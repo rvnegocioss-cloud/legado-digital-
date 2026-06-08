@@ -1,6 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import HomenagemTemplate from "@/components/HomenagemTemplate";
 
+// Esta linha abaixo força o site a ignorar o cache e buscar os dados reais no Supabase sempre
+export const revalidate = 0;
+
 export default async function Home() {
   const { data: homenagem } = await supabase
     .from("homenagens")
