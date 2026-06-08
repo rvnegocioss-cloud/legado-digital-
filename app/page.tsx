@@ -1,15 +1,24 @@
+import { supabase } from "@/lib/supabase";
 import HomenagemTemplate from "@/components/HomenagemTemplate";
 
-export default function Home() {
+export default async function Home() {
+  const { data: homenagem } = await supabase
+    .from("homenagens")
+    .select("*")
+    .eq("id", "8f981539-6281-4585-938e-c8bed6c241be")
+    .single();
+
+  if (!homenagem) return <p>Homenagem não encontrada.</p>;
+
   return (
     <HomenagemTemplate
-      fotoUrl=""
-      nomeCompleto="Maria Aparecida Silva"
-      dataNascimento="12 de março de 1945"
-      dataFalecimento="3 de junho de 2024"
-      biografia="Maria foi uma mulher de fé inabalável, dedicada à família e aos amigos. Sua memória é um legado de amor."
-      videoUrl=""
-      galeriaFotos={[]}
+      fotoUrl={homenagem.foto_url || ""}
+      nomeCompleto={homenagem.nome_completo}
+      dataNascimento={homenagem.data_nascimento}
+      dataFalecimento={homenagem.data_falecimento}
+      biografia={homenagem.biografia}
+      videoUrl={homenagem.video_url || ""}
+      galeriaFotos={homenagem.galeria_fotos || []}
       condolencias={[]}
     />
   );
