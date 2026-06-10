@@ -1,9 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import HomenagemTemplate from "@/components/HomenagemTemplate";
 
-// Esta linha abaixo força o site a ignorar o cache e buscar os dados reais no Supabase sempre
-export const revalidate = 0;
-
 export default async function Home() {
   const { data: homenagem } = await supabase
     .from("homenagens")
@@ -21,12 +18,15 @@ export default async function Home() {
       dataFalecimento={homenagem.data_falecimento}
       cidade={homenagem.cidade || ""}
       frasePreferida={homenagem.frase_preferida || ""}
-      biografia={homenagem.biografia}
+      biografia={homenagem.biografia || ""}
       timeline={homenagem.timeline || []}
+      galeria={[]}
       videoUrl={homenagem.video_url || ""}
       musicaUrl={homenagem.musica_url || ""}
-      galeriaFotos={homenagem.galeria_fotos || []}
-      condolencias={[]}
+      homenagens={[]}
+      assinaturas={[]}
+      slugUrl={homenagem.slug || ""}
+      temaPadrao="noturno"
     />
   );
 }
