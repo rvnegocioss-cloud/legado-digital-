@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export interface TimelineEvent { year: string; title: string; description?: string; }
 export interface Homenagem { id: string; visitorName: string; visitorPhoto?: string; message: string; likes: number; createdAt: string; }
@@ -49,8 +50,8 @@ export default function HomenagemTemplate(props: HomenagemProps) {
   const [abaAtiva, setAbaAtiva] = useState("sobre");
   const [menuAberto, setMenuAberto] = useState(false);
   const [tocando, setTocando] = useState(false);
-  const [homenagens] = useState(initialHomenagens);
-  const [assinaturas] = useState(initialAssinaturas);
+  const [homenagens, setHomenagens] = useState<Homenagem[]>(initialHomenagens);
+  const [assinaturas, setAssinaturas] = useState<Assinatura[]>(initialAssinaturas);
   const [nomeVisitante, setNomeVisitante] = useState("");
   const [relacao, setRelacao] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -58,6 +59,19 @@ export default function HomenagemTemplate(props: HomenagemProps) {
   const [submitOk, setSubmitOk] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = temas[tema];
+
+  useEffect(() => {
+    async function carregar() {
+      if (!slugUrl) return;
+      const { data } = await supabase.from('homenagens').select('id, visitor_name, message, likes, created_at').eq('memorial_slug', slugUrl).order('created_at', { ascending: false });
+      if (data) {
+        const lista = data.map((h:any) => ({ id: h.id, visitorName: h.visitor_name, message: h.message, likes: h.likes || 0, createdAt: h.created_at }));
+        setHomenagens(lista);
+        setAssinaturas(lista.map(l => ({ id: l.id, visitorName: l.visitorName, relationship: '', message: l.message, createdAt: l.createdAt })));
+      }
+    }
+    carregar();
+  }, [slugUrl]);
 
   const abas = [
     { id: "sobre", label: "Sobre" },
@@ -89,11 +103,16 @@ export default function HomenagemTemplate(props: HomenagemProps) {
     e.preventDefault();
     if (!nomeVisitante.trim() ||!mensagem.trim()) return;
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 800));
+    const { data, error } = await supabase.from('homenagens').insert({ memorial_slug: slugUrl || 'teste', visitor_name: nomeVisitante, message: mensagem, likes: 0 }).select().single();
     setSubmitting(false);
-    setSubmitOk(true);
-    setNomeVisitante(""); setRelacao(""); setMensagem("");
-    setTimeout(() => setSubmitOk(false), 3000);
+    if (!error && data) {
+      const nova = { id: data.id, visitorName: nomeVisitante, message: mensagem, likes: 0, createdAt: data.created_at };
+      setHomenagens([nova,...homenagens]);
+      setAssinaturas([{ id: data.id, visitorName: nomeVisitante, relationship: relacao, message: mensagem, createdAt: data.created_at },...assinaturas]);
+      setSubmitOk(true);
+      setNomeVisitante(""); setRelacao(""); setMensagem("");
+      setTimeout(() => setSubmitOk(false), 3000);
+    }
   };
 
   const getEmbedUrl = (url: string) => {
@@ -133,20 +152,20 @@ export default function HomenagemTemplate(props: HomenagemProps) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Lato:wght@300;400;700&family=Dancing+Script:wght@600&display=swap');
         *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0}
-       .fd{font-family:'Cormorant Garamond',serif}.cursive{font-family:'Dancing Script',cursive}
-       .container{max-width:1120px;margin:0 auto;padding:0 16px}
-       .hero-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:28px}
-       .sobre-grid{display:grid;grid-template-columns:1fr;gap:20px}
-       .hom-grid{display:grid;grid-template-columns:1fr;gap:14px}
-       .ass-grid{display:grid;grid-template-columns:1fr;gap:14px}
-       .gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-       .loc-grid{display:grid;grid-template-columns:1fr;gap:20px}
-       .nav-desktop{display:none}
+      .fd{font-family:'Cormorant Garamond',serif}.cursive{font-family:'Dancing Script',cursive}
+      .container{max-width:1120px;margin:0 auto;padding:0 16px}
+      .hero-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:28px}
+      .sobre-grid{display:grid;grid-template-columns:1fr;gap:20px}
+      .hom-grid{display:grid;grid-template-columns:1fr;gap:14px}
+      .ass-grid{display:grid;grid-template-columns:1fr;gap:14px}
+      .gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+      .loc-grid{display:grid;grid-template-columns:1fr;gap:20px}
+      .nav-desktop{display:none}
         @media(min-width:768px){.hom-grid{grid-template-columns:repeat(2,1fr)}.ass-grid{grid-template-columns:repeat(2,1fr)}.gal-grid{grid-template-columns:repeat(3,1fr)}.loc-grid{grid-template-columns:1fr 1fr}}
         @media(min-width:1024px){.hero-wrap{flex-direction:row;text-align:left;gap:48px}.sobre-grid{grid-template-columns:1.2fr 0.8fr}.hom-grid{grid-template-columns:repeat(3,1fr)}.ass-grid{grid-template-columns:repeat(3,1fr)}.gal-grid{grid-template-columns:repeat(4,1fr)}.nav-desktop{display:flex}}
-       .img-cover{width:100%;height:100%;object-fit:cover}
-       .card-lift{transition:transform.2s,box-shadow.2s}.card-lift:hover{transform:translateY(-2px)}
-       .fade-up{animation:fu.6s ease-out}@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+      .img-cover{width:100%;height:100%;object-fit:cover}
+      .card-lift{transition:transform.2s,box-shadow.2s}.card-lift:hover{transform:translateY(-2px)}
+      .fade-up{animation:fu.6s ease-out}@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
       `}</style>
 
       {musicaUrl && <audio ref={audioRef} src={musicaUrl} loop preload="none" />}
