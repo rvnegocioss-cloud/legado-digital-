@@ -9,6 +9,8 @@ interface FundoParallaxProps {
   overlay?: string;
   /** intensidade do movimento (px) */
   forca?: number;
+  /** posição do recorte da imagem */
+  posicao?: string;
 }
 
 /**
@@ -19,8 +21,9 @@ interface FundoParallaxProps {
  */
 export default function FundoParallax({
   src,
-  overlay = "linear-gradient(180deg, rgba(8,16,24,0.45) 0%, rgba(8,16,24,0.78) 100%)",
+  overlay = "linear-gradient(180deg, rgba(8,16,24,0.74) 0%, rgba(8,16,24,0.38) 45%, rgba(8,16,24,0.12) 100%)",
   forca = 28,
+  posicao = "center 72%",
 }: FundoParallaxProps) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -28,25 +31,31 @@ export default function FundoParallax({
     const el = ref.current;
     if (!el) return;
 
-    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+    // nx, ny = posição do mouse normalizada (-1..1); cx, cy = valores suavizados
+    let nx = 0, ny = 0, cx = 0, cy = 0, raf = 0;
 
     const loop = () => {
-      cx += (tx - cx) * 0.07;
-      cy += (ty - cy) * 0.07;
-      el.style.transform = `scale(1.14) translate3d(${cx}px, ${cy}px, 0)`;
+      cx += (nx - cx) * 0.08;
+      cy += (ny - cy) * 0.08;
+      // inclinação 3D: o lado para onde o mouse aponta vem para frente (cresce)
+      const ry = cx * 14;          // rotação no eixo Y (graus)
+      const rx = -cy * 10;         // rotação no eixo X (graus)
+      const tX = cx * -forca;      // leve deslocamento junto
+      const tY = cy * -forca * 0.6;
+      el.style.transform =
+        `scale(1.18) rotateX(${rx}deg) rotateY(${ry}deg) translate3d(${tX}px, ${tY}px, 0)`;
       raf = requestAnimationFrame(loop);
     };
 
-    const onMouse = (e: MouseEvent) => {
-      tx = ((e.clientX / window.innerWidth) - 0.5) * -forca * 2;
-      ty = ((e.clientY / window.innerHeight) - 0.5) * -forca;
-    };
-
     const clamp = (v: number) => Math.max(-1, Math.min(1, v));
+    const onMouse = (e: MouseEvent) => {
+      nx = clamp((e.clientX / window.innerWidth - 0.5) * 2);
+      ny = clamp((e.clientY / window.innerHeight - 0.5) * 2);
+    };
     const onOrient = (e: DeviceOrientationEvent) => {
       if (e.gamma == null || e.beta == null) return;
-      tx = clamp(e.gamma / 30) * -forca * 1.6;
-      ty = clamp((e.beta - 45) / 30) * -forca;
+      nx = clamp(e.gamma / 30);
+      ny = clamp((e.beta - 45) / 30);
     };
 
     window.addEventListener("mousemove", onMouse);
@@ -61,15 +70,16 @@ export default function FundoParallax({
   }, [forca]);
 
   return (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden", zIndex: 0 }}>
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", zIndex: 0, perspective: "900px" }}>
       <div
         ref={ref}
         style={{
           position: "absolute",
-          inset: "-7%",
+          inset: "-12%",
           backgroundImage: `url(${src})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: posicao,
+          transformStyle: "preserve-3d",
           willChange: "transform",
         }}
       />
