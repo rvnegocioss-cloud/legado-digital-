@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import Vela3D from "@/components/Vela3D";
+import FundoParallax from "@/components/FundoParallax";
 
 export interface TimelineEvent { year: string; title: string; description?: string; }
 export interface Homenagem { id: string; visitorName: string; visitorPhoto?: string; message: string; likes: number; createdAt: string; }
@@ -207,8 +207,9 @@ export default function HomenagemTemplate(props: HomenagemProps) {
           </div>
         )}
 
-        <section style={{ background: `linear-gradient(180deg, ${t.heroBg} 0%, ${t.bg} 100%)`, padding: "48px 0" }}>
-          <div className="container hero-wrap fade-up">
+        <section style={{ position: "relative", overflow: "hidden", background: `linear-gradient(180deg, ${t.heroBg} 0%, ${t.bg} 100%)`, padding: "48px 0" }}>
+          <FundoParallax src="/velas.jpg" />
+          <div className="container hero-wrap fade-up" style={{ position: "relative", zIndex: 1 }}>
             <div style={{ position: "relative" }}>
               <div style={{ width: 180, height: 180, borderRadius: "50%", padding: 4, background: `conic-gradient(from 0deg, ${t.gold}, ${t.goldLight}, ${t.goldDark}, ${t.gold})` }}>
                 <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden", background: t.bgSecond, border: `3px solid ${t.bg}` }}>
@@ -224,9 +225,6 @@ export default function HomenagemTemplate(props: HomenagemProps) {
               {vinculos.length > 0 && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>{vinculos.map(v => <span key={v} style={C.tag}>👤 {v}</span>)}</div>}
               {frasePreferida && <div style={{ marginTop: 24, paddingLeft: 20, borderLeft: `3px solid ${t.gold}` }}><p className="fd" style={{ fontSize: 20, fontStyle: "italic", color: t.textLight, margin: 0, lineHeight: 1.5 }}>"{frasePreferida}"</p></div>}
             </div>
-          </div>
-          <div style={{ marginTop: 32, color: t.textLight }}>
-            <Vela3D cor={t.gold} iniciarAcesa />
           </div>
         </section>
 
