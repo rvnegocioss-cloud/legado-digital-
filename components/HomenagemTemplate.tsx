@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import Vela3D from "@/components/Vela3D";
 
 export interface TimelineEvent { year: string; title: string; description?: string; }
 export interface Homenagem { id: string; visitorName: string; visitorPhoto?: string; message: string; likes: number; createdAt: string; }
@@ -223,6 +224,9 @@ export default function HomenagemTemplate(props: HomenagemProps) {
               {vinculos.length > 0 && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>{vinculos.map(v => <span key={v} style={C.tag}>👤 {v}</span>)}</div>}
               {frasePreferida && <div style={{ marginTop: 24, paddingLeft: 20, borderLeft: `3px solid ${t.gold}` }}><p className="fd" style={{ fontSize: 20, fontStyle: "italic", color: t.textLight, margin: 0, lineHeight: 1.5 }}>"{frasePreferida}"</p></div>}
             </div>
+          </div>
+          <div style={{ marginTop: 32, color: t.textLight }}>
+            <Vela3D cor={t.gold} iniciarAcesa />
           </div>
         </section>
 
