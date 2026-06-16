@@ -14,11 +14,10 @@ Desenvolvido com foco em design **minimalista e de alta classe**, utilizando uma
 
 ## 🚀 Tecnologias
 
-- [Next.js 14](https://nextjs.org/) — App Router
+- [Next.js 16](https://nextjs.org/) — App Router
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [Supabase](https://supabase.com/) *(integração planejada — ver TODOs)*
-- Google Fonts — Cormorant Garamond + Lato
+- [Supabase](https://supabase.com/) — integração ativa (homenagens + livro de condolências)
 
 ---
 
@@ -68,31 +67,9 @@ Acesse em: `http://localhost:3000`
 
 O componente já está preparado para conexão com banco de dados. Procure pelos comentários `// TODO: Integrar com Supabase` no arquivo `HomenagemTemplate.tsx`.
 
-**Tabelas necessárias no Supabase:**
+As credenciais ficam em `.env.local` (`NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`) e são lidas em `lib/supabase.ts`.
 
-```sql
--- Tabela de homenagens
-create table homenagens (
-  id uuid primary key default gen_random_uuid(),
-  nome_completo text not null,
-  data_nascimento text,
-  data_falecimento text,
-  biografia text,
-  foto_url text,
-  video_url text,
-  galeria_fotos text[],
-  created_at timestamp default now()
-);
-
--- Tabela de condolências
-create table condolencias (
-  id uuid primary key default gen_random_uuid(),
-  homenagem_id uuid references homenagens(id),
-  visitor_name text not null,
-  message text not null,
-  created_at timestamp default now()
-);
-```
+As mensagens do livro de condolências são gravadas na tabela `homenagens`, vinculadas pela coluna `memorial_slug`.
 
 ---
 
