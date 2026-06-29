@@ -58,6 +58,7 @@ export default function HomenagemTemplate(props: HomenagemProps) {
   const [mensagem, setMensagem] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitOk, setSubmitOk] = useState(false);
+  const [velasAcesas, setVelasAcesas] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = temas[tema];
 
@@ -208,7 +209,7 @@ export default function HomenagemTemplate(props: HomenagemProps) {
         )}
 
         <section style={{ position: "relative", overflow: "hidden", background: `linear-gradient(180deg, ${t.heroBg} 0%, ${t.bg} 100%)`, padding: "48px 0" }}>
-          <FundoParallax src="/velas.jpg" />
+          <FundoParallax srcApagada="/velas-apagada.jpg" srcAcesa="/velas-acesa.jpg" acesa={velasAcesas} />
           <div className="container hero-wrap fade-up" style={{ position: "relative", zIndex: 1 }}>
             <div style={{ position: "relative" }}>
               <div style={{ width: 180, height: 180, borderRadius: "50%", padding: 4, background: `conic-gradient(from 0deg, ${t.gold}, ${t.goldLight}, ${t.goldDark}, ${t.gold})` }}>
@@ -225,6 +226,26 @@ export default function HomenagemTemplate(props: HomenagemProps) {
               {vinculos.length > 0 && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>{vinculos.map(v => <span key={v} style={C.tag}>👤 {v}</span>)}</div>}
               {frasePreferida && <div style={{ marginTop: 24, paddingLeft: 20, borderLeft: `3px solid ${t.gold}` }}><p className="fd" style={{ fontSize: 20, fontStyle: "italic", color: t.textLight, margin: 0, lineHeight: 1.5 }}>"{frasePreferida}"</p></div>}
             </div>
+          </div>
+          <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", marginTop: 36 }}>
+            <button
+              onClick={() => setVelasAcesas(v => !v)}
+              className="vela-btn"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                padding: "13px 26px", borderRadius: 40, cursor: "pointer",
+                fontSize: 15, fontWeight: 600, letterSpacing: 0.5,
+                color: velasAcesas ? "#0B1D2A" : t.gold,
+                background: velasAcesas ? `linear-gradient(135deg, ${t.goldDark}, ${t.goldLight})` : "rgba(8,16,24,0.55)",
+                border: `1px solid ${t.borderStrong}`,
+                backdropFilter: "blur(6px)",
+                boxShadow: velasAcesas ? `0 0 28px ${t.gold}88` : "0 4px 18px rgba(0,0,0,0.4)",
+                transition: "all .5s ease",
+              }}
+            >
+              <span style={{ fontSize: 18 }}>🕯️</span>
+              {velasAcesas ? "Apagar as velas" : "Acender as velas"}
+            </button>
           </div>
         </section>
 
