@@ -1,0 +1,22 @@
+# 💳 Skill: Payments & Stripe - Legado Digital
+
+## 🎯 MODELO DE NEGÓCIO
+- **Assinatura mensal** para funerárias
+- **Planos:** Básico, Profissional, Premium
+- **Trial grátis:** 7 dias para testar
+- **Cobrança:** Todo dia 1 ou na data de contratação
+
+## 📋 PLANOS SUGERIDOS
+| Plano | Preço | Memoriais | Recursos |
+|-------|-------|-----------|----------|
+| Básico | R$ 97/mês | Até 10 | QR Code, livro condolências |
+| Profissional | R$ 197/mês | Até 50 | + Fotos, vídeos, privacidade |
+| Premium | R$ 397/mês | Ilimitado | + 3D, customização, prioridade |
+
+## 🔧 IMPLEMENTAÇÃO
+- Webhooks do Stripe para:
+  - `checkout.session.completed` → Ativar plano
+  - `invoice.paid` → Renovação mensal
+  - `customer.subscription.deleted` → Cancelar
+- Tabela `assinaturas` no Supabase sincronizada com Stripe
+- Middleware para verificar status da assinatura

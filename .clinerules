@@ -1,0 +1,31 @@
+# 🏛️ Legado Digital - Regras do Projeto
+
+## 📋 Sobre o Projeto
+SaaS de memoriais digitais para o setor funerário.
+- Tecnologias: Next.js 16, Tailwind CSS v4, Supabase, Vercel
+- 4 níveis de acesso: Super Admin → Funerária → Família → Visitante
+- Modelo de negócio: Assinatura mensal para funerárias
+- Diferencial: QR Code com controle de privacidade
+
+## 🎯 Stack Técnica Principal
+- **Frontend:** Next.js 16 (App Router) + Tailwind CSS v4 + shadcn/ui
+- **3D e Animações:** React Three Fiber / Drei + Framer Motion + GSAP + Aceternity UI
+- **Backend/Database:** Supabase (PostgreSQL + Auth + Storage + RLS)
+- **Deploy:** Vercel (produção) + GitHub (código)
+- **Workflows:** n8n (automações)
+
+## 📂 Estrutura do Projeto
+```
+📁 app/           → Páginas (App Router)
+📁 components/    → Componentes React
+📁 lib/           → Utilitários (supabase.ts, etc.)
+📁 public/        → Assets estáticos
+📁 .rules/        → Skills especialistas
+```
+
+## 🚨 Regras Obrigatórias
+1. SEMPRE usar Server Components por padrão (só 'use client' quando necessário)
+2. Toda página de memorial DEVE ter meta tags SEO
+3. RLS no Supabase é obrigatório em TODAS as tabelas
+4. Commits no Git antes e depois de alterações críticas
+5. npm run build antes de deploy

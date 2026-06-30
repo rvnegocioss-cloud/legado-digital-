@@ -1,0 +1,52 @@
+# 🗄️ Skill: Supabase Expert - Legado Digital
+
+## 📋 REGRAS SUPABASE
+- **RLS (Row Level Security)** é OBRIGATÓRIO em TODAS as tabelas
+- SEMPRE usar tipos TypeScript gerados pelo Supabase
+- Queries sempre filtradas pelo nível de acesso do usuário
+
+## 📂 ESTRUTURA DE TABELAS PRINCIPAIS
+```sql
+-- Funerárias (clientes pagantes)
+funerarias: id, nome, cnpj, email, telefone, plano_id, status, created_at
+
+-- Falecidos (memoriais)
+memoriais: id, funeraria_id, slug, nome, data_nascimento, data_falecimento,
+           biografia, foto_url, privacidade, status, created_at
+
+-- Famílias (parentes com acesso de edição)
+familias: id, memorial_id, nome, email, parentesco, created_at
+
+-- Homenagens (livro de condolências)
+homenagens: id, memorial_id, nome_visitante, mensagem, created_at
+
+-- Planos de assinatura
+planos: id, nome, preco, max_memoriais, recursos, created_at
+```
+
+## 🔒 RLS - REGRAS POR NÍVEL
+```sql
+-- Funerária: só vê seus próprios memoriais
+CREATE POLICY "Funerária vê seus memoriais" ON memoriais
+  FOR ALL USING (funeraria_id = auth.uid());
+
+-- Família: só edita memorial designado
+CREATE POLICY "Família edita memorial" ON memoriais
+  FOR UPDATE USING (id IN (
+    SELECT memorial_id FROM familias WHERE email = auth.email()
+  ));
+
+-- Visitante: só lê memoriais públicos
+CREATE POLICY "Visitante lê públicos" ON memoriais
+  FOR SELECT USING (privacidade = 'publico');
+```
+
+## 🪣 STORAGE (Buckets)
+- `fotos-falecido` → Leitura pública, escrita só funerária/família
+- `documentos-funeraria` → Privado (só funerária)
+- `fotos-perfil` → Fotos de perfil dos usuários
+
+## 🔐 AUTH
+- Usar Supabase Auth com magic link (email)
+- Roles: super_admin, funeraria, familia
+- Session management com cookies do Next.js

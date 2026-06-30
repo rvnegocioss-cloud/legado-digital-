@@ -1,0 +1,46 @@
+# 🎮 Skill: 3D & Three.js - Legado Digital
+
+## 🎯 EFEITOS 3D NO MEMORIAL
+Usar React Three Fiber + Drei para criar experiências imersivas.
+
+### 🕯️ VELA 3D COM CHAMA
+```tsx
+'use client'
+import { Canvas } from '@react-three/fiber'
+import { Float, Environment, Lightformer } from '@react-three/drei'
+
+// Componente de vela com chama animada
+export function Vela3D() {
+  return (
+    <Canvas camera={{ position: [0, 0, 5] }}>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[0, 2, 0]} color="#ffd700" intensity={2} />
+      <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+        <mesh>
+          <cylinderGeometry args={[0.3, 0.4, 1]} />
+          <meshPhysicalMaterial color="#f5f0e0" roughness={0.8} />
+        </mesh>
+      </Float>
+      <Environment preset="night" />
+    </Canvas>
+  )
+}
+```
+
+### ✨ EFEITOS RECOMENDADOS
+1. **Velas 3D** → Chama tremulando, luz suave 🕯️
+2. **Partículas** → Estrelas ou pétalas no ar 🌟
+3. **Parallax** → Fotos com profundidade 3D 📸
+4. **Fundo dinâmico** → Céu noturno estrelado 🌌
+5. **Transições** → Fade suave entre fotos 🌅
+
+### 📦 BIBLIOTECAS INSTALADAS
+```bash
+npm install @react-three/fiber @react-three/drei @react-three/postprocessing
+```
+
+### ⚡ PERFORMANCE
+- Usar `Canvas` apenas quando necessário (evitar em listas)
+- Componentes 3D com `Suspense` e `lazy`
+- Reduzir qualidade em dispositivos mobile
+- Usar `Stats` do drei para debug

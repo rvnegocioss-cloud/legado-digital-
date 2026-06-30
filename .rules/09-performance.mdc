@@ -1,0 +1,33 @@
+# ⚡ Skill: Performance & Otimização - Legado Digital
+
+## 🎯 METAS DE PERFORMANCE
+- **Lighthouse:** 90+ em todas as categorias
+- **Core Web Vitals:** LCP < 2.5s, FID < 100ms, CLS < 0.1
+- **First Paint:** < 1s
+- **Tamanho do bundle:** < 200kb JS crítico
+
+## 📋 BOAS PRÁTICAS
+```typescript
+// 1. Lazy loading de componentes 3D (só carregar quando visível)
+import dynamic from 'next/dynamic'
+const Vela3D = dynamic(() => import('@/components/Vela3D'), { ssr: false })
+
+// 2. Imagens otimizadas
+import Image from 'next/image'
+<Image src={foto} alt="Foto do falecido" priority fill className="object-cover" />
+
+// 3. Fotos em WebP com Next/Image (automático)
+// 4. Fontes com next/font (google fonts otimizadas)
+// 5. Prefetch de páginas de memorial mais visitadas
+```
+
+## 🖼️ OTIMIZAÇÃO DE MIDIA
+- Fotos do falecido: WebP, max 1200px, qualidade 80%
+- Upload redimensionado no client-side antes de enviar
+- Vídeos: hospedar no YouTube/Vimeo (embed), não no servidor
+- Ícones: Lucide React (tree-shakeable)
+
+## 📦 BUNDLE ANALYSIS
+- `npm run build` para verificar tamanhos
+- Dynamic imports para códigos pesados (Three.js, GSAP)
+- Evitar bibliotecas grandes desnecessárias

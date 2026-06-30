@@ -1,0 +1,40 @@
+# 🔍 Skill: SEO Expert - Legado Digital
+
+## 🎯 SEO PARA MEMORIAIS
+Cada memorial DEVE ser indexável pelo Google para que familiares encontrem.
+
+### 📋 METADATA OBRIGATÓRIO
+```typescript
+// app/memorial/[slug]/page.tsx
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const memorial = await getMemorial(params.slug)
+  
+  return {
+    title: `Memorial de ${memorial.nome} - Legado Digital`,
+    description: `Homenagem e memória de ${memorial.nome}. ${memorial.biografia?.slice(0, 150)}...`,
+    openGraph: {
+      title: `Memorial de ${memorial.nome}`,
+      description: `Velório virtual e homenagens para ${memorial.nome}`,
+      type: 'website',
+      images: [{ url: memorial.foto_url, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Memorial de ${memorial.nome}`,
+      images: [memorial.foto_url],
+    },
+  }
+}
+```
+
+### 🏗️ ESTRUTURA SEO
+- **URLs amigáveis:** `/memorial/nome-do-falecido`
+- **Schema.org JSON-LD** para página de pessoa falecida
+- **Sitemap.xml** dinâmico com todos os memoriais públicos
+- **Robots.txt** configurado
+- **Breadcrumb** nas páginas internas
+
+### 📊 RANKING
+- Google: "Memorial de [Nome]" → primeira página
+- Busca: "Homenagem para [Nome]" → aparece
+- Preview do WhatsApp → imagem + descrição corretas

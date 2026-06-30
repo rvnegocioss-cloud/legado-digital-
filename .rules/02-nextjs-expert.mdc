@@ -1,0 +1,50 @@
+# ⚡ Skill: Next.js Expert - Legado Digital
+
+## 📋 REGRAS NEXT.JS 16
+- **SEMPRE** usar App Router (não Pages Router)
+- **Server Components** por padrão
+- Só usar `'use client'` quando precisar de:
+  - useState / useEffect
+  - Event handlers (onClick, onSubmit)
+  - Framer Motion / Three.js / GSAP
+  - Context API
+
+## 📂 ESTRUTURA DE PASTAS
+```
+📁 app/
+├── 📁 (marketing)/       ← Landing page (público)
+│   └── page.tsx
+├── 📁 (auth)/            ← Login
+│   └── page.tsx
+├── 📁 memorial/
+│   └── [slug]/           ← Página do falecido
+│       └── page.tsx
+├── 📁 admin/             ← Super Admin
+│   └── page.tsx
+├── 📁 funeraria/         ← Dashboard funerária
+│   └── page.tsx
+├── 📁 familia/           ← Painel família
+│   └── [slug]/
+│       └── page.tsx
+├── layout.tsx
+└── page.tsx
+```
+
+## 🎯 SEO - OBRIGATÓRIO em toda página de memorial
+```typescript
+export const metadata: Metadata = {
+  title: 'Memorial de [Nome] - Legado Digital',
+  description: 'Homenagem e memória de [Nome]. Deixe sua mensagem de condolências.',
+  openGraph: {
+    title: 'Memorial de [Nome]',
+    description: '...',
+    images: ['/foto-falecido.jpg'],
+  },
+}
+```
+
+## 🔗 LINKS IMPORTANTES
+- Server Actions para formulários
+- `generateStaticParams` para memoriais estáticos
+- `next/image` para otimização de fotos
+- `next/navigation` para rotas (não next/router)

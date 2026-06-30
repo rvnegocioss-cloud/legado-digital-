@@ -1,0 +1,43 @@
+# 🔐 Skill: Auth & RBAC - Legado Digital
+
+## 🎯 4 NÍVEIS DE ACESSO
+
+| Nível | Tipo | Acesso |
+|-------|------|--------|
+| 👑 **Super Admin** | sysadmin | Tudo: funerárias, memoriais, planos, métricas |
+| 🏢 **Funerária** | cliente pagante | Seus memoriais, QR Codes, convidar família |
+| 👨‍👩‍👧‍👦 **Família** | parentes | Editar memorial do falecido, fotos, privacidade |
+| 👤 **Visitante** | público | Ler homenagens, deixar condolências |
+
+## 📋 IMPLEMENTAÇÃO
+
+### Tabela de Roles no Supabase
+```sql
+CREATE TYPE user_role AS ENUM ('super_admin', 'funeraria', 'familia');
+
+-- Usar app_metadata para armazenar role
+-- auth.users.raw_app_meta_data->>'role'
+```
+
+### Middleware de Proteção
+```typescript
+// middleware.ts
+export async function middleware(request: NextRequest) {
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  // Rotas protegidas
+  if (request.nextUrl.pathname.startsWith('/admin') && session?.user?.role !== 'super_admin') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+  
+  if (request.nextUrl.pathname.startsWith('/funeraria') && session?.user?.role !== 'funeraria') {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+}
+```
+
+### 🎯 REGRAS DE AUTORIZAÇÃO
+- Super Admin: CRUD completo em todas as tabelas
+- Funerária: Só CRUD nos próprios memoriais
+- Família: Só UPDATE no memorial designado
+- Visitante: Só SELECT em memoriais públicos + INSERT em homenagens

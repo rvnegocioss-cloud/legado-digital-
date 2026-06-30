@@ -1,0 +1,58 @@
+# 🎬 Skill: Animações & Motion - Legado Digital
+
+## 🎯 BIBLIOTECAS DE ANIMAÇÃO
+| Biblioteca | Uso | Prioridade |
+|------------|-----|:----------:|
+| **Framer Motion** | Transições, scroll, gestos, layout | 🔴 Essencial |
+| **GSAP** | Animações complexas, timelines, SVGs | 🟡 Premium |
+| **Aceternity UI** | Efeitos prontos (cards, background, spotlight) | 🟢 Diferencial |
+
+## 📋 FRAMER MOTION (PADRÃO)
+```typescript
+'use client'
+import { motion } from 'framer-motion'
+
+// Fade-in ao scroll (MAIS USADO)
+export function FadeInView({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-100px' }}
+      transition={{ duration: 0.6 }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+// Stagger (para listas)
+export function StaggerList({ children }) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{
+        visible: { transition: { staggerChildren: 0.1 } }
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+```
+
+## 🕯️ EFEITOS NO MEMORIAL
+1. **Abrir memorial** → Fade suave com blur (1s)
+2. **Fotos aparecendo** → Scale + opacity ao scroll
+3. **Velas acendendo** → GSAP timeline (chama + luz)
+4. **Mensagens de condolências** → Slide-up suave
+5. **Livro de condolências** → Virar página animado
+6. **QR Code** → Pulse animado para chamar atenção
+
+## ⚠️ REGRAS
+- 'use client' obrigatório para animações
+- `motion.div` não funciona em Server Components
+- Animações 3D separar em componentes dinâmicos
+- Mobile: reduzir intensidade das animações

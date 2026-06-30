@@ -1,0 +1,42 @@
+# 🛡️ Skill: Backup & Safety - Legado Digital
+
+## 📋 REGRA DE OURO
+SEMPRE que eu for fazer qualquer alteração crítica, devo seguir este fluxo:
+
+### 1️⃣ ANTES de alterar (backup automático)
+- [ ] **Git commit** com mensagem descritiva do estado atual
+- [ ] Verificar se não há arquivos não commitados (`git status`)
+- [ ] Se for migration SQL: exportar schema atual primeiro
+- [ ] Se for alteração em produção: avisar e confirmar
+
+### 2️⃣ DURANTE a alteração
+- [ ] Nunca dropar colunas sem verificar dependências
+- [ ] Migrations sempre com `IF EXISTS` / `IF NOT EXISTS`
+- [ ] Alterações críticas em transação SQL
+- [ ] Manter backup do `.env.local` se alterar variáveis
+
+### 3️⃣ DEPOIS da alteração
+- [ ] Rodar `npm run build` — verificar se compila
+- [ ] Testar fluxo principal (criar memorial, visualizar, etc.)
+- [ ] Fazer novo commit com as alterações
+- [ ] Dar `git push` para GitHub
+
+### 🔄 FLUXO GIT PADRÃO
+```bash
+# Antes de começar
+git checkout -b feature/nome-da-feature
+
+# Durante o desenvolvimento
+git add . && git commit -m "tipo: descrição"
+
+# Finalizar
+git checkout main
+git merge feature/nome-da-feature
+git push origin main
+```
+
+### 📦 BACKUPS AUTOMÁTICOS
+- **Código:** GitHub (push frequente)
+- **Banco:** Supabase faz backup automático diário
+- ** env:** Manter `.env.example` sempre atualizado
+- **NUNCA** commitar `.env.local` ou arquivos com senhas

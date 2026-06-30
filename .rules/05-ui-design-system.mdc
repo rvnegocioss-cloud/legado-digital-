@@ -1,0 +1,42 @@
+# 🎨 Skill: UI/UX Design System - Legado Digital
+
+## 🎯 IDENTIDADE VISUAL
+- **Tema:** Serenidade, elegância, respeito
+- **Cores principais:** 
+  - Primary: #1a1a2e (azul escuro noturno)
+  - Secondary: #e2b714 (dourado suave - velas)
+  - Background: #0f0f1a (quase preto)
+  - Text: #f5f5f5 (branco suave)
+  - Accent: #c9a84c (dourado memorial)
+- **Tipografia:** Inter (títulos) + Georgia (corpo - legível)
+
+## 📱 COMPONENTES shadcn/ui PRIORITÁRIOS
+```bash
+# Instalar na ordem:
+npx shadcn@latest add button card dialog form input 
+npx shadcn@latest add sheet tabs toast dropdown-menu
+npx shadcn@latest add avatar badge separator skeleton
+```
+
+## 🎬 ANIMAÇÕES (Framer Motion)
+```typescript
+// Padrão de fade-in ao scroll
+<motion.div
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ duration: 0.6, ease: "easeOut" }}
+/>
+```
+
+## 🌗 DARK MODE
+- Padrão escuro (noturno, sereno)
+- Opção de tema claro para acessibilidade
+- Usar `next-themes` para gerenciamento
+
+## ♿ ACESSIBILIDADE
+- Contraste mínimo 4.5:1 (importante para idosos)
+- Font-size mínimo 16px
+- Botões com área de clique mínima 44x44px
+- ARIA labels em todos os componentes interativos
+- Navegação por teclado (Tab, Enter, Escape)
