@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legado Digital — Organograma e Apresentação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --azul: #0B1D2A;
+            --azul-claro: #132D3E;
+            --ouro: #C9A46A;
+            --ouro-claro: #DFC390;
+            --bege: #F5F2EB;
+            --cinza: #58616B;
+            --cinza-claro: #E8E5DC;
+            --sucesso: #2a7a3e;
+            --warning: #b8860b;
+            --danger: #8b2f2f;
+            --radius: 12px;
+            --shadow: 0 8px 32px rgba(11, 29, 42, 0.12);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bege);
+            color: var(--cinza);
+            line-height: 1.6;
+        }
+
+        /* === NAV === */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(245, 242, 235, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--cinza-claro);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        nav .logo {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--azul);
+            letter-spacing: -0.5px;
+        }
+        nav .logo span { color: var(--ouro); }
+        nav a {
+            color: var(--cinza);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: var(--azul); }
+        nav .nav-right { margin-left: auto; }
+        nav .badge-nav {
+            background: var(--ouro);
+            color: var(--azul);
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* === HERO === */
+        header.hero {
+            padding: 8rem 2rem 4rem;
+            background: linear-gradient(160deg, var(--azul) 0%, #0e2a3a 100%);
+            color: var(--bege);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        header.hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(201, 164, 106, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        header.hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            position: relative;
+        }
+        header.hero h1 span { color: var(--ouro); }
+        header.hero .sub {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--ouro);
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+        header.hero .slogan {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.05rem;
+            color: rgba(245, 242, 235, 0.7);
+            margin-top: 0.5rem;
+        }
+        header.hero .meta-info {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+        header.hero .meta-info .item {
+            text-align: center;
+        }
+        header.hero .meta-info .num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--ouro);
+        }
+        header.hero .meta-info .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(245, 242, 235, 0.6);
+        }
+
+        /* === CONTAINER === */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* === SEÇÃO === */
+        section {
+            margin: 3rem 0;
+        }
+        section .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--azul);
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        section .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: var(--ouro);
+            margin-top: 0.5rem;
+        }
+        section .section-desc {
+            color: var(--cinza);
+            font-size: 0.95rem;
+            max-width: 700px;
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* === CARDS === */
+        .card-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        .card-grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        .card-grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .card-grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(201, 164, 106, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(11, 29, 42, 0.18);
+        }
+        .card .card-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .card h3 {
+            color: var(--azul);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .card p {
+            font-size: 0.85rem;
+            color: var(--cinza);
+            margin-top: 0.3rem;
+        }
+        .card .tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .tag-concluido { background: #d4edda; color: #155724; }
+        .tag-andamento { background: #fff3cd; color: #856404; }
+        .tag-planejado { background: #cce5ff; color: #004085; }
+        .tag-futuro { background: #e2e3e5; color: #383d41; }
+
+        /* === ORGANOGRAMA === */
+        .org-wrapper {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            overflow-x: auto;
+        }
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            min-width: 600px;
+        }
+        .org-row {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+            position: relative;
+        }
+        .org-node {
+            background: var(--azul);
+            color: var(--bege);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+            min-width: 200px;
+            position: relative;
+            box-shadow: 0 4px 16px rgba(11, 29, 42, 0.2);
+        }
+        .org-node.level-1 { background: var(--ouro); color: var(--azul); }
+        .org-node.level-2 { background: var(--azul); }
+        .org-node.level-3 { background: var(--azul-claro); }
+        .org-node.level-4 { background: #2c4a5c; }
+        .org-node .role {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .org-node .who {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            margin-top: 0.2rem;
+        }
+        .org-node .desc {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+        .org-connector {
+            width: 2px;
+            height: 30px;
+            background: var(--ouro);
+            margin: 0 auto;
+        }
+        .org-connector-h {
+            height: 2px;
+            background: var(--ouro);
+            flex: 1;
+            max-width: 100px;
+        }
+        .org-connector-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 0;
+            height: 30px;
+        }
+        .org-connector-wrapper .line-down {
+            width: 2px;
+            height: 30px;
+            background: var(--ouro);
+        }
+
+        /* === TABELAS === */
+        .table-wrapper {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        table thead th {
+            background: var(--azul);
+            color: var(--bege);
+            padding: 0.9rem 1rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+        table tbody td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--cinza-claro);
+        }
+        table tbody tr:nth-child(even) { background: rgba(245, 242, 235, 0.5); }
+        table tbody tr:hover { background: rgba(201, 164, 106, 0.08); }
+        table .highlight { color: var(--azul); font-weight: 600; }
+        table .price { color: var(--sucesso); font-weight: 700; }
+        table .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.4rem;
+        }
+        table .status-dot.ok { background: var(--sucesso); }
+        table .status-dot.warn { background: var(--warning); }
+        table .status-dot.wait { background: #6c757d; }
+
+        /* === FLUXO === */
+        .flow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .flow-step {
+            background: white;
+            border: 1px solid var(--cinza-claro);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--azul);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .flow-step .num {
+            background: var(--ouro);
+            color: var(--azul);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .flow-arrow {
+            font-size: 1.2rem;
+            color: var(--ouro);
+            font-weight: 300;
+        }
+
+        /* === FOOTER === */
+        footer {
+            background: var(--azul);
+            color: var(--bege);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+        footer p { font-size: 0.85rem; opacity: 0.8; }
+        footer .gold { color: var(--ouro); }
+        footer .conf {
+            font-size: 0.7rem;
+            opacity: 0.5;
+            margin-top: 0.5rem;
+        }
+
+        /* === RESPONSIVO === */
+        @media (max-width: 768px) {
+            header.hero h1 { font-size: 2rem; }
+            header.hero .meta-info { gap: 1.5rem; }
+            .org-node { min-width: 140px; padding: 0.8rem 1rem; }
+            .org-row { gap: 1rem; }
+            .flow-step { font-size: 0.7rem; padding: 0.4rem 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+    <div class="logo">LEGADO <span>DIGITAL</span></div>
+    <a href="#produto">Produto</a>
+    <a href="#organograma">Organograma</a>
+    <a href="#planos">Planos</a>
+    <a href="#privacidade">Privacidade</a>
+    <a href="#paginas">Páginas</a>
+    <a href="#fases">Fases</a>
+    <div class="nav-right"><span class="badge-nav">v1.0</span></div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+    <div class="sub">Plataforma SaaS de Memoriais Digitais</div>
+    <h1>Preservando <span>Histórias</span><br>Para Sempre</h1>
+    <p class="slogan">Transformando o luto em legado permanente</p>
+    <div class="meta-info">
+        <div class="item"><div class="num">4</div><div class="label">Níveis de Acesso</div></div>
+        <div class="item"><div class="num">3</div><div class="label">Planos</div></div>
+        <div class="item"><div class="num">9</div><div class="label">Fases de Construção</div></div>
+        <div class="item"><div class="num">6</div><div class="label">Páginas do Sistema</div></div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- COMO FUNCIONA -->
+    <section id="produto">
+        <h2 class="section-title">O Produto</h2>
+        <p class="section-desc">
+            O Legado Digital é uma plataforma SaaS voltada ao setor funerário. 
+            Nossa missão é transformar o luto em legado permanente, oferecendo 
+            às famílias um memorial digital elegante e acessível através de um 
+            QR Code discreto integrado à placa memorial do ente querido.
+        </p>
+
+        <div class="card-grid card-grid-2" style="margin-top:1rem;">
+            <div class="card">
+                <div class="card-icon">🪦</div>
+                <h3>Funerária cadastra</h3>
+                <p>A funerária cadastra o falecido na plataforma e gera o vínculo inicial.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">👨‍👩‍👧‍👦</div>
+                <h3>Família personaliza</h3>
+                <p>A família recebe o acesso e personaliza o memorial com fotos, vídeos e biografia.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📱</div>
+                <h3>QR Code na placa</h3>
+                <p>Um QR Code único é gerado e instalado na placa memorial do falecido.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">💬</div>
+                <h3>Visitantes homenageiam</h3>
+                <p>Ao escanear o QR Code, qualquer pessoa acessa a página de homenagem e deixa condolências.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ORGANOGRAMA DO SISTEMA -->
+    <section id="organograma">
+        <h2 class="section-title">Organograma do Sistema</h2>
+        <p class="section-desc">
+            O sistema foi desenhado com 4 níveis de acesso, garantindo segurança, 
+            controle e escalabilidade para todos os envolvidos.
+        </p>
+
+        <div class="org-wrapper">
+            <div class="org-chart">
+
+                <!-- Nível 1 -->
+                <div class="org-row">
+                    <div class="org-node level-1">
+                        <div class="role">👑 Super Admin</div>
+                        <div class="who">Você — Sócio Gestor</div>
+                        <div class="desc">Controla tudo: funerárias, memoriais, QR Codes, planos e métricas</div>
+                    </div>
+                </div>
+
+                <div class="org-connector"></div>
+                <div class="org-connector-wrapper">
+                    <div class="org-connector-h"></div>
+                    <div class="line-down"></div>
+                    <div class="org-connector-h"></div>
+                </div>
+
+                <!-- Nível 2 -->
+                <div class="org-row">
+                    <div class="org-node level-2">
+                        <div class="role">🏢 Funerária</div>
+                        <div class="who">Cliente Pagante</div>
+                        <div class="desc">Cadastra falecidos, gera QR Codes, convida famílias, modera mensagens</div>
+                    </div>
+                </div>
+
+                <div class="org-connector"></div>
+                <div class="org-connector-wrapper">
+                    <div class="org-connector-h"></div>
+                    <div class="line-down"></div>
+                    <div class="org-connector-h"></div>
+                </div>
+
+                <!-- Nível 3 -->
+                <div class="org-row">
+                    <div class="org-node level-3">
+                        <div class="role">👪 Família</div>
+                        <div class="who">Parentes do Falecido</div>
+                        <div class="desc">Edita memorial, faz upload de fotos/vídeos, define privacidade</div>
+                    </div>
+                </div>
+
+                <div class="org-connector"></div>
+                <div class="org-connector-wrapper">
+                    <div class="org-connector-h"></div>
+                    <div class="line-down"></div>
+                    <div class="org-connector-h"></div>
+                </div>
+
+                <!-- Nível 4 -->
+                <div class="org-row">
+                    <div class="org-node level-4">
+                        <div class="role">👤 Visitante</div>
+                        <div class="who">Público Geral</div>
+                        <div class="desc">Acessa a página pelo QR Code, deixa homenagem e assina o livro</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Tabela explicativa do organograma -->
+        <div class="table-wrapper" style="margin-top:1.5rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nível</th>
+                        <th>Quem é</th>
+                        <th>O que pode fazer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">1 — Super Admin</td>
+                        <td>Você (sócio gestor)</td>
+                        <td>Controla tudo: funerárias, memoriais, QR Codes, planos e métricas</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">2 — Funerária</td>
+                        <td>Cliente pagante</td>
+                        <td>Cadastra falecidos, gera QR Codes, convida famílias, modera mensagens</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">3 — Família</td>
+                        <td>Parentes do falecido</td>
+                        <td>Edita memorial, faz upload de fotos/vídeos, define privacidade da página</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">4 — Visitante</td>
+                        <td>Público geral</td>
+                        <td>Acessa a página pelo QR Code, deixa homenagem e assina o livro</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- PLANOS (a definir) -->
+    <section id="planos">
+        <h2 class="section-title">Nossos Clientes — As Funerárias</h2>
+        <p class="section-desc">
+            A funerária é o elo central do negócio. Ela terá uma assinatura mensal para usar 
+            a plataforma e oferecerá o memorial digital como diferencial de serviço para 
+            as famílias que atende. Os planos e valores ainda serão definidos.
+        </p>
+
+        <div class="org-wrapper" style="margin-top:1.5rem;">
+            <div style="text-align:center; padding: 2rem;">
+                <span style="font-size:3rem;">📋</span>
+                <h3 style="color:var(--azul); margin-top:1rem;">Planos em definição</h3>
+                <p style="color:var(--cinza); font-size:0.9rem; max-width:500px; margin:0.5rem auto;">
+                    Os planos de assinatura para funerárias serão definidos em etapa futura, 
+                    após validação do produto com os primeiros clientes.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRIVACIDADE -->
+    <section id="privacidade">
+        <h2 class="section-title">QR Code e Controle de Privacidade</h2>
+        <p class="section-desc">
+            Um dos diferenciais do Legado Digital é o controle total sobre quem pode 
+            acessar cada memorial. A família decide o nível de privacidade — incluindo 
+            a opção de proteger o QR Code com senha.
+        </p>
+
+        <div class="card-grid card-grid-3">
+            <div class="card">
+                <div class="card-icon">🌍</div>
+                <h3>Público</h3>
+                <p>Qualquer pessoa com o link ou QR Code pode acessar o memorial.</p>
+                <span class="tag tag-concluido">QR Code liberado</span>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔒</div>
+                <h3>Privado</h3>
+                <p>Somente quem tem o link direto consegue acessar. QR Code sem divulgação.</p>
+                <span class="tag tag-planejado">Sem QR Code</span>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔑</div>
+                <h3>Senha</h3>
+                <p>Quem tiver a senha definida pela família consegue acessar o memorial.</p>
+                <span class="tag tag-andamento">QR Code com senha</span>
+            </div>
+        </div>
+
+        <div class="table-wrapper" style="margin-top:1.5rem;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Modo</th>
+                        <th>Quem acessa</th>
+                        <th>QR Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">Público</td>
+                        <td>Qualquer pessoa com o link ou QR Code</td>
+                        <td>Liberado sem restrição</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Privado</td>
+                        <td>Somente quem tem o link direto</td>
+                        <td>QR Code sem divulgação</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Senha</td>
+                        <td>Quem tiver a senha definida pela família</td>
+                        <td>QR Code com senha de acesso</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="color:var(--azul); margin-top:2rem; font-size:1.1rem;">🔐 Como funciona o QR Code com senha</h3>
+        <div class="flow-steps" style="margin-top:1rem;">
+            <div class="flow-step"><span class="num">1</span> Visitante escaneia o QR Code</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">2</span> Tela elegante pedindo a senha</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">3</span> Visitante digita a senha da família</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">4</span> Acesso ao memorial liberado ✅</div>
+        </div>
+        <p style="font-size:0.85rem; color:var(--cinza); margin-top:0.8rem;">
+            A senha é definida pela própria família no painel de configurações do memorial. 
+            Pode ser alterada a qualquer momento.
+        </p>
+
+        <h3 style="color:var(--azul); margin-top:2rem; font-size:1.1rem;">📋 Fluxo de liberação do QR Code</h3>
+        <div class="flow-steps" style="margin-top:1rem;">
+            <div class="flow-step"><span class="num">1</span> Funerária cadastra o falecido</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">2</span> Sistema notifica a família</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">3</span> Família personaliza o memorial</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">4</span> Família solicita liberação do QR</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">5</span> Super Admin aprova ✅</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">6</span> QR Code gerado automaticamente</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="num">7</span> Funerária instala na placa 🪦</div>
+        </div>
+    </section>
+
+    <!-- PÁGINAS DO SISTEMA -->
+    <section id="paginas">
+        <h2 class="section-title">Páginas do Sistema</h2>
+        <p class="section-desc">
+            O Legado Digital é composto por 6 páginas principais, cada uma com 
+            um propósito e nível de acesso específico.
+        </p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Página</th>
+                        <th>Quem acessa</th>
+                        <th>Função</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">/ (Home)</td>
+                        <td>Público</td>
+                        <td>Landing page de vendas para funerárias</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">/memorial/[slug]</td>
+                        <td>Público / Senha</td>
+                        <td>Página de homenagem do falecido</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">/login</td>
+                        <td>Funerária e Família</td>
+                        <td>Acesso ao sistema</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">/admin</td>
+                        <td>Super Admin</td>
+                        <td>Painel central de controle</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">/funeraria/dashboard</td>
+                        <td>Funerária</td>
+                        <td>Gestão dos memoriais</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">/familia/[slug]</td>
+                        <td>Família</td>
+                        <td>Edição do memorial e privacidade</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- FASES DE CONSTRUÇÃO -->
+    <section id="fases">
+        <h2 class="section-title">Fases de Construção</h2>
+        <p class="section-desc">
+            Roadmap completo do projeto, do MVP ao futuro com pagamentos integrados.
+        </p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fase</th>
+                        <th>O que é</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">1 — Infraestrutura</td>
+                        <td>GitHub, Vercel, Supabase, Next.js</td>
+                        <td><span class="status-dot ok"></span> Concluído</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">2 — Memorial público</td>
+                        <td>Página de homenagem com todos os campos</td>
+                        <td><span class="status-dot ok"></span> Concluído</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">3 — Landing page</td>
+                        <td>Apresentação do produto para funerárias</td>
+                        <td><span class="status-dot warn"></span> Em andamento</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">4 — Autenticação</td>
+                        <td>Login para funerária, família e admin</td>
+                        <td><span class="status-dot wait"></span> Próxima etapa</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">5 — Painel funerária</td>
+                        <td>Gestão de memoriais e QR Codes</td>
+                        <td><span class="status-dot wait"></span> Planejado</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">6 — Painel família</td>
+                        <td>Edição, fotos, vídeos e privacidade</td>
+                        <td><span class="status-dot wait"></span> Planejado</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">7 — Painel admin</td>
+                        <td>Controle central completo</td>
+                        <td><span class="status-dot wait"></span> Planejado</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">8 — QR Code auto</td>
+                        <td>Geração automática por memorial</td>
+                        <td><span class="status-dot wait"></span> Planejado</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">9 — Pagamentos</td>
+                        <td>Planos e cobrança mensal das funerárias</td>
+                        <td><span class="status-dot wait"></span> Futuro</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p class="gold">Legado Digital</p>
+    <p>Preservando histórias hoje para que continuem inspirando amanhã.</p>
+    <p class="conf">Documento confidencial — uso interno dos sócios</p>
+</footer>
+
+</body>
+</html>
