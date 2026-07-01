@@ -68,9 +68,29 @@
 - Lighthouse: 85+ (ponto de partida bom)
 
 ### 🔨 Próximas etapas
-1. [ ] Commit final da sessão
-2. [ ] Push para GitHub
+1. [x] Commit final da sessão
+2. [x] Push para GitHub
 3. [ ] Deploy em Vercel (staging)
 4. [ ] Iniciar Fase 4: Autenticação (login)
 
 ---
+
+## ⏳ Sessão 003 — 01/07/2026: Correção e Conclusão
+| Item | Valor |
+|------|-------|
+| Commit | `7316e7fd137a0bfb7e29b3a19baae93a69165939` |
+| Branch | `dev` |
+| Status | ✅ Hero 3D corrigido, build OK, commit local e push efetuados |
+
+### 📦 O que foi corrigido e feito nesta sessão
+- [x] Corrigido erro de TypeScript em `components/Hero3D.tsx` (`bufferAttribute` para `primitive` com `THREE.BufferAttribute`)
+- [x] Validado `npm run build` sem erros
+- [x] Adicionado `.clinerules` ao controle de versão
+- [x] Realizado `git add .` e `git commit -m "fix: correcao e conclusao da sessao anterior"`
+- [x] Realizado `git push origin dev`
+
+### 🔨 Próximas etapas (atualizadas)
+1. [ ] Deploy em Vercel (staging)
+2. [ ] Iniciar Fase 4: Autenticação (login)
+3. [ ] Verificar integração da página de homenagem com Supabase
+4. [ ] Testar página de demonstração na landing page
