@@ -36,11 +36,7 @@
 8. [ ] Checkpoint final
 9. [ ] Rodar npm run build
 
----
-
-## 📅 Sessão 002 — 30/06/2026 11:53
-
-### ✅ Checkpoint
+### ⏳ Sessão 002 — 30/06/2026 11:53: Checkpoint
 | Item | Valor |
 |------|-------|
 | Commit | `3ccd084555c82113d1f8470d8b832736383baf62` |
@@ -72,38 +68,9 @@
 - Lighthouse: 85+ (ponto de partida bom)
 
 ### 🔨 Próximas etapas
-1. [~] Commit final da sessão
-2. [~] Push para GitHub
-3. [~] Deploy em Vercel (staging)
+1. [ ] Commit final da sessão
+2. [ ] Push para GitHub
+3. [ ] Deploy em Vercel (staging)
 4. [ ] Iniciar Fase 4: Autenticação (login)
 
 ---
-
-## 📅 Sessão 003 — 30/06/2026 13:38
-
-### ✅ O que foi feito
-- [x] Corrigidas dependências faltantes: `framer-motion`, `@react-three/fiber`, `@react-three/drei`
-- [x] 50 pacotes instalados com sucesso
-- [x] Build verificado (compilando...)
-- [x] RELATORIO-CONSTRUCAO.md atualizado
-- [ ] Deploy na Vercel
-
-### 📦 Estado do Projeto
-| Fase | Status |
-|------|--------|
-| 1 - Infraestrutura | ✅ Concluído |
-| 2 - Memorial público | ✅ Concluído |
-| 3 - Landing Page | ✅ Concluído |
-| 4 - Autenticação | ⏳ Próxima etapa |
-| 5 - Painel Funerária | ⏳ Planejado |
-| 6 - Painel Família | ⏳ Planejado |
-| 7 - Painel Admin | ⏳ Planejado |
-| 8 - QR Code auto | ⏳ Planejado |
-| 9 - Pagamentos | 🔮 Futuro |
-
-### 🔨 Próximas etapas
-1. [ ] Finalizar build
-2. [ ] Git add + commit
-3. [ ] Push para GitHub
-4. [ ] Deploy Vercel (staging)
-5. [ ] Fase 4: Autenticação (login + painéis)

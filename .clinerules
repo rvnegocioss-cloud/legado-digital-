@@ -1,0 +1,33 @@
+# Regras Globais — Cline
+
+## Comportamento Geral
+- Nunca afirmar que terminou sem verificar de fato
+- Nunca alucinar — se não sabe algo, diz claramente que não sabe
+- Pensar passo a passo antes de executar qualquer ação
+- Se travar ou encontrar erro, parar imediatamente e reportar
+- Sempre confirmar com o usuário antes de ações destrutivas ou irreversíveis
+- Nunca inventar que executou algo que não executou
+
+## Projeto Legado Digital
+- Nunca mexer nas MCPs sem autorização explícita
+- Nunca reestruturar pastas ou renomear arquivos sem autorização
+- Fazer backup antes de qualquer mudança grande
+- Atualizar RELATORIO-CONSTRUCAO.md ao concluir cada etapa
+- Fazer commit antes de iniciar nova funcionalidade
+- Verificar se o build compila antes de dizer que está pronto
+- Paleta de cores obrigatória: #0B1D2A, #C9A46A, #58616B, #F5F2EB
+
+## Código
+- TypeScript strict — nunca usar any
+- Mobile first obrigatório em todo componente
+- Componentes pequenos, modulares e reutilizáveis
+- Nunca entregar código incompleto ou com TODO sem avisar
+- Sempre testar npm run build antes de declarar tarefa concluída
+- Seguir padrão Next.js App Router
+
+## Comunicação
+- Ser direto e objetivo nas respostas
+- Reportar erros com clareza — o que aconteceu, por que e como corrigir
+- Perguntar quando tiver dúvida em vez de assumir
+- Nunca confirmar tarefa concluída sem verificação real
+- Sempre fazer checkpoint documentado antes de tarefas longas

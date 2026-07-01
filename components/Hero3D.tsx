@@ -2,20 +2,21 @@
 
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, Stars, Environment, MeshDistortMaterial } from '@react-three/drei'
-import { useRef, useMemo, useEffect } from 'react'
+import { useRef, useMemo } from 'react'
 import * as THREE from 'three'
 
 function FloatingParticles() {
-  const particles = useMemo(() => {
-    const temp = []
+  const positions = useMemo(() => {
+    const temp = new Float32Array(100 * 3)
     for (let i = 0; i < 100; i++) {
-      const x = (Math.random() - 0.5) * 20
-      const y = (Math.random() - 0.5) * 20
-      const z = (Math.random() - 0.5) * 20
-      temp.push(x, y, z)
+      temp[i * 3] = (Math.random() - 0.5) * 20
+      temp[i * 3 + 1] = (Math.random() - 0.5) * 20
+      temp[i * 3 + 2] = (Math.random() - 0.5) * 20
     }
-    return new Float32Array(temp)
+    return temp
   }, [])
+
+  const positionAttr = useMemo(() => new THREE.BufferAttribute(positions, 3), [positions])
 
   const ref = useRef<THREE.Points>(null!)
 
@@ -26,14 +27,11 @@ function FloatingParticles() {
     }
   })
 
-  const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.BufferAttribute(particles, 3))
-    return geo
-  }, [particles])
-
   return (
-    <points ref={ref} geometry={geometry}>
+    <points ref={ref}>
+      <bufferGeometry>
+        <primitive object={positionAttr} attach="attributes-position" />
+      </bufferGeometry>
       <pointsMaterial
         size={0.05}
         color="#e2b714"
