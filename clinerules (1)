@@ -1,0 +1,17 @@
+Nunca delete arquivos de componentes, páginas ou templates sem mostrar o que será removido e aguardar aprovação explícita do Rafael.
+
+Nunca faça push para o branch main diretamente. Todo trabalho vai para dev. Merge para main só com ordem explícita.
+
+Nunca altere vercel.json, .env, next.config.js ou qualquer configuração de deploy sem ordem explícita.
+
+Nunca remova rotas existentes. Se uma página existe, ela continua existindo.
+
+Nunca instale ou remova dependências sem listar o que será alterado e aguardar confirmação.
+
+Antes de qualquer alteração estrutural, liste os arquivos que serão tocados e aguarde aprovação.
+
+Se o build quebrar, reverta para o último estado funcional antes de tentar qualquer correção.
+
+Arquivos que nunca podem ser deletados ou sobrescritos sem aprovação: components/HomenagemTemplate.tsx, app/homenagem/, app/page.tsx, vercel.json, RELATORIO-CONSTRUCAO.md, qualquer arquivo .env.
+
+Trabalhe um passo de cada vez e confirme antes de avançar.

@@ -60,7 +60,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 text-lg md:text-xl text-white/50 max-w-2xl mx-auto"
           >
-            Transforme o luto em legado permanente. Ofereça memoriais digitais
+            Transforme o luto em legado permanente. Ofereça memoriais digitais 
             elegantes com QR Code para as famílias que sua funerária atende.
           </motion.p>
 
@@ -167,11 +167,6 @@ export default function Home() {
                 title: 'Gestão Completa',
                 desc: 'Dashboard para funerária gerenciar todos os memoriais em um só lugar. Simples e intuitivo.',
               },
-              {
-                icon: '👁️',
-                title: 'Ver Demonstração',
-                desc: 'Veja um exemplo real de como fica um memorial digital. Clique para acessar uma homenagem de demonstração.',
-              },
             ].map((benefit, idx) => (
               <motion.div
                 key={benefit.title}
@@ -191,29 +186,6 @@ export default function Home() {
                 </Card>
               </motion.div>
             ))}
-
-            {/* Demo Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="md:col-span-3"
-            >
-              <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#e2b714]/30 transition-all h-full">
-                <CardContent className="flex items-center justify-center p-8">
-                  <Button
-                    size="lg"
-                    className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold text-base px-8 h-14"
-                    asChild
-                  >
-                    <Link href="/homenagem/demo">
-                      Ver Memorial de Demonstração
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
           </div>
         </div>
       </section>
@@ -448,7 +420,7 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-white/40 text-sm max-w-md">
-                Transformando o luto em legado permanente. Memoriais digitais
+                Transformando o luto em legado permanente. Memoriais digitais 
                 com QR Code para o setor funerário.
               </p>
             </div>
