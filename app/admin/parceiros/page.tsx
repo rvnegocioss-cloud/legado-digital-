@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -237,7 +238,11 @@ export default function AdminParceiros() {
             <tbody>
               {parceiros.map((p) => (
                 <tr key={p.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
-                  <td className="py-3 px-4 text-white">{p.nome_fantasia || p.razao_social}</td>
+                  <td className="py-3 px-4 text-white">
+                    <Link href={`/admin/parceiros/${p.id}`} className="hover:text-blue-400 hover:underline">
+                      {p.nome_fantasia || p.razao_social}
+                    </Link>
+                  </td>
                   <td className="py-3 px-4 text-zinc-300">{p.email}</td>
                   <td className="py-3 px-4 text-zinc-300">
                     {TIPOS_PARCEIRO.find((t) => t.value === p.tipo_parceiro)?.label || p.tipo_parceiro}
