@@ -14,13 +14,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user && pathname !== '/admin/login') {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user && pathname !== '/admin/login') {
+          router.push('/admin/login')
+          return
+        }
+        setUser(user)
+      } catch {
         router.push('/admin/login')
-        return
+      } finally {
+        setLoading(false)
       }
-      setUser(user)
-      setLoading(false)
     }
     checkAuth()
   }, [pathname, router])

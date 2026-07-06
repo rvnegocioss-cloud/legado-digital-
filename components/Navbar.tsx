@@ -48,8 +48,8 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Button className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold px-6">
-              Acessar Plataforma
+            <Button className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold px-6" asChild>
+              <Link href="/admin/login">Acessar Plataforma</Link>
             </Button>
           </div>
 
@@ -90,8 +90,8 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Button className="w-full bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold">
-                Acessar Plataforma
+              <Button className="w-full bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold" asChild>
+                <Link href="/admin/login">Acessar Plataforma</Link>
               </Button>
             </div>
           </motion.div>

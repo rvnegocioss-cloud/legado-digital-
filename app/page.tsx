@@ -207,7 +207,7 @@ export default function Home() {
                     className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold text-base px-8 h-14"
                     asChild
                   >
-                    <Link href="/homenagem/demo">
+                    <Link href="/homenagem">
                       Ver Memorial de Demonstração
                     </Link>
                   </Button>
