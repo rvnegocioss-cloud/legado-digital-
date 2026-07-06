@@ -103,8 +103,11 @@ País → Estado → Cidade
 | **Fase 4** | Planos, aquisições, utilização, fechamento mensal |
 | **Fase 5** | Geolocalização avançada, mapeamento cemiterial |
 
+## Mapa Visual das Páginas
+Organograma dos 6 ambientes + fluxo de dados dos memoriais (parceiro_id): mantido como Artifact, atualizar a cada mudança estrutural relevante (não só quando pedido).
+
 ## Fase Atual
-**FASE 1 — Fundação**
+**FASE 1 — Fundação** (concluindo) → entrando na **FASE 2 — Portal parceiro**
 
 Prioridades imediatas:
 - [x] Schema do banco (perfis, usuarios, permissoes)
@@ -113,45 +116,37 @@ Prioridades imediatas:
 - [x] Contas dos sócios criadas (Rafael, Pedro, Ricardo)
 - [x] RLS corrigido com políticas de leitura
 - [x] Layout admin protegido por papel admin_legado_digital
-- [ ] CRUD completo (parceiros, memoriais, usuarios)
+- [x] CRUD de Parceiros (com página de detalhe por parceiro)
+- [x] Módulo de Cemitérios (cadastro + mapa Leaflet pra localização)
+- [x] parceiro_id vinculando memoriais a parceiros
+- [ ] CRUD completo de Memoriais na Central (hoje só leitura)
+- [ ] Corrigir rota pública `/homenagem` (falta `[slug]` dinâmico — hoje inacessível)
+- [ ] Portal do Parceiro B2B (login e área própria — ver seção abaixo)
 - [ ] Website institucional finalizado
 
-## Próximo Passo — Central Admin (Sócios)
+## Próximo Passo — Portal do Parceiro B2B
+Cada funerária/parceiro vai ter acesso próprio (fora da Central), vendo só os próprios memoriais.
 
-### Acesso
-- Botão "Acessar Plataforma" na landing → /admin/login (já existe)
-- Botão separado "Acesso Parceiros" → /parceiro/login
+### Pendências pra isso funcionar
+1. Semear papel **"Parceiro B2B"** em `perfis` (hoje só existem Admin e Operador Legado Digital)
+2. Criar tabela `parceiros_usuarios` (usuario_id, parceiro_id) — permite mais de 1 pessoa por funerária
+3. RLS em `homenagens` restringindo parceiro ao próprio `parceiro_id` (função tipo `is_own_parceiro()`)
+4. `/parceiro/login` + `/parceiro/layout.tsx` (mesmo padrão do admin, checando papel Parceiro B2B)
+5. `/parceiro/memoriais` — CRUD restrito ao próprio parceiro
+6. Botão "Convidar contato" em `/admin/parceiros/[id]` pra criar o acesso do parceiro
 
-### O que vai ter no /admin/dashboard
-**Parceiros**
-- Lista de parceiros cadastrados
-- Status, plano contratado, contrato
-- Cadastro de novos parceiros
-
-**Memoriais**
-- Lista de todos os memoriais
-- Status (rascunho, publicado, bloqueado, cancelado)
-- Vinculação com parceiro e estrutura cemiterial
-
-**Financeiro**
-- Histórico de aquisições por parceiro
-- Utilização mensal (memoriais ativados vs contratados)
-- Status de adimplência
-- Fechamento mensal para ERP externo
-
-**Usuários**
-- Gestão de operadores internos
-- Gestão de familiares por memorial
-
-**Estrutura cemiterial**
-- Cemitérios, jazigos, gavetas por parceiro
+### Estrutura já existente pra apoiar isso
+- `/admin/parceiros/[id]` — ficha do parceiro (dados, plano/pagamento, memoriais dele) — Central enxerga tudo
+- `parceiros_b2b.plano_contratado` / `status_pagamento` (em_dia/pendente/inadimplente) — campos simples; módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) fica pra Fase 4
 
 ### Ordem de construção
 1. [x] Auth integrado
-2. [ ] CRUD de Parceiros
-3. [ ] CRUD de Memoriais
-4. [ ] Módulo Financeiro
-5. [ ] Módulo de Usuários
+2. [x] CRUD de Parceiros
+3. [x] Módulo de Cemitérios
+4. [ ] CRUD de Memoriais (Central)
+5. [ ] Portal do Parceiro B2B
+6. [ ] Módulo Financeiro completo
+7. [ ] Módulo de Usuários
 
 ## Sócios — Emails
 - Rafael (admin): rvnegocioss@gmail.com
@@ -164,14 +159,23 @@ Prioridades imediatas:
 - SUPABASE_SERVICE_ROLE_KEY adicionada no .env.local
 - **Central do Legado Digital** em app/admin/
   - Login via Supabase Auth (email/senha)
-  - Layout protegido com verificação de papel admin_legado_digital
+  - Layout protegido com verificação de papel admin_legado_digital/operador_legado_digital
   - Dashboard com cards de estatísticas
-  - Páginas: Parceiros, Memoriais, Usuários
-- Schema de admin: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes
-- Contas dos 3 sócios criadas via Admin API
+  - **Parceiros**: CRUD completo (criar/editar/ativar-desativar) + página de detalhe `/admin/parceiros/[id]` (dados, plano/pagamento, memoriais do parceiro). Tipos: funerária, plano funerário, prefeitura, autarquia, concessionária, associação, entidade religiosa, canal comercial (cemitério/crematório **não** são parceiros comerciais — ver Cemitérios)
+  - **Cemitérios**: cadastro em `/admin/cemiterios` com mapa Leaflet + OpenStreetMap (clique pra marcar lat/lng), sem chave de API
+  - **Memoriais**: listagem em `/admin/memoriais` (só leitura ainda — CRUD é o próximo passo)
+  - Usuários: página existe, ainda sem gestão real
+- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios
+- `homenagens.parceiro_id` — vincula memorial ao parceiro que cadastrou (null = venda direta Legado Digital)
+- Função helper `is_legado_staff()` — usada nas políticas RLS de parceiros_b2b, cemiterios e homenagens
+- 2 funerárias fictícias cadastradas pra testes: Funerária Memória Eterna (SP), Funerária Paz Perpétua (RJ)
+- Contas dos 3 sócios criadas via Admin API (script `scripts/seed-socios.mjs`)
 - Next.js 16 + TypeScript + Tailwind funcionando
 - Build passando sem erros
 - Repositório GitHub: rvnegocioss-cloud/legado-digital-
+
+## Bugs conhecidos
+- `/homenagem` (página pública do memorial) não tem rota dinâmica `[slug]` — hoje é inacessível pra qualquer memorial real. Corrigir antes de divulgar QR Codes/URLs.
 
 ## O que NÃO está no MVP
 - Faturamento e cobrança interna
