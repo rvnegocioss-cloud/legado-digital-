@@ -1,31 +1,52 @@
-# 🏛️ Legado Digital - Regras do Projeto
+# Cline Rules — Legado Digital
 
-## 📋 Sobre o Projeto
-SaaS de memoriais digitais para o setor funerário.
-- Tecnologias: Next.js 16, Tailwind CSS v4, Supabase, Vercel
-- 4 níveis de acesso: Super Admin → Funerária → Família → Visitante
-- Modelo de negócio: Assinatura mensal para funerárias
-- Diferencial: QR Code com controle de privacidade
+## Modo de Operação
 
-## 🎯 Stack Técnica Principal
-- **Frontend:** Next.js 16 (App Router) + Tailwind CSS v4 + shadcn/ui
-- **3D e Animações:** React Three Fiber / Drei + Framer Motion + GSAP + Aceternity UI
-- **Backend/Database:** Supabase (PostgreSQL + Auth + Storage + RLS)
-- **Deploy:** Vercel (produção) + GitHub (código)
-- **Workflows:** n8n (automações)
+Este projeto usa dois agentes separados:
 
-## 📂 Estrutura do Projeto
-```
-📁 app/           → Páginas (App Router)
-📁 components/    → Componentes React
-📁 lib/           → Utilitários (supabase.ts, etc.)
-📁 public/        → Assets estáticos
-📁 .rules/        → Skills especialistas
-```
+- **PLAN** → Claude (claude.ai) — planejamento, arquitetura, decisões
+- **ACT** → Cline + freellmapi — execução no código
 
-## 🚨 Regras Obrigatórias
-1. SEMPRE usar Server Components por padrão (só 'use client' quando necessário)
-2. Toda página de memorial DEVE ter meta tags SEO
-3. RLS no Supabase é obrigatório em TODAS as tabelas
-4. Commits no Git antes e depois de alterações críticas
-5. npm run build antes de deploy
+---
+
+## Regras do ACT (Cline)
+
+### Quando executar normalmente:
+- Tarefas claras com plano definido
+- Criar arquivos, editar código, rodar comandos
+- Seguir exatamente o que foi planejado no CLAUDE.md
+
+### Quando PARAR e consultar o PLAN (Claude):
+- Encontrar erro que não consegue resolver em 2 tentativas
+- Precisar tomar decisão arquitetural não prevista no plano
+- Ambiguidade — quando o plano não cobre o caso encontrado
+- Mudança que afeta múltiplos arquivos de forma não planejada
+- Qualquer dúvida sobre regras de negócio do Legado Digital
+
+### Como consultar:
+1. Pare imediatamente
+2. Documente o erro ou dúvida claramente
+3. Informe ao usuário: "Preciso de orientação do PLAN antes de continuar"
+4. Aguarde instrução antes de prosseguir
+
+---
+
+## Regras Gerais
+
+- Nunca tomar decisões arquiteturais sozinho
+- Nunca modificar arquivos de sistema do Windows
+- Nunca apagar arquivos sem confirmação explícita
+- Sempre seguir as convenções do CLAUDE.md
+- Sempre confirmar o que foi feito, não o que vai fazer
+- Respostas curtas e diretas ao usuário
+- Se não souber, dizer claramente em vez de inventar
+
+---
+
+## Stack do Projeto
+
+Next.js 16 + TypeScript + Supabase + Tailwind + shadcn/ui + Vercel
+
+Arquitetura: Opção B — sistema unificado (Next.js + Supabase direto)
+
+Consulte sempre o CLAUDE.md para contexto completo.
