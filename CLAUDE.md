@@ -1,5 +1,13 @@
 # Legado Digital — Briefing do Projeto
 
+## Regra Obrigatória — Atualização do CLAUDE.md
+**Após cada tarefa concluída, o Claude Code DEVE atualizar este arquivo:**
+- Marcar itens concluídos com [x]
+- Adicionar o que foi feito na seção "O que está pronto"
+- Atualizar "Fase Atual" com próximos passos
+- Registrar decisões técnicas importantes tomadas
+- Esta regra não pode ser ignorada — é parte do fluxo de trabalho
+
 ## O que é
 Plataforma B2B2C para criação, gestão e acesso a memoriais digitais vinculados a QR Codes, lápides, jazigos, gavetas, caixas ossuárias, cemitérios, crematórios, funerárias, planos funerários, prefeituras e concessionárias cemiteriais.
 
@@ -101,18 +109,66 @@ País → Estado → Cidade
 Prioridades imediatas:
 - [x] Schema do banco (perfis, usuarios, permissoes)
 - [x] Central do Legado Digital (admin)
+- [x] Supabase Auth integrado na tela de login
+- [x] Contas dos sócios criadas (Rafael, Pedro, Ricardo)
+- [x] RLS corrigido com políticas de leitura
+- [x] Layout admin protegido por papel admin_legado_digital
 - [ ] CRUD completo (parceiros, memoriais, usuarios)
 - [ ] Website institucional finalizado
+
+## Próximo Passo — Central Admin (Sócios)
+
+### Acesso
+- Botão "Acessar Plataforma" na landing → /admin/login (já existe)
+- Botão separado "Acesso Parceiros" → /parceiro/login
+
+### O que vai ter no /admin/dashboard
+**Parceiros**
+- Lista de parceiros cadastrados
+- Status, plano contratado, contrato
+- Cadastro de novos parceiros
+
+**Memoriais**
+- Lista de todos os memoriais
+- Status (rascunho, publicado, bloqueado, cancelado)
+- Vinculação com parceiro e estrutura cemiterial
+
+**Financeiro**
+- Histórico de aquisições por parceiro
+- Utilização mensal (memoriais ativados vs contratados)
+- Status de adimplência
+- Fechamento mensal para ERP externo
+
+**Usuários**
+- Gestão de operadores internos
+- Gestão de familiares por memorial
+
+**Estrutura cemiterial**
+- Cemitérios, jazigos, gavetas por parceiro
+
+### Ordem de construção
+1. [x] Auth integrado
+2. [ ] CRUD de Parceiros
+3. [ ] CRUD de Memoriais
+4. [ ] Módulo Financeiro
+5. [ ] Módulo de Usuários
+
+## Sócios — Emails
+- Rafael (admin): rvnegocioss@gmail.com
+- Pedro (admin): pedro.saraiva@estouonline.com.br
+- Ricardo (admin): ricrodalves@gmail.com
 
 ## O que está pronto
 - Landing page com design premium (Hero 3D, animações, seções)
 - Conexão Supabase configurada no .env.local
-- **Central do Legado Digital** em `app/admin/`
+- SUPABASE_SERVICE_ROLE_KEY adicionada no .env.local
+- **Central do Legado Digital** em app/admin/
   - Login via Supabase Auth (email/senha)
-  - Layout protegido com navbar e logout
+  - Layout protegido com verificação de papel admin_legado_digital
   - Dashboard com cards de estatísticas
   - Páginas: Parceiros, Memoriais, Usuários
-- Schema de admin: `usuarios`, `perfis`, `permissoes`, `usuarios_perfis`, `perfis_permissoes`
+- Schema de admin: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes
+- Contas dos 3 sócios criadas via Admin API
 - Next.js 16 + TypeScript + Tailwind funcionando
 - Build passando sem erros
 - Repositório GitHub: rvnegocioss-cloud/legado-digital-
@@ -132,6 +188,7 @@ Prioridades imediatas:
 - LGPD desde o início (consentimento, privacidade, trilha de alteração)
 - ERP externo para faturamento — Legado Digital só registra fechamento mensal
 - IA deve propor arquitetura antes de escrever código
+- Explicar em linguagem simples ao usuário o que está sendo feito e por quê
 
 ## Convenções de Código
 - Componentes em PascalCase
@@ -149,7 +206,7 @@ Prioridades imediatas:
 - sequential-thinking: raciocínio em etapas
 - context7: documentação de libs em tempo real
 - n8n: automações (emails, notificações)
-- code-search: busca no código
+- github: versionamento
 
 ## Comandos Úteis
 ```bash

@@ -3,11 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { supabase, signOut } from '@/lib/auth'
-import type { User } from '@supabase/supabase-js'
+import { getAdminUser, signOut } from '@/lib/auth'
+
+const ALLOWED_ROLES = ['Admin Legado Digital', 'Operador Legado Digital']
+
+type AdminUser = {
+  email: string
+  usuarios_perfis: { perfis: { nome: string } | null }[]
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<AdminUser | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
@@ -15,12 +21,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user && pathname !== '/admin/login') {
+        const adminUser = (await getAdminUser()) as AdminUser | null
+        const roles = adminUser?.usuarios_perfis?.map((up) => up.perfis?.nome) ?? []
+        const authorized = roles.some((r) => r && ALLOWED_ROLES.includes(r))
+
+        if (!authorized && pathname !== '/admin/login') {
           router.push('/admin/login')
           return
         }
-        setUser(user)
+        setUser(authorized ? adminUser : null)
       } catch {
         router.push('/admin/login')
       } finally {
