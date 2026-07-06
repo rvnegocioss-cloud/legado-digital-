@@ -63,6 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/cemiterios', label: 'Cemitérios', icon: '🗺️' },
     { href: '/admin/memoriais', label: 'Memoriais', icon: '🕯️' },
     { href: '/admin/usuarios', label: 'Usuários', icon: '👥' },
+    { href: '/admin/mapa', label: 'Mapa', icon: '📍' },
   ]
 
   return (
