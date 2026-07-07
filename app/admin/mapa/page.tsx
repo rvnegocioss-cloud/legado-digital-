@@ -283,7 +283,7 @@ export default function MapaPaginas() {
                     <span className="who">Funerárias, prefeituras</span>
                     <span className="name">Portal do Parceiro B2B</span>
                     <span className="path">/parceiro</span>
-                    <span className="desc">Cada parceiro só vê e cadastra os próprios memoriais</span>
+                    <span className="desc">Dashboard + CRUD — cada parceiro só vê e cadastra os próprios memoriais</span>
                     <span className="pill done">Pronto</span>
                   </div>
                 </li>
@@ -436,9 +436,9 @@ export default function MapaPaginas() {
       </section>
 
       <footer>
-        Atualizado em 2026-07-06 (Portal do Parceiro B2B concluído: login, papel Parceiro B2B,
-        RLS por parceiro, convite de contato) — os rótulos refletem o que foi verificado no
-        código e no banco, não apenas o roadmap do CLAUDE.md.
+        Atualizado em 2026-07-06 (Portal do Parceiro ganhou dashboard próprio, e a Central acessa
+        direto pela ficha do parceiro sem precisar logar de novo) — os rótulos refletem o que foi
+        verificado no código e no banco, não apenas o roadmap do CLAUDE.md.
       </footer>
     </div>
   )

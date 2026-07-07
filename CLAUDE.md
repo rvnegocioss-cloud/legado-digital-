@@ -133,13 +133,19 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 2. Tabela `parceiros_usuarios` (usuario_id, parceiro_id) — permite mais de 1 pessoa por funerária
 3. RLS em `homenagens`: `homenagens_parceiro_own` restringe parceiro ao próprio `parceiro_id` via função `is_own_parceiro()`; `homenagens_staff_all` mantém acesso total pra Admin/Operador
 4. `/parceiro/login` + `/parceiro/layout.tsx` — protegido, papel Parceiro B2B
-5. `/parceiro/memoriais` — CRUD (criar/editar) restrito ao próprio parceiro
-6. Botão **"Convidar contato"** em `/admin/parceiros/[id]` → chama `POST /api/admin/convidar-parceiro` (server-side, usa a service role key, nunca exposta ao client) — cria/atualiza o usuário com senha temporária `123456` e já vincula ao papel e ao parceiro
-7. Botão "Acesso Parceiros" na navbar da landing → `/parceiro/login`
+5. `/parceiro` — dashboard (total de memoriais, plano contratado, status de pagamento)
+6. `/parceiro/memoriais` — CRUD (criar/editar) restrito ao próprio parceiro
+7. Botão **"Convidar contato"** em `/admin/parceiros/[id]` → chama `POST /api/admin/convidar-parceiro` (server-side, usa a service role key, nunca exposta ao client) — cria/atualiza o usuário com senha temporária `123456` e já vincula ao papel e ao parceiro
+8. Botão "Acesso Parceiros" na navbar da landing → `/parceiro/login`
+9. **Acesso direto da Central**: botão "Acessar Plataforma do Parceiro" na ficha (`/admin/parceiros/[id]`) leva a equipe interna direto pro Portal do Parceiro daquele parceiro (`/parceiro?parceiro_id=X`), sem precisar logar de novo — mostra aviso "Visualizando como: X — modo Central"
 
 ### Ainda falta
 - Upload de fotos/vídeo/timeline no CRUD do parceiro (hoje só campos biográficos básicos)
 - Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4; por ora só `plano_contratado`/`status_pagamento` simples em `parceiros_b2b`
+- `SUPABASE_SERVICE_ROLE_KEY` ainda não foi adicionada nas variáveis de ambiente do **Vercel** (só existe no `.env.local`) — "Convidar contato" só funciona em produção depois disso
+
+## Convenção de Teste
+**Toda área de cadastro nova vem com 2 registros fictícios** já cadastrados, pra nunca ficar vendo tela vazia ao revisar. (Ex: 2 funerárias, 2 memoriais.)
 
 ### Ordem de construção
 1. [x] Auth integrado
