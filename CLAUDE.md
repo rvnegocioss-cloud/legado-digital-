@@ -8,6 +8,8 @@
 - Registrar decisões técnicas importantes tomadas
 - Esta regra não pode ser ignorada — é parte do fluxo de trabalho
 
+**Um commit só, um deploy só:** CLAUDE.md e `/admin/mapa` atualizam no MESMO commit/push da modificação de código, nunca em commit separado depois. Gasta tempo e token à toa fazer 2 deploys pra mesma tarefa.
+
 ## O que é
 Plataforma B2B2C para criação, gestão e acesso a memoriais digitais vinculados a QR Codes, lápides, jazigos, gavetas, caixas ossuárias, cemitérios, crematórios, funerárias, planos funerários, prefeituras e concessionárias cemiteriais.
 
@@ -135,7 +137,7 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 3. RLS em `homenagens`: `homenagens_parceiro_own` restringe parceiro ao próprio `parceiro_id` via função `is_own_parceiro()`; `homenagens_staff_all` mantém acesso total pra Admin/Operador
 4. `/parceiro/login` + `/parceiro/layout.tsx` — protegido, papel Parceiro B2B
 5. `/parceiro` — dashboard (total de memoriais, plano contratado, status de pagamento)
-6. `/parceiro/memoriais` — CRUD (criar/editar) restrito ao próprio parceiro
+6. `/parceiro/memoriais` — CRUD (criar/editar) restrito ao próprio parceiro, com link "Ver página" pra `/homenagem/[slug]` de cada um (gera slug automático ao criar)
 7. Botão **"Convidar contato"** em `/admin/parceiros/[id]` → chama `POST /api/admin/convidar-parceiro` (server-side, usa a service role key, nunca exposta ao client) — cria/atualiza o usuário com senha temporária `123456` e já vincula ao papel e ao parceiro
 8. Botão "Acesso Parceiros" na navbar da landing → `/parceiro/login`
 9. **Acesso direto da Central**: botão "Acessar Plataforma do Parceiro" na ficha (`/admin/parceiros/[id]`) leva a equipe interna direto pro Portal do Parceiro daquele parceiro (`/parceiro?parceiro_id=X`), sem precisar logar de novo — mostra aviso "Visualizando como: X — modo Central"

@@ -436,9 +436,10 @@ export default function MapaPaginas() {
       </section>
 
       <footer>
-        Atualizado em 2026-07-07 (CRUD de Memoriais concluído na Central: criar, editar, ficha por
-        memorial com link pra página pública) — os rótulos refletem o que foi verificado no
-        código e no banco, não apenas o roadmap do CLAUDE.md.
+        Atualizado em 2026-07-07 (Portal do Parceiro ganhou link "Ver página" por memorial, com
+        geração automática de slug — antes o memorial cadastrado pelo parceiro nunca ficava
+        acessível publicamente) — os rótulos refletem o que foi verificado no código e no banco,
+        não apenas o roadmap do CLAUDE.md.
       </footer>
     </div>
   )

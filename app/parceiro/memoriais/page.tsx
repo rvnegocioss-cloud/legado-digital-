@@ -22,7 +22,17 @@ interface Memorial {
   cidade: string | null
   biografia: string | null
   frase_preferida: string | null
+  slug: string | null
   created_at: string
+}
+
+function gerarSlug(nome: string) {
+  return nome
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g'), '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }
 
 const FORM_INICIAL = {
@@ -70,7 +80,7 @@ function ParceiroMemoriaisInner() {
 
     let query = supabase
       .from('homenagens')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, created_at')
+      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, created_at')
       .order('created_at', { ascending: false })
 
     if (meuParceiroId) {
@@ -108,9 +118,13 @@ function ParceiroMemoriaisInner() {
     setSalvando(true)
     setErro('')
 
+    const slug = gerarSlug(form.nome_completo)
+
     const { error } = editando
       ? await supabase.from('homenagens').update(form).eq('id', editando.id)
-      : await supabase.from('homenagens').insert({ ...form, parceiro_id: parceiroId })
+      : await supabase
+          .from('homenagens')
+          .insert({ ...form, slug, memorial_slug: slug, parceiro_id: parceiroId })
 
     if (error) {
       setErro(error.message)
@@ -205,6 +219,7 @@ function ParceiroMemoriaisInner() {
                 <th className="text-left py-3 px-4">Cidade</th>
                 <th className="text-left py-3 px-4">Criado em</th>
                 <th className="text-left py-3 px-4"></th>
+                <th className="text-left py-3 px-4"></th>
               </tr>
             </thead>
             <tbody>
@@ -214,6 +229,18 @@ function ParceiroMemoriaisInner() {
                   <td className="py-3 px-4 text-zinc-300">{m.cidade || '-'}</td>
                   <td className="py-3 px-4 text-zinc-400">
                     {new Date(m.created_at).toLocaleDateString('pt-BR')}
+                  </td>
+                  <td className="py-3 px-4">
+                    {m.slug && (
+                      <a
+                        href={`/homenagem/${m.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:underline text-xs"
+                      >
+                        Ver página
+                      </a>
+                    )}
                   </td>
                   <td className="py-3 px-4">
                     <button
