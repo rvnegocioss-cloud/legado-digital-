@@ -119,32 +119,34 @@ Prioridades imediatas:
 - [x] CRUD de Parceiros (com página de detalhe por parceiro)
 - [x] Módulo de Cemitérios (cadastro + mapa Leaflet pra localização)
 - [x] parceiro_id vinculando memoriais a parceiros
+- [x] Mapa de páginas embutido na Central (`/admin/mapa`)
+- [x] Portal do Parceiro B2B (login, layout protegido, CRUD de memoriais próprio)
 - [ ] CRUD completo de Memoriais na Central (hoje só leitura)
 - [ ] Corrigir rota pública `/homenagem` (falta `[slug]` dinâmico — hoje inacessível)
-- [ ] Portal do Parceiro B2B (login e área própria — ver seção abaixo)
 - [ ] Website institucional finalizado
 
-## Próximo Passo — Portal do Parceiro B2B
-Cada funerária/parceiro vai ter acesso próprio (fora da Central), vendo só os próprios memoriais.
+## Portal do Parceiro B2B — como funciona
+Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os próprios memoriais.
 
-### Pendências pra isso funcionar
-1. Semear papel **"Parceiro B2B"** em `perfis` (hoje só existem Admin e Operador Legado Digital)
-2. Criar tabela `parceiros_usuarios` (usuario_id, parceiro_id) — permite mais de 1 pessoa por funerária
-3. RLS em `homenagens` restringindo parceiro ao próprio `parceiro_id` (função tipo `is_own_parceiro()`)
-4. `/parceiro/login` + `/parceiro/layout.tsx` (mesmo padrão do admin, checando papel Parceiro B2B)
-5. `/parceiro/memoriais` — CRUD restrito ao próprio parceiro
-6. Botão "Convidar contato" em `/admin/parceiros/[id]` pra criar o acesso do parceiro
+### Estrutura implementada
+1. Papel **"Parceiro B2B"** semeado em `perfis`
+2. Tabela `parceiros_usuarios` (usuario_id, parceiro_id) — permite mais de 1 pessoa por funerária
+3. RLS em `homenagens`: `homenagens_parceiro_own` restringe parceiro ao próprio `parceiro_id` via função `is_own_parceiro()`; `homenagens_staff_all` mantém acesso total pra Admin/Operador
+4. `/parceiro/login` + `/parceiro/layout.tsx` — protegido, papel Parceiro B2B
+5. `/parceiro/memoriais` — CRUD (criar/editar) restrito ao próprio parceiro
+6. Botão **"Convidar contato"** em `/admin/parceiros/[id]` → chama `POST /api/admin/convidar-parceiro` (server-side, usa a service role key, nunca exposta ao client) — cria/atualiza o usuário com senha temporária `123456` e já vincula ao papel e ao parceiro
+7. Botão "Acesso Parceiros" na navbar da landing → `/parceiro/login`
 
-### Estrutura já existente pra apoiar isso
-- `/admin/parceiros/[id]` — ficha do parceiro (dados, plano/pagamento, memoriais dele) — Central enxerga tudo
-- `parceiros_b2b.plano_contratado` / `status_pagamento` (em_dia/pendente/inadimplente) — campos simples; módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) fica pra Fase 4
+### Ainda falta
+- Upload de fotos/vídeo/timeline no CRUD do parceiro (hoje só campos biográficos básicos)
+- Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4; por ora só `plano_contratado`/`status_pagamento` simples em `parceiros_b2b`
 
 ### Ordem de construção
 1. [x] Auth integrado
 2. [x] CRUD de Parceiros
 3. [x] Módulo de Cemitérios
-4. [ ] CRUD de Memoriais (Central)
-5. [ ] Portal do Parceiro B2B
+4. [x] Portal do Parceiro B2B
+5. [ ] CRUD de Memoriais (Central)
 6. [ ] Módulo Financeiro completo
 7. [ ] Módulo de Usuários
 
@@ -164,10 +166,12 @@ Cada funerária/parceiro vai ter acesso próprio (fora da Central), vendo só os
   - **Parceiros**: CRUD completo (criar/editar/ativar-desativar) + página de detalhe `/admin/parceiros/[id]` (dados, plano/pagamento, memoriais do parceiro). Tipos: funerária, plano funerário, prefeitura, autarquia, concessionária, associação, entidade religiosa, canal comercial (cemitério/crematório **não** são parceiros comerciais — ver Cemitérios)
   - **Cemitérios**: cadastro em `/admin/cemiterios` com mapa Leaflet + OpenStreetMap (clique pra marcar lat/lng), sem chave de API
   - **Memoriais**: listagem em `/admin/memoriais` (só leitura ainda — CRUD é o próximo passo)
+  - **Mapa**: `/admin/mapa` — organograma dos 6 ambientes + fluxo de dados dos memoriais, pra sócios acompanharem a construção
   - Usuários: página existe, ainda sem gestão real
-- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios
+- **Portal do Parceiro B2B** em app/parceiro/ — login, layout protegido, CRUD de memoriais restrito ao próprio parceiro (ver seção própria acima)
+- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios
 - `homenagens.parceiro_id` — vincula memorial ao parceiro que cadastrou (null = venda direta Legado Digital)
-- Função helper `is_legado_staff()` — usada nas políticas RLS de parceiros_b2b, cemiterios e homenagens
+- Funções helper: `is_legado_staff()` (RLS de parceiros_b2b/cemiterios/homenagens pra equipe interna), `is_own_parceiro(uuid)` (RLS de homenagens/parceiros_b2b pro próprio parceiro)
 - 2 funerárias fictícias cadastradas pra testes: Funerária Memória Eterna (SP), Funerária Paz Perpétua (RJ)
 - Contas dos 3 sócios criadas via Admin API (script `scripts/seed-socios.mjs`)
 - Next.js 16 + TypeScript + Tailwind funcionando

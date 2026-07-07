@@ -284,7 +284,7 @@ export default function MapaPaginas() {
                     <span className="name">Portal do Parceiro B2B</span>
                     <span className="path">/parceiro</span>
                     <span className="desc">Cada parceiro só vê e cadastra os próprios memoriais</span>
-                    <span className="pill plan">Planejado</span>
+                    <span className="pill done">Pronto</span>
                   </div>
                 </li>
                 <li>
@@ -422,23 +422,23 @@ export default function MapaPaginas() {
         </div>
 
         <div className="callout">
-          <span className="mark">?</span>
+          <span className="mark">✓</span>
           <div className="body">
-            <strong>Decisão pendente:</strong> como ligar um usuário da funerária ao registro dela em{' '}
-            <code>parceiros_b2b</code>.
+            <strong>Resolvido:</strong> tabela <code>parceiros_usuarios</code> liga o login à
+            funerária (mesmo padrão de <code>usuarios_perfis</code>), permitindo mais de uma
+            pessoa por parceiro.
             <p>
-              Proposta: uma tabela <code>parceiros_usuarios</code> (mesmo padrão de{' '}
-              <code>usuarios_perfis</code>), permitindo mais de uma pessoa por funerária acessar o
-              Portal do Parceiro.
+              Falta ainda: upload de fotos/vídeo/timeline no cadastro do parceiro (hoje só campos
+              biográficos básicos).
             </p>
           </div>
         </div>
       </section>
 
       <footer>
-        Atualizado em 2026-07-06 (Parceiros e Cemitérios concluídos, ficha de parceiro adicionada)
-        — os rótulos refletem o que foi verificado no código e no banco, não apenas o roadmap do
-        CLAUDE.md.
+        Atualizado em 2026-07-06 (Portal do Parceiro B2B concluído: login, papel Parceiro B2B,
+        RLS por parceiro, convite de contato) — os rótulos refletem o que foi verificado no
+        código e no banco, não apenas o roadmap do CLAUDE.md.
       </footer>
     </div>
   )
