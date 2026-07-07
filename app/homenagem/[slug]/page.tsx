@@ -2,7 +2,14 @@ import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+interface TimelineEvent {
+  year?: string;
+  title?: string;
+  description?: string;
+}
+
 interface Homenagem {
+  id: string;
   nome_completo: string;
   data_nascimento: string | null;
   data_falecimento: string | null;
@@ -10,6 +17,21 @@ interface Homenagem {
   frase_preferida: string | null;
   biografia: string | null;
   foto_url: string | null;
+  video_url: string | null;
+  galeria_fotos: string[] | null;
+  timeline: TimelineEvent[] | null;
+}
+
+interface Condolencia {
+  id: string;
+  visitor_name: string;
+  message: string;
+  created_at: string;
+}
+
+function getEmbedUrl(url: string) {
+  const m = url.match(/(?:youtube\.com.*v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : url;
 }
 
 export default async function HomenagemPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -17,7 +39,9 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
   const { data: homenagem } = await supabase
     .from("homenagens")
-    .select("nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url")
+    .select(
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline"
+    )
     .eq("slug", slug)
     .single();
 
@@ -34,6 +58,16 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
   const m = homenagem as Homenagem;
   const periodo = [m.data_nascimento, m.data_falecimento].filter(Boolean).join(" — ");
+
+  const { data: condolenciasData } = await supabase
+    .from("condolencias")
+    .select("id, visitor_name, message, created_at")
+    .eq("homenagem_id", m.id)
+    .order("created_at", { ascending: false });
+
+  const condolencias = (condolenciasData || []) as Condolencia[];
+  const timeline = Array.isArray(m.timeline) ? m.timeline : [];
+  const galeria = Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : [];
 
   return (
     <div style={estilos.page}>
@@ -65,6 +99,64 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
           <p style={estilos.bio}>
             {m.biografia || "A biografia será adicionada em breve pela família."}
           </p>
+        </section>
+
+        {m.video_url && (
+          <section style={{ ...estilos.card, marginTop: 24, padding: 12 }}>
+            <div style={{ aspectRatio: "16/9", borderRadius: 8, overflow: "hidden" }}>
+              <iframe
+                src={getEmbedUrl(m.video_url)}
+                style={{ width: "100%", height: "100%", border: 0 }}
+                allowFullScreen
+                title="Vídeo"
+              />
+            </div>
+          </section>
+        )}
+
+        {timeline.length > 0 && (
+          <section style={{ marginTop: 32 }}>
+            <div style={estilos.label}>Linha do Tempo</div>
+            <div style={estilos.timelineWrap}>
+              {timeline.map((ev, i) => (
+                <div key={i}>
+                  {ev.year && <div style={estilos.timelineAno}>{ev.year}</div>}
+                  {ev.title && <div style={estilos.timelineTitulo}>{ev.title}</div>}
+                  {ev.description && <p style={estilos.timelineDesc}>{ev.description}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {galeria.length > 0 && (
+          <section style={{ marginTop: 32 }}>
+            <div style={estilos.label}>Galeria</div>
+            <div style={estilos.galeriaGrid}>
+              {galeria.map((url, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={url} alt={`Foto ${i + 1}`} style={estilos.galeriaFoto} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section style={{ marginTop: 32 }}>
+          <div style={estilos.label}>
+            Condolências {condolencias.length > 0 && `(${condolencias.length})`}
+          </div>
+          {condolencias.length === 0 ? (
+            <p style={{ color: "#7a8a96", marginTop: 14 }}>Ainda não há condolências registradas.</p>
+          ) : (
+            <div style={estilos.condolenciasWrap}>
+              {condolencias.map((c) => (
+                <div key={c.id} style={estilos.condolenciaCard}>
+                  <div style={{ fontWeight: 600, color: "#F5F2EB" }}>{c.visitor_name}</div>
+                  <p style={{ margin: "6px 0 0", color: "#b0c0cc", fontSize: 15 }}>{c.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
@@ -148,6 +240,31 @@ const estilos: Record<string, React.CSSProperties> = {
     fontWeight: 600,
   },
   bio: { marginTop: 14, fontSize: 16, lineHeight: 1.8, color: "#b0c0cc", whiteSpace: "pre-wrap" },
+  timelineWrap: {
+    marginTop: 14,
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    borderLeft: "2px solid #C9A46A",
+    paddingLeft: 20,
+  },
+  timelineAno: { color: "#C9A46A", fontSize: 14, fontWeight: 600 },
+  timelineTitulo: { fontSize: 17, marginTop: 2 },
+  timelineDesc: { color: "#7a8a96", fontSize: 14, marginTop: 4 },
+  galeriaGrid: {
+    marginTop: 14,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+    gap: 10,
+  },
+  galeriaFoto: { width: "100%", height: 140, objectFit: "cover", borderRadius: 8 },
+  condolenciasWrap: { marginTop: 14, display: "flex", flexDirection: "column", gap: 12 },
+  condolenciaCard: {
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(201,164,106,0.18)",
+    borderRadius: 10,
+    padding: 16,
+  },
   footer: {
     borderTop: "1px solid rgba(201,164,106,0.18)",
     maxWidth: 720,
