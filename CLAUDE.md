@@ -121,8 +121,9 @@ Prioridades imediatas:
 - [x] parceiro_id vinculando memoriais a parceiros
 - [x] Mapa de páginas embutido na Central (`/admin/mapa`)
 - [x] Portal do Parceiro B2B (login, layout protegido, CRUD de memoriais próprio)
+- [x] Dashboard do Portal do Parceiro + acesso direto pela Central
+- [x] Corrigir rota pública `/homenagem/[slug]` (testado com memorial real e slug inexistente)
 - [ ] CRUD completo de Memoriais na Central (hoje só leitura)
-- [ ] Corrigir rota pública `/homenagem` (falta `[slug]` dinâmico — hoje inacessível)
 - [ ] Website institucional finalizado
 
 ## Portal do Parceiro B2B — como funciona
@@ -185,7 +186,7 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 - Repositório GitHub: rvnegocioss-cloud/legado-digital-
 
 ## Bugs conhecidos
-- `/homenagem` (página pública do memorial) não tem rota dinâmica `[slug]` — hoje é inacessível pra qualquer memorial real. Corrigir antes de divulgar QR Codes/URLs.
+- (resolvido) `/homenagem` não tinha rota dinâmica `[slug]` — corrigido, agora em `app/homenagem/[slug]/page.tsx`, testado com memorial real e slug inexistente
 
 ## O que NÃO está no MVP
 - Faturamento e cobrança interna

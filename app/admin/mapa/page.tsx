@@ -302,7 +302,7 @@ export default function MapaPaginas() {
                     <span className="name">Página do Memorial</span>
                     <span className="path">/homenagem/[slug]</span>
                     <span className="desc">Acesso via QR Code, URL ou busca, conforme privacidade</span>
-                    <span className="pill bug">Rota sem [slug]</span>
+                    <span className="pill done">Pronto</span>
                   </div>
                 </li>
                 <li>
@@ -436,9 +436,9 @@ export default function MapaPaginas() {
       </section>
 
       <footer>
-        Atualizado em 2026-07-06 (Portal do Parceiro ganhou dashboard próprio, e a Central acessa
-        direto pela ficha do parceiro sem precisar logar de novo) — os rótulos refletem o que foi
-        verificado no código e no banco, não apenas o roadmap do CLAUDE.md.
+        Atualizado em 2026-07-07 (rota pública do memorial corrigida e testada — `/homenagem/[slug]`
+        já funciona de ponta a ponta) — os rótulos refletem o que foi verificado no código e no
+        banco, não apenas o roadmap do CLAUDE.md.
       </footer>
     </div>
   )
