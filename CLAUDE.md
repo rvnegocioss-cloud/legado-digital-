@@ -123,7 +123,7 @@ Prioridades imediatas:
 - [x] Portal do Parceiro B2B (login, layout protegido, CRUD de memoriais próprio)
 - [x] Dashboard do Portal do Parceiro + acesso direto pela Central
 - [x] Corrigir rota pública `/homenagem/[slug]` (testado com memorial real e slug inexistente)
-- [ ] CRUD completo de Memoriais na Central (hoje só leitura)
+- [x] CRUD completo de Memoriais na Central (hoje só leitura)
 - [ ] Website institucional finalizado
 
 ## Portal do Parceiro B2B — como funciona
@@ -153,7 +153,7 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 2. [x] CRUD de Parceiros
 3. [x] Módulo de Cemitérios
 4. [x] Portal do Parceiro B2B
-5. [ ] CRUD de Memoriais (Central)
+5. [x] CRUD de Memoriais (Central)
 6. [ ] Módulo Financeiro completo
 7. [ ] Módulo de Usuários
 
@@ -172,7 +172,7 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
   - Dashboard com cards de estatísticas
   - **Parceiros**: CRUD completo (criar/editar/ativar-desativar) + página de detalhe `/admin/parceiros/[id]` (dados, plano/pagamento, memoriais do parceiro). Tipos: funerária, plano funerário, prefeitura, autarquia, concessionária, associação, entidade religiosa, canal comercial (cemitério/crematório **não** são parceiros comerciais — ver Cemitérios)
   - **Cemitérios**: cadastro em `/admin/cemiterios` com mapa Leaflet + OpenStreetMap (clique pra marcar lat/lng), sem chave de API
-  - **Memoriais**: listagem em `/admin/memoriais` (só leitura ainda — CRUD é o próximo passo)
+  - **Memoriais**: CRUD completo em `/admin/memoriais` (criar/editar) + ficha `/admin/memoriais/[id]` (dados, edição, botão "Acessar página do memorial" linkando pra `/homenagem/[slug]`, mostra qual parceiro cadastrou ou se foi direto)
   - **Mapa**: `/admin/mapa` — organograma dos 6 ambientes + fluxo de dados dos memoriais, pra sócios acompanharem a construção
   - Usuários: página existe, ainda sem gestão real
 - **Portal do Parceiro B2B** em app/parceiro/ — login, layout protegido, CRUD de memoriais restrito ao próprio parceiro (ver seção própria acima)
@@ -180,6 +180,7 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 - `homenagens.parceiro_id` — vincula memorial ao parceiro que cadastrou (null = venda direta Legado Digital)
 - Funções helper: `is_legado_staff()` (RLS de parceiros_b2b/cemiterios/homenagens pra equipe interna), `is_own_parceiro(uuid)` (RLS de homenagens/parceiros_b2b pro próprio parceiro)
 - 2 funerárias fictícias cadastradas pra testes: Funerária Memória Eterna (SP), Funerária Paz Perpétua (RJ)
+- 4 memoriais fictícios: 2 via Memória Eterna, 2 diretos (Legado Digital)
 - Contas dos 3 sócios criadas via Admin API (script `scripts/seed-socios.mjs`)
 - Next.js 16 + TypeScript + Tailwind funcionando
 - Build passando sem erros
@@ -233,3 +234,30 @@ npm run lint     # verifica erros
 ## Credenciais (apenas referência — nunca commitar)
 - Supabase Project Ref: yegvazxycfrbhblyzvhg
 - Deploy: Vercel (projeto legado-digital-)
+
+---
+
+## Session Start Protocol ⚡
+
+**MANDATORY** at start of each session:
+
+```bash
+# Load essential docs (~800 tokens - 2 min read)
+✓ .claude/COMMON_MISTAKES.md      # ⚠️ CRITICAL - Read FIRST
+✓ .claude/QUICK_START.md          # Essential commands
+✓ .claude/ARCHITECTURE_MAP.md     # File locations
+```
+
+**At task completion:**
+- Create completion doc in `.claude/completions/YYYY-MM-DD-task-name.md`
+- Move session file to `.claude/sessions/archive/` (if created)
+
+**⚠️ NEVER auto-load:**
+- Files in `.claude/completions/` (0 token cost)
+- Files in `.claude/sessions/` (0 token cost)
+- Files in `docs/archive/` (0 token cost)
+
+---
+
+**Last Updated**: 2026-07-07
+**Optimized with**: [Claude Token Optimizer](https://github.com/nadimtuhin/claude-token-optimizer)

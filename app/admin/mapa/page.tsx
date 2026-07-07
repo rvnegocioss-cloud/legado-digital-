@@ -344,8 +344,8 @@ export default function MapaPaginas() {
           <div className="module-card">
             <span className="name">Memoriais</span>
             <span className="path">/admin/memoriais</span>
-            <span className="desc">Só listagem por enquanto — falta criar/editar</span>
-            <span className="pill wip">Em construção</span>
+            <span className="desc">CRUD completo + ficha por memorial, com link pra página pública</span>
+            <span className="pill done">Pronto</span>
           </div>
           <div className="module-card">
             <span className="name">Usuários</span>
@@ -436,9 +436,9 @@ export default function MapaPaginas() {
       </section>
 
       <footer>
-        Atualizado em 2026-07-07 (rota pública do memorial corrigida e testada — `/homenagem/[slug]`
-        já funciona de ponta a ponta) — os rótulos refletem o que foi verificado no código e no
-        banco, não apenas o roadmap do CLAUDE.md.
+        Atualizado em 2026-07-07 (CRUD de Memoriais concluído na Central: criar, editar, ficha por
+        memorial com link pra página pública) — os rótulos refletem o que foi verificado no
+        código e no banco, não apenas o roadmap do CLAUDE.md.
       </footer>
     </div>
   )
