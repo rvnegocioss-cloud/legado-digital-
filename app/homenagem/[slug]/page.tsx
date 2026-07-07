@@ -1,11 +1,13 @@
 import { supabase } from "@/lib/supabase";
 import HomenagemTemplate from "@/components/HomenagemTemplate";
 
-export default async function HomenagemPage({ params }: { params: { slug: string } }) {
+export default async function HomenagemPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+
   const { data: homenagem } = await supabase
     .from("homenagens")
     .select("*")
-    .eq("slug", params.slug)
+    .eq("slug", slug)
     .single();
 
   if (!homenagem) return <p>Homenagem não encontrada.</p>;
