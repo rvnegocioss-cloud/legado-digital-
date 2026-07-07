@@ -126,7 +126,7 @@ export default function DetalheParceiro() {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            href={`/parceiro/memoriais?parceiro_id=${parceiro.id}`}
+            href={`/parceiro?parceiro_id=${parceiro.id}`}
             className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap"
           >
             Acessar Plataforma do Parceiro

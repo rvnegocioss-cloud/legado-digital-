@@ -90,6 +90,12 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
     router.push('/parceiro/login')
   }
 
+  const suffix = modoStaff ? `?parceiro_id=${parceiroIdParam}` : ''
+  const navItems = [
+    { href: `/parceiro${suffix}`, label: 'Dashboard', match: '/parceiro' },
+    { href: `/parceiro/memoriais${suffix}`, label: 'Memoriais', match: '/parceiro/memoriais' },
+  ]
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       {modoStaff && (
@@ -101,13 +107,22 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
-              <Link
-                href={modoStaff ? `/parceiro/memoriais?parceiro_id=${parceiroIdParam}` : '/parceiro/memoriais'}
-                className="text-lg font-bold text-blue-400"
-              >
-                {nomeParceiro}
-              </Link>
-              <span className="text-xs uppercase tracking-wide text-zinc-500">Portal do Parceiro</span>
+              <span className="text-lg font-bold text-blue-400">{nomeParceiro}</span>
+              <div className="hidden md:flex items-center gap-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                      pathname === item.match
+                        ? 'bg-zinc-800 text-white'
+                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-zinc-400">{email}</span>
