@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase, getParceiroUser } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,6 +35,16 @@ const FORM_INICIAL = {
 }
 
 export default function ParceiroMemoriais() {
+  return (
+    <Suspense fallback={<p className="text-zinc-400">Carregando...</p>}>
+      <ParceiroMemoriaisInner />
+    </Suspense>
+  )
+}
+
+function ParceiroMemoriaisInner() {
+  const searchParams = useSearchParams()
+  const parceiroIdParam = searchParams.get('parceiro_id')
   const [memoriais, setMemoriais] = useState<Memorial[]>([])
   const [parceiroId, setParceiroId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -45,18 +56,28 @@ export default function ParceiroMemoriais() {
 
   useEffect(() => {
     load()
-  }, [])
+  }, [parceiroIdParam])
 
   async function load() {
     setLoading(true)
-    const parceiroUser = (await getParceiroUser()) as any
-    const meuParceiroId = parceiroUser?.parceiros_usuarios?.[0]?.parceiros_b2b?.id || null
+
+    let meuParceiroId = parceiroIdParam
+    if (!meuParceiroId) {
+      const parceiroUser = (await getParceiroUser()) as any
+      meuParceiroId = parceiroUser?.parceiros_usuarios?.[0]?.parceiros_b2b?.id || null
+    }
     setParceiroId(meuParceiroId)
 
-    const { data } = await supabase
+    let query = supabase
       .from('homenagens')
       .select('id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, created_at')
       .order('created_at', { ascending: false })
+
+    if (meuParceiroId) {
+      query = query.eq('parceiro_id', meuParceiroId)
+    }
+
+    const { data } = await query
     setMemoriais(data || [])
     setLoading(false)
   }

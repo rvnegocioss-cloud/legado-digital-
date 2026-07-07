@@ -124,13 +124,21 @@ export default function DetalheParceiro() {
             {parceiro.cidade && ` · ${parceiro.cidade}${parceiro.estado ? '/' + parceiro.estado : ''}`}
           </p>
         </div>
-        <span
-          className={`px-2 py-1 rounded text-xs ${
-            parceiro.ativo ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'
-          }`}
-        >
-          {parceiro.ativo ? 'Ativo' : 'Inativo'}
-        </span>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/parceiro/memoriais?parceiro_id=${parceiro.id}`}
+            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap"
+          >
+            Acessar Plataforma do Parceiro
+          </Link>
+          <span
+            className={`px-2 py-1 rounded text-xs ${
+              parceiro.ativo ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'
+            }`}
+          >
+            {parceiro.ativo ? 'Ativo' : 'Inativo'}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
