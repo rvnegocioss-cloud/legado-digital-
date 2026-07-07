@@ -152,9 +152,8 @@ export default function HomenagemTemplate(props: HomenagemProps) {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Lato:wght@300;400;700&family=Dancing+Script:wght@600&display=swap');
         *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0}
-      .fd{font-family:'Cormorant Garamond',serif}.cursive{font-family:'Dancing Script',cursive}
+      .fd{font-family:Georgia,'Times New Roman',serif}.cursive{font-family:Georgia,'Times New Roman',serif;font-style:italic}
       .container{max-width:1120px;margin:0 auto;padding:0 16px}
       .hero-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:28px}
       .sobre-grid{display:grid;grid-template-columns:1fr;gap:20px}

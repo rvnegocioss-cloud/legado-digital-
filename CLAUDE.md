@@ -191,6 +191,7 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 ## Bugs conhecidos
 - (resolvido) `/homenagem` não tinha rota dinâmica `[slug]` — corrigido, agora em `app/homenagem/[slug]/page.tsx`, testado com memorial real e slug inexistente
 - (resolvido) Links "Ver página"/"Acessar página do memorial" abriam com `target="_blank"` — no navegador mobile isso gerava a tela nativa "This page couldn't load" quando a aba nova era descartada em segundo plano. Removido `target="_blank"`, agora abre na mesma aba.
+- (resolvido) `HomenagemTemplate.tsx` tinha `@import url(fonts.googleapis.com/...)` direto no `<style>` — fonte buscada em tempo real do Google no navegador do visitante. Em rede que não alcança `fonts.googleapis.com` (firewall, operadora, bloqueador), travava o carregamento da página inteira ("This page couldn't load"). Corrigido: removido o `@import`, `.fd`/`.cursive` usam fonte de sistema (Georgia/Times New Roman), sem dependência de rede externa.
 
 ## O que NÃO está no MVP
 - Faturamento e cobrança interna
@@ -216,6 +217,22 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 - Pastas em kebab-case
 - Sempre usar Supabase MCP para operações no banco
 - Sempre usar Vercel MCP para deploy
+
+## Skills gstack
+**Localização**: `D:\gstack` (HD externo)
+
+Gstack de Garry Tan — 23 slash commands para estruturar Claude Code como uma equipe (CEO, Designer, Eng Manager, Release Manager, QA). Carregue com:
+```bash
+/plugin install D:\gstack
+```
+
+Skills principais:
+- `/office-hours` — descoberta de produto
+- `/plan-ceo-review` — escopo estratégico
+- `/plan-eng-review` — arquitetura
+- `/review` — revisão de código
+- `/qa` — testes com Playwright
+- `/ship` — release
 
 ## MCPs Disponíveis
 - supabase: operações no banco
