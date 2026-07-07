@@ -51,9 +51,42 @@ export default function DetalheParceiro() {
   const [memoriais, setMemoriais] = useState<Memorial[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [conviteEmail, setConviteEmail] = useState('')
+  const [conviteNome, setConviteNome] = useState('')
+  const [convidando, setConvidando] = useState(false)
+  const [conviteErro, setConviteErro] = useState('')
+  const [conviteSucesso, setConviteSucesso] = useState<{ email: string; tempPassword: string } | null>(null)
+
   useEffect(() => {
     if (params.id) load(params.id)
   }, [params.id])
+
+  async function convidarContato(e: React.FormEvent) {
+    e.preventDefault()
+    setConvidando(true)
+    setConviteErro('')
+    setConviteSucesso(null)
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/convidar-parceiro', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ parceiroId: params.id, email: conviteEmail, nome: conviteNome }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setConviteErro(json.error || 'Erro ao convidar contato')
+    } else {
+      setConviteSucesso({ email: json.email, tempPassword: json.tempPassword })
+      setConviteEmail('')
+      setConviteNome('')
+    }
+    setConvidando(false)
+  }
 
   async function load(id: string) {
     setLoading(true)
@@ -146,6 +179,46 @@ export default function DetalheParceiro() {
             </div>
           </dl>
         </div>
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
+        <h2 className="text-sm font-medium text-zinc-400 mb-4">Acesso ao Portal do Parceiro</h2>
+        <p className="text-zinc-500 text-sm mb-4">
+          Cria (ou atualiza) o login desse contato pro Portal do Parceiro, com senha temporária.
+        </p>
+        <form onSubmit={convidarContato} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            placeholder="Nome do contato"
+            value={conviteNome}
+            onChange={(e) => setConviteNome(e.target.value)}
+            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+          />
+          <input
+            type="email"
+            placeholder="E-mail do contato"
+            required
+            value={conviteEmail}
+            onChange={(e) => setConviteEmail(e.target.value)}
+            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+          />
+          <button
+            type="submit"
+            disabled={convidando}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg whitespace-nowrap"
+          >
+            {convidando ? 'Criando...' : 'Convidar contato'}
+          </button>
+        </form>
+        {conviteErro && <p className="text-red-400 text-sm mt-3">{conviteErro}</p>}
+        {conviteSucesso && (
+          <p className="text-green-400 text-sm mt-3">
+            Acesso criado pra <strong>{conviteSucesso.email}</strong> — senha temporária:{' '}
+            <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{conviteSucesso.tempPassword}</code>{' '}
+            (repasse pro parceiro e peça pra trocar). Login em{' '}
+            <code className="bg-zinc-800 px-1.5 py-0.5 rounded">/parceiro/login</code>.
+          </p>
+        )}
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">

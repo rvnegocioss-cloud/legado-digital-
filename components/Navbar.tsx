@@ -48,6 +48,12 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/parceiro/login"
+              className="text-sm text-white/60 hover:text-[#e2b714] transition-colors"
+            >
+              Acesso Parceiros
+            </Link>
             <Button className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold px-6" asChild>
               <Link href="/admin/login">Acessar Plataforma</Link>
             </Button>
@@ -90,6 +96,13 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                href="/parceiro/login"
+                onClick={() => setIsOpen(false)}
+                className="block text-sm text-white/60 hover:text-[#e2b714] transition-colors py-2"
+              >
+                Acesso Parceiros
+              </Link>
               <Button className="w-full bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold" asChild>
                 <Link href="/admin/login">Acessar Plataforma</Link>
               </Button>

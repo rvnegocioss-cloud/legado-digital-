@@ -33,6 +33,32 @@ export async function getAdminUser() {
   return data
 }
 
+export async function getParceiroUser() {
+  const user = await getCurrentUser()
+  if (!user) return null
+
+  const { data, error } = await supabase
+    .from('usuarios')
+    .select(`
+      *,
+      usuarios_perfis (
+        perfis ( id, nome )
+      ),
+      parceiros_usuarios (
+        parceiros_b2b ( id, razao_social, nome_fantasia )
+      )
+    `)
+    .eq('email', user.email)
+    .single()
+
+  if (error || !data || !data.ativo) return null
+
+  const roles = (data.usuarios_perfis || []).map((up: any) => up.perfis?.nome)
+  if (!roles.includes('Parceiro B2B')) return null
+
+  return data
+}
+
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
