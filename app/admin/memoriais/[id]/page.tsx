@@ -113,8 +113,6 @@ export default function DetalheMemorial() {
         {memorial.slug && (
           <a
             href={`/homenagem/${memorial.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap"
           >
             Acessar página do memorial

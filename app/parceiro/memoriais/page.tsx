@@ -234,8 +234,6 @@ function ParceiroMemoriaisInner() {
                     {m.slug && (
                       <a
                         href={`/homenagem/${m.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="text-blue-400 hover:underline text-xs"
                       >
                         Ver página

@@ -190,6 +190,7 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 
 ## Bugs conhecidos
 - (resolvido) `/homenagem` não tinha rota dinâmica `[slug]` — corrigido, agora em `app/homenagem/[slug]/page.tsx`, testado com memorial real e slug inexistente
+- (resolvido) Links "Ver página"/"Acessar página do memorial" abriam com `target="_blank"` — no navegador mobile isso gerava a tela nativa "This page couldn't load" quando a aba nova era descartada em segundo plano. Removido `target="_blank"`, agora abre na mesma aba.
 
 ## O que NÃO está no MVP
 - Faturamento e cobrança interna
