@@ -166,9 +166,18 @@ Identidade navy `#0B1D2A` + dourado `#C9A46A` (mesma do template antigo "Noturno
 
 ### Ainda não incluído (planejado, não construído)
 - Formulário de nova condolência (será ilha client isolada, pequena)
-- Acender/apagar vela, troca de tema, compartilhar, player de música (ilhas client, uma por vez, sem RAF)
+- Acender/apagar vela, troca de tema, compartilhar (ilhas client, uma por vez, sem RAF)
 - Localização (cemitério/jazigo) — sem dado real ainda, schema de jazigo/gaveta não existe (Fase 5)
 - Portal da Família — família edita o próprio memorial. Mesmo padrão do parceiro (tabela `responsaveis_familiares` + função `is_own_familiar(homenagem_id)`), só que escopado num memorial em vez de um parceiro inteiro. Não conflita com RLS existente (políticas somam). Ainda não iniciado.
+- Timeline: hoje é um campo de texto (`ano | título | descrição` por linha) — não intuitivo. Trocar por campos separados de verdade (bloco por evento, botão "+ adicionar").
+
+### Decisão — Música de fundo (direitos autorais)
+**Família NÃO pode fazer upload de música livre.** Risco jurídico real: tocar música protegida publicamente é "comunicação ao público" pela Lei 9.610/98 (Lei de Direitos Autorais) — pode gerar notificação de remoção, cobrança do ECAD (arrecadação de execução pública no Brasil) ou processo de gravadora/artista.
+
+**Solução**: biblioteca curada de ~10-15 faixas **instrumentais royalty-free** (piano/cordas, tom sóbrio, licença de uso comercial explícita), hospedadas no nosso próprio Storage. Família escolhe de uma lista, não faz upload livre. Zero risco jurídico. Ainda não construído — falta: escolher/licenciar as faixas, subir pro bucket, criar o seletor no formulário.
+
+### Pendente de verificação — limite de fotos/armazenamento
+Quantidade de fotos/vídeo por memorial ainda **não foi definida com número real** — depende do plano contratado no Supabase (armazenamento e banda). Não inventar número sem checar o plano atual primeiro.
 
 ## Convenção de Teste
 **Toda área de cadastro nova vem com 2 registros fictícios** já cadastrados, pra nunca ficar vendo tela vazia ao revisar. (Ex: 2 funerárias, 2 memoriais.)

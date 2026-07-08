@@ -424,22 +424,40 @@ export default function MapaPaginas() {
         <div className="callout">
           <span className="mark">✓</span>
           <div className="body">
-            <strong>Resolvido:</strong> tabela <code>parceiros_usuarios</code> liga o login à
-            funerária (mesmo padrão de <code>usuarios_perfis</code>), permitindo mais de uma
-            pessoa por parceiro.
+            <strong>Resolvido:</strong> upload de vídeo e fotos direto no sistema (bucket{' '}
+            <code>memoriais</code> no Supabase Storage) em <code>/admin/memoriais/[id]</code> e{' '}
+            <code>/parceiro/memoriais</code>. Sem YouTube — vídeo toca nativo na página pública.
+            <p>Timeline ainda é campo de texto simples, falta virar UI de verdade (bloco por evento).</p>
+          </div>
+        </div>
+
+        <div className="callout">
+          <span className="mark">🎵</span>
+          <div className="body">
+            <strong>Decisão — Música de fundo:</strong> família não vai poder subir música livre
+            (risco jurídico real: tocar música protegida publicamente é execução pública, Lei
+            9.610/98 — pode gerar cobrança do ECAD ou notificação de remoção).
             <p>
-              Falta ainda: upload de fotos/vídeo/timeline no cadastro do parceiro (hoje só campos
-              biográficos básicos).
+              Solução: biblioteca curada de faixas instrumentais royalty-free, hospedada no nosso
+              Storage — família escolhe de uma lista. Ainda não construído.
             </p>
+          </div>
+        </div>
+
+        <div className="callout">
+          <span className="mark">?</span>
+          <div className="body">
+            <strong>Pendente:</strong> limite de fotos/vídeo por memorial ainda sem número
+            definido — depende do plano contratado no Supabase (armazenamento/banda). Não
+            inventar número sem checar o plano real primeiro.
           </div>
         </div>
       </section>
 
       <footer>
-        Atualizado em 2026-07-07 (Portal do Parceiro ganhou link "Ver página" por memorial, com
-        geração automática de slug — antes o memorial cadastrado pelo parceiro nunca ficava
-        acessível publicamente) — os rótulos refletem o que foi verificado no código e no banco,
-        não apenas o roadmap do CLAUDE.md.
+        Atualizado em 2026-07-07 (upload de vídeo/fotos direto no sistema, decisão de música
+        royalty-free por direitos autorais) — os rótulos refletem o que foi verificado no código e
+        no banco, não apenas o roadmap do CLAUDE.md.
       </footer>
     </div>
   )
