@@ -34,6 +34,10 @@ function getEmbedUrl(url: string) {
   return m ? `https://www.youtube.com/embed/${m[1]}` : url;
 }
 
+function isYoutube(url: string) {
+  return /youtube\.com|youtu\.be/.test(url);
+}
+
 export default async function HomenagemPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
@@ -104,12 +108,21 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         {m.video_url && (
           <section style={{ ...estilos.card, marginTop: 24, padding: 12 }}>
             <div style={{ aspectRatio: "16/9", borderRadius: 8, overflow: "hidden" }}>
-              <iframe
-                src={getEmbedUrl(m.video_url)}
-                style={{ width: "100%", height: "100%", border: 0 }}
-                allowFullScreen
-                title="Vídeo"
-              />
+              {isYoutube(m.video_url) ? (
+                <iframe
+                  src={getEmbedUrl(m.video_url)}
+                  style={{ width: "100%", height: "100%", border: 0 }}
+                  allowFullScreen
+                  title="Vídeo"
+                />
+              ) : (
+                // eslint-disable-next-line jsx-a11y/media-has-caption
+                <video
+                  src={m.video_url}
+                  controls
+                  style={{ width: "100%", height: "100%", background: "#000" }}
+                />
+              )}
             </div>
           </section>
         )}

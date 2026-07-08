@@ -23,12 +23,12 @@ interface Memorial {
   created_at: string
 }
 
-function galeriaParaTexto(galeria: string[] | null) {
-  return (galeria || []).join('\n')
-}
-
-function textoParaGaleria(texto: string): string[] {
-  return texto.split('\n').map((l) => l.trim()).filter(Boolean)
+async function subirArquivo(memorialId: string, pasta: 'video' | 'galeria', file: File) {
+  const caminho = `${memorialId}/${pasta}/${Date.now()}-${file.name}`
+  const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
+  if (error) throw error
+  const { data } = supabase.storage.from('memoriais').getPublicUrl(caminho)
+  return data.publicUrl
 }
 
 function timelineParaTexto(timeline: Memorial['timeline']) {
@@ -64,10 +64,12 @@ export default function DetalheMemorial() {
     biografia: '',
   })
   const [videoUrl, setVideoUrl] = useState('')
-  const [galeriaTexto, setGaleriaTexto] = useState('')
+  const [galeria, setGaleria] = useState<string[]>([])
   const [timelineTexto, setTimelineTexto] = useState('')
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
+  const [enviandoVideo, setEnviandoVideo] = useState(false)
+  const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [erro, setErro] = useState('')
   const [salvo, setSalvo] = useState(false)
 
@@ -90,7 +92,7 @@ export default function DetalheMemorial() {
         biografia: m.biografia || '',
       })
       setVideoUrl(m.video_url || '')
-      setGaleriaTexto(galeriaParaTexto(m.galeria_fotos))
+      setGaleria(m.galeria_fotos || [])
       setTimelineTexto(timelineParaTexto(m.timeline))
 
       if (m.parceiro_id) {
@@ -114,7 +116,7 @@ export default function DetalheMemorial() {
     const payload = {
       ...form,
       video_url: videoUrl || null,
-      galeria_fotos: textoParaGaleria(galeriaTexto),
+      galeria_fotos: galeria,
       timeline: textoParaTimeline(timelineTexto),
     }
     const { error } = await supabase.from('homenagens').update(payload).eq('id', params.id)
@@ -128,6 +130,39 @@ export default function DetalheMemorial() {
     setSalvando(false)
     setSalvo(true)
     if (memorial) setMemorial({ ...memorial, ...form })
+  }
+
+  async function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !memorial) return
+    setEnviandoVideo(true)
+    setErro('')
+    try {
+      const url = await subirArquivo(memorial.id, 'video', file)
+      setVideoUrl(url)
+    } catch (err: any) {
+      setErro(err.message || 'Erro ao enviar vídeo')
+    }
+    setEnviandoVideo(false)
+  }
+
+  async function handleGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0 || !memorial) return
+    setEnviandoGaleria(true)
+    setErro('')
+    try {
+      const urls = await Promise.all(files.map((f) => subirArquivo(memorial.id, 'galeria', f)))
+      setGaleria((atual) => [...atual, ...urls])
+    } catch (err: any) {
+      setErro(err.message || 'Erro ao enviar fotos')
+    }
+    setEnviandoGaleria(false)
+    e.target.value = ''
+  }
+
+  function removerFoto(url: string) {
+    setGaleria((atual) => atual.filter((u) => u !== url))
   }
 
   if (loading) return <p className="text-zinc-400">Carregando...</p>
@@ -202,22 +237,49 @@ export default function DetalheMemorial() {
             className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
           />
 
-          <Input
-            placeholder="Link do vídeo (YouTube)"
-            value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
-            className="bg-zinc-800 border-zinc-700 text-white"
-          />
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
+            {videoUrl && (
+              <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />
+            )}
+            <input
+              type="file"
+              accept="video/*"
+              onChange={handleVideoChange}
+              disabled={enviandoVideo}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+            />
+            {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
+          </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Galeria de fotos — uma URL por linha</label>
-            <textarea
-              placeholder={'https://exemplo.com/foto1.jpg\nhttps://exemplo.com/foto2.jpg'}
-              rows={3}
-              value={galeriaTexto}
-              onChange={(e) => setGaleriaTexto(e.target.value)}
-              className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+            <label className="block text-xs text-zinc-500 mb-1">Galeria de fotos</label>
+            {galeria.length > 0 && (
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                {galeria.map((url) => (
+                  <div key={url} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removerFoto(url)}
+                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleGaleriaChange}
+              disabled={enviandoGaleria}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
             />
+            {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
           </div>
 
           <div>

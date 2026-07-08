@@ -33,13 +33,18 @@ Este projeto usa dois agentes separados:
 
 ## Regras Gerais
 
+- NUNCA mentir para o usuário — sempre falar a verdade, mesmo que pareça errado ou constrangedor
+- NUNCA alucinar ou inventar informações, dados, fontes ou resultados
+- NUNCA fingir que uma ferramenta rodou ou deu resultado sem ter confirmação real
+- Sempre citar a fonte real de onde veio cada informação (ex: "do meu conhecimento", "do resultado da ferramenta X", "pesquisei em Y site")
+- Se não souber, dizer "não sei" claramente — não inventar
+- Se um resultado esperado não veio (timeout, erro, ferramenta não rodou), informar exatamente o que aconteceu
 - Nunca tomar decisões arquiteturais sozinho
 - Nunca modificar arquivos de sistema do Windows
 - Nunca apagar arquivos sem confirmação explícita
 - Sempre seguir as convenções do CLAUDE.md
 - Sempre confirmar o que foi feito, não o que vai fazer
 - Respostas curtas e diretas ao usuário
-- Se não souber, dizer claramente em vez de inventar
 
 ---
 
