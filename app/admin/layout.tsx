@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
 
 const ALLOWED_ROLES = ['Admin Legado Digital', 'Operador Legado Digital']
@@ -58,12 +59,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const navItems = [
-    { href: '/admin', label: 'Dashboard', icon: '📊' },
-    { href: '/admin/parceiros', label: 'Parceiros', icon: '🤝' },
-    { href: '/admin/cemiterios', label: 'Cemitérios', icon: '🗺️' },
-    { href: '/admin/memoriais', label: 'Memoriais', icon: '🕯️' },
-    { href: '/admin/usuarios', label: 'Usuários', icon: '👥' },
-    { href: '/admin/mapa', label: 'Mapa', icon: '📍' },
+    { href: '/admin', label: 'Dashboard', Icon: LayoutDashboard },
+    { href: '/admin/parceiros', label: 'Parceiros', Icon: Building2 },
+    { href: '/admin/cemiterios', label: 'Cemitérios', Icon: MapPin },
+    { href: '/admin/memoriais', label: 'Memoriais', Icon: ScrollText },
+    { href: '/admin/usuarios', label: 'Usuários', Icon: Users },
+    { href: '/admin/mapa', label: 'Mapa', Icon: Map },
   ]
 
   return (
@@ -80,13 +81,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
                       pathname === item.href
                         ? 'bg-zinc-800 text-white'
                         : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                     }`}
                   >
-                    {item.icon} {item.label}
+                    <item.Icon size={15} />
+                    {item.label}
                   </Link>
                 ))}
               </div>

@@ -140,48 +140,66 @@ export default function AdminCemiterios() {
             </DialogHeader>
 
             <form onSubmit={salvar} className="space-y-3">
-              <Input
-                placeholder="Nome"
-                required
-                value={form.nome}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <select
-                value={form.tipo}
-                onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
-              >
-                <option value="cemiterio">Cemitério</option>
-                <option value="crematorio">Crematório</option>
-              </select>
-              <Input
-                placeholder="Endereço"
-                value={form.endereco}
-                onChange={(e) => setForm({ ...form, endereco: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <div className="flex gap-3">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Nome</label>
                 <Input
-                  placeholder="Cidade"
-                  value={form.cidade}
-                  onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                  placeholder="Nome do cemitério ou crematório"
+                  required
+                  value={form.nome}
+                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
                   className="bg-zinc-800 border-zinc-700 text-white"
                 />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Tipo</label>
+                <select
+                  value={form.tipo}
+                  onChange={(e) => setForm({ ...form, tipo: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                >
+                  <option value="cemiterio">Cemitério</option>
+                  <option value="crematorio">Crematório</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Endereço</label>
                 <Input
-                  placeholder="UF"
-                  maxLength={2}
-                  value={form.estado}
-                  onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })}
-                  className="bg-zinc-800 border-zinc-700 text-white w-20"
+                  placeholder="Rua, número, bairro"
+                  value={form.endereco}
+                  onChange={(e) => setForm({ ...form, endereco: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
                 />
               </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+                  <Input
+                    placeholder="Cidade"
+                    value={form.cidade}
+                    onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">UF</label>
+                  <Input
+                    placeholder="UF"
+                    maxLength={2}
+                    value={form.estado}
+                    onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })}
+                    className="bg-zinc-800 border-zinc-700 text-white w-20"
+                  />
+                </div>
+              </div>
 
-              <CemiterioMapPicker
-                lat={form.latitude}
-                lng={form.longitude}
-                onChange={(lat, lng) => setForm({ ...form, latitude: lat, longitude: lng })}
-              />
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Localização no mapa</label>
+                <CemiterioMapPicker
+                  lat={form.latitude}
+                  lng={form.longitude}
+                  onChange={(lat, lng) => setForm({ ...form, latitude: lat, longitude: lng })}
+                />
+              </div>
               {form.latitude != null && form.longitude != null && (
                 <p className="text-xs text-zinc-400">
                   Lat {form.latitude.toFixed(6)} · Lng {form.longitude.toFixed(6)}

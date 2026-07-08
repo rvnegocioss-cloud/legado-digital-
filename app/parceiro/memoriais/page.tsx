@@ -38,6 +38,8 @@ function gerarSlug(nome: string) {
     .replace(/(^-|-$)/g, '')
 }
 
+const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
+
 async function subirArquivo(memorialId: string, pasta: 'video' | 'galeria', file: File) {
   const caminho = `${memorialId}/${pasta}/${Date.now()}-${file.name}`
   const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
@@ -196,11 +198,23 @@ function ParceiroMemoriaisInner() {
   async function handleGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
+
+    const vagas = LIMITE_FOTOS - galeria.length
+    if (vagas <= 0) {
+      setErro(`Limite de ${LIMITE_FOTOS} fotos por memorial atingido.`)
+      e.target.value = ''
+      return
+    }
+
+    const selecionados = files.slice(0, vagas)
     setEnviandoGaleria(true)
     setErro('')
     try {
-      const urls = await Promise.all(files.map((f) => subirArquivo(idParaUpload, 'galeria', f)))
+      const urls = await Promise.all(selecionados.map((f) => subirArquivo(idParaUpload, 'galeria', f)))
       setGaleria((atual) => [...atual, ...urls])
+      if (files.length > selecionados.length) {
+        setErro(`Só cabiam mais ${vagas} foto(s) — limite de ${LIMITE_FOTOS} por memorial.`)
+      }
     } catch (err: any) {
       setErro(err.message || 'Erro ao enviar fotos')
     }
@@ -267,46 +281,64 @@ function ParceiroMemoriaisInner() {
             </DialogHeader>
 
             <form onSubmit={salvar} className="space-y-3">
-              <Input
-                placeholder="Nome completo"
-                required
-                value={form.nome_completo}
-                onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <div className="flex gap-3">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
                 <Input
-                  placeholder="Data de nascimento"
-                  value={form.data_nascimento}
-                  onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-                <Input
-                  placeholder="Data de falecimento"
-                  value={form.data_falecimento}
-                  onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
+                  placeholder="Nome completo do falecido"
+                  required
+                  value={form.nome_completo}
+                  onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
                   className="bg-zinc-800 border-zinc-700 text-white"
                 />
               </div>
-              <Input
-                placeholder="Cidade"
-                value={form.cidade}
-                onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <Input
-                placeholder="Frase preferida"
-                value={form.frase_preferida}
-                onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <textarea
-                placeholder="Biografia"
-                rows={3}
-                value={form.biografia}
-                onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-                className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
-              />
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-zinc-500 mb-1">Data de nascimento</label>
+                  <Input
+                    placeholder="DD/MM/AAAA"
+                    value={form.data_nascimento}
+                    onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs text-zinc-500 mb-1">Data de falecimento</label>
+                  <Input
+                    placeholder="DD/MM/AAAA"
+                    value={form.data_falecimento}
+                    onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+                <Input
+                  placeholder="Cidade onde viveu ou faleceu"
+                  value={form.cidade}
+                  onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>
+                <Input
+                  placeholder="Uma frase marcante da pessoa"
+                  value={form.frase_preferida}
+                  onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Biografia</label>
+                <textarea
+                  placeholder="Conte a história de vida da pessoa"
+                  rows={3}
+                  value={form.biografia}
+                  onChange={(e) => setForm({ ...form, biografia: e.target.value })}
+                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                />
+              </div>
 
               <div>
                 <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
@@ -324,7 +356,9 @@ function ParceiroMemoriaisInner() {
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Galeria de fotos</label>
+                <label className="block text-xs text-zinc-500 mb-1">
+                  Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
+                </label>
                 {galeria.length > 0 && (
                   <div className="grid grid-cols-4 gap-2 mb-2">
                     {galeria.map((url) => (
@@ -347,8 +381,8 @@ function ParceiroMemoriaisInner() {
                   accept="image/*"
                   multiple
                   onChange={handleGaleriaChange}
-                  disabled={enviandoGaleria}
-                  className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+                  disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
+                  className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
                 />
                 {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
               </div>

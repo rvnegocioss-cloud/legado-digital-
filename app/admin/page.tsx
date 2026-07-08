@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Building2, ScrollText, Users } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 
 interface Stats {
@@ -44,9 +45,9 @@ export default function AdminDashboard() {
   }
 
   const cards = [
-    { title: 'Parceiros B2B', value: stats.totalParceiros, icon: '🤝', href: '/admin/parceiros' },
-    { title: 'Memoriais', value: stats.totalMemoriais, icon: '🕯️', href: '/admin/memoriais' },
-    { title: 'Usuários', value: stats.totalUsuarios, icon: '👥', href: '/admin/usuarios' },
+    { title: 'Parceiros B2B', value: stats.totalParceiros, Icon: Building2, href: '/admin/parceiros' },
+    { title: 'Memoriais', value: stats.totalMemoriais, Icon: ScrollText, href: '/admin/memoriais' },
+    { title: 'Usuários', value: stats.totalUsuarios, Icon: Users, href: '/admin/usuarios' },
   ]
 
   if (loading) {
@@ -63,7 +64,7 @@ export default function AdminDashboard() {
             href={card.href}
             className="block p-6 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
           >
-            <div className="text-4xl mb-4">{card.icon}</div>
+            <card.Icon className="mb-4 text-zinc-400" size={32} strokeWidth={1.5} />
             <h2 className="text-lg font-medium text-zinc-300">{card.title}</h2>
             <p className="text-3xl font-bold text-white mt-2">{card.value}</p>
           </Link>

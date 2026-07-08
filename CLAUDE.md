@@ -182,6 +182,11 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 ## Convenção de Teste
 **Toda área de cadastro nova vem com 2 registros fictícios** já cadastrados, pra nunca ficar vendo tela vazia ao revisar. (Ex: 2 funerárias, 2 memoriais.)
 
+## Convenção de Formulários
+- **Todo campo de cadastro tem `<label>` descritivo acima**, nunca só placeholder (placeholder some ao digitar, usuário perde a referência do que é o campo)
+- **Sem emoji como ícone de UI** — plataforma é séria (memorial de pessoa falecida), usar ícones de `lucide-react` (já instalado), sempre `strokeWidth={1.5}`, cor neutra (`text-zinc-400`)
+- Limites de upload/quantidade (ex: 4 fotos por memorial) sempre visíveis no label do campo (`Galeria de fotos (2/4)`)
+
 ### Ordem de construção
 1. [x] Auth integrado
 2. [x] CRUD de Parceiros

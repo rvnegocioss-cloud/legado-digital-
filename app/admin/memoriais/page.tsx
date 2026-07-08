@@ -106,46 +106,64 @@ export default function AdminMemoriais() {
               <DialogTitle className="text-white">Novo Memorial</DialogTitle>
             </DialogHeader>
             <form onSubmit={salvar} className="space-y-3">
-              <Input
-                placeholder="Nome completo"
-                required
-                value={form.nome_completo}
-                onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <div className="flex gap-3">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
                 <Input
-                  placeholder="Data de nascimento"
-                  value={form.data_nascimento}
-                  onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-                <Input
-                  placeholder="Data de falecimento"
-                  value={form.data_falecimento}
-                  onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
+                  placeholder="Nome completo do falecido"
+                  required
+                  value={form.nome_completo}
+                  onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
                   className="bg-zinc-800 border-zinc-700 text-white"
                 />
               </div>
-              <Input
-                placeholder="Cidade"
-                value={form.cidade}
-                onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <Input
-                placeholder="Frase preferida"
-                value={form.frase_preferida}
-                onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <textarea
-                placeholder="Biografia"
-                rows={3}
-                value={form.biografia}
-                onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-                className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
-              />
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-zinc-500 mb-1">Data de nascimento</label>
+                  <Input
+                    placeholder="DD/MM/AAAA"
+                    value={form.data_nascimento}
+                    onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs text-zinc-500 mb-1">Data de falecimento</label>
+                  <Input
+                    placeholder="DD/MM/AAAA"
+                    value={form.data_falecimento}
+                    onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+                <Input
+                  placeholder="Cidade onde viveu ou faleceu"
+                  value={form.cidade}
+                  onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>
+                <Input
+                  placeholder="Uma frase marcante da pessoa"
+                  value={form.frase_preferida}
+                  onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Biografia</label>
+                <textarea
+                  placeholder="Conte a história de vida da pessoa"
+                  rows={3}
+                  value={form.biografia}
+                  onChange={(e) => setForm({ ...form, biografia: e.target.value })}
+                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                />
+              </div>
               {erro && <p className="text-red-400 text-sm">{erro}</p>}
               <DialogFooter className="bg-transparent border-zinc-800 mt-4">
                 <Button type="submit" disabled={salvando}>

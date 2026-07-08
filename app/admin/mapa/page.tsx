@@ -432,7 +432,7 @@ export default function MapaPaginas() {
         </div>
 
         <div className="callout">
-          <span className="mark">🎵</span>
+          <span className="mark">♫</span>
           <div className="body">
             <strong>Decisão — Música de fundo:</strong> família não vai poder subir música livre
             (risco jurídico real: tocar música protegida publicamente é execução pública, Lei

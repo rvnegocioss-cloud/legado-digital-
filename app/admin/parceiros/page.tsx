@@ -147,63 +147,87 @@ export default function AdminParceiros() {
             </DialogHeader>
 
             <form onSubmit={salvar} className="space-y-3">
-              <Input
-                placeholder="Razão social"
-                required
-                value={form.razao_social}
-                onChange={(e) => setForm({ ...form, razao_social: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <Input
-                placeholder="Nome fantasia"
-                value={form.nome_fantasia}
-                onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <select
-                value={form.tipo_parceiro}
-                onChange={(e) => setForm({ ...form, tipo_parceiro: e.target.value })}
-                className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
-              >
-                {TIPOS_PARCEIRO.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-              <Input
-                type="email"
-                placeholder="E-mail"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <Input
-                placeholder="Telefone"
-                value={form.telefone}
-                onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <Input
-                placeholder="CNPJ"
-                value={form.cnpj}
-                onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
-              />
-              <div className="flex gap-3">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Razão social</label>
                 <Input
-                  placeholder="Cidade"
-                  value={form.cidade}
-                  onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                  placeholder="Nome jurídico completo"
+                  required
+                  value={form.razao_social}
+                  onChange={(e) => setForm({ ...form, razao_social: e.target.value })}
                   className="bg-zinc-800 border-zinc-700 text-white"
                 />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Nome fantasia</label>
                 <Input
-                  placeholder="UF"
-                  maxLength={2}
-                  value={form.estado}
-                  onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })}
-                  className="bg-zinc-800 border-zinc-700 text-white w-20"
+                  placeholder="Como o parceiro é conhecido"
+                  value={form.nome_fantasia}
+                  onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
                 />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Tipo de parceiro</label>
+                <select
+                  value={form.tipo_parceiro}
+                  onChange={(e) => setForm({ ...form, tipo_parceiro: e.target.value })}
+                  className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                >
+                  {TIPOS_PARCEIRO.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">E-mail</label>
+                <Input
+                  type="email"
+                  placeholder="contato@parceiro.com.br"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Telefone</label>
+                <Input
+                  placeholder="(00) 00000-0000"
+                  value={form.telefone}
+                  onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">CNPJ</label>
+                <Input
+                  placeholder="00.000.000/0000-00"
+                  value={form.cnpj}
+                  onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+                  <Input
+                    placeholder="Cidade"
+                    value={form.cidade}
+                    onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">UF</label>
+                  <Input
+                    placeholder="UF"
+                    maxLength={2}
+                    value={form.estado}
+                    onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })}
+                    className="bg-zinc-800 border-zinc-700 text-white w-20"
+                  />
+                </div>
               </div>
 
               {erro && <p className="text-red-400 text-sm">{erro}</p>}

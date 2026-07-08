@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { ScrollText, ClipboardList, CreditCard } from 'lucide-react'
 import { supabase, getParceiroUser } from '@/lib/auth'
 
 interface ParceiroInfo {
@@ -89,19 +90,19 @@ function ParceiroDashboardInner() {
           href={memoriaisHref}
           className="block p-6 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
         >
-          <div className="text-4xl mb-4">🕯️</div>
+          <ScrollText className="mb-4 text-zinc-400" size={32} strokeWidth={1.5} />
           <h2 className="text-lg font-medium text-zinc-300">Memoriais cadastrados</h2>
           <p className="text-3xl font-bold text-white mt-2">{totalMemoriais}</p>
         </Link>
 
         <div className="p-6 rounded-xl bg-zinc-900 border border-zinc-800">
-          <div className="text-4xl mb-4">📋</div>
+          <ClipboardList className="mb-4 text-zinc-400" size={32} strokeWidth={1.5} />
           <h2 className="text-lg font-medium text-zinc-300">Plano contratado</h2>
           <p className="text-xl font-bold text-white mt-2">{parceiro.plano_contratado || '—'}</p>
         </div>
 
         <div className="p-6 rounded-xl bg-zinc-900 border border-zinc-800">
-          <div className="text-4xl mb-4">💳</div>
+          <CreditCard className="mb-4 text-zinc-400" size={32} strokeWidth={1.5} />
           <h2 className="text-lg font-medium text-zinc-300">Status de pagamento</h2>
           <p className="mt-2">
             <span className={`px-2 py-1 rounded text-sm ${pagamento.className}`}>
