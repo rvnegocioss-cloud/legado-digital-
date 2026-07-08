@@ -17,7 +17,33 @@ interface Memorial {
   biografia: string | null
   slug: string | null
   parceiro_id: string | null
+  video_url: string | null
+  galeria_fotos: string[] | null
+  timeline: { year?: string; title?: string; description?: string }[] | null
   created_at: string
+}
+
+function galeriaParaTexto(galeria: string[] | null) {
+  return (galeria || []).join('\n')
+}
+
+function textoParaGaleria(texto: string): string[] {
+  return texto.split('\n').map((l) => l.trim()).filter(Boolean)
+}
+
+function timelineParaTexto(timeline: Memorial['timeline']) {
+  return (timeline || []).map((ev) => `${ev.year || ''} | ${ev.title || ''} | ${ev.description || ''}`).join('\n')
+}
+
+function textoParaTimeline(texto: string) {
+  return texto
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((linha) => {
+      const [year, title, description] = linha.split('|').map((p) => p?.trim() || '')
+      return { year, title, description }
+    })
 }
 
 interface Parceiro {
@@ -37,6 +63,9 @@ export default function DetalheMemorial() {
     frase_preferida: '',
     biografia: '',
   })
+  const [videoUrl, setVideoUrl] = useState('')
+  const [galeriaTexto, setGaleriaTexto] = useState('')
+  const [timelineTexto, setTimelineTexto] = useState('')
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
@@ -60,6 +89,9 @@ export default function DetalheMemorial() {
         frase_preferida: m.frase_preferida || '',
         biografia: m.biografia || '',
       })
+      setVideoUrl(m.video_url || '')
+      setGaleriaTexto(galeriaParaTexto(m.galeria_fotos))
+      setTimelineTexto(timelineParaTexto(m.timeline))
 
       if (m.parceiro_id) {
         const { data: p } = await supabase
@@ -79,7 +111,13 @@ export default function DetalheMemorial() {
     setErro('')
     setSalvo(false)
 
-    const { error } = await supabase.from('homenagens').update(form).eq('id', params.id)
+    const payload = {
+      ...form,
+      video_url: videoUrl || null,
+      galeria_fotos: textoParaGaleria(galeriaTexto),
+      timeline: textoParaTimeline(timelineTexto),
+    }
+    const { error } = await supabase.from('homenagens').update(payload).eq('id', params.id)
 
     if (error) {
       setErro(error.message)
@@ -163,6 +201,37 @@ export default function DetalheMemorial() {
             onChange={(e) => setForm({ ...form, biografia: e.target.value })}
             className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
           />
+
+          <Input
+            placeholder="Link do vídeo (YouTube)"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white"
+          />
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Galeria de fotos — uma URL por linha</label>
+            <textarea
+              placeholder={'https://exemplo.com/foto1.jpg\nhttps://exemplo.com/foto2.jpg'}
+              rows={3}
+              value={galeriaTexto}
+              onChange={(e) => setGaleriaTexto(e.target.value)}
+              className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">
+              Linha do tempo — uma por linha: ano | título | descrição
+            </label>
+            <textarea
+              placeholder={'1980 | Nascimento | São Paulo, SP\n2010 | Casamento | '}
+              rows={3}
+              value={timelineTexto}
+              onChange={(e) => setTimelineTexto(e.target.value)}
+              className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+            />
+          </div>
 
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
           {salvo && <p className="text-green-400 text-sm">Salvo.</p>}

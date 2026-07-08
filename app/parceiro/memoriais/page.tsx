@@ -23,6 +23,9 @@ interface Memorial {
   biografia: string | null
   frase_preferida: string | null
   slug: string | null
+  video_url: string | null
+  galeria_fotos: string[] | null
+  timeline: { year?: string; title?: string; description?: string }[] | null
   created_at: string
 }
 
@@ -33,6 +36,29 @@ function gerarSlug(nome: string) {
     .replace(new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g'), '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
+}
+
+function galeriaParaTexto(galeria: string[] | null) {
+  return (galeria || []).join('\n')
+}
+
+function textoParaGaleria(texto: string): string[] {
+  return texto.split('\n').map((l) => l.trim()).filter(Boolean)
+}
+
+function timelineParaTexto(timeline: Memorial['timeline']) {
+  return (timeline || []).map((ev) => `${ev.year || ''} | ${ev.title || ''} | ${ev.description || ''}`).join('\n')
+}
+
+function textoParaTimeline(texto: string) {
+  return texto
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((linha) => {
+      const [year, title, description] = linha.split('|').map((p) => p?.trim() || '')
+      return { year, title, description }
+    })
 }
 
 const FORM_INICIAL = {
@@ -61,6 +87,9 @@ function ParceiroMemoriaisInner() {
   const [dialogAberto, setDialogAberto] = useState(false)
   const [editando, setEditando] = useState<Memorial | null>(null)
   const [form, setForm] = useState(FORM_INICIAL)
+  const [videoUrl, setVideoUrl] = useState('')
+  const [galeriaTexto, setGaleriaTexto] = useState('')
+  const [timelineTexto, setTimelineTexto] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -80,7 +109,9 @@ function ParceiroMemoriaisInner() {
 
     let query = supabase
       .from('homenagens')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, created_at')
+      .select(
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, video_url, galeria_fotos, timeline, created_at'
+      )
       .order('created_at', { ascending: false })
 
     if (meuParceiroId) {
@@ -95,6 +126,9 @@ function ParceiroMemoriaisInner() {
   function abrirNovo() {
     setEditando(null)
     setForm(FORM_INICIAL)
+    setVideoUrl('')
+    setGaleriaTexto('')
+    setTimelineTexto('')
     setErro('')
     setDialogAberto(true)
   }
@@ -109,6 +143,9 @@ function ParceiroMemoriaisInner() {
       frase_preferida: m.frase_preferida || '',
       biografia: m.biografia || '',
     })
+    setVideoUrl(m.video_url || '')
+    setGaleriaTexto(galeriaParaTexto(m.galeria_fotos))
+    setTimelineTexto(timelineParaTexto(m.timeline))
     setErro('')
     setDialogAberto(true)
   }
@@ -119,12 +156,17 @@ function ParceiroMemoriaisInner() {
     setErro('')
 
     const slug = gerarSlug(form.nome_completo)
+    const camposRicos = {
+      video_url: videoUrl || null,
+      galeria_fotos: textoParaGaleria(galeriaTexto),
+      timeline: textoParaTimeline(timelineTexto),
+    }
 
     const { error } = editando
-      ? await supabase.from('homenagens').update(form).eq('id', editando.id)
+      ? await supabase.from('homenagens').update({ ...form, ...camposRicos }).eq('id', editando.id)
       : await supabase
           .from('homenagens')
-          .insert({ ...form, slug, memorial_slug: slug, parceiro_id: parceiroId })
+          .insert({ ...form, ...camposRicos, slug, memorial_slug: slug, parceiro_id: parceiroId })
 
     if (error) {
       setErro(error.message)
@@ -193,6 +235,35 @@ function ParceiroMemoriaisInner() {
                 onChange={(e) => setForm({ ...form, biografia: e.target.value })}
                 className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
               />
+
+              <Input
+                placeholder="Link do vídeo (YouTube)"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-white"
+              />
+
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Galeria — uma URL de foto por linha</label>
+                <textarea
+                  rows={2}
+                  value={galeriaTexto}
+                  onChange={(e) => setGaleriaTexto(e.target.value)}
+                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">
+                  Linha do tempo — uma por linha: ano | título | descrição
+                </label>
+                <textarea
+                  rows={2}
+                  value={timelineTexto}
+                  onChange={(e) => setTimelineTexto(e.target.value)}
+                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                />
+              </div>
 
               {erro && <p className="text-red-400 text-sm">{erro}</p>}
 

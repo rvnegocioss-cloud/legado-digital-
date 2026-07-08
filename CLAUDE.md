@@ -147,6 +147,29 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 - Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4; por ora só `plano_contratado`/`status_pagamento` simples em `parceiros_b2b`
 - `SUPABASE_SERVICE_ROLE_KEY` ainda não foi adicionada nas variáveis de ambiente do **Vercel** (só existe no `.env.local`) — "Convidar contato" só funciona em produção depois disso
 
+## Página do Memorial (`/homenagem/[slug]`) — como funciona
+Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servidor** — zero JS client na rota, sem risco de travar o navegador (ver Bugs conhecidos).
+
+### O que já exibe (lendo direto do Postgres)
+- Hero: foto, nome, datas, cidade, frase preferida
+- Biografia
+- Vídeo incorporado (`video_url`, converte link do YouTube)
+- Galeria de fotos (`galeria_fotos`)
+- Linha do tempo (`timeline` jsonb)
+- Condolências — lidas de verdade da tabela `condolencias` via `homenagem_id` (não é mais hack reaproveitando `homenagens`)
+
+### Gap conhecido (por isso as seções somem em teste)
+As seções só aparecem se o memorial **tiver o dado preenchido** — e hoje **nenhum formulário de edição tem campo pra vídeo/galeria/timeline** (nem `/admin/memoriais/[id]` nem `/parceiro/memoriais`, só nome/datas/cidade/frase/bio). Só dá pra popular via SQL direto. Precisa adicionar esses campos nos dois formulários de edição.
+
+### Visual
+Identidade navy `#0B1D2A` + dourado `#C9A46A` (mesma do template antigo "Noturno"), tipografia serif. Estilização ainda básica (inline styles simples) — refino visual "luxo moderno" é a próxima etapa, mantendo tudo em CSS puro (sem animação contínua, sem fetch de fonte externa).
+
+### Ainda não incluído (planejado, não construído)
+- Formulário de nova condolência (será ilha client isolada, pequena)
+- Acender/apagar vela, troca de tema, compartilhar, player de música (ilhas client, uma por vez, sem RAF)
+- Localização (cemitério/jazigo) — sem dado real ainda, schema de jazigo/gaveta não existe (Fase 5)
+- Portal da Família — família edita o próprio memorial. Mesmo padrão do parceiro (tabela `responsaveis_familiares` + função `is_own_familiar(homenagem_id)`), só que escopado num memorial em vez de um parceiro inteiro. Não conflita com RLS existente (políticas somam). Ainda não iniciado.
+
 ## Convenção de Teste
 **Toda área de cadastro nova vem com 2 registros fictícios** já cadastrados, pra nunca ficar vendo tela vazia ao revisar. (Ex: 2 funerárias, 2 memoriais.)
 
