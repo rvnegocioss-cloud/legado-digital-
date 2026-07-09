@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  const { memorialId, senha } = await req.json()
+  const { memorialId, senha, tipo } = await req.json()
+  const coluna = tipo === 'familia' ? 'senha_familia_hash' : 'senha_acesso_hash'
   if (!memorialId) {
     return NextResponse.json({ error: 'memorialId obrigatório' }, { status: 400 })
   }
@@ -52,21 +53,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
   }
 
-  if (!senha) {
-    // Senha vazia = remove a trava, memorial volta a ser público
-    const { error } = await supabaseAdmin
-      .from('homenagens_seguranca')
-      .delete()
-      .eq('homenagem_id', memorialId)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ ok: true, temSenha: false })
-  }
+  const valor = senha ? hashSenhaMemorial(memorialId, senha) : null
 
-  const hash = hashSenhaMemorial(memorialId, senha)
   const { error } = await supabaseAdmin
     .from('homenagens_seguranca')
-    .upsert({ homenagem_id: memorialId, senha_acesso_hash: hash, updated_at: new Date().toISOString() })
+    .upsert(
+      { homenagem_id: memorialId, [coluna]: valor, updated_at: new Date().toISOString() },
+      { onConflict: 'homenagem_id', ignoreDuplicates: false }
+    )
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true, temSenha: true })
+  return NextResponse.json({ ok: true, temSenha: !!valor })
 }

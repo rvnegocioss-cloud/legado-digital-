@@ -144,6 +144,8 @@ Prioridades imediatas:
 - [x] Edição de logo/descrição da página pública do parceiro — na Central (`/admin/parceiros/[id]`) E no Portal do Parceiro (`/parceiro`), os dois lados
 - [x] Campo de sugestões dos sócios em `/admin/mapa` (tabela `mapa_sugestoes`, RLS staff-only)
 - [x] Timeline reorganizada em blocos de evento (Ano/Título/Descrição + mover ↑↓ + remover), trocando o textarea confuso `ano | título | descrição`
+- [x] Senha de edição por memorial (`homenagens_seguranca.senha_familia_hash`, separada da senha de acesso) — campo no formulário Central e Parceiro
+- [x] **Portal da Família** (`/familia/login` + `/familia/[slug]`) — família entra com slug do memorial + senha de edição (sem conta/e-mail, sessão via cookie assinado HMAC de 12h), edita os mesmos campos do admin/parceiro (foto, vídeo, galeria, timeline, bio, frase). Central e Parceiro continuam vendo tudo (mesma tabela `homenagens`)
 - [ ] QR Code — ainda não implementado. Decisão: gerar PNG no servidor com lib `qrcode` (sem API externa em runtime, aprendizado do bug de fonte do Google), apontando pra `/homenagem/[slug]`, salvo no Storage (`memoriais/qrcodes/{slug}.png`), botão "Baixar QR Code" na ficha do memorial (Central e Parceiro)
 - [ ] Busca embutida direto na landing (hoje é botão que leva pra `/busca`, não campo de texto na própria home)
 - [ ] Modos de privacidade completos (`configuracoes_privacidade` — hoje só existe "público" e "com senha", faltam "privado por e-mail/cadastro" e "oculto" da lista de modos do MVP)
@@ -174,6 +176,19 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 
 Definir/trocar/remover senha: campo "Senha de acesso" no formulário de edição (Central `/admin/memoriais/[id]` e Portal do Parceiro `/parceiro/memoriais`) — deixar em branco = memorial público.
 
+## Portal da Família — como funciona
+Família gerencia o próprio memorial, sem conta/e-mail/cadastro — só slug + senha de edição.
+
+1. Central ou Parceiro define a **"Senha de edição da família"** na ficha do memorial (campo separado da senha de acesso pública — uma é só visualização, essa é permissão de editar)
+2. Família entra em `/familia/login` com o slug do memorial (parte final da URL) + essa senha
+3. `POST /api/familia-login` verifica a senha (hash scrypt em `homenagens_seguranca.senha_familia_hash`) e emite um **cookie assinado HMAC** (`familia_{id}`, 12h, httpOnly) — sem Supabase Auth, sem tabela de usuário família, é só uma prova de que sabe a senha daquele memorial específico
+4. `/familia/[slug]` — formulário de edição (mesmos campos do admin/parceiro: nome, datas, cidade, frase, bio, foto, vídeo, galeria, timeline), reaproveita o `TimelineEditor`
+5. `GET/POST /api/familia-memorial` e `POST /api/familia-upload` verificam o cookie a cada chamada (nunca confiam em RLS, já que não existe sessão Supabase pra família) e usam a service role key pra ler/gravar
+
+**Integração:** como grava na mesma tabela `homenagens` que Central e Parceiro já leem/editam, tudo que a família muda aparece automaticamente nos dois portais internos — sem trabalho extra, é a mesma regra de "toda feature nova reflete nos lados relevantes".
+
+**Ainda falta:** link de convite direto (hoje a funerária/Central passa o slug e a senha por fora, sem e-mail automático); página de "esqueci a senha" pra família (mesma pendência do parceiro).
+
 ## Página do Memorial (`/homenagem/[slug]`) — como funciona
 Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servidor** — zero JS client na rota, sem risco de travar o navegador (ver Bugs conhecidos).
 
@@ -195,7 +210,6 @@ Identidade navy `#0B1D2A` + dourado `#C9A46A` (mesma do template antigo "Noturno
 - Formulário de nova condolência (será ilha client isolada, pequena)
 - Acender/apagar vela, troca de tema, compartilhar (ilhas client, uma por vez, sem RAF)
 - Localização (cemitério/jazigo) — sem dado real ainda, schema de jazigo/gaveta não existe (Fase 5)
-- Portal da Família — família edita o próprio memorial. Mesmo padrão do parceiro (tabela `responsaveis_familiares` + função `is_own_familiar(homenagem_id)`), só que escopado num memorial em vez de um parceiro inteiro. Não conflita com RLS existente (políticas somam). Ainda não iniciado.
 - QR Code — ver decisão registrada em "Fase Atual".
 
 ### Decisão — Música de fundo (direitos autorais)
@@ -243,7 +257,8 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
   - Usuários: página existe, ainda sem gestão real
 - **Portal do Parceiro B2B** em app/parceiro/ — login, layout protegido, CRUD de memoriais restrito ao próprio parceiro (ver seção própria acima), dashboard com edição da própria página pública (logo/descrição)
 - **Busca pública** `/busca` e **sub-landing do parceiro** `/parceiros/[slug]` — ver `lib/publicTheme.ts` (tema navy/dourado compartilhado com a página do memorial)
-- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios, mapa_sugestoes
+- **Portal da Família** `/familia/login` + `/familia/[slug]` — acesso por slug + senha (sem conta), cookie assinado, edita o memorial (ver seção própria acima)
+- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios, mapa_sugestoes, homenagens_seguranca
 - `parceiros_b2b.slug`/`logo_url`/`descricao_publica` — dados da sub-landing pública; view `parceiros_publicos` expõe só os campos seguros pro anon (nunca CNPJ/telefone/email)
 - `homenagens.parceiro_id` — vincula memorial ao parceiro que cadastrou (null = venda direta Legado Digital)
 - Funções helper: `is_legado_staff()` (RLS de parceiros_b2b/cemiterios/homenagens pra equipe interna), `is_own_parceiro(uuid)` (RLS de homenagens/parceiros_b2b pro próprio parceiro)

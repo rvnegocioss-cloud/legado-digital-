@@ -90,6 +90,10 @@ function ParceiroMemoriaisInner() {
   const [temSenha, setTemSenha] = useState(false)
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [senhaMsg, setSenhaMsg] = useState('')
+  const [senhaFamilia, setSenhaFamilia] = useState('')
+  const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
+  const [salvandoSenhaFamilia, setSalvandoSenhaFamilia] = useState(false)
+  const [senhaFamiliaMsg, setSenhaFamiliaMsg] = useState('')
 
   useEffect(() => {
     load()
@@ -182,14 +186,17 @@ function ParceiroMemoriaisInner() {
       }))
     )
     setErro('')
+    setSenhaFamilia('')
+    setSenhaFamiliaMsg('')
     setDialogAberto(true)
 
     const { data: seguranca } = await supabase
       .from('homenagens_seguranca')
-      .select('homenagem_id')
+      .select('senha_acesso_hash, senha_familia_hash')
       .eq('homenagem_id', m.id)
       .maybeSingle()
-    setTemSenha(!!seguranca)
+    setTemSenha(!!seguranca?.senha_acesso_hash)
+    setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
   }
 
   async function salvarSenha(e: React.FormEvent) {
@@ -202,7 +209,7 @@ function ParceiroMemoriaisInner() {
     const res = await fetch('/api/memorial-senha', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: editando.id, senha }),
+      body: JSON.stringify({ memorialId: editando.id, senha, tipo: 'acesso' }),
     })
     const json = await res.json()
 
@@ -214,6 +221,30 @@ function ParceiroMemoriaisInner() {
       setSenhaMsg(json.temSenha ? 'Senha definida.' : 'Senha removida — memorial público de novo.')
     }
     setSalvandoSenha(false)
+  }
+
+  async function salvarSenhaFamilia(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editando) return
+    setSalvandoSenhaFamilia(true)
+    setSenhaFamiliaMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/memorial-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: editando.id, senha: senhaFamilia, tipo: 'familia' }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setSenhaFamiliaMsg(json.error || 'Erro ao salvar senha')
+    } else {
+      setTemSenhaFamilia(json.temSenha)
+      setSenhaFamilia('')
+      setSenhaFamiliaMsg(json.temSenha ? 'Senha definida — família já pode editar em /familia/login.' : 'Acesso da família removido.')
+    }
+    setSalvandoSenhaFamilia(false)
   }
 
   const idParaUpload = editando?.id || rascunhoId
@@ -484,6 +515,27 @@ function ParceiroMemoriaisInner() {
                   </Button>
                 </div>
                 {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
+              </form>
+            )}
+
+            {editando && (
+              <form onSubmit={salvarSenhaFamilia} className="mt-2 pt-4 border-t border-zinc-800">
+                <label className="block text-xs text-zinc-500 mb-1">
+                  {temSenhaFamilia ? 'Nova senha da família (ou deixe em branco pra remover acesso)' : 'Senha de edição da família (permite a família editar em /familia/login)'}
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Deixe em branco pra não ter acesso"
+                    value={senhaFamilia}
+                    onChange={(e) => setSenhaFamilia(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                  />
+                  <Button type="submit" disabled={salvandoSenhaFamilia}>
+                    {salvandoSenhaFamilia ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                </div>
+                {senhaFamiliaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaFamiliaMsg}</p>}
               </form>
             )}
           </DialogContent>

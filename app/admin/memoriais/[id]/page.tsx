@@ -67,6 +67,10 @@ export default function DetalheMemorial() {
   const [temSenha, setTemSenha] = useState(false)
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [senhaMsg, setSenhaMsg] = useState('')
+  const [senhaFamilia, setSenhaFamilia] = useState('')
+  const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
+  const [salvandoSenhaFamilia, setSalvandoSenhaFamilia] = useState(false)
+  const [senhaFamiliaMsg, setSenhaFamiliaMsg] = useState('')
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -108,10 +112,11 @@ export default function DetalheMemorial() {
 
       const { data: seguranca } = await supabase
         .from('homenagens_seguranca')
-        .select('homenagem_id')
+        .select('senha_acesso_hash, senha_familia_hash')
         .eq('homenagem_id', m.id)
         .maybeSingle()
-      setTemSenha(!!seguranca)
+      setTemSenha(!!seguranca?.senha_acesso_hash)
+      setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
     }
     setLoading(false)
   }
@@ -126,7 +131,7 @@ export default function DetalheMemorial() {
     const res = await fetch('/api/memorial-senha', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: memorial.id, senha }),
+      body: JSON.stringify({ memorialId: memorial.id, senha, tipo: 'acesso' }),
     })
     const json = await res.json()
 
@@ -138,6 +143,30 @@ export default function DetalheMemorial() {
       setSenhaMsg(json.temSenha ? 'Senha definida — memorial agora exige senha na busca.' : 'Senha removida — memorial voltou a ser público.')
     }
     setSalvandoSenha(false)
+  }
+
+  async function salvarSenhaFamilia(e: React.FormEvent) {
+    e.preventDefault()
+    if (!memorial) return
+    setSalvandoSenhaFamilia(true)
+    setSenhaFamiliaMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/memorial-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: memorial.id, senha: senhaFamilia, tipo: 'familia' }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setSenhaFamiliaMsg(json.error || 'Erro ao salvar senha')
+    } else {
+      setTemSenhaFamilia(json.temSenha)
+      setSenhaFamilia('')
+      setSenhaFamiliaMsg(json.temSenha ? 'Senha definida — família já pode editar em /familia/login.' : 'Acesso da família removido.')
+    }
+    setSalvandoSenhaFamilia(false)
   }
 
   async function salvar(e: React.FormEvent) {
@@ -414,6 +443,33 @@ export default function DetalheMemorial() {
           </Button>
         </form>
         {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
+        <h2 className="text-sm font-medium text-zinc-400 mb-1">Acesso da família — senha de edição</h2>
+        <p className="text-zinc-500 text-xs mb-4">
+          {temSenhaFamilia
+            ? 'A família já pode editar esse memorial em /familia/login com essa senha. Diferente da senha de acesso acima — essa dá permissão de editar, não só visualizar.'
+            : 'Defina uma senha pra a família editar esse memorial sozinha (fotos, vídeo, biografia, timeline) em /familia/login, sem precisar de login com e-mail.'}
+        </p>
+        <form onSubmit={salvarSenhaFamilia} className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-xs text-zinc-500 mb-1">
+              {temSenhaFamilia ? 'Nova senha da família (ou deixe em branco pra remover acesso)' : 'Senha de edição da família'}
+            </label>
+            <Input
+              type="text"
+              placeholder="Deixe em branco pra não ter acesso"
+              value={senhaFamilia}
+              onChange={(e) => setSenhaFamilia(e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-white"
+            />
+          </div>
+          <Button type="submit" disabled={salvandoSenhaFamilia} className="self-end">
+            {salvandoSenhaFamilia ? 'Salvando...' : 'Salvar'}
+          </Button>
+        </form>
+        {senhaFamiliaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaFamiliaMsg}</p>}
       </div>
     </div>
   )

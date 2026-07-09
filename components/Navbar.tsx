@@ -54,8 +54,14 @@ export default function Navbar() {
             >
               Acesso Parceiros
             </Link>
+            <Link
+              href="/familia/login"
+              className="text-sm text-white/60 hover:text-[#e2b714] transition-colors"
+            >
+              Acesso Familiar
+            </Link>
             <Button className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold px-6" asChild>
-              <Link href="/admin/login">Acessar Plataforma</Link>
+              <Link href="/admin/login">Acesso Legado Central</Link>
             </Button>
           </div>
 
@@ -103,8 +109,15 @@ export default function Navbar() {
               >
                 Acesso Parceiros
               </Link>
+              <Link
+                href="/familia/login"
+                onClick={() => setIsOpen(false)}
+                className="block text-sm text-white/60 hover:text-[#e2b714] transition-colors py-2"
+              >
+                Acesso Familiar
+              </Link>
               <Button className="w-full bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold" asChild>
-                <Link href="/admin/login">Acessar Plataforma</Link>
+                <Link href="/admin/login">Acesso Legado Central</Link>
               </Button>
             </div>
           </motion.div>
