@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { signIn } from '@/lib/auth'
 
 export default function AdminLogin() {
@@ -76,6 +77,10 @@ export default function AdminLogin() {
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
+
+          <Link href="/recuperar-senha" className="block text-center text-xs text-zinc-500 hover:text-white">
+            Esqueceu sua senha?
+          </Link>
         </form>
       </div>
     </div>

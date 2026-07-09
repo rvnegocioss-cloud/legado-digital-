@@ -72,6 +72,10 @@ export default function FamiliaLoginPage() {
           >
             {entrando ? 'Entrando...' : 'Entrar'}
           </button>
+          <p className="text-center text-xs text-zinc-600">
+            Esqueceu a senha? Esse acesso não usa e-mail — fale com quem cadastrou o memorial
+            (a funerária ou a Legado Digital) pra pedir uma senha nova.
+          </p>
         </form>
       </div>
     </div>
