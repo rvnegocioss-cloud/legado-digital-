@@ -93,7 +93,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   const suffix = modoStaff ? `?parceiro_id=${parceiroIdParam}` : ''
   const navItems = [
     { href: `/parceiro${suffix}`, label: 'Dashboard', match: '/parceiro' },
-    { href: `/parceiro/memoriais${suffix}`, label: 'Memoriais', match: '/parceiro/memoriais' },
+    { href: `/parceiro/memoriais${suffix}`, label: 'Memoriais (Cadastrar/Editar)', match: '/parceiro/memoriais' },
   ]
 
   return (

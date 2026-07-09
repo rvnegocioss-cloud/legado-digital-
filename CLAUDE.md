@@ -10,6 +10,15 @@
 
 **Um commit só, um deploy só:** CLAUDE.md e `/admin/mapa` atualizam no MESMO commit/push da modificação de código, nunca em commit separado depois. Gasta tempo e token à toa fazer 2 deploys pra mesma tarefa.
 
+## Regra — Relatório de Skills e MCPs
+Toda vez que uma skill (gstack, frontend-design, ui-ux-pro-max, etc.) ou MCP (Supabase, Vercel, etc.) for usada, registrar em `docs/USO_SKILLS_MCPS.md`: o que foi usado, motivo, o que produziu. Log separado do CLAUDE.md — serve pra aprendizado e rastreabilidade do que a IA usou e por quê.
+
+## Regra — Clareza de rótulos na UI
+Rótulo de menu/botão precisa deixar óbvia a ação (ex: "Memoriais (Cadastrar/Editar)", não só "Memoriais"). Motivo: usuário achou que cadastro de memorial não existia no Portal do Parceiro — só o rótulo do menu não deixava isso claro, a função já existia.
+
+## Regra — Integração Central ↔ Portal do Parceiro ↔ Página Pública
+Toda feature nova precisa ser refletida nos lados relevantes: se o parceiro pode editar algo sobre o próprio parceiro (ex: logo/descrição da página pública), a Central também precisa poder ver/editar isso — nunca implementar só de um lado. Se algo aparece na página pública, os dois portais internos (Central e Parceiro) devem ter visibilidade do dado por trás.
+
 ## O que é
 Plataforma B2B2C para criação, gestão e acesso a memoriais digitais vinculados a QR Codes, lápides, jazigos, gavetas, caixas ossuárias, cemitérios, crematórios, funerárias, planos funerários, prefeituras e concessionárias cemiteriais.
 
@@ -126,6 +135,16 @@ Prioridades imediatas:
 - [x] Dashboard do Portal do Parceiro + acesso direto pela Central
 - [x] Corrigir rota pública `/homenagem/[slug]` (testado com memorial real e slug inexistente)
 - [x] CRUD completo de Memoriais na Central (hoje só leitura)
+- [x] Upload de foto principal do homenageado nos formulários (Central e Portal do Parceiro) — antes só vídeo/galeria/timeline tinham upload
+- [x] Busca pública `/busca` — busca memorial por nome (sem filtro de privacidade ainda, ver Fase 2 pendências)
+- [x] Sub-landing pública do parceiro `/parceiros/[slug]` — logo, descrição, memoriais do parceiro + busca interna
+- [x] Botão "Buscar um Memorial" na landing, linkando pra `/busca`
+- [x] Edição de logo/descrição da página pública do parceiro — na Central (`/admin/parceiros/[id]`) E no Portal do Parceiro (`/parceiro`), os dois lados
+- [x] Campo de sugestões dos sócios em `/admin/mapa` (tabela `mapa_sugestoes`, RLS staff-only)
+- [x] Timeline reorganizada em blocos de evento (Ano/Título/Descrição + mover ↑↓ + remover), trocando o textarea confuso `ano | título | descrição`
+- [ ] QR Code — ainda não implementado. Decisão: gerar PNG no servidor com lib `qrcode` (sem API externa em runtime, aprendizado do bug de fonte do Google), apontando pra `/homenagem/[slug]`, salvo no Storage (`memoriais/qrcodes/{slug}.png`), botão "Baixar QR Code" na ficha do memorial (Central e Parceiro)
+- [ ] Busca embutida direto na landing (hoje é botão que leva pra `/busca`, não campo de texto na própria home)
+- [ ] Filtro de privacidade na busca pública (`/busca` e sub-landing do parceiro mostram todo memorial publicado — `configuracoes_privacidade` ainda não existe)
 - [ ] Website institucional finalizado
 
 ## Portal do Parceiro B2B — como funciona
@@ -143,7 +162,6 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 9. **Acesso direto da Central**: botão "Acessar Plataforma do Parceiro" na ficha (`/admin/parceiros/[id]`) leva a equipe interna direto pro Portal do Parceiro daquele parceiro (`/parceiro?parceiro_id=X`), sem precisar logar de novo — mostra aviso "Visualizando como: X — modo Central"
 
 ### Ainda falta
-- Upload de fotos/vídeo/timeline no CRUD do parceiro (hoje só campos biográficos básicos)
 - Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4; por ora só `plano_contratado`/`status_pagamento` simples em `parceiros_b2b`
 - `SUPABASE_SERVICE_ROLE_KEY` ainda não foi adicionada nas variáveis de ambiente do **Vercel** (só existe no `.env.local`) — "Convidar contato" só funciona em produção depois disso
 
@@ -158,8 +176,8 @@ Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servi
 - Linha do tempo (`timeline` jsonb)
 - Condolências — lidas de verdade da tabela `condolencias` via `homenagem_id` (não é mais hack reaproveitando `homenagens`)
 
-### Gap conhecido (por isso as seções somem em teste)
-As seções só aparecem se o memorial **tiver o dado preenchido** — e hoje **nenhum formulário de edição tem campo pra vídeo/galeria/timeline** (nem `/admin/memoriais/[id]` nem `/parceiro/memoriais`, só nome/datas/cidade/frase/bio). Só dá pra popular via SQL direto. Precisa adicionar esses campos nos dois formulários de edição.
+### Gap conhecido (resolvido)
+As seções só aparecem se o memorial **tiver o dado preenchido**. Antes nenhum formulário de edição tinha campo pra foto/vídeo/galeria/timeline — agora os dois formulários (`/admin/memoriais/[id]` e `/parceiro/memoriais`) têm todos esses campos, incluindo upload direto pro Storage.
 
 ### Visual
 Identidade navy `#0B1D2A` + dourado `#C9A46A` (mesma do template antigo "Noturno"), tipografia serif. Estilização ainda básica (inline styles simples) — refino visual "luxo moderno" é a próxima etapa, mantendo tudo em CSS puro (sem animação contínua, sem fetch de fonte externa).
@@ -169,7 +187,7 @@ Identidade navy `#0B1D2A` + dourado `#C9A46A` (mesma do template antigo "Noturno
 - Acender/apagar vela, troca de tema, compartilhar (ilhas client, uma por vez, sem RAF)
 - Localização (cemitério/jazigo) — sem dado real ainda, schema de jazigo/gaveta não existe (Fase 5)
 - Portal da Família — família edita o próprio memorial. Mesmo padrão do parceiro (tabela `responsaveis_familiares` + função `is_own_familiar(homenagem_id)`), só que escopado num memorial em vez de um parceiro inteiro. Não conflita com RLS existente (políticas somam). Ainda não iniciado.
-- Timeline: hoje é um campo de texto (`ano | título | descrição` por linha) — não intuitivo. Trocar por campos separados de verdade (bloco por evento, botão "+ adicionar").
+- QR Code — ver decisão registrada em "Fase Atual".
 
 ### Decisão — Música de fundo (direitos autorais)
 **Família NÃO pode fazer upload de música livre.** Risco jurídico real: tocar música protegida publicamente é "comunicação ao público" pela Lei 9.610/98 (Lei de Direitos Autorais) — pode gerar notificação de remoção, cobrança do ECAD (arrecadação de execução pública no Brasil) ou processo de gravadora/artista.
@@ -214,8 +232,10 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
   - **Memoriais**: CRUD completo em `/admin/memoriais` (criar/editar) + ficha `/admin/memoriais/[id]` (dados, edição, botão "Acessar página do memorial" linkando pra `/homenagem/[slug]`, mostra qual parceiro cadastrou ou se foi direto)
   - **Mapa**: `/admin/mapa` — organograma dos 6 ambientes + fluxo de dados dos memoriais, pra sócios acompanharem a construção
   - Usuários: página existe, ainda sem gestão real
-- **Portal do Parceiro B2B** em app/parceiro/ — login, layout protegido, CRUD de memoriais restrito ao próprio parceiro (ver seção própria acima)
-- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios
+- **Portal do Parceiro B2B** em app/parceiro/ — login, layout protegido, CRUD de memoriais restrito ao próprio parceiro (ver seção própria acima), dashboard com edição da própria página pública (logo/descrição)
+- **Busca pública** `/busca` e **sub-landing do parceiro** `/parceiros/[slug]` — ver `lib/publicTheme.ts` (tema navy/dourado compartilhado com a página do memorial)
+- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios, mapa_sugestoes
+- `parceiros_b2b.slug`/`logo_url`/`descricao_publica` — dados da sub-landing pública; view `parceiros_publicos` expõe só os campos seguros pro anon (nunca CNPJ/telefone/email)
 - `homenagens.parceiro_id` — vincula memorial ao parceiro que cadastrou (null = venda direta Legado Digital)
 - Funções helper: `is_legado_staff()` (RLS de parceiros_b2b/cemiterios/homenagens pra equipe interna), `is_own_parceiro(uuid)` (RLS de homenagens/parceiros_b2b pro próprio parceiro)
 - 2 funerárias fictícias cadastradas pra testes: Funerária Memória Eterna (SP), Funerária Paz Perpétua (RJ)
@@ -256,21 +276,12 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 - Sempre usar Supabase MCP para operações no banco
 - Sempre usar Vercel MCP para deploy
 
-## Skills gstack
-**Localização**: `D:\gstack` (HD externo)
+## Skills instaladas
+Log de uso fica em `docs/USO_SKILLS_MCPS.md` (ver regra no topo do arquivo).
 
-Gstack de Garry Tan — 23 slash commands para estruturar Claude Code como uma equipe (CEO, Designer, Eng Manager, Release Manager, QA). Carregue com:
-```bash
-/plugin install D:\gstack
-```
-
-Skills principais:
-- `/office-hours` — descoberta de produto
-- `/plan-ceo-review` — escopo estratégico
-- `/plan-eng-review` — arquitetura
-- `/review` — revisão de código
-- `/qa` — testes com Playwright
-- `/ship` — release
+- **gstack** (Garry Tan) — `D:\gstack`, 23 slash commands pra estruturar fluxo como equipe (CEO, Designer, Eng Manager, QA, Release). `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/review`, `/qa`, `/ship`. Overhead desproporcional pra tarefa pequena/interna — avaliar antes de invocar, não é obrigatório.
+- **frontend-design** (Anthropic) — direção de design pra UI pública nova/distintiva (usado nas páginas `/busca` e `/parceiros/[slug]`)
+- **ui-ux-pro-max, ui-styling, design-system, design, brand, banner-design, slides** (nextlevelbuilder) — banco de padrões de UI/UX, paletas, tipografia, componentes; `ui-ux-pro-max` tem script Python (`scripts/search.py --domain <x>`) searchável
 
 ## MCPs Disponíveis
 - supabase: operações no banco
@@ -317,5 +328,5 @@ npm run lint     # verifica erros
 
 ---
 
-**Last Updated**: 2026-07-07
+**Last Updated**: 2026-07-09
 **Optimized with**: [Claude Token Optimizer](https://github.com/nadimtuhin/claude-token-optimizer)

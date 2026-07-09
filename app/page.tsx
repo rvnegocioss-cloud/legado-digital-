@@ -77,8 +77,9 @@ export default function Home() {
               size="lg"
               variant="outline"
               className="border-white/20 text-white hover:bg-white/5 text-base px-8 h-14"
+              asChild
             >
-              Ver Demonstração
+              <Link href="/busca">Buscar um Memorial</Link>
             </Button>
           </motion.div>
 

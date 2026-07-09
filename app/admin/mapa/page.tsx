@@ -1,3 +1,8 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase, getCurrentUser } from '@/lib/auth'
+
 const css = `
 .mapa-paginas {
   --bg: #0B1D2A;
@@ -201,6 +206,43 @@ const css = `
 }
 .mapa-paginas .module-card .desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
 
+.mapa-paginas .sugestao-form { display: flex; flex-direction: column; gap: 0.6rem; max-width: 640px; }
+.mapa-paginas .sugestao-form textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+.mapa-paginas .sugestao-form label { font-size: 0.78rem; color: var(--text-muted); }
+.mapa-paginas .sugestao-form button {
+  align-self: flex-start;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.mapa-paginas .sugestao-form button:disabled { opacity: 0.6; cursor: default; }
+.mapa-paginas .sugestao-lista { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.6rem; }
+.mapa-paginas .sugestao-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+}
+.mapa-paginas .sugestao-item .autor { font-size: 0.72rem; color: var(--gold); font-weight: 600; }
+.mapa-paginas .sugestao-item .data { font-size: 0.7rem; color: var(--text-faint); margin-left: 0.5rem; }
+.mapa-paginas .sugestao-item p { margin: 0.35rem 0 0; font-size: 0.88rem; color: var(--text); white-space: pre-wrap; }
+
 .mapa-paginas footer {
   margin-top: 3rem;
   padding-top: 1.5rem;
@@ -232,7 +274,59 @@ function Arrow() {
   )
 }
 
+interface Sugestao {
+  id: string
+  autor_email: string
+  mensagem: string
+  created_at: string
+}
+
 export default function MapaPaginas() {
+  const [sugestoes, setSugestoes] = useState<Sugestao[]>([])
+  const [mensagem, setMensagem] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState('')
+
+  useEffect(() => {
+    carregarSugestoes()
+  }, [])
+
+  async function carregarSugestoes() {
+    const { data } = await supabase
+      .from('mapa_sugestoes')
+      .select('id, autor_email, mensagem, created_at')
+      .order('created_at', { ascending: false })
+    setSugestoes(data || [])
+  }
+
+  async function enviarSugestao(e: React.FormEvent) {
+    e.preventDefault()
+    if (!mensagem.trim()) return
+    setEnviando(true)
+    setErro('')
+
+    const user = await getCurrentUser()
+    if (!user?.email) {
+      setErro('Sessão expirada — faça login de novo.')
+      setEnviando(false)
+      return
+    }
+
+    const { error } = await supabase
+      .from('mapa_sugestoes')
+      .insert({ autor_email: user.email, mensagem: mensagem.trim() })
+
+    if (error) {
+      setErro(error.message)
+      setEnviando(false)
+      return
+    }
+
+    setMensagem('')
+    setEnviando(false)
+    carregarSugestoes()
+  }
+
   return (
     <div className="mapa-paginas">
       <style>{css}</style>
@@ -309,8 +403,18 @@ export default function MapaPaginas() {
                   <div className="node">
                     <span className="who">Público em geral</span>
                     <span className="name">Busca Pública</span>
-                    <span className="desc">Encontrar memoriais com filtros, respeitando privacidade</span>
-                    <span className="pill plan">Planejado</span>
+                    <span className="path">/busca</span>
+                    <span className="desc">Buscar memorial por nome — ainda sem filtro de privacidade (todo publicado aparece)</span>
+                    <span className="pill wip">Em construção</span>
+                  </div>
+                </li>
+                <li>
+                  <div className="node">
+                    <span className="who">Público em geral</span>
+                    <span className="name">Sub-landing do Parceiro</span>
+                    <span className="path">/parceiros/[slug]</span>
+                    <span className="desc">Página pública do parceiro (logo, descrição, memoriais + busca interna)</span>
+                    <span className="pill done">Pronto</span>
                   </div>
                 </li>
               </ul>
@@ -454,10 +558,53 @@ export default function MapaPaginas() {
         </div>
       </section>
 
+      <section className="section">
+        <div className="section-head">
+          <div>
+            <h2>Sugestões dos sócios</h2>
+            <p>Espaço pra Rafael, Pedro e Ricardo deixarem opinião sobre as páginas — fica registrado aqui.</p>
+          </div>
+        </div>
+
+        <form className="sugestao-form" onSubmit={enviarSugestao}>
+          <label htmlFor="sugestao-mensagem">Sua sugestão ou opinião</label>
+          <textarea
+            id="sugestao-mensagem"
+            value={mensagem}
+            onChange={(e) => setMensagem(e.target.value)}
+            placeholder="Ex: acho que a busca pública devia mostrar a cidade em destaque..."
+          />
+          {erro && <span style={{ color: 'var(--bug-fg)', fontSize: '0.82rem' }}>{erro}</span>}
+          <button type="submit" disabled={enviando}>
+            {enviando ? 'Enviando...' : 'Registrar sugestão'}
+          </button>
+        </form>
+
+        {sugestoes.length > 0 && (
+          <div className="sugestao-lista">
+            {sugestoes.map((s) => (
+              <div key={s.id} className="sugestao-item">
+                <span className="autor">{s.autor_email}</span>
+                <span className="data">
+                  {new Date(s.created_at).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+                <p>{s.mensagem}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       <footer>
-        Atualizado em 2026-07-07 (upload de vídeo/fotos direto no sistema, decisão de música
-        royalty-free por direitos autorais) — os rótulos refletem o que foi verificado no código e
-        no banco, não apenas o roadmap do CLAUDE.md.
+        Atualizado em 2026-07-09 (busca pública, sub-landing do parceiro, campo de sugestões dos
+        sócios, upload de foto do homenageado nos formulários) — os rótulos refletem o que foi
+        verificado no código e no banco, não apenas o roadmap do CLAUDE.md.
       </footer>
     </div>
   )

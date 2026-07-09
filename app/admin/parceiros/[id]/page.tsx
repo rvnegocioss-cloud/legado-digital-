@@ -18,7 +18,18 @@ interface Parceiro {
   ativo: boolean
   plano_contratado: string | null
   status_pagamento: string
+  slug: string | null
+  logo_url: string | null
+  descricao_publica: string | null
   created_at: string
+}
+
+async function subirLogo(parceiroId: string, file: File) {
+  const caminho = `parceiro-logos/${parceiroId}/${Date.now()}-${file.name}`
+  const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
+  if (error) throw error
+  const { data } = supabase.storage.from('memoriais').getPublicUrl(caminho)
+  return data.publicUrl
 }
 
 interface Memorial {
@@ -57,9 +68,51 @@ export default function DetalheParceiro() {
   const [conviteErro, setConviteErro] = useState('')
   const [conviteSucesso, setConviteSucesso] = useState<{ email: string; tempPassword: string } | null>(null)
 
+  const [logoUrl, setLogoUrl] = useState('')
+  const [descricaoPublica, setDescricaoPublica] = useState('')
+  const [enviandoLogo, setEnviandoLogo] = useState(false)
+  const [salvandoPagina, setSalvandoPagina] = useState(false)
+  const [paginaErro, setPaginaErro] = useState('')
+  const [paginaSalva, setPaginaSalva] = useState(false)
+
   useEffect(() => {
     if (params.id) load(params.id)
   }, [params.id])
+
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !parceiro) return
+    setEnviandoLogo(true)
+    setPaginaErro('')
+    try {
+      const url = await subirLogo(parceiro.id, file)
+      setLogoUrl(url)
+    } catch (err: any) {
+      setPaginaErro(err.message || 'Erro ao enviar logo')
+    }
+    setEnviandoLogo(false)
+  }
+
+  async function salvarPaginaPublica(e: React.FormEvent) {
+    e.preventDefault()
+    setSalvandoPagina(true)
+    setPaginaErro('')
+    setPaginaSalva(false)
+
+    const { error } = await supabase
+      .from('parceiros_b2b')
+      .update({ logo_url: logoUrl || null, descricao_publica: descricaoPublica || null })
+      .eq('id', params.id)
+
+    if (error) {
+      setPaginaErro(error.message)
+      setSalvandoPagina(false)
+      return
+    }
+
+    setSalvandoPagina(false)
+    setPaginaSalva(true)
+  }
 
   async function convidarContato(e: React.FormEvent) {
     e.preventDefault()
@@ -100,6 +153,10 @@ export default function DetalheParceiro() {
     ])
     setParceiro(p)
     setMemoriais(m || [])
+    if (p) {
+      setLogoUrl(p.logo_url || '')
+      setDescricaoPublica(p.descricao_publica || '')
+    }
     setLoading(false)
   }
 
@@ -187,6 +244,61 @@ export default function DetalheParceiro() {
             </div>
           </dl>
         </div>
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium text-zinc-400">Página pública do parceiro</h2>
+          {parceiro.slug && (
+            <a
+              href={`/parceiros/${parceiro.slug}`}
+              className="text-blue-400 hover:underline text-xs"
+            >
+              Ver página pública
+            </a>
+          )}
+        </div>
+        {!parceiro.slug && (
+          <p className="text-yellow-500 text-sm mb-4">
+            Este parceiro ainda não tem slug — rode a migração de backfill antes de publicar.
+          </p>
+        )}
+        <form onSubmit={salvarPaginaPublica} className="space-y-3 max-w-md">
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Logo</label>
+            {logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-zinc-800 rounded p-2" />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+              disabled={enviandoLogo}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+            />
+            {enviandoLogo && <p className="text-xs text-zinc-500 mt-1">Enviando logo...</p>}
+          </div>
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Descrição institucional (aparece na página pública)</label>
+            <textarea
+              placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
+              rows={3}
+              value={descricaoPublica}
+              onChange={(e) => setDescricaoPublica(e.target.value)}
+              className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+            />
+          </div>
+          {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
+          {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
+          <button
+            type="submit"
+            disabled={salvandoPagina}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+          >
+            {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
+          </button>
+        </form>
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">

@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 
 interface Memorial {
   id: string
@@ -23,6 +24,7 @@ interface Memorial {
   biografia: string | null
   frase_preferida: string | null
   slug: string | null
+  foto_url: string | null
   video_url: string | null
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
@@ -40,27 +42,12 @@ function gerarSlug(nome: string) {
 
 const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
 
-async function subirArquivo(memorialId: string, pasta: 'video' | 'galeria', file: File) {
+async function subirArquivo(memorialId: string, pasta: 'foto' | 'video' | 'galeria', file: File) {
   const caminho = `${memorialId}/${pasta}/${Date.now()}-${file.name}`
   const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
   if (error) throw error
   const { data } = supabase.storage.from('memoriais').getPublicUrl(caminho)
   return data.publicUrl
-}
-
-function timelineParaTexto(timeline: Memorial['timeline']) {
-  return (timeline || []).map((ev) => `${ev.year || ''} | ${ev.title || ''} | ${ev.description || ''}`).join('\n')
-}
-
-function textoParaTimeline(texto: string) {
-  return texto
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((linha) => {
-      const [year, title, description] = linha.split('|').map((p) => p?.trim() || '')
-      return { year, title, description }
-    })
 }
 
 const FORM_INICIAL = {
@@ -89,10 +76,12 @@ function ParceiroMemoriaisInner() {
   const [dialogAberto, setDialogAberto] = useState(false)
   const [editando, setEditando] = useState<Memorial | null>(null)
   const [form, setForm] = useState(FORM_INICIAL)
+  const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [galeria, setGaleria] = useState<string[]>([])
-  const [timelineTexto, setTimelineTexto] = useState('')
+  const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
   const [salvando, setSalvando] = useState(false)
+  const [enviandoFoto, setEnviandoFoto] = useState(false)
   const [enviandoVideo, setEnviandoVideo] = useState(false)
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [erro, setErro] = useState('')
@@ -115,7 +104,7 @@ function ParceiroMemoriaisInner() {
     let query = supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, video_url, galeria_fotos, timeline, created_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, created_at'
       )
       .order('created_at', { ascending: false })
 
@@ -130,9 +119,10 @@ function ParceiroMemoriaisInner() {
 
   async function abrirNovo() {
     setForm(FORM_INICIAL)
+    setFotoUrl('')
     setVideoUrl('')
     setGaleria([])
-    setTimelineTexto('')
+    setTimelineEventos([])
     setErro('')
 
     // Cria o rascunho já no banco (id previsível) pra permitir upload de mídia
@@ -172,14 +162,35 @@ function ParceiroMemoriaisInner() {
       frase_preferida: m.frase_preferida || '',
       biografia: m.biografia || '',
     })
+    setFotoUrl(m.foto_url || '')
     setVideoUrl(m.video_url || '')
     setGaleria(m.galeria_fotos || [])
-    setTimelineTexto(timelineParaTexto(m.timeline))
+    setTimelineEventos(
+      (m.timeline || []).map((ev) => ({
+        year: ev.year || '',
+        title: ev.title || '',
+        description: ev.description || '',
+      }))
+    )
     setErro('')
     setDialogAberto(true)
   }
 
   const idParaUpload = editando?.id || rascunhoId
+
+  async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setEnviandoFoto(true)
+    setErro('')
+    try {
+      const url = await subirArquivo(idParaUpload, 'foto', file)
+      setFotoUrl(url)
+    } catch (err: any) {
+      setErro(err.message || 'Erro ao enviar foto')
+    }
+    setEnviandoFoto(false)
+  }
 
   async function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -247,9 +258,10 @@ function ParceiroMemoriaisInner() {
       ...form,
       slug,
       memorial_slug: slug,
+      foto_url: fotoUrl || null,
       video_url: videoUrl || null,
       galeria_fotos: galeria,
-      timeline: textoParaTimeline(timelineTexto),
+      timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
     }
 
     const { error } = await supabase.from('homenagens').update(payload).eq('id', idParaUpload)
@@ -341,6 +353,22 @@ function ParceiroMemoriaisInner() {
               </div>
 
               <div>
+                <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
+                {fotoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={fotoUrl} alt="" className="w-20 h-20 rounded-full object-cover mb-2" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFotoChange}
+                  disabled={enviandoFoto}
+                  className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+                />
+                {enviandoFoto && <p className="text-xs text-zinc-500 mt-1">Enviando foto...</p>}
+              </div>
+
+              <div>
                 <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
                 {videoUrl && (
                   <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-40 bg-black" />
@@ -387,17 +415,7 @@ function ParceiroMemoriaisInner() {
                 {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
               </div>
 
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">
-                  Linha do tempo — uma por linha: ano | título | descrição
-                </label>
-                <textarea
-                  rows={2}
-                  value={timelineTexto}
-                  onChange={(e) => setTimelineTexto(e.target.value)}
-                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
-                />
-              </div>
+              <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
 
               {erro && <p className="text-red-400 text-sm">{erro}</p>}
 
