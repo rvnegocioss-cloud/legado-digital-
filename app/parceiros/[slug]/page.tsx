@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { tema, periodoTexto, CORES } from "@/lib/publicTheme";
+import { tema, CORES } from "@/lib/publicTheme";
+import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 
 export const dynamic = "force-dynamic";
 
@@ -15,25 +15,12 @@ interface Parceiro {
   estado: string | null;
 }
 
-interface Memorial {
-  nome_completo: string;
-  data_nascimento: string | null;
-  data_falecimento: string | null;
-  cidade: string | null;
-  foto_url: string | null;
-  slug: string | null;
-}
-
 export default async function ParceiroPublicoPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ q?: string }>;
 }) {
   const { slug } = await params;
-  const { q } = await searchParams;
-  const termo = (q || "").trim();
 
   const { data: parceiro } = await supabase
     .from("parceiros_publicos")
@@ -53,21 +40,6 @@ export default async function ParceiroPublicoPage({
   }
 
   const p = parceiro as Parceiro;
-
-  let query = supabase
-    .from("homenagens")
-    .select("nome_completo, data_nascimento, data_falecimento, cidade, foto_url, slug")
-    .eq("parceiro_id", p.id)
-    .not("slug", "is", null)
-    .order("nome_completo")
-    .limit(60);
-
-  if (termo) {
-    query = query.ilike("nome_completo", `%${termo}%`);
-  }
-
-  const { data } = await query;
-  const memoriais = (data || []) as Memorial[];
 
   return (
     <div style={tema.page}>
@@ -91,63 +63,8 @@ export default async function ParceiroPublicoPage({
       </header>
 
       <main style={tema.main}>
-        <div style={tema.label}>Memoriais sob nossos cuidados</div>
-
-        <form action={`/parceiros/${p.slug}`} style={tema.buscaForm}>
-          <label
-            htmlFor="q"
-            style={{ position: "absolute", width: 1, height: 1, overflow: "hidden" }}
-          >
-            Buscar memorial por nome
-          </label>
-          <input
-            id="q"
-            type="text"
-            name="q"
-            defaultValue={termo}
-            placeholder="Buscar por nome"
-            style={tema.buscaInput}
-          />
-          <button type="submit" style={tema.buscaBotao}>
-            Buscar
-          </button>
-        </form>
-
-        {memoriais.length === 0 ? (
-          <p style={tema.vazio}>
-            {termo
-              ? `Nenhum memorial encontrado com o nome "${termo}".`
-              : "Nenhum memorial publicado ainda."}
-          </p>
-        ) : (
-          <div style={tema.placaGrid}>
-            {memoriais.map((m) => (
-              <Link key={m.slug} href={`/homenagem/${m.slug}`} style={tema.placaLink}>
-                <div style={tema.placa}>
-                  <div style={tema.placaAnel}>
-                    <div style={tema.placaAnelInner}>
-                      {m.foto_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={m.foto_url} alt={m.nome_completo} style={tema.placaFoto} />
-                      ) : (
-                        <span style={{ color: "#7a8a96", fontSize: 10 }}>Sem foto</span>
-                      )}
-                    </div>
-                  </div>
-                  <div style={tema.placaTextos}>
-                    <div style={tema.placaNome}>{m.nome_completo}</div>
-                    <div style={tema.placaHairline} />
-                    <div style={tema.placaMeta}>
-                      {[periodoTexto(m.data_nascimento, m.data_falecimento), m.cidade]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        <div style={tema.label}>Buscar memorial sob nossos cuidados</div>
+        <BuscaMemorial parceiroId={p.id} />
       </main>
 
       <footer style={tema.footer}>

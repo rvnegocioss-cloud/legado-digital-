@@ -63,6 +63,10 @@ export default function DetalheMemorial() {
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [erro, setErro] = useState('')
   const [salvo, setSalvo] = useState(false)
+  const [senha, setSenha] = useState('')
+  const [temSenha, setTemSenha] = useState(false)
+  const [salvandoSenha, setSalvandoSenha] = useState(false)
+  const [senhaMsg, setSenhaMsg] = useState('')
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -101,8 +105,39 @@ export default function DetalheMemorial() {
           .single()
         setParceiro(p)
       }
+
+      const { data: seguranca } = await supabase
+        .from('homenagens_seguranca')
+        .select('homenagem_id')
+        .eq('homenagem_id', m.id)
+        .maybeSingle()
+      setTemSenha(!!seguranca)
     }
     setLoading(false)
+  }
+
+  async function salvarSenha(e: React.FormEvent) {
+    e.preventDefault()
+    if (!memorial) return
+    setSalvandoSenha(true)
+    setSenhaMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/memorial-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: memorial.id, senha }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setSenhaMsg(json.error || 'Erro ao salvar senha')
+    } else {
+      setTemSenha(json.temSenha)
+      setSenha('')
+      setSenhaMsg(json.temSenha ? 'Senha definida — memorial agora exige senha na busca.' : 'Senha removida — memorial voltou a ser público.')
+    }
+    setSalvandoSenha(false)
   }
 
   async function salvar(e: React.FormEvent) {
@@ -352,6 +387,33 @@ export default function DetalheMemorial() {
             {salvando ? 'Salvando...' : 'Salvar alterações'}
           </Button>
         </form>
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
+        <h2 className="text-sm font-medium text-zinc-400 mb-1">Privacidade — senha de acesso</h2>
+        <p className="text-zinc-500 text-xs mb-4">
+          {temSenha
+            ? 'Este memorial exige senha pra aparecer na busca pública. Deixe o campo em branco e salve pra tornar público de novo.'
+            : 'Este memorial está público — qualquer um encontra pelo nome na busca. Defina uma senha pra exigir acesso restrito.'}
+        </p>
+        <form onSubmit={salvarSenha} className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-xs text-zinc-500 mb-1">
+              {temSenha ? 'Nova senha (ou deixe em branco pra remover)' : 'Senha de acesso'}
+            </label>
+            <Input
+              type="text"
+              placeholder="Deixe em branco pra público"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-white"
+            />
+          </div>
+          <Button type="submit" disabled={salvandoSenha} className="self-end">
+            {salvandoSenha ? 'Salvando...' : 'Salvar'}
+          </Button>
+        </form>
+        {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
       </div>
     </div>
   )

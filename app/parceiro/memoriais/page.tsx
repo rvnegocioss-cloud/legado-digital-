@@ -86,6 +86,10 @@ function ParceiroMemoriaisInner() {
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [erro, setErro] = useState('')
   const [rascunhoId, setRascunhoId] = useState('')
+  const [senha, setSenha] = useState('')
+  const [temSenha, setTemSenha] = useState(false)
+  const [salvandoSenha, setSalvandoSenha] = useState(false)
+  const [senhaMsg, setSenhaMsg] = useState('')
 
   useEffect(() => {
     load()
@@ -120,6 +124,9 @@ function ParceiroMemoriaisInner() {
   async function abrirNovo() {
     setForm(FORM_INICIAL)
     setFotoUrl('')
+    setSenha('')
+    setTemSenha(false)
+    setSenhaMsg('')
     setVideoUrl('')
     setGaleria([])
     setTimelineEventos([])
@@ -152,8 +159,10 @@ function ParceiroMemoriaisInner() {
     setDialogAberto(true)
   }
 
-  function abrirEdicao(m: Memorial) {
+  async function abrirEdicao(m: Memorial) {
     setEditando(m)
+    setSenha('')
+    setSenhaMsg('')
     setForm({
       nome_completo: m.nome_completo,
       data_nascimento: m.data_nascimento || '',
@@ -174,6 +183,37 @@ function ParceiroMemoriaisInner() {
     )
     setErro('')
     setDialogAberto(true)
+
+    const { data: seguranca } = await supabase
+      .from('homenagens_seguranca')
+      .select('homenagem_id')
+      .eq('homenagem_id', m.id)
+      .maybeSingle()
+    setTemSenha(!!seguranca)
+  }
+
+  async function salvarSenha(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editando) return
+    setSalvandoSenha(true)
+    setSenhaMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/memorial-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: editando.id, senha }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setSenhaMsg(json.error || 'Erro ao salvar senha')
+    } else {
+      setTemSenha(json.temSenha)
+      setSenha('')
+      setSenhaMsg(json.temSenha ? 'Senha definida.' : 'Senha removida — memorial público de novo.')
+    }
+    setSalvandoSenha(false)
   }
 
   const idParaUpload = editando?.id || rascunhoId
@@ -425,6 +465,27 @@ function ParceiroMemoriaisInner() {
                 </Button>
               </DialogFooter>
             </form>
+
+            {editando && (
+              <form onSubmit={salvarSenha} className="mt-2 pt-4 border-t border-zinc-800">
+                <label className="block text-xs text-zinc-500 mb-1">
+                  {temSenha ? 'Nova senha (ou deixe em branco pra tornar público)' : 'Senha de acesso (deixe em branco pra público)'}
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Deixe em branco pra público"
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                  />
+                  <Button type="submit" disabled={salvandoSenha}>
+                    {salvandoSenha ? 'Salvando...' : 'Salvar senha'}
+                  </Button>
+                </div>
+                {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
+              </form>
+            )}
           </DialogContent>
         </Dialog>
       </div>

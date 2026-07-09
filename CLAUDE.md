@@ -136,15 +136,17 @@ Prioridades imediatas:
 - [x] Corrigir rota pública `/homenagem/[slug]` (testado com memorial real e slug inexistente)
 - [x] CRUD completo de Memoriais na Central (hoje só leitura)
 - [x] Upload de foto principal do homenageado nos formulários (Central e Portal do Parceiro) — antes só vídeo/galeria/timeline tinham upload
-- [x] Busca pública `/busca` — busca memorial por nome (sem filtro de privacidade ainda, ver Fase 2 pendências)
-- [x] Sub-landing pública do parceiro `/parceiros/[slug]` — logo, descrição, memoriais do parceiro + busca interna
+- [x] Busca pública `/busca` — busca memorial por nome, sem grade aberta (só resultado da busca)
+- [x] Sub-landing pública do parceiro `/parceiros/[slug]` — logo, descrição, busca interna escopada ao parceiro (grade aberta com todos os memoriais foi removida — vazava privacidade)
+- [x] Senha de acesso por memorial (tabela `homenagens_seguranca`, hash scrypt, nunca exposta ao anon — `homenagens_busca_publica` só expõe `tem_senha` boolean). Campo de senha nos formulários (Central e Parceiro) via `/api/memorial-senha`; verificação pública via `/api/memorial-acesso`. Resultado de busca com senha exige senha antes de liberar o link do memorial
+- [x] Atalho "Página Pública" no menu da Central, do lado do "Mapa"
 - [x] Botão "Buscar um Memorial" na landing, linkando pra `/busca`
 - [x] Edição de logo/descrição da página pública do parceiro — na Central (`/admin/parceiros/[id]`) E no Portal do Parceiro (`/parceiro`), os dois lados
 - [x] Campo de sugestões dos sócios em `/admin/mapa` (tabela `mapa_sugestoes`, RLS staff-only)
 - [x] Timeline reorganizada em blocos de evento (Ano/Título/Descrição + mover ↑↓ + remover), trocando o textarea confuso `ano | título | descrição`
 - [ ] QR Code — ainda não implementado. Decisão: gerar PNG no servidor com lib `qrcode` (sem API externa em runtime, aprendizado do bug de fonte do Google), apontando pra `/homenagem/[slug]`, salvo no Storage (`memoriais/qrcodes/{slug}.png`), botão "Baixar QR Code" na ficha do memorial (Central e Parceiro)
 - [ ] Busca embutida direto na landing (hoje é botão que leva pra `/busca`, não campo de texto na própria home)
-- [ ] Filtro de privacidade na busca pública (`/busca` e sub-landing do parceiro mostram todo memorial publicado — `configuracoes_privacidade` ainda não existe)
+- [ ] Modos de privacidade completos (`configuracoes_privacidade` — hoje só existe "público" e "com senha", faltam "privado por e-mail/cadastro" e "oculto" da lista de modos do MVP)
 - [ ] Website institucional finalizado
 
 ## Portal do Parceiro B2B — como funciona
@@ -164,6 +166,13 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 ### Ainda falta
 - Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4; por ora só `plano_contratado`/`status_pagamento` simples em `parceiros_b2b`
 - `SUPABASE_SERVICE_ROLE_KEY` ainda não foi adicionada nas variáveis de ambiente do **Vercel** (só existe no `.env.local`) — "Convidar contato" só funciona em produção depois disso
+
+## Busca pública e privacidade por senha — como funciona
+`/busca` e `/parceiros/[slug]` usam o mesmo componente client (`components/public/BuscaMemorial.tsx`): campo de busca por nome, sem grade aberta listando memoriais (isso vazava privacidade — corrigido). Resultado sem senha mostra o link direto; resultado com senha pede senha antes de liberar.
+
+**Arquitetura de segurança:** a senha nunca é guardada na tabela `homenagens` (que tem RLS de leitura pública `true` — qualquer coluna ali é visível ao anon). Fica em `homenagens_seguranca` (hash scrypt, salt = id do memorial), sem nenhuma policy de leitura pública — só staff ou o próprio parceiro dono do memorial (via RLS), nunca o anon. A view `homenagens_busca_publica` expõe só um booleano `tem_senha`, nunca o hash. Verificação da senha e escrita/troca de senha passam por API routes server-side (`/api/memorial-acesso` público, `/api/memorial-senha` autenticado) usando a service role key — o hash nunca trafega pro client.
+
+Definir/trocar/remover senha: campo "Senha de acesso" no formulário de edição (Central `/admin/memoriais/[id]` e Portal do Parceiro `/parceiro/memoriais`) — deixar em branco = memorial público.
 
 ## Página do Memorial (`/homenagem/[slug]`) — como funciona
 Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servidor** — zero JS client na rota, sem risco de travar o navegador (ver Bugs conhecidos).
