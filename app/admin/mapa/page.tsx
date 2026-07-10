@@ -607,13 +607,26 @@ export default function MapaPaginas() {
               a vida do homenageado direto no memorial. Avaliar pro próximo deploy.
             </p>
             <p>
-              <strong>Drones no cemitério (ideia do Pedro):</strong> uso de drones em operação
-              cemiterial — ainda sem escopo definido de pra quê (sobrevoo/mapeamento/vigilância?).
+              <strong>Drones no cemitério (ideia do Pedro):</strong> conectado com o mapeamento
+              abaixo — voo de drone gera ortomosaico (imagem aérea georreferenciada) do cemitério,
+              base pra marcar cada túmulo com precisão de centímetros.
             </p>
             <p>
-              <strong>Mapeamento de cemitério e túmulos:</strong> como mapear fisicamente um
-              cemitério e a posição de cada túmulo — ligado à Fase 5 (Geolocalização avançada,
-              mapeamento cemiterial) já prevista no roadmap, ainda sem solução técnica escolhida.
+              <strong>Mapeamento + navegação tipo Waze até o túmulo (ideia de Rafael):</strong> família
+              busca por nome/código cadastrado no túmulo e o celular guia até lá. Fase 5, schema de
+              jazigo/gaveta ainda não existe. Opções analisadas:
+            </p>
+            <p style={{ marginLeft: '0.8rem' }}>
+              <em>Captura da coordenada:</em> GPS de celular (grátis, erro 3-10m não distingue túmulos
+              a ~1m um do outro) · GPS/GNSS profissional RTK (sub-metro, precisa equipamento+operador)
+              · ortomosaico de drone + marcação manual na imagem (precisão de centímetros, mesmo
+              padrão de clique-no-mapa de <code>/admin/cemiterios</code>).
+            </p>
+            <p style={{ marginLeft: '0.8rem' }}>
+              <em>Guiar o visitante:</em> link pro Google Maps/Waze (zero código nosso, mas rota pela
+              rua conhecida do Google, não pelos carreadores internos) · bússola própria no navegador
+              (seta+distância sobre o mapa, não depende de rota externa) · rota turn-by-turn interna
+              (grafo de carreadores + algoritmo tipo A*, escopo grande).
             </p>
           </div>
         </div>

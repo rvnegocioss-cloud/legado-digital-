@@ -296,8 +296,11 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 
 ## Ideias em avaliação (backlog não decidido, só registrado)
 - **Música gerada com IA (Suno):** opção do familiar gerar uma música sobre a vida do homenageado direto no memorial. Avaliar pro próximo deploy. Registrado 2026-07-10.
-- **Drones no cemitério (ideia do Pedro):** uso de drones em operação cemiterial — ainda sem escopo definido de pra quê (sobrevoo/mapeamento/vigilância?). Registrado 2026-07-10.
-- **Mapeamento de cemitério e túmulos:** como mapear fisicamente um cemitério e a posição de cada túmulo — ligado à Fase 5 (Geolocalização avançada, mapeamento cemiterial) já prevista no roadmap, ainda sem solução técnica escolhida.
+- **Drones no cemitério (ideia do Pedro):** conectado com o mapeamento abaixo — voo de drone pra gerar ortomosaico (imagem aérea georreferenciada) do cemitério, base pra marcar cada túmulo com precisão de centímetros sem depender de GPS de celular.
+- **Mapeamento de cemitério + navegação tipo Waze até o túmulo:** ideia de Rafael (2026-07-10) — família busca por nome/código cadastrado no túmulo e o celular guia até lá. Análise de opções (Fase 5, schema de jazigo/gaveta ainda não existe):
+  - *Captura da coordenada de cada túmulo:* (1) GPS de celular no campo — grátis, mas erro típico de 3-10m não distingue túmulos a ~1m um do outro; (2) GPS/GNSS profissional RTK — precisão sub-metro, mas exige equipamento e operador treinado; (3) ortomosaico de drone + marcação manual de cada túmulo na imagem (reaproveita a ideia de drone do Pedro) — precisão de centímetros, mesmo padrão de clique-no-mapa já usado em `/admin/cemiterios`.
+  - *Guiar o visitante até o túmulo:* (1) link direto pro Google Maps/Waze com a coordenada — zero código nosso, mas rota pela rua conhecida do Google, não pelos carreadores internos; (2) bússola própria no navegador (`navigator.geolocation.watchPosition` + seta/distância sobre o mapa do cemitério) — simples, não depende de rota externa nem de mapear carreadores; (3) rota turn-by-turn dentro do cemitério (grafo de carreadores + algoritmo tipo A*) — escopo grande, tipo mapa indoor (IndoorAtlas/Mappedin).
+  - Nada decidido ainda — só a análise registrada.
 
 ## O que NÃO está no MVP
 - Faturamento e cobrança interna
