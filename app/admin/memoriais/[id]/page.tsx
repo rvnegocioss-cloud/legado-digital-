@@ -24,6 +24,7 @@ interface Memorial {
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   qr_code_url: string | null
+  mensagem_placa: string | null
   created_at: string
 }
 
@@ -79,6 +80,9 @@ export default function DetalheMemorial() {
   const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
+  const [mensagemPlaca, setMensagemPlaca] = useState('')
+  const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
+  const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -101,6 +105,7 @@ export default function DetalheMemorial() {
       setFotoUrl(m.foto_url || '')
       setVideoUrl(m.video_url || '')
       setGaleria(m.galeria_fotos || [])
+      setMensagemPlaca(m.mensagem_placa || '')
       setTimelineEventos(
         (m.timeline || []).map((ev: { year?: string; title?: string; description?: string }) => ({
           year: ev.year || '',
@@ -213,6 +218,21 @@ export default function DetalheMemorial() {
       setConviteFamiliarEmail('')
     }
     setConvidandoFamiliar(false)
+  }
+
+  async function salvarMensagemPlaca(e: React.FormEvent) {
+    e.preventDefault()
+    if (!memorial) return
+    setSalvandoMensagemPlaca(true)
+    setMensagemPlacaMsg('')
+
+    const { error } = await supabase
+      .from('homenagens')
+      .update({ mensagem_placa: mensagemPlaca || null })
+      .eq('id', memorial.id)
+
+    setMensagemPlacaMsg(error ? error.message : 'Salvo — vai junto no próximo QR Code enviado pro fornecedor.')
+    setSalvandoMensagemPlaca(false)
   }
 
   async function salvar(e: React.FormEvent) {
@@ -494,6 +514,25 @@ export default function DetalheMemorial() {
             </button>
           </div>
         </div>
+
+        <form onSubmit={salvarMensagemPlaca} className="mt-5 pt-4 border-t border-zinc-800">
+          <label className="block text-xs text-zinc-500 mb-1">Mensagem da placa</label>
+          <p className="text-zinc-500 text-xs mb-2">
+            Texto que a família quer gravado na placa junto do QR Code — vai anexado no e-mail
+            pro fornecedor de placas, pra confeccionar tudo junto.
+          </p>
+          <textarea
+            rows={3}
+            placeholder="Ex: Em memória eterna de..."
+            value={mensagemPlaca}
+            onChange={(e) => setMensagemPlaca(e.target.value)}
+            className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
+          />
+          <Button type="submit" disabled={salvandoMensagemPlaca}>
+            {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
+          </Button>
+          {mensagemPlacaMsg && <p className="text-xs text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
+        </form>
       </div>
       </div>
 

@@ -30,6 +30,7 @@ interface Memorial {
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   qr_code_url: string | null
+  mensagem_placa: string | null
   created_at: string
 }
 
@@ -102,6 +103,9 @@ function ParceiroMemoriaisInner() {
   const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
+  const [mensagemPlaca, setMensagemPlaca] = useState('')
+  const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
+  const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
 
   useEffect(() => {
     load()
@@ -120,7 +124,7 @@ function ParceiroMemoriaisInner() {
     let query = supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, created_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, created_at'
       )
       .order('created_at', { ascending: false })
 
@@ -143,6 +147,7 @@ function ParceiroMemoriaisInner() {
     setGaleria([])
     setTimelineEventos([])
     setQrCodeUrl('')
+    setMensagemPlaca('')
     setErro('')
 
     // Cria o rascunho já no banco (id previsível) pra permitir upload de mídia
@@ -195,6 +200,7 @@ function ParceiroMemoriaisInner() {
       }))
     )
     setQrCodeUrl(m.qr_code_url || '')
+    setMensagemPlaca(m.mensagem_placa || '')
     setErro('')
     setSenhaFamilia('')
     setSenhaFamiliaMsg('')
@@ -279,6 +285,21 @@ function ParceiroMemoriaisInner() {
       setConviteFamiliarEmail('')
     }
     setConvidandoFamiliar(false)
+  }
+
+  async function salvarMensagemPlaca(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editando) return
+    setSalvandoMensagemPlaca(true)
+    setMensagemPlacaMsg('')
+
+    const { error } = await supabase
+      .from('homenagens')
+      .update({ mensagem_placa: mensagemPlaca || null })
+      .eq('id', editando.id)
+
+    setMensagemPlacaMsg(error ? error.message : 'Salvo — vai junto no próximo QR Code enviado pro fornecedor.')
+    setSalvandoMensagemPlaca(false)
   }
 
   async function gerarQrCode() {
@@ -642,6 +663,25 @@ function ParceiroMemoriaisInner() {
                     </button>
                   </div>
                 </div>
+
+                <form onSubmit={salvarMensagemPlaca} className="mt-3">
+                  <label className="block text-xs text-zinc-500 mb-1">Mensagem da placa</label>
+                  <p className="text-zinc-500 text-xs mb-2">
+                    Texto que a família quer gravado na placa junto do QR — vai anexado no e-mail
+                    pro fornecedor, pra confeccionar tudo junto.
+                  </p>
+                  <textarea
+                    rows={2}
+                    placeholder="Ex: Em memória eterna de..."
+                    value={mensagemPlaca}
+                    onChange={(e) => setMensagemPlaca(e.target.value)}
+                    className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
+                  />
+                  <Button type="submit" disabled={salvandoMensagemPlaca}>
+                    {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
+                  </Button>
+                  {mensagemPlacaMsg && <p className="text-xs text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
+                </form>
               </div>
             )}
           </DialogContent>

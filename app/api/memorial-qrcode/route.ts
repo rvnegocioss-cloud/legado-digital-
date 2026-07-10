@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
   if (config?.valor) {
     const { data: pessoa } = await supabaseAdmin
       .from('homenagens')
-      .select('nome_completo')
+      .select('nome_completo, mensagem_placa')
       .eq('id', memorialId)
       .single()
 
@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
       slug: homenagem.slug,
       url,
       qrCodePng: png,
+      mensagemPlaca: pessoa?.mensagem_placa,
     })
     emailEnviado = resultado.enviado
   }
