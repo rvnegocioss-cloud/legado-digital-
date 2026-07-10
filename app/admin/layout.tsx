@@ -78,18 +78,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link href="/admin" className="text-lg font-bold text-blue-400">
                 Central Legado
               </Link>
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden md:flex items-center gap-1 overflow-x-auto">
                 {navItems.map(item => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm whitespace-nowrap shrink-0 transition-colors ${
                       pathname === item.href
                         ? 'bg-zinc-800 text-white'
                         : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                     }`}
                   >
-                    <item.Icon size={15} />
+                    <item.Icon size={15} className="shrink-0" />
                     {item.label}
                   </Link>
                 ))}

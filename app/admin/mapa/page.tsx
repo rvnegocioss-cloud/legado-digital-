@@ -156,6 +156,7 @@ const css = `
   align-self: flex-start;
 }
 .mapa-paginas .node .desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+.mapa-paginas .tutorial-link { display: block; margin-top: 0.35rem; font-size: 0.72rem; color: var(--gold); white-space: nowrap; }
 
 .mapa-paginas .flow { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding-bottom: 0.5rem; }
 .mapa-paginas .flow-col { display: flex; flex-direction: column; gap: 0.9rem; min-width: 220px; flex: 1; }
@@ -357,6 +358,9 @@ export default function MapaPaginas() {
           </div>
         </div>
 
+        <p style={{ fontSize: '0.72rem', color: 'var(--text-faint)', marginBottom: '0.4rem' }}>
+          ← arraste pro lado pra ver todos os ambientes →
+        </p>
         <div className="orgchart-scroll">
           <ul className="orgchart">
             <li>
@@ -373,7 +377,7 @@ export default function MapaPaginas() {
                     <span className="path">/admin</span>
                     <span className="desc">Vê tudo: parceiros, cemitérios, memoriais, usuários</span>
                     <span className="pill wip">Módulos em andamento ↓</span>
-                    <a href="/admin/manual#central" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+                    <a href="/admin/manual#central" className="tutorial-link">Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -383,7 +387,7 @@ export default function MapaPaginas() {
                     <span className="path">/parceiro</span>
                     <span className="desc">Dashboard + CRUD — cada parceiro só vê e cadastra os próprios memoriais</span>
                     <span className="pill done">Pronto</span>
-                    <a href="/admin/manual#parceiro" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+                    <a href="/admin/manual#parceiro" className="tutorial-link">Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -393,7 +397,7 @@ export default function MapaPaginas() {
                     <span className="path">/familia/login + /familia/[slug]</span>
                     <span className="desc">1 e-mail por memorial, senha simples gerada automaticamente — sem convite múltiplo</span>
                     <span className="pill done">Pronto</span>
-                    <a href="/admin/manual#familia" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+                    <a href="/admin/manual#familia" className="tutorial-link">Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -403,7 +407,7 @@ export default function MapaPaginas() {
                     <span className="path">/homenagem/[slug]</span>
                     <span className="desc">Acesso via QR Code, URL ou busca — senha (se houver) bloqueia os três</span>
                     <span className="pill done">Pronto</span>
-                    <a href="/admin/manual#memorial" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+                    <a href="/admin/manual#memorial" className="tutorial-link">Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -413,7 +417,7 @@ export default function MapaPaginas() {
                     <span className="path">/busca</span>
                     <span className="desc">Busca por nome, sem sensibilidade a acento</span>
                     <span className="pill done">Pronto</span>
-                    <a href="/admin/manual#busca" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+                    <a href="/admin/manual#busca" className="tutorial-link">Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -423,7 +427,7 @@ export default function MapaPaginas() {
                     <span className="path">/parceiros/[slug]</span>
                     <span className="desc">Página pública do parceiro (logo, descrição, memoriais + busca interna)</span>
                     <span className="pill done">Pronto</span>
-                    <a href="/admin/manual#sublanding" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+                    <a href="/admin/manual#sublanding" className="tutorial-link">Tutorial →</a>
                   </div>
                 </li>
               </ul>
@@ -447,41 +451,41 @@ export default function MapaPaginas() {
             <span className="path">/admin/parceiros</span>
             <span className="desc">CRUD completo + ficha por parceiro (dados, plano/pagamento, memoriais dele)</span>
             <span className="pill done">Pronto</span>
-            <a href="/admin/manual#mod-parceiros" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+            <a href="/admin/manual#mod-parceiros" className="tutorial-link">Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Cemitérios</span>
             <span className="path">/admin/cemiterios</span>
             <span className="desc">Cadastro com mapa (Leaflet) pra marcar a localização</span>
             <span className="pill done">Pronto</span>
-            <a href="/admin/manual#mod-cemiterios" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+            <a href="/admin/manual#mod-cemiterios" className="tutorial-link">Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Memoriais</span>
             <span className="path">/admin/memoriais</span>
             <span className="desc">CRUD completo + ficha por memorial, com link pra página pública</span>
             <span className="pill done">Pronto</span>
-            <a href="/admin/manual#mod-memoriais" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+            <a href="/admin/manual#mod-memoriais" className="tutorial-link">Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Central de E-mails</span>
             <span className="path">/admin/emails</span>
             <span className="desc">Log de senha da família, confirmação de placa, envio ao fornecedor</span>
             <span className="pill done">Pronto</span>
-            <a href="/admin/manual#mod-emails" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+            <a href="/admin/manual#mod-emails" className="tutorial-link">Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Usuários</span>
             <span className="path">/admin/usuarios</span>
             <span className="desc">Tela existe, sem gestão real ainda</span>
             <span className="pill plan">Planejado</span>
-            <a href="/admin/manual#mod-usuarios" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+            <a href="/admin/manual#mod-usuarios" className="tutorial-link">Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Financeiro</span>
             <span className="desc">Contratos, planos, aquisições, fechamento mensal — Fase 4</span>
             <span className="pill plan">Planejado</span>
-            <a href="/admin/manual#mod-financeiro" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+            <a href="/admin/manual#mod-financeiro" className="tutorial-link">Tutorial →</a>
           </div>
         </div>
       </section>
@@ -648,6 +652,9 @@ export default function MapaPaginas() {
               (seta+distância sobre o mapa, não depende de rota externa) · rota turn-by-turn interna
               (grafo de carreadores + algoritmo tipo A*, escopo grande).
             </p>
+            <a href="/admin/mapa/drone" style={{ color: 'var(--gold)', fontSize: '0.85rem', textDecoration: 'underline', display: 'inline-block', marginTop: '0.6rem' }}>
+              Relatório completo pro Pedro — guia técnico de mapeamento por drone →
+            </a>
           </div>
         </div>
       </section>
