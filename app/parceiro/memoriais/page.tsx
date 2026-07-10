@@ -94,6 +94,10 @@ function ParceiroMemoriaisInner() {
   const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
   const [salvandoSenhaFamilia, setSalvandoSenhaFamilia] = useState(false)
   const [senhaFamiliaMsg, setSenhaFamiliaMsg] = useState('')
+  const [conviteFamiliarNome, setConviteFamiliarNome] = useState('')
+  const [conviteFamiliarEmail, setConviteFamiliarEmail] = useState('')
+  const [convidandoFamiliar, setConvidandoFamiliar] = useState(false)
+  const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
 
   useEffect(() => {
     load()
@@ -245,6 +249,30 @@ function ParceiroMemoriaisInner() {
       setSenhaFamiliaMsg(json.temSenha ? 'Senha definida — família já pode editar em /familia/login.' : 'Acesso da família removido.')
     }
     setSalvandoSenhaFamilia(false)
+  }
+
+  async function convidarFamiliar(e: React.FormEvent) {
+    e.preventDefault()
+    if (!editando) return
+    setConvidandoFamiliar(true)
+    setConviteFamiliarMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/convidar-familiar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: editando.id, nome: conviteFamiliarNome, email: conviteFamiliarEmail }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setConviteFamiliarMsg(json.error || 'Erro ao convidar')
+    } else {
+      setConviteFamiliarMsg(`Convite criado — senha temporária: ${json.tempPassword}. Repasse pro familiar (${json.email}).`)
+      setConviteFamiliarNome('')
+      setConviteFamiliarEmail('')
+    }
+    setConvidandoFamiliar(false)
   }
 
   const idParaUpload = editando?.id || rascunhoId
@@ -515,6 +543,35 @@ function ParceiroMemoriaisInner() {
                   </Button>
                 </div>
                 {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
+              </form>
+            )}
+
+            {editando && (
+              <form onSubmit={convidarFamiliar} className="mt-2 pt-4 border-t border-zinc-800 space-y-2">
+                <label className="block text-xs text-zinc-500 mb-1">
+                  Convidar familiar responsável (acesso por e-mail, ele mesmo gera código pros outros)
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Nome"
+                    value={conviteFamiliarNome}
+                    onChange={(e) => setConviteFamiliarNome(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                  />
+                  <Input
+                    type="email"
+                    placeholder="E-mail"
+                    required
+                    value={conviteFamiliarEmail}
+                    onChange={(e) => setConviteFamiliarEmail(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                  />
+                  <Button type="submit" disabled={convidandoFamiliar}>
+                    {convidandoFamiliar ? 'Convidando...' : 'Convidar'}
+                  </Button>
+                </div>
+                {conviteFamiliarMsg && <p className="text-xs text-zinc-400 mt-2">{conviteFamiliarMsg}</p>}
               </form>
             )}
 

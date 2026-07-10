@@ -177,17 +177,26 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 Definir/trocar/remover senha: campo "Senha de acesso" no formulário de edição (Central `/admin/memoriais/[id]` e Portal do Parceiro `/parceiro/memoriais`) — deixar em branco = memorial público.
 
 ## Portal da Família — como funciona
-Família gerencia o próprio memorial, sem conta/e-mail/cadastro — só slug + senha de edição.
+Família gerencia o próprio memorial. Dois jeitos de entrar em `/familia/login` (abas): **e-mail** (responsável principal, conta de verdade) ou **código** (até 3 outros parentes, sem conta).
 
-1. Central ou Parceiro define a **"Senha de edição da família"** na ficha do memorial (campo separado da senha de acesso pública — uma é só visualização, essa é permissão de editar)
-2. Família entra em `/familia/login` com o slug do memorial (parte final da URL) + essa senha
-3. `POST /api/familia-login` verifica a senha (hash scrypt em `homenagens_seguranca.senha_familia_hash`) e emite um **cookie assinado HMAC** (`familia_{id}`, 12h, httpOnly) — sem Supabase Auth, sem tabela de usuário família, é só uma prova de que sabe a senha daquele memorial específico
-4. `/familia/[slug]` — formulário de edição (mesmos campos do admin/parceiro: nome, datas, cidade, frase, bio, foto, vídeo, galeria, timeline), reaproveita o `TimelineEditor`
-5. `GET/POST /api/familia-memorial` e `POST /api/familia-upload` verificam o cookie a cada chamada (nunca confiam em RLS, já que não existe sessão Supabase pra família) e usam a service role key pra ler/gravar
+### Responsável principal (aba "Sou o responsável")
+1. Central ou Parceiro convida o familiar responsável por e-mail na ficha do memorial (botão "Convidar familiar responsável", igual ao "Convidar contato" do parceiro) → cria usuário Supabase Auth com senha temporária `123456`, papel **"Familiar Responsável"**, e uma linha em `responsaveis_familiares` (tipo `responsavel`)
+2. Login por e-mail/senha via `POST /api/familia-login-email` (Supabase Auth de verdade) → emite o mesmo cookie assinado HMAC (`familia_{id}`), mas com uma flag `responsavel: true` dentro do token
+3. RLS: `is_own_familiar(homenagem_id)` permite esse usuário ler/editar o memorial direto via Supabase (mesma lógica do `is_own_parceiro`) — hoje as rotas de família não usam isso ainda, mas a policy já existe pronta
 
-**Integração:** como grava na mesma tabela `homenagens` que Central e Parceiro já leem/editam, tudo que a família muda aparece automaticamente nos dois portais internos — sem trabalho extra, é a mesma regra de "toda feature nova reflete nos lados relevantes".
+### Outros familiares (aba "Tenho um código")
+1. Dentro de `/familia/[slug]`, só o responsável vê a seção "Convidar outros familiares" com botão **"Gerar código de acesso"** — cria um código numérico de 6 dígitos (hash salvo em `homenagens_seguranca.senha_familia_hash`, mesma coluna de antes), mostrado **uma única vez** pra ele repassar
+2. Outros parentes entram com slug + esse código em `/familia/login` (`POST /api/familia-login`, sem conta) → cookie com `responsavel: false`
+3. **Limite de 4 no total** (1 responsável + até 3 por código) — checado em `responsaveis_familiares` antes de convidar/gerar novo código
 
-**Ainda falta:** link de convite direto (hoje a funerária/Central passa o slug e a senha por fora, sem e-mail automático); página de "esqueci a senha" pra família (mesma pendência do parceiro).
+### Estrutura
+- Tabela `responsaveis_familiares` (homenagem_id, usuario_id, nome, email, tipo: `responsavel`/`administrador`)
+- `GET/POST /api/familia-memorial` e `POST /api/familia-upload` continuam verificando o cookie a cada chamada (service role, sem depender de RLS)
+- `GET /api/familia-memorial` agora também devolve `responsavel` (bool) e a lista de `familiares` (só se for o responsável)
+
+**Integração:** grava na mesma tabela `homenagens` — Central e Parceiro já enxergam tudo que a família editar, sem trabalho extra.
+
+**Ainda falta:** "esqueci a senha" pro responsável já existe (`/recuperar-senha`, é conta Supabase Auth normal); pra quem entra por código, se perder o código só pedindo um novo pro responsável gerar.
 
 ## Página do Memorial (`/homenagem/[slug]`) — como funciona
 Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servidor** — zero JS client na rota, sem risco de travar o navegador (ver Bugs conhecidos).
@@ -257,7 +266,7 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
   - Usuários: página existe, ainda sem gestão real
 - **Portal do Parceiro B2B** em app/parceiro/ — login, layout protegido, CRUD de memoriais restrito ao próprio parceiro (ver seção própria acima), dashboard com edição da própria página pública (logo/descrição)
 - **Busca pública** `/busca` e **sub-landing do parceiro** `/parceiros/[slug]` — ver `lib/publicTheme.ts` (tema navy/dourado compartilhado com a página do memorial)
-- **Portal da Família** `/familia/login` + `/familia/[slug]` — acesso por slug + senha (sem conta), cookie assinado, edita o memorial (ver seção própria acima)
+- **Portal da Família** `/familia/login` + `/familia/[slug]` — responsável principal por e-mail (convite, conta Supabase Auth) + até 3 parentes por código gerado pelo próprio responsável (máx. 4), cookie assinado, edita o memorial (ver seção própria acima)
 - Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios, mapa_sugestoes, homenagens_seguranca
 - `parceiros_b2b.slug`/`logo_url`/`descricao_publica` — dados da sub-landing pública; view `parceiros_publicos` expõe só os campos seguros pro anon (nunca CNPJ/telefone/email)
 - `homenagens.parceiro_id` — vincula memorial ao parceiro que cadastrou (null = venda direta Legado Digital)

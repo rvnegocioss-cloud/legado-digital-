@@ -385,9 +385,9 @@ export default function MapaPaginas() {
                   <div className="node">
                     <span className="who">Responsáveis pelo memorial</span>
                     <span className="name">Portal da Família</span>
-                    <span className="path">/familia</span>
-                    <span className="desc">Gerencia conteúdo e privacidade do memorial</span>
-                    <span className="pill plan">Planejado</span>
+                    <span className="path">/familia/login + /familia/[slug]</span>
+                    <span className="desc">Responsável entra por e-mail (convite); até 3 parentes por código gerado por ele — máx. 4</span>
+                    <span className="pill done">Pronto</span>
                   </div>
                 </li>
                 <li>
@@ -531,7 +531,22 @@ export default function MapaPaginas() {
             <strong>Resolvido:</strong> upload de vídeo e fotos direto no sistema (bucket{' '}
             <code>memoriais</code> no Supabase Storage) em <code>/admin/memoriais/[id]</code> e{' '}
             <code>/parceiro/memoriais</code>. Sem YouTube — vídeo toca nativo na página pública.
-            <p>Timeline ainda é campo de texto simples, falta virar UI de verdade (bloco por evento).</p>
+            <p>Timeline já virou blocos de evento de verdade (Ano/Título/Descrição + mover ↑↓), não é mais textarea.</p>
+          </div>
+        </div>
+
+        <div className="callout">
+          <span className="mark">OBS</span>
+          <div className="body">
+            <strong>Portal da Família:</strong> ficou pronto com acesso em 2 camadas — a Central/Parceiro
+            convida o <b>responsável principal por e-mail</b> (conta de verdade, senha temporária, igual
+            ao convite de parceiro), e esse responsável — de dentro de <code>/familia/[slug]</code> —
+            gera um <b>código numérico</b> pra repassar pra até 3 outros parentes entrarem sem precisar
+            de conta. Limite duro de <b>4 familiares por memorial</b> (tabela <code>responsaveis_familiares</code>).
+            <p>
+              Senha de acesso público (visualização, na busca) e senha/código de edição da família são
+              coisas separadas — nunca confundir as duas no formulário.
+            </p>
           </div>
         </div>
 

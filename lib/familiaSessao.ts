@@ -7,29 +7,44 @@ function assinar(payload: string) {
   return createHmac('sha256', SEGREDO).update(payload).digest('hex')
 }
 
-export function criarTokenFamilia(memorialId: string) {
-  const payload = JSON.stringify({ memorialId, exp: Date.now() + DURACAO_MS })
+export function criarTokenFamilia(memorialId: string, responsavel = false) {
+  const payload = JSON.stringify({ memorialId, responsavel, exp: Date.now() + DURACAO_MS })
   const payloadB64 = Buffer.from(payload).toString('base64url')
   const assinatura = assinar(payloadB64)
   return `${payloadB64}.${assinatura}`
 }
 
-export function verificarTokenFamilia(token: string | undefined | null, memorialId: string) {
-  if (!token) return false
+function decodificarToken(token: string) {
   const [payloadB64, assinatura] = token.split('.')
-  if (!payloadB64 || !assinatura) return false
+  if (!payloadB64 || !assinatura) return null
 
   const assinaturaEsperada = assinar(payloadB64)
   const a = Buffer.from(assinatura)
   const b = Buffer.from(assinaturaEsperada)
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return false
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null
 
   try {
-    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString())
-    if (payload.memorialId !== memorialId) return false
-    if (Date.now() > payload.exp) return false
-    return true
+    return JSON.parse(Buffer.from(payloadB64, 'base64url').toString()) as {
+      memorialId: string
+      responsavel: boolean
+      exp: number
+    }
   } catch {
-    return false
+    return null
   }
+}
+
+export function verificarTokenFamilia(token: string | undefined | null, memorialId: string) {
+  if (!token) return false
+  const payload = decodificarToken(token)
+  if (!payload) return false
+  if (payload.memorialId !== memorialId) return false
+  if (Date.now() > payload.exp) return false
+  return true
+}
+
+export function ehResponsavelFamilia(token: string | undefined | null, memorialId: string) {
+  if (!verificarTokenFamilia(token, memorialId)) return false
+  const payload = decodificarToken(token!)
+  return !!payload?.responsavel
 }

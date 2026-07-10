@@ -71,6 +71,10 @@ export default function DetalheMemorial() {
   const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
   const [salvandoSenhaFamilia, setSalvandoSenhaFamilia] = useState(false)
   const [senhaFamiliaMsg, setSenhaFamiliaMsg] = useState('')
+  const [conviteFamiliarNome, setConviteFamiliarNome] = useState('')
+  const [conviteFamiliarEmail, setConviteFamiliarEmail] = useState('')
+  const [convidandoFamiliar, setConvidandoFamiliar] = useState(false)
+  const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -167,6 +171,30 @@ export default function DetalheMemorial() {
       setSenhaFamiliaMsg(json.temSenha ? 'Senha definida — família já pode editar em /familia/login.' : 'Acesso da família removido.')
     }
     setSalvandoSenhaFamilia(false)
+  }
+
+  async function convidarFamiliar(e: React.FormEvent) {
+    e.preventDefault()
+    if (!memorial) return
+    setConvidandoFamiliar(true)
+    setConviteFamiliarMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/convidar-familiar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: memorial.id, nome: conviteFamiliarNome, email: conviteFamiliarEmail }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setConviteFamiliarMsg(json.error || 'Erro ao convidar')
+    } else {
+      setConviteFamiliarMsg(`Convite criado — senha temporária: ${json.tempPassword}. Repasse pro familiar (${json.email}) e peça pra trocar em "Esqueceu sua senha?".`)
+      setConviteFamiliarNome('')
+      setConviteFamiliarEmail('')
+    }
+    setConvidandoFamiliar(false)
   }
 
   async function salvar(e: React.FormEvent) {
@@ -446,7 +474,36 @@ export default function DetalheMemorial() {
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-1">Acesso da família — senha de edição</h2>
+        <h2 className="text-sm font-medium text-zinc-400 mb-1">Convidar familiar responsável</h2>
+        <p className="text-zinc-500 text-xs mb-4">
+          Cria acesso por e-mail pro familiar responsável — depois de entrar, ele mesmo gera um
+          código pra convidar até 3 outros parentes (máximo 4 no total).
+        </p>
+        <form onSubmit={convidarFamiliar} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            placeholder="Nome do familiar"
+            value={conviteFamiliarNome}
+            onChange={(e) => setConviteFamiliarNome(e.target.value)}
+            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+          />
+          <input
+            type="email"
+            placeholder="E-mail do familiar"
+            required
+            value={conviteFamiliarEmail}
+            onChange={(e) => setConviteFamiliarEmail(e.target.value)}
+            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+          />
+          <Button type="submit" disabled={convidandoFamiliar} className="whitespace-nowrap">
+            {convidandoFamiliar ? 'Convidando...' : 'Convidar'}
+          </Button>
+        </form>
+        {conviteFamiliarMsg && <p className="text-xs text-zinc-400 mt-2">{conviteFamiliarMsg}</p>}
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
+        <h2 className="text-sm font-medium text-zinc-400 mb-1">Acesso da família — senha de edição manual</h2>
         <p className="text-zinc-500 text-xs mb-4">
           {temSenhaFamilia
             ? 'A família já pode editar esse memorial em /familia/login com essa senha. Diferente da senha de acesso acima — essa dá permissão de editar, não só visualizar.'

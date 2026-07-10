@@ -59,6 +59,12 @@ export default function FamiliaEdicaoPage() {
   const [enviandoVideo, setEnviandoVideo] = useState(false)
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
 
+  const [responsavel, setResponsavel] = useState(false)
+  const [familiares, setFamiliares] = useState<{ nome: string; email: string; tipo: string }[]>([])
+  const [gerandoCodigo, setGerandoCodigo] = useState(false)
+  const [codigoGerado, setCodigoGerado] = useState('')
+  const [erroCodigo, setErroCodigo] = useState('')
+
   useEffect(() => {
     if (params.slug) carregar(params.slug)
   }, [params.slug])
@@ -94,7 +100,29 @@ export default function FamiliaEdicaoPage() {
         description: ev.description || '',
       }))
     )
+    setResponsavel(!!json.responsavel)
+    setFamiliares(json.familiares || [])
     setCarregando(false)
+  }
+
+  async function gerarCodigo() {
+    setGerandoCodigo(true)
+    setErroCodigo('')
+    setCodigoGerado('')
+
+    const res = await fetch('/api/familia-gerar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug: params.slug }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setErroCodigo(json.error || 'Erro ao gerar código')
+    } else {
+      setCodigoGerado(json.codigo)
+    }
+    setGerandoCodigo(false)
   }
 
   async function salvar(e: React.FormEvent) {
@@ -359,6 +387,49 @@ export default function FamiliaEdicaoPage() {
             </button>
           </form>
         </div>
+
+        {responsavel && (
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mt-6">
+            <h2 className="text-sm font-medium text-zinc-400 mb-1">Convidar outros familiares</h2>
+            <p className="text-zinc-500 text-xs mb-4">
+              Gere um código de acesso e repasse pra até 3 outros parentes (máximo 4 no total,
+              incluindo você) editarem esse memorial junto com você.
+            </p>
+            <button
+              type="button"
+              onClick={gerarCodigo}
+              disabled={gerandoCodigo || familiares.length >= 4}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white text-sm font-medium rounded-lg"
+            >
+              {gerandoCodigo ? 'Gerando...' : 'Gerar código de acesso'}
+            </button>
+            {familiares.length >= 4 && (
+              <p className="text-xs text-yellow-500 mt-2">Limite de 4 familiares já atingido.</p>
+            )}
+            {erroCodigo && <p className="text-red-400 text-sm mt-2">{erroCodigo}</p>}
+            {codigoGerado && (
+              <p className="text-green-400 text-sm mt-2">
+                Código: <span className="font-mono text-lg">{codigoGerado}</span> — repasse esse
+                número junto com o endereço do memorial (<code>{params.slug}</code>) pra quem vai
+                usar a aba &ldquo;Tenho um código&rdquo; em /familia/login. Guarde num lugar seguro, só
+                aparece essa vez.
+              </p>
+            )}
+
+            {familiares.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-zinc-800">
+                <p className="text-xs text-zinc-500 mb-2">Quem já tem acesso ({familiares.length}/4):</p>
+                <ul className="space-y-1">
+                  {familiares.map((f) => (
+                    <li key={f.email} className="text-sm text-zinc-300">
+                      {f.nome} <span className="text-zinc-600">— {f.tipo === 'responsavel' ? 'responsável' : 'convidado por código'}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
