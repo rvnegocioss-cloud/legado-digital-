@@ -2,6 +2,15 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+
+interface Resultado {
+  id: string
+  nome_completo: string
+  cidade: string | null
+  foto_url: string | null
+  slug: string | null
+}
 
 export default function FamiliaLoginPage() {
   const router = useRouter()
@@ -9,10 +18,15 @@ export default function FamiliaLoginPage() {
 
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [slug, setSlug] = useState('')
-  const [codigo, setCodigo] = useState('')
   const [entrando, setEntrando] = useState(false)
   const [erro, setErro] = useState('')
+
+  // Aba "código": passo 1 = busca pelo nome, passo 2 = digitar o código
+  const [nomeBusca, setNomeBusca] = useState('')
+  const [buscando, setBuscando] = useState(false)
+  const [resultados, setResultados] = useState<Resultado[] | null>(null)
+  const [selecionado, setSelecionado] = useState<Resultado | null>(null)
+  const [codigo, setCodigo] = useState('')
 
   async function entrarComEmail(e: React.FormEvent) {
     e.preventDefault()
@@ -34,15 +48,35 @@ export default function FamiliaLoginPage() {
     router.push(`/familia/${json.slug}`)
   }
 
+  async function buscarNome(e: React.FormEvent) {
+    e.preventDefault()
+    const nome = nomeBusca.trim()
+    if (!nome) return
+    setBuscando(true)
+    setErro('')
+    setSelecionado(null)
+
+    const { data } = await supabase
+      .from('homenagens_busca_publica')
+      .select('id, nome_completo, cidade, foto_url, slug')
+      .ilike('nome_completo', `%${nome}%`)
+      .order('nome_completo')
+      .limit(10)
+
+    setResultados((data || []) as Resultado[])
+    setBuscando(false)
+  }
+
   async function entrarComCodigo(e: React.FormEvent) {
     e.preventDefault()
+    if (!selecionado?.slug) return
     setEntrando(true)
     setErro('')
 
     const res = await fetch('/api/familia-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: slug.trim(), senha: codigo.trim() }),
+      body: JSON.stringify({ slug: selecionado.slug, senha: codigo.trim() }),
     })
     const json = await res.json()
 
@@ -117,24 +151,76 @@ export default function FamiliaLoginPage() {
               {entrando ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
-        ) : (
-          <form onSubmit={entrarComCodigo} className="space-y-3">
+        ) : !selecionado ? (
+          <form onSubmit={buscarNome} className="space-y-3">
             <p className="text-xs text-zinc-500">
-              Pra quem recebeu o código de acesso de outro familiar.
+              Pra quem recebeu o código de acesso de outro familiar. Busque pelo nome do
+              homenageado pra achar o memorial certo.
             </p>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Endereço do memorial</label>
+              <label className="block text-xs text-zinc-500 mb-1">Nome do homenageado</label>
               <input
                 type="text"
-                placeholder="ex: maria-da-silva"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
+                placeholder="Nome completo"
+                value={nomeBusca}
+                onChange={(e) => setNomeBusca(e.target.value)}
                 required
                 className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
               />
-              <p className="text-[11px] text-zinc-600 mt-1">
-                É a parte final do link — em legadodigital.com/homenagem/<b>maria-da-silva</b>, seria &ldquo;maria-da-silva&rdquo;.
-              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={buscando}
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+            >
+              {buscando ? 'Buscando...' : 'Buscar'}
+            </button>
+
+            {resultados !== null && resultados.length === 0 && (
+              <p className="text-zinc-500 text-sm">Nenhum memorial encontrado com esse nome.</p>
+            )}
+
+            {resultados && resultados.length > 0 && (
+              <div className="space-y-2 pt-2">
+                {resultados.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setSelecionado(r)}
+                    className="w-full flex items-center gap-3 p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-left"
+                  >
+                    {r.foto_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={r.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-zinc-800" />
+                    )}
+                    <div>
+                      <div className="text-sm text-white">{r.nome_completo}</div>
+                      {r.cidade && <div className="text-xs text-zinc-500">{r.cidade}</div>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </form>
+        ) : (
+          <form onSubmit={entrarComCodigo} className="space-y-3">
+            <button
+              type="button"
+              onClick={() => { setSelecionado(null); setCodigo(''); setErro('') }}
+              className="text-xs text-zinc-500 hover:text-white"
+            >
+              ← Buscar outro nome
+            </button>
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-zinc-900 border border-zinc-800">
+              {selecionado.foto_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={selecionado.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-zinc-800" />
+              )}
+              <div className="text-sm text-white">{selecionado.nome_completo}</div>
             </div>
             <div>
               <label className="block text-xs text-zinc-500 mb-1">Código de acesso</label>
@@ -144,6 +230,7 @@ export default function FamiliaLoginPage() {
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
                 required
+                autoFocus
                 className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
               />
             </div>

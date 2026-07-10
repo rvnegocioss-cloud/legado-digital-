@@ -12,6 +12,9 @@
 
 **Build passou → commit + push direto, sem perguntar.** Não fica esperando confirmação a cada vez — o usuário já autorizou isso como regra permanente (2026-07-10). Só para e avisa se o build falhar.
 
+## Regra — Nunca pedir slug/endereço técnico em tela pública
+Em qualquer fluxo de acesso pra visitante/família (login, busca), **nunca** peça o slug/endereço do memorial digitado à mão (ex: "maria-da-silva"). Não é prático, ninguém guarda isso de cabeça. Sempre buscar pelo **nome do homenageado** (like/ilike em `homenagens_busca_publica`), mostrar resultados com foto+nome, pessoa escolhe o certo. O slug fica por trás, resolvido pela busca — nunca é campo de formulário voltado pro público. Corrigido em `/familia/login` (2026-07-10, era o "Endereço do memorial" na aba de código).
+
 ## Regra — Relatório de Skills e MCPs
 Toda vez que uma skill (gstack, frontend-design, ui-ux-pro-max, etc.) ou MCP (Supabase, Vercel, etc.) for usada, registrar em `docs/USO_SKILLS_MCPS.md`: o que foi usado, motivo, o que produziu. Log separado do CLAUDE.md — serve pra aprendizado e rastreabilidade do que a IA usou e por quê.
 
