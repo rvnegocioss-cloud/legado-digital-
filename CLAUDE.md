@@ -301,6 +301,16 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 - (resolvido) `HomenagemTemplate.tsx` tinha `@import url(fonts.googleapis.com/...)` direto no `<style>` — fonte buscada em tempo real do Google no navegador do visitante. Em rede que não alcança `fonts.googleapis.com` (firewall, operadora, bloqueador), travava o carregamento da página inteira ("This page couldn't load"). Corrigido: removido o `@import`, `.fd`/`.cursive` usam fonte de sistema (Georgia/Times New Roman), sem dependência de rede externa.
 - (resolvido) **Causa real do "This page couldn't load"**: `FundoParallax.tsx` (fundo 3D das velas no hero do memorial) rodava um `requestAnimationFrame` infinito reescrevendo `transform` a cada frame numa camada `preserve-3d` + `will-change` + giroscópio/`DeviceOrientation`. Em GPUs/navegadores mais fracos vazava memória do compositor até o navegador matar a aba (tela nativa de crash do Edge/Chrome). A página aparecia e depois "sumia". Veio pro ar quando os deploys da sessão rebuildaram o parallax. Corrigido: `FundoParallax` agora é **estático** (crossfade das imagens + overlay), sem loop de animação nem compute contínuo.
 
+## Chatbot IA na landing — planejado (ÚLTIMO passo, só depois de tudo mais pronto)
+"Bem-vindo ao Legado Digital, como posso te ajudar?" — bolha de chat na landing, atende 3 públicos diferentes: **família** (como editar memorial, privacidade), **funerária/parceiro** (como virar parceiro, comissão, portal), **cemitério/prefeitura** (concessão, autarquia). Bot pergunta ou infere quem é o visitante e responde com FAQ correspondente.
+
+Opções de arquitetura analisadas (2026-07-10), nada decidido/implementado ainda:
+- **API de LLM direto (Anthropic/OpenAI) + rota própria:** IA roda na nuvem do provedor, nosso `/api/chat` só manda a pergunta + system prompt com info da empresa e repassa a resposta. Vercel AI SDK (`ai` no npm) é nativo pra Next.js, facilita streaming/estado do chat. Paga por uso — escalável, bate a regra de integração externa registrada acima.
+- **Plataforma pronta (Intercom Fin, Crisp AI, Chatbase, Tidio):** IA e widget 100% hospedados no terceiro, só cola `<script>`. Sobe os FAQs, eles treinam sozinhos, já vem com handoff pra humano e dashboard. Assinatura mensal, mais caro em escala, zero engenharia nossa.
+- **Híbrido:** rota própria (opção 1) usando componentes prontos de UI de chat — meio-termo entre controle e velocidade de montagem.
+
+Fazer por último, depois que o resto do MVP estiver rodando de verdade.
+
 ## Ideias em avaliação (backlog não decidido, só registrado)
 - **Música gerada com IA (Suno):** opção do familiar gerar uma música sobre a vida do homenageado direto no memorial. Avaliar pro próximo deploy. Registrado 2026-07-10.
 - **Drones no cemitério (ideia do Pedro):** conectado com o mapeamento abaixo — voo de drone pra gerar ortomosaico (imagem aérea georreferenciada) do cemitério, base pra marcar cada túmulo com precisão de centímetros sem depender de GPS de celular.
