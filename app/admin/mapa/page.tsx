@@ -207,8 +207,7 @@ const css = `
 .mapa-paginas .module-card .desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
 
 .mapa-paginas .sugestao-form { display: flex; flex-direction: column; gap: 0.6rem; max-width: 640px; }
-.mapa-paginas .sugestao-form textarea,
-.mapa-paginas .sugestao-form input {
+.mapa-paginas .sugestao-form textarea {
   width: 100%;
   min-height: 90px;
   resize: vertical;
@@ -220,7 +219,6 @@ const css = `
   font-family: inherit;
   font-size: 0.92rem;
 }
-.mapa-paginas .sugestao-form input { min-height: unset; }
 .mapa-paginas .sugestao-form label { font-size: 0.78rem; color: var(--text-muted); }
 .mapa-paginas .sugestao-form button {
   align-self: flex-start;
@@ -288,37 +286,10 @@ export default function MapaPaginas() {
   const [mensagem, setMensagem] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
-  const [emailFornecedor, setEmailFornecedor] = useState('')
-  const [salvandoEmail, setSalvandoEmail] = useState(false)
-  const [emailMsg, setEmailMsg] = useState('')
 
   useEffect(() => {
     carregarSugestoes()
-    carregarEmailFornecedor()
   }, [])
-
-  async function carregarEmailFornecedor() {
-    const { data } = await supabase
-      .from('configuracoes_sistema')
-      .select('valor')
-      .eq('chave', 'email_fornecedor_placas')
-      .maybeSingle()
-    setEmailFornecedor(data?.valor || '')
-  }
-
-  async function salvarEmailFornecedor(e: React.FormEvent) {
-    e.preventDefault()
-    setSalvandoEmail(true)
-    setEmailMsg('')
-
-    const { error } = await supabase
-      .from('configuracoes_sistema')
-      .update({ valor: emailFornecedor.trim() || null, updated_at: new Date().toISOString() })
-      .eq('chave', 'email_fornecedor_placas')
-
-    setEmailMsg(error ? error.message : 'Salvo — próximos QR Codes gerados já vão pra esse e-mail.')
-    setSalvandoEmail(false)
-  }
 
   async function carregarSugestoes() {
     const { data } = await supabase
@@ -620,20 +591,9 @@ export default function MapaPaginas() {
               Resend ou se troca de serviço antes de configurar; Rafael pega a API key quando
               decidido. Sem a key, QR e download continuam normais — só o e-mail automático não sai.
             </p>
-            <form className="sugestao-form" onSubmit={salvarEmailFornecedor} style={{ marginTop: '0.8rem', maxWidth: 420 }}>
-              <label htmlFor="email-fornecedor">E-mail do fornecedor de placas</label>
-              <input
-                id="email-fornecedor"
-                type="email"
-                value={emailFornecedor}
-                onChange={(e) => setEmailFornecedor(e.target.value)}
-                placeholder="fornecedor@exemplo.com"
-              />
-              {emailMsg && <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{emailMsg}</span>}
-              <button type="submit" disabled={salvandoEmail}>
-                {salvandoEmail ? 'Salvando...' : 'Salvar e-mail'}
-              </button>
-            </form>
+            <p>
+              Campo de cadastro do e-mail do fornecedor fica no dashboard da Central (<code>/admin</code>), não aqui.
+            </p>
           </div>
         </div>
       </section>
