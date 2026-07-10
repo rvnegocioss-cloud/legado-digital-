@@ -17,6 +17,13 @@ interface ParceiroInfo {
   descricao_publica: string | null
 }
 
+interface MemorialQr {
+  id: string
+  nome_completo: string
+  slug: string | null
+  qr_code_url: string | null
+}
+
 async function subirLogo(parceiroId: string, file: File) {
   const caminho = `parceiro-logos/${parceiroId}/${Date.now()}-${file.name}`
   const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
@@ -45,6 +52,7 @@ function ParceiroDashboardInner() {
 
   const [parceiro, setParceiro] = useState<ParceiroInfo | null>(null)
   const [totalMemoriais, setTotalMemoriais] = useState(0)
+  const [memoriaisQr, setMemoriaisQr] = useState<MemorialQr[]>([])
   const [loading, setLoading] = useState(true)
 
   const [logoUrl, setLogoUrl] = useState('')
@@ -72,7 +80,7 @@ function ParceiroDashboardInner() {
       return
     }
 
-    const [{ data: p }, { count }] = await Promise.all([
+    const [{ data: p }, { count }, { data: memoriais }] = await Promise.all([
       supabase
         .from('parceiros_b2b')
         .select('id, nome_fantasia, razao_social, plano_contratado, status_pagamento, slug, logo_url, descricao_publica')
@@ -82,10 +90,17 @@ function ParceiroDashboardInner() {
         .from('homenagens')
         .select('*', { count: 'exact', head: true })
         .eq('parceiro_id', meuParceiroId),
+      supabase
+        .from('homenagens')
+        .select('id, nome_completo, slug, qr_code_url')
+        .eq('parceiro_id', meuParceiroId)
+        .order('created_at', { ascending: false })
+        .limit(20),
     ])
 
     setParceiro(p)
     setTotalMemoriais(count || 0)
+    setMemoriaisQr(memoriais || [])
     if (p) {
       setLogoUrl(p.logo_url || '')
       setDescricaoPublica(p.descricao_publica || '')
@@ -176,6 +191,59 @@ function ParceiroDashboardInner() {
       >
         Ver todos os memoriais →
       </Link>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
+        <h2 className="text-sm font-medium text-zinc-400 mb-4">Memoriais e QR Codes</h2>
+        {memoriaisQr.length === 0 ? (
+          <p className="text-zinc-400 text-sm">Nenhum memorial cadastrado ainda.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-zinc-400 border-b border-zinc-800">
+                  <th className="text-left py-2 px-3">QR Code</th>
+                  <th className="text-left py-2 px-3">Nome</th>
+                  <th className="text-left py-2 px-3"></th>
+                  <th className="text-left py-2 px-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {memoriaisQr.map((m) => (
+                  <tr key={m.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                    <td className="py-2 px-3">
+                      {m.qr_code_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={m.qr_code_url} alt="" className="w-10 h-10 rounded bg-white p-0.5" />
+                      ) : (
+                        <span className="text-zinc-600 text-xs">Sem QR ainda</span>
+                      )}
+                    </td>
+                    <td className="py-2 px-3 text-white">{m.nome_completo}</td>
+                    <td className="py-2 px-3">
+                      {m.qr_code_url && (
+                        <a
+                          href={m.qr_code_url}
+                          download={`qrcode-${m.slug}.png`}
+                          className="text-blue-400 hover:underline text-xs"
+                        >
+                          Baixar QR Code
+                        </a>
+                      )}
+                    </td>
+                    <td className="py-2 px-3">
+                      {m.slug && (
+                        <a href={`/homenagem/${m.slug}`} className="text-zinc-400 hover:text-white text-xs">
+                          Ver página
+                        </a>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
         <div className="flex items-center justify-between mb-4">
