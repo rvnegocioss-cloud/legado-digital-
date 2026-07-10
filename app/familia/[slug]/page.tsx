@@ -240,7 +240,11 @@ export default function FamiliaEdicaoPage() {
   return (
     <div className="min-h-screen bg-zinc-950 py-10 px-4">
       <div className="max-w-xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <Link href="/familia/login" className="text-sm text-zinc-400 hover:text-white">
+          ← Sair
+        </Link>
+
+        <div className="flex items-center justify-between mt-4 mb-6">
           <h1 className="text-xl font-bold text-white">Editar memorial de {form.nome_completo}</h1>
           <a
             href={`/homenagem/${params.slug}`}

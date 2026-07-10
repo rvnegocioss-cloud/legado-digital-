@@ -21,6 +21,12 @@ Toda vez que uma skill (gstack, frontend-design, ui-ux-pro-max, etc.) ou MCP (Su
 ## Regra — Clareza de rótulos na UI
 Rótulo de menu/botão precisa deixar óbvia a ação (ex: "Memoriais (Cadastrar/Editar)", não só "Memoriais"). Motivo: usuário achou que cadastro de memorial não existia no Portal do Parceiro — só o rótulo do menu não deixava isso claro, a função já existia.
 
+## Regra — Retorno pra página anterior
+Toda página de detalhe/edição (acessada clicando em algo de uma lista, ex: `/admin/memoriais/[id]`, `/admin/parceiros/[id]`, `/familia/[slug]`) precisa ter um link visível de volta no topo (ex: "← Voltar pra Memoriais", "← Sair"). Não deixar a pessoa só no botão "voltar" do navegador. Registrado 2026-07-10 depois de aplicar em `/familia/[slug]` (não tinha nenhum retorno — família ficava presa na tela sem saída visível).
+
+## Regra — Layout de ficha na Central: não empilhar tudo em coluna única
+Ficha de detalhe (`/admin/memoriais/[id]` e afins) usa grid responsivo (`grid-cols-1 lg:grid-cols-3`), não uma pilha de cards um embaixo do outro. Conteúdo principal (dados/formulário) ocupa 2/3 da largura; informação de consulta rápida (ex: QR Code) fica ao lado, na coluna de 1/3, visível sem rolar a página. Em mobile reflui pra coluna única normalmente. Motivo: usuário reclamou que tudo ficava "uma coisa embaixo da outra" mesmo em tela larga — o problema não era mobile-first, era nunca ter sido montado um breakpoint de desktop. Registrado 2026-07-10.
+
 ## Regra — Integração Central ↔ Portal do Parceiro ↔ Página Pública
 Toda feature nova precisa ser refletida nos lados relevantes: se o parceiro pode editar algo sobre o próprio parceiro (ex: logo/descrição da página pública), a Central também precisa poder ver/editar isso — nunca implementar só de um lado. Se algo aparece na página pública, os dois portais internos (Central e Parceiro) devem ter visibilidade do dado por trás.
 
@@ -289,6 +295,7 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 - Repositório GitHub: rvnegocioss-cloud/legado-digital-
 
 ## Bugs conhecidos
+- (resolvido) Busca pública (`/busca`, `/parceiros/[slug]`, `/familia/login`) não achava nome com acento quando a pessoa digitava sem acento (ex: buscar "jose" não achava "José", "antonio" não achava "Antônio") — `ilike` do Postgres é sensível a acento, e ninguém digita acento buscando no celular. Corrigido com função `buscar_homenagens_publicas(termo, p_parceiro_id)` (extensão `unaccent`, compara `unaccent(nome_completo) ilike unaccent(termo)`), chamada via `supabase.rpc()` nos 3 lugares que buscavam por nome. Registrado 2026-07-10.
 - (resolvido) `/homenagem` não tinha rota dinâmica `[slug]` — corrigido, agora em `app/homenagem/[slug]/page.tsx`, testado com memorial real e slug inexistente
 - (resolvido) Links "Ver página"/"Acessar página do memorial" abriam com `target="_blank"` — no navegador mobile isso gerava a tela nativa "This page couldn't load" quando a aba nova era descartada em segundo plano. Removido `target="_blank"`, agora abre na mesma aba.
 - (resolvido) `HomenagemTemplate.tsx` tinha `@import url(fonts.googleapis.com/...)` direto no `<style>` — fonte buscada em tempo real do Google no navegador do visitante. Em rede que não alcança `fonts.googleapis.com` (firewall, operadora, bloqueador), travava o carregamento da página inteira ("This page couldn't load"). Corrigido: removido o `@import`, `.fd`/`.cursive` usam fonte de sistema (Georgia/Times New Roman), sem dependência de rede externa.

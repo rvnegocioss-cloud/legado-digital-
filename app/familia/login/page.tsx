@@ -56,12 +56,7 @@ export default function FamiliaLoginPage() {
     setErro('')
     setSelecionado(null)
 
-    const { data } = await supabase
-      .from('homenagens_busca_publica')
-      .select('id, nome_completo, cidade, foto_url, slug')
-      .ilike('nome_completo', `%${nome}%`)
-      .order('nome_completo')
-      .limit(10)
+    const { data } = await supabase.rpc('buscar_homenagens_publicas', { termo: nome })
 
     setResultados((data || []) as Resultado[])
     setBuscando(false)

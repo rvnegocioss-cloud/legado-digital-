@@ -328,7 +328,8 @@ export default function DetalheMemorial() {
         )}
       </div>
 
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 rounded-xl bg-zinc-900 border border-zinc-800 p-6">
         <h2 className="text-sm font-medium text-zinc-400 mb-4">Dados do memorial</h2>
         <form onSubmit={salvar} className="space-y-3">
           <div>
@@ -464,6 +465,38 @@ export default function DetalheMemorial() {
         </form>
       </div>
 
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 lg:self-start">
+        <h2 className="text-sm font-medium text-zinc-400 mb-4">QR Code do memorial</h2>
+        <div className="flex items-center gap-4">
+          {qrCodeUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={qrCodeUrl} alt="" className="w-28 h-28 rounded bg-white p-1.5" />
+          ) : (
+            <div className="w-28 h-28 rounded bg-zinc-800" />
+          )}
+          <div className="flex flex-col gap-2">
+            {qrCodeUrl && (
+              <a
+                href={qrCodeUrl}
+                download={`qrcode-${memorial.slug}.png`}
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium text-center"
+              >
+                Baixar QR Code
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={gerarQrCode}
+              disabled={gerandoQrCode}
+              className="text-zinc-400 hover:text-white text-xs text-left"
+            >
+              {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar QR Code' : 'Gerar QR Code'}
+            </button>
+          </div>
+        </div>
+      </div>
+      </div>
+
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
         <h2 className="text-sm font-medium text-zinc-400 mb-1">Privacidade — senha de acesso</h2>
         <p className="text-zinc-500 text-xs mb-4">
@@ -545,37 +578,6 @@ export default function DetalheMemorial() {
           </Button>
         </form>
         {senhaFamiliaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaFamiliaMsg}</p>}
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-4">QR Code do memorial</h2>
-        <div className="flex items-center gap-4">
-          {qrCodeUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={qrCodeUrl} alt="" className="w-28 h-28 rounded bg-white p-1.5" />
-          ) : (
-            <div className="w-28 h-28 rounded bg-zinc-800" />
-          )}
-          <div className="flex flex-col gap-2">
-            {qrCodeUrl && (
-              <a
-                href={qrCodeUrl}
-                download={`qrcode-${memorial.slug}.png`}
-                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium text-center"
-              >
-                Baixar QR Code
-              </a>
-            )}
-            <button
-              type="button"
-              onClick={gerarQrCode}
-              disabled={gerandoQrCode}
-              className="text-zinc-400 hover:text-white text-xs text-left"
-            >
-              {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar QR Code' : 'Gerar QR Code'}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   )

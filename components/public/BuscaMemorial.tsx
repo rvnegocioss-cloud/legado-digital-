@@ -35,18 +35,10 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
     setSenhaAbertaId(null)
     setDesbloqueadoId(null)
 
-    let query = supabase
-      .from('homenagens_busca_publica')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, foto_url, slug, tem_senha')
-      .ilike('nome_completo', `%${nome}%`)
-      .order('nome_completo')
-      .limit(30)
-
-    if (parceiroId) {
-      query = query.eq('parceiro_id', parceiroId)
-    }
-
-    const { data } = await query
+    const { data } = await supabase.rpc('buscar_homenagens_publicas', {
+      termo: nome,
+      p_parceiro_id: parceiroId || null,
+    })
     setResultados((data || []) as Resultado[])
     setBuscando(false)
   }
