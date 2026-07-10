@@ -294,6 +294,11 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 - (resolvido) `HomenagemTemplate.tsx` tinha `@import url(fonts.googleapis.com/...)` direto no `<style>` — fonte buscada em tempo real do Google no navegador do visitante. Em rede que não alcança `fonts.googleapis.com` (firewall, operadora, bloqueador), travava o carregamento da página inteira ("This page couldn't load"). Corrigido: removido o `@import`, `.fd`/`.cursive` usam fonte de sistema (Georgia/Times New Roman), sem dependência de rede externa.
 - (resolvido) **Causa real do "This page couldn't load"**: `FundoParallax.tsx` (fundo 3D das velas no hero do memorial) rodava um `requestAnimationFrame` infinito reescrevendo `transform` a cada frame numa camada `preserve-3d` + `will-change` + giroscópio/`DeviceOrientation`. Em GPUs/navegadores mais fracos vazava memória do compositor até o navegador matar a aba (tela nativa de crash do Edge/Chrome). A página aparecia e depois "sumia". Veio pro ar quando os deploys da sessão rebuildaram o parallax. Corrigido: `FundoParallax` agora é **estático** (crossfade das imagens + overlay), sem loop de animação nem compute contínuo.
 
+## Ideias em avaliação (backlog não decidido, só registrado)
+- **Música gerada com IA (Suno):** opção do familiar gerar uma música sobre a vida do homenageado direto no memorial. Avaliar pro próximo deploy. Registrado 2026-07-10.
+- **Drones no cemitério (ideia do Pedro):** uso de drones em operação cemiterial — ainda sem escopo definido de pra quê (sobrevoo/mapeamento/vigilância?). Registrado 2026-07-10.
+- **Mapeamento de cemitério e túmulos:** como mapear fisicamente um cemitério e a posição de cada túmulo — ligado à Fase 5 (Geolocalização avançada, mapeamento cemiterial) já prevista no roadmap, ainda sem solução técnica escolhida.
+
 ## O que NÃO está no MVP
 - Faturamento e cobrança interna
 - Pagamento online

@@ -596,6 +596,27 @@ export default function MapaPaginas() {
             </p>
           </div>
         </div>
+
+        <div className="callout">
+          <span className="mark">💡</span>
+          <div className="body">
+            <strong>Ideias em avaliação</strong> — ainda não decidido nem no roadmap, só registrado
+            pra não esquecer:
+            <p>
+              <strong>Música gerada com IA (Suno):</strong> opção do familiar gerar uma música sobre
+              a vida do homenageado direto no memorial. Avaliar pro próximo deploy.
+            </p>
+            <p>
+              <strong>Drones no cemitério (ideia do Pedro):</strong> uso de drones em operação
+              cemiterial — ainda sem escopo definido de pra quê (sobrevoo/mapeamento/vigilância?).
+            </p>
+            <p>
+              <strong>Mapeamento de cemitério e túmulos:</strong> como mapear fisicamente um
+              cemitério e a posição de cada túmulo — ligado à Fase 5 (Geolocalização avançada,
+              mapeamento cemiterial) já prevista no roadmap, ainda sem solução técnica escolhida.
+            </p>
+          </div>
+        </div>
       </section>
 
       <section className="section">
