@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase, getParceiroUser } from '@/lib/auth'
+import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -28,6 +29,7 @@ interface Memorial {
   video_url: string | null
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
+  qr_code_url: string | null
   created_at: string
 }
 
@@ -98,6 +100,8 @@ function ParceiroMemoriaisInner() {
   const [conviteFamiliarEmail, setConviteFamiliarEmail] = useState('')
   const [convidandoFamiliar, setConvidandoFamiliar] = useState(false)
   const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
+  const [gerandoQrCode, setGerandoQrCode] = useState(false)
 
   useEffect(() => {
     load()
@@ -116,7 +120,7 @@ function ParceiroMemoriaisInner() {
     let query = supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, created_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, created_at'
       )
       .order('created_at', { ascending: false })
 
@@ -138,6 +142,7 @@ function ParceiroMemoriaisInner() {
     setVideoUrl('')
     setGaleria([])
     setTimelineEventos([])
+    setQrCodeUrl('')
     setErro('')
 
     // Cria o rascunho já no banco (id previsível) pra permitir upload de mídia
@@ -189,6 +194,7 @@ function ParceiroMemoriaisInner() {
         description: ev.description || '',
       }))
     )
+    setQrCodeUrl(m.qr_code_url || '')
     setErro('')
     setSenhaFamilia('')
     setSenhaFamiliaMsg('')
@@ -273,6 +279,14 @@ function ParceiroMemoriaisInner() {
       setConviteFamiliarEmail('')
     }
     setConvidandoFamiliar(false)
+  }
+
+  async function gerarQrCode() {
+    if (!idParaUpload) return
+    setGerandoQrCode(true)
+    const url = await gerarQrCodeCliente(idParaUpload)
+    if (url) setQrCodeUrl(url)
+    setGerandoQrCode(false)
   }
 
   const idParaUpload = editando?.id || rascunhoId
@@ -370,6 +384,8 @@ function ParceiroMemoriaisInner() {
       setSalvando(false)
       return
     }
+
+    gerarQrCodeCliente(idParaUpload).then((url) => { if (url) setQrCodeUrl(url) })
 
     setSalvando(false)
     setDialogAberto(false)
@@ -595,6 +611,39 @@ function ParceiroMemoriaisInner() {
                 {senhaFamiliaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaFamiliaMsg}</p>}
               </form>
             )}
+
+            {editando && (
+              <div className="mt-2 pt-4 border-t border-zinc-800">
+                <label className="block text-xs text-zinc-500 mb-2">QR Code do memorial</label>
+                <div className="flex items-center gap-3">
+                  {qrCodeUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={qrCodeUrl} alt="" className="w-16 h-16 rounded bg-white p-1" />
+                  ) : (
+                    <div className="w-16 h-16 rounded bg-zinc-800" />
+                  )}
+                  <div className="flex flex-col gap-1">
+                    {qrCodeUrl && (
+                      <a
+                        href={qrCodeUrl}
+                        download={`qrcode-${editando.slug}.png`}
+                        className="text-blue-400 hover:underline text-xs"
+                      >
+                        Baixar QR Code
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={gerarQrCode}
+                      disabled={gerandoQrCode}
+                      className="text-zinc-400 hover:text-white text-xs text-left"
+                    >
+                      {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar QR Code' : 'Gerar QR Code'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -611,6 +660,7 @@ function ParceiroMemoriaisInner() {
                 <th className="text-left py-3 px-4">Nome</th>
                 <th className="text-left py-3 px-4">Cidade</th>
                 <th className="text-left py-3 px-4">Criado em</th>
+                <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
               </tr>
@@ -630,6 +680,17 @@ function ParceiroMemoriaisInner() {
                         className="text-blue-400 hover:underline text-xs"
                       >
                         Ver página
+                      </a>
+                    )}
+                  </td>
+                  <td className="py-3 px-4">
+                    {m.qr_code_url && (
+                      <a
+                        href={m.qr_code_url}
+                        download={`qrcode-${m.slug}.png`}
+                        className="text-blue-400 hover:underline text-xs"
+                      >
+                        Baixar QR Code
                       </a>
                     )}
                   </td>

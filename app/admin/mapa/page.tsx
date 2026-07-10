@@ -207,7 +207,8 @@ const css = `
 .mapa-paginas .module-card .desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
 
 .mapa-paginas .sugestao-form { display: flex; flex-direction: column; gap: 0.6rem; max-width: 640px; }
-.mapa-paginas .sugestao-form textarea {
+.mapa-paginas .sugestao-form textarea,
+.mapa-paginas .sugestao-form input {
   width: 100%;
   min-height: 90px;
   resize: vertical;
@@ -219,6 +220,7 @@ const css = `
   font-family: inherit;
   font-size: 0.92rem;
 }
+.mapa-paginas .sugestao-form input { min-height: unset; }
 .mapa-paginas .sugestao-form label { font-size: 0.78rem; color: var(--text-muted); }
 .mapa-paginas .sugestao-form button {
   align-self: flex-start;
@@ -286,10 +288,37 @@ export default function MapaPaginas() {
   const [mensagem, setMensagem] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
+  const [emailFornecedor, setEmailFornecedor] = useState('')
+  const [salvandoEmail, setSalvandoEmail] = useState(false)
+  const [emailMsg, setEmailMsg] = useState('')
 
   useEffect(() => {
     carregarSugestoes()
+    carregarEmailFornecedor()
   }, [])
+
+  async function carregarEmailFornecedor() {
+    const { data } = await supabase
+      .from('configuracoes_sistema')
+      .select('valor')
+      .eq('chave', 'email_fornecedor_placas')
+      .maybeSingle()
+    setEmailFornecedor(data?.valor || '')
+  }
+
+  async function salvarEmailFornecedor(e: React.FormEvent) {
+    e.preventDefault()
+    setSalvandoEmail(true)
+    setEmailMsg('')
+
+    const { error } = await supabase
+      .from('configuracoes_sistema')
+      .update({ valor: emailFornecedor.trim() || null, updated_at: new Date().toISOString() })
+      .eq('chave', 'email_fornecedor_placas')
+
+    setEmailMsg(error ? error.message : 'Salvo — próximos QR Codes gerados já vão pra esse e-mail.')
+    setSalvandoEmail(false)
+  }
 
   async function carregarSugestoes() {
     const { data } = await supabase
@@ -569,6 +598,36 @@ export default function MapaPaginas() {
             <strong>Pendente:</strong> limite de fotos/vídeo por memorial ainda sem número
             definido — depende do plano contratado no Supabase (armazenamento/banda). Não
             inventar número sem checar o plano real primeiro.
+          </div>
+        </div>
+
+        <div className="callout">
+          <span className="mark">▦</span>
+          <div className="body">
+            <strong>QR Code — pipeline automático:</strong> gerado memorial = gerado QR Code =
+            encaminhado e-mail. Ao criar/salvar um memorial (Central ou Portal do Parceiro), o
+            sistema gera o PNG do QR sozinho (<code>/api/memorial-qrcode</code>) e, se o campo
+            abaixo tiver um e-mail cadastrado, encaminha automaticamente pro fornecedor de placas
+            com o nome do homenageado, o ID do memorial e o link da página — o nome do arquivo
+            anexado é o slug do memorial, pra bater com o QR sem risco de confundir placas.
+            <p>
+              Por enquanto é 1 fornecedor só (campo único). Se amanhã tiver mais de um, esse
+              campo vira um cadastro de vários — ainda não construído, não precisa por ora.
+            </p>
+            <form className="sugestao-form" onSubmit={salvarEmailFornecedor} style={{ marginTop: '0.8rem', maxWidth: 420 }}>
+              <label htmlFor="email-fornecedor">E-mail do fornecedor de placas</label>
+              <input
+                id="email-fornecedor"
+                type="email"
+                value={emailFornecedor}
+                onChange={(e) => setEmailFornecedor(e.target.value)}
+                placeholder="fornecedor@exemplo.com"
+              />
+              {emailMsg && <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{emailMsg}</span>}
+              <button type="submit" disabled={salvandoEmail}>
+                {salvandoEmail ? 'Salvando...' : 'Salvar e-mail'}
+              </button>
+            </form>
           </div>
         </div>
       </section>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
+import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
@@ -22,6 +23,7 @@ interface Memorial {
   video_url: string | null
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
+  qr_code_url: string | null
   created_at: string
 }
 
@@ -75,6 +77,8 @@ export default function DetalheMemorial() {
   const [conviteFamiliarEmail, setConviteFamiliarEmail] = useState('')
   const [convidandoFamiliar, setConvidandoFamiliar] = useState(false)
   const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
+  const [gerandoQrCode, setGerandoQrCode] = useState(false)
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -121,8 +125,22 @@ export default function DetalheMemorial() {
         .maybeSingle()
       setTemSenha(!!seguranca?.senha_acesso_hash)
       setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
+
+      if (m.qr_code_url) {
+        setQrCodeUrl(m.qr_code_url)
+      } else if (m.slug) {
+        gerarQrCodeCliente(m.id).then((url) => { if (url) setQrCodeUrl(url) })
+      }
     }
     setLoading(false)
+  }
+
+  async function gerarQrCode() {
+    if (!memorial) return
+    setGerandoQrCode(true)
+    const url = await gerarQrCodeCliente(memorial.id)
+    if (url) setQrCodeUrl(url)
+    setGerandoQrCode(false)
   }
 
   async function salvarSenha(e: React.FormEvent) {
@@ -527,6 +545,37 @@ export default function DetalheMemorial() {
           </Button>
         </form>
         {senhaFamiliaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaFamiliaMsg}</p>}
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
+        <h2 className="text-sm font-medium text-zinc-400 mb-4">QR Code do memorial</h2>
+        <div className="flex items-center gap-4">
+          {qrCodeUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={qrCodeUrl} alt="" className="w-28 h-28 rounded bg-white p-1.5" />
+          ) : (
+            <div className="w-28 h-28 rounded bg-zinc-800" />
+          )}
+          <div className="flex flex-col gap-2">
+            {qrCodeUrl && (
+              <a
+                href={qrCodeUrl}
+                download={`qrcode-${memorial.slug}.png`}
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium text-center"
+              >
+                Baixar QR Code
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={gerarQrCode}
+              disabled={gerandoQrCode}
+              className="text-zinc-400 hover:text-white text-xs text-left"
+            >
+              {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar QR Code' : 'Gerar QR Code'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

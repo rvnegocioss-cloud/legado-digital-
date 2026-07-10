@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
+import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -76,15 +77,19 @@ export default function AdminMemoriais() {
     setErro('')
 
     const slug = gerarSlug(form.nome_completo)
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('homenagens')
       .insert({ ...form, slug, memorial_slug: slug })
+      .select()
+      .single()
 
     if (error) {
       setErro(error.message)
       setSalvando(false)
       return
     }
+
+    if (data) gerarQrCodeCliente(data.id)
 
     setSalvando(false)
     setDialogAberto(false)
