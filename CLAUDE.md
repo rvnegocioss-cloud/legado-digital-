@@ -10,6 +10,8 @@
 
 **Um commit só, um deploy só:** CLAUDE.md e `/admin/mapa` atualizam no MESMO commit/push da modificação de código, nunca em commit separado depois. Gasta tempo e token à toa fazer 2 deploys pra mesma tarefa.
 
+**Build passou → commit + push direto, sem perguntar.** Não fica esperando confirmação a cada vez — o usuário já autorizou isso como regra permanente (2026-07-10). Só para e avisa se o build falhar.
+
 ## Regra — Relatório de Skills e MCPs
 Toda vez que uma skill (gstack, frontend-design, ui-ux-pro-max, etc.) ou MCP (Supabase, Vercel, etc.) for usada, registrar em `docs/USO_SKILLS_MCPS.md`: o que foi usado, motivo, o que produziu. Log separado do CLAUDE.md — serve pra aprendizado e rastreabilidade do que a IA usou e por quê.
 
