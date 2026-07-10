@@ -156,13 +156,16 @@ Prioridades imediatas:
 - [x] Campo de sugestões dos sócios em `/admin/mapa` (tabela `mapa_sugestoes`, RLS staff-only)
 - [x] Timeline reorganizada em blocos de evento (Ano/Título/Descrição + mover ↑↓ + remover), trocando o textarea confuso `ano | título | descrição`
 - [x] Senha de edição por memorial (`homenagens_seguranca.senha_familia_hash`, separada da senha de acesso) — campo no formulário Central e Parceiro
-- [x] **Portal da Família** (`/familia/login` + `/familia/[slug]`) — família entra com slug do memorial + senha de edição (sem conta/e-mail, sessão via cookie assinado HMAC de 12h), edita os mesmos campos do admin/parceiro (foto, vídeo, galeria, timeline, bio, frase). Central e Parceiro continuam vendo tudo (mesma tabela `homenagens`)
+- [x] **Portal da Família** (`/familia/login` + `/familia/[slug]`) — família busca pelo nome do homenageado + senha simples gerada automaticamente (1 e-mail por memorial, sem conta, sessão via cookie assinado HMAC de 12h), edita os mesmos campos do admin/parceiro (foto, vídeo, galeria, timeline, bio, frase). Central e Parceiro continuam vendo tudo (mesma tabela `homenagens`). Simplificado 2026-07-10 (ver seção própria)
 - [x] QR Code — implementado. PNG gerado no servidor com lib `qrcode` (`lib/qrcode.ts`), sem API externa. `POST /api/memorial-qrcode` (staff ou dono do parceiro) monta a URL com `req.nextUrl.origin` + `/homenagem/[slug]` (sem hardcode de domínio), gera o PNG e salva em `memoriais/qrcodes/{slug}.png` no Storage, grava `homenagens.qr_code_url`. Auto-gera: ao criar memorial na Central (`/admin/memoriais`) e ao salvar no Portal do Parceiro (`/parceiro/memoriais`); na ficha (`/admin/memoriais/[id]`) gera sozinho se abrir e não tiver QR ainda (cobre memoriais antigos). Botão "Baixar QR Code" + "Gerar/Atualizar QR Code" manual nos dois portais. `lib/gerarQrCode.ts` centraliza a chamada client-side (evita repetir em 3 arquivos).
   - Pipeline "gerado memorial = gerado QR = encaminhado e-mail": toda vez que o QR é (re)gerado, `/api/memorial-qrcode` confere `configuracoes_sistema.email_fornecedor_placas` e, se tiver e-mail cadastrado, manda automaticamente pro fornecedor de placas via **Resend** (`lib/enviarEmailQrCode.ts`) — corpo do e-mail com nome do homenageado, ID do memorial, link da página, e o PNG anexado com nome de arquivo = slug (pra não trocar placa errada). Campo do e-mail é editável em `/admin/mapa` (tabela `configuracoes_sistema`, chave `email_fornecedor_placas`, RLS staff-only) — hoje é 1 fornecedor só, dá pra trocar o e-mail ali sem mexer em código.
   - **Regra registrada (2026-07-10):** toda integração com serviço externo (pagamento, banco, e-mail, etc) tem que ser escalável mesmo que o plano gratuito não baste depois — pagar por um serviço bom é aceitável, gambiarra pra economizar não.
   - **Pendente de configuração:** falta adicionar `RESEND_API_KEY` no `.env.local`/Vercel (conta Resend ainda não criada) — sem isso o envio de e-mail falha silenciosamente (QR e download continuam funcionando normal, só o e-mail automático não sai). Fato técnico a verificar: no plano grátis do Resend, sem domínio verificado, só é possível enviar pro e-mail do dono da conta — pra mandar de verdade pro fornecedor externo, precisa verificar um domínio próprio no Resend.
   - **Visibilidade no dashboard (2026-07-10):** memoriais com QR Code (thumbnail + "Baixar QR Code") aparecem direto no dashboard da Central (`/admin`) e do Portal do Parceiro (`/parceiro`), não só na ficha de cada memorial — usuário achou a versão só na ficha pouco visível. Campo "E-mail do fornecedor de placas" também está no dashboard da Central (além do `/admin/mapa`).
   - **Mensagem da placa (2026-07-10):** campo `homenagens.mensagem_placa` (texto livre, definido pela família) no formulário Central e Parceiro, dentro do card de QR Code. Vai junto no corpo do e-mail pro fornecedor sempre que o QR é (re)gerado — QR Code e texto da placa chegam juntos pro fornecedor confeccionar tudo de uma vez, sem risco de vir separado.
+  - **Confirmação da família antes do fornecedor (2026-07-10):** salvar a mensagem da placa (`POST /api/admin/salvar-mensagem-placa`) zera `homenagens_seguranca.mensagem_placa_confirmada` e manda e-mail (`lib/enviarEmailConfirmacaoPlaca.ts`) pro `familia_email` cadastrado, com link de 1 clique (token aleatório em `emails_enviados.token`, sem precisar de login) pra `/confirmar-placa/[token]`. **Enquanto não confirmado, o e-mail pro fornecedor NÃO sai** — `lib/dispararEmailFornecedor.ts` (usado tanto no `/api/memorial-qrcode` quanto na página de confirmação) checa isso antes de enviar. Editar a mensagem depois de confirmada reseta a confirmação — força reconfirmar. Sem mensagem cadastrada, o fluxo antigo continua (QR vai direto pro fornecedor).
+  - **Central de E-mails (2026-07-10):** tabela `emails_enviados` loga todo e-mail disparado (senha da família, confirmação de placa, envio ao fornecedor) — destinatário, assunto, status (`enviado`/`confirmado`/`erro`), com mensagem de erro quando falha. Painel em `/admin/emails` (staff vê tudo) e `/parceiro/emails` (RLS restringe aos memoriais do próprio parceiro) — parceiro confirma que a família já aprovou a placa sem precisar abrir e-mail nenhum.
+- [x] Manual do sistema (`/admin/manual`) — o que tem em cada página + integração, linkado do `/admin/mapa` (link no topo + "Tutorial →" em cada nó do organograma e módulo). Mantido atualizado junto com o mapa, mesma disciplina.
 - [ ] Busca embutida direto na landing (hoje é botão que leva pra `/busca`, não campo de texto na própria home)
 - [ ] Modos de privacidade completos (`configuracoes_privacidade` — hoje só existe "público" e "com senha", faltam "privado por e-mail/cadastro" e "oculto" da lista de modos do MVP)
 - [ ] Website institucional finalizado
@@ -188,31 +191,25 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 ## Busca pública e privacidade por senha — como funciona
 `/busca` e `/parceiros/[slug]` usam o mesmo componente client (`components/public/BuscaMemorial.tsx`): campo de busca por nome, sem grade aberta listando memoriais (isso vazava privacidade — corrigido). Resultado sem senha mostra o link direto; resultado com senha pede senha antes de liberar.
 
+Busca **sem sensibilidade a acento** (2026-07-10): função Postgres `buscar_homenagens_publicas(termo, p_parceiro_id)` usa a extensão `unaccent` (`unaccent(nome_completo) ilike unaccent('%'||termo||'%')`) — buscar "jose" acha "José", "antonio" acha "Antônio". Chamada via `supabase.rpc()` nos 3 lugares que buscam por nome (`BuscaMemorial.tsx`, `/familia/login`). Antes disso, `ilike` puro não achava nome acentuado quando digitado sem acento — bug real, ninguém digita acento buscando no celular.
+
 **Arquitetura de segurança:** a senha nunca é guardada na tabela `homenagens` (que tem RLS de leitura pública `true` — qualquer coluna ali é visível ao anon). Fica em `homenagens_seguranca` (hash scrypt, salt = id do memorial), sem nenhuma policy de leitura pública — só staff ou o próprio parceiro dono do memorial (via RLS), nunca o anon. A view `homenagens_busca_publica` expõe só um booleano `tem_senha`, nunca o hash. Verificação da senha e escrita/troca de senha passam por API routes server-side (`/api/memorial-acesso` público, `/api/memorial-senha` autenticado) usando a service role key — o hash nunca trafega pro client.
 
-Definir/trocar/remover senha: campo "Senha de acesso" no formulário de edição (Central `/admin/memoriais/[id]` e Portal do Parceiro `/parceiro/memoriais`) — deixar em branco = memorial público.
+**A senha de acesso bloqueia os DOIS caminhos (2026-07-10):** antes só bloqueava aparecer na busca — quem tinha o link direto ou o QR Code entrava sem senha nenhuma (buraco real, achado nessa sessão). Corrigido: `/homenagem/[slug]` agora também checa `tem_senha` (via `homenagens_busca_publica`) e, se tiver, exige a senha antes de renderizar a página — ilha client `GateSenhaAcesso.tsx` faz a verificação, sucesso grava cookie assinado HMAC de 30 dias (`mem_acesso_{slug}`, `lib/acessoMemorialSessao.ts`) pra não pedir de novo.
+
+Definir/trocar/remover senha: campo "Senha de acesso" no formulário de edição (Central `/admin/memoriais/[id]` e Portal do Parceiro `/parceiro/memoriais`) — deixar em branco = memorial público (busca E link/QR direto).
 
 ## Portal da Família — como funciona
-Família gerencia o próprio memorial. Dois jeitos de entrar em `/familia/login` (abas): **e-mail** (responsável principal, conta de verdade) ou **código** (até 3 outros parentes, sem conta).
+**Simplificado (2026-07-10)** — modelo antigo de responsável+código pra até 3 parentes foi removido (complexidade desnecessária, tabela `responsaveis_familiares` sempre esteve vazia). Agora é **1 e-mail de contato por memorial, sem conta**:
 
-### Responsável principal (aba "Sou o responsável")
-1. Central ou Parceiro convida o familiar responsável por e-mail na ficha do memorial (botão "Convidar familiar responsável", igual ao "Convidar contato" do parceiro) → cria usuário Supabase Auth com senha temporária `123456`, papel **"Familiar Responsável"**, e uma linha em `responsaveis_familiares` (tipo `responsavel`)
-2. Login por e-mail/senha via `POST /api/familia-login-email` (Supabase Auth de verdade) → emite o mesmo cookie assinado HMAC (`familia_{id}`), mas com uma flag `responsavel: true` dentro do token
-3. RLS: `is_own_familiar(homenagem_id)` permite esse usuário ler/editar o memorial direto via Supabase (mesma lógica do `is_own_parceiro`) — hoje as rotas de família não usam isso ainda, mas a policy já existe pronta
+1. Central ou Parceiro cadastra o e-mail da família na ficha do memorial (campo "E-mail da família") → `POST /api/admin/cadastrar-email-familia`
+2. Sistema gera sozinho uma senha simples (8 caracteres hex), hasheia em `homenagens_seguranca.senha_familia_hash`, grava o e-mail em `homenagens.familia_email`, e manda a senha por e-mail (Resend, `lib/enviarEmailSenhaFamilia.ts`) — registrado na Central de E-mails
+3. Família busca o memorial pelo nome do homenageado em `/familia/login` (nunca por slug/endereço — regra de sempre) e entra com essa senha via `POST /api/familia-login`, cookie assinado HMAC de 12h (`familia_{id}`, `lib/familiaSessao.ts`)
+4. Dentro de `/familia/[slug]`, edita os mesmos campos de sempre (foto, vídeo, galeria, timeline, bio, frase) — grava direto em `homenagens`, Central e Parceiro enxergam tudo
 
-### Outros familiares (aba "Tenho um código")
-1. Dentro de `/familia/[slug]`, só o responsável vê a seção "Convidar outros familiares" com botão **"Gerar código de acesso"** — cria um código numérico de 6 dígitos (hash salvo em `homenagens_seguranca.senha_familia_hash`, mesma coluna de antes), mostrado **uma única vez** pra ele repassar
-2. Outros parentes entram com slug + esse código em `/familia/login` (`POST /api/familia-login`, sem conta) → cookie com `responsavel: false`
-3. **Limite de 4 no total** (1 responsável + até 3 por código) — checado em `responsaveis_familiares` antes de convidar/gerar novo código
+Sem Resend configurado, a API ainda retorna a senha gerada na resposta pro staff/parceiro repassar manualmente (fallback visível na tela).
 
-### Estrutura
-- Tabela `responsaveis_familiares` (homenagem_id, usuario_id, nome, email, tipo: `responsavel`/`administrador`)
-- `GET/POST /api/familia-memorial` e `POST /api/familia-upload` continuam verificando o cookie a cada chamada (service role, sem depender de RLS)
-- `GET /api/familia-memorial` agora também devolve `responsavel` (bool) e a lista de `familiares` (só se for o responsável)
-
-**Integração:** grava na mesma tabela `homenagens` — Central e Parceiro já enxergam tudo que a família editar, sem trabalho extra.
-
-**Ainda falta:** "esqueci a senha" pro responsável já existe (`/recuperar-senha`, é conta Supabase Auth normal); pra quem entra por código, se perder o código só pedindo um novo pro responsável gerar.
+**Ainda falta:** "esqueci a senha" da família — hoje só reemitindo (botão "Gerar nova senha" na Central/Parceiro).
 
 ## Página do Memorial (`/homenagem/[slug]`) — como funciona
 Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servidor** — zero JS client na rota, sem risco de travar o navegador (ver Bugs conhecidos).
@@ -282,8 +279,10 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
   - Usuários: página existe, ainda sem gestão real
 - **Portal do Parceiro B2B** em app/parceiro/ — login, layout protegido, CRUD de memoriais restrito ao próprio parceiro (ver seção própria acima), dashboard com edição da própria página pública (logo/descrição)
 - **Busca pública** `/busca` e **sub-landing do parceiro** `/parceiros/[slug]` — ver `lib/publicTheme.ts` (tema navy/dourado compartilhado com a página do memorial)
-- **Portal da Família** `/familia/login` + `/familia/[slug]` — responsável principal por e-mail (convite, conta Supabase Auth) + até 3 parentes por código gerado pelo próprio responsável (máx. 4), cookie assinado, edita o memorial (ver seção própria acima)
-- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios, mapa_sugestoes, homenagens_seguranca
+- **Portal da Família** `/familia/login` + `/familia/[slug]` — 1 e-mail de contato por memorial, senha simples gerada e enviada automaticamente, cookie assinado, edita o memorial (ver seção própria acima)
+- **Central de E-mails** `/admin/emails` + `/parceiro/emails` — log de senha da família, confirmação de placa, envio ao fornecedor
+- **Manual do sistema** `/admin/manual` — o que tem em cada página + integração, linkado do mapa
+- Schema: usuarios, perfis, permissoes, usuarios_perfis, perfis_permissoes, parceiros_b2b, cemiterios, parceiros_usuarios, mapa_sugestoes, homenagens_seguranca, emails_enviados, configuracoes_sistema
 - `parceiros_b2b.slug`/`logo_url`/`descricao_publica` — dados da sub-landing pública; view `parceiros_publicos` expõe só os campos seguros pro anon (nunca CNPJ/telefone/email)
 - `homenagens.parceiro_id` — vincula memorial ao parceiro que cadastrou (null = venda direta Legado Digital)
 - Funções helper: `is_legado_staff()` (RLS de parceiros_b2b/cemiterios/homenagens pra equipe interna), `is_own_parceiro(uuid)` (RLS de homenagens/parceiros_b2b pro próprio parceiro)

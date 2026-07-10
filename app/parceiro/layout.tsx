@@ -94,6 +94,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: `/parceiro${suffix}`, label: 'Dashboard', match: '/parceiro' },
     { href: `/parceiro/memoriais${suffix}`, label: 'Memoriais (Cadastrar/Editar)', match: '/parceiro/memoriais' },
+    { href: `/parceiro/emails${suffix}`, label: 'E-mails', match: '/parceiro/emails' },
   ]
 
   return (

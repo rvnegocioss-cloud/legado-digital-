@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { verificarTokenFamilia, ehResponsavelFamilia } from '@/lib/familiaSessao'
+import { verificarTokenFamilia } from '@/lib/familiaSessao'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -43,19 +43,7 @@ export async function GET(req: NextRequest) {
   const resultado = await buscarMemorialEValidar(supabaseAdmin, slug, req)
   if ('erro' in resultado) return NextResponse.json({ error: resultado.erro }, { status: resultado.status })
 
-  const token = req.cookies.get(`familia_${resultado.homenagem.id}`)?.value
-  const responsavel = ehResponsavelFamilia(token, resultado.homenagem.id)
-
-  let familiares: { nome: string; email: string; tipo: string }[] = []
-  if (responsavel) {
-    const { data } = await supabaseAdmin
-      .from('responsaveis_familiares')
-      .select('nome, email, tipo')
-      .eq('homenagem_id', resultado.homenagem.id)
-    familiares = data || []
-  }
-
-  return NextResponse.json({ memorial: resultado.homenagem, responsavel, familiares })
+  return NextResponse.json({ memorial: resultado.homenagem })
 }
 
 export async function POST(req: NextRequest) {

@@ -25,6 +25,7 @@ interface Memorial {
   timeline: { year?: string; title?: string; description?: string }[] | null
   qr_code_url: string | null
   mensagem_placa: string | null
+  familia_email: string | null
   created_at: string
 }
 
@@ -70,19 +71,16 @@ export default function DetalheMemorial() {
   const [temSenha, setTemSenha] = useState(false)
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [senhaMsg, setSenhaMsg] = useState('')
-  const [senhaFamilia, setSenhaFamilia] = useState('')
   const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
-  const [salvandoSenhaFamilia, setSalvandoSenhaFamilia] = useState(false)
-  const [senhaFamiliaMsg, setSenhaFamiliaMsg] = useState('')
-  const [conviteFamiliarNome, setConviteFamiliarNome] = useState('')
-  const [conviteFamiliarEmail, setConviteFamiliarEmail] = useState('')
-  const [convidandoFamiliar, setConvidandoFamiliar] = useState(false)
-  const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
+  const [familiaEmail, setFamiliaEmail] = useState('')
+  const [cadastrandoFamiliaEmail, setCadastrandoFamiliaEmail] = useState(false)
+  const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
   const [mensagemPlaca, setMensagemPlaca] = useState('')
   const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
+  const [mensagemPlacaConfirmada, setMensagemPlacaConfirmada] = useState(false)
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -106,6 +104,7 @@ export default function DetalheMemorial() {
       setVideoUrl(m.video_url || '')
       setGaleria(m.galeria_fotos || [])
       setMensagemPlaca(m.mensagem_placa || '')
+      setFamiliaEmail(m.familia_email || '')
       setTimelineEventos(
         (m.timeline || []).map((ev: { year?: string; title?: string; description?: string }) => ({
           year: ev.year || '',
@@ -125,11 +124,12 @@ export default function DetalheMemorial() {
 
       const { data: seguranca } = await supabase
         .from('homenagens_seguranca')
-        .select('senha_acesso_hash, senha_familia_hash')
+        .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada')
         .eq('homenagem_id', m.id)
         .maybeSingle()
       setTemSenha(!!seguranca?.senha_acesso_hash)
       setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
+      setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
 
       if (m.qr_code_url) {
         setQrCodeUrl(m.qr_code_url)
@@ -172,52 +172,30 @@ export default function DetalheMemorial() {
     setSalvandoSenha(false)
   }
 
-  async function salvarSenhaFamilia(e: React.FormEvent) {
+  async function cadastrarEmailFamilia(e: React.FormEvent) {
     e.preventDefault()
     if (!memorial) return
-    setSalvandoSenhaFamilia(true)
-    setSenhaFamiliaMsg('')
+    setCadastrandoFamiliaEmail(true)
+    setFamiliaEmailMsg('')
 
     const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/memorial-senha', {
+    const res = await fetch('/api/admin/cadastrar-email-familia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: memorial.id, senha: senhaFamilia, tipo: 'familia' }),
+      body: JSON.stringify({ memorialId: memorial.id, email: familiaEmail }),
     })
     const json = await res.json()
 
     if (!res.ok) {
-      setSenhaFamiliaMsg(json.error || 'Erro ao salvar senha')
+      setFamiliaEmailMsg(json.error || 'Erro ao cadastrar')
+    } else if (json.emailEnviado) {
+      setFamiliaEmailMsg('Cadastrado — e-mail com a senha de acesso enviado pra família.')
+      setTemSenhaFamilia(true)
     } else {
-      setTemSenhaFamilia(json.temSenha)
-      setSenhaFamilia('')
-      setSenhaFamiliaMsg(json.temSenha ? 'Senha definida — família já pode editar em /familia/login.' : 'Acesso da família removido.')
+      setFamiliaEmailMsg(`Cadastrado, mas o e-mail não saiu (Resend não configurado). Senha gerada: ${json.senha} — repasse manualmente.`)
+      setTemSenhaFamilia(true)
     }
-    setSalvandoSenhaFamilia(false)
-  }
-
-  async function convidarFamiliar(e: React.FormEvent) {
-    e.preventDefault()
-    if (!memorial) return
-    setConvidandoFamiliar(true)
-    setConviteFamiliarMsg('')
-
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/convidar-familiar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: memorial.id, nome: conviteFamiliarNome, email: conviteFamiliarEmail }),
-    })
-    const json = await res.json()
-
-    if (!res.ok) {
-      setConviteFamiliarMsg(json.error || 'Erro ao convidar')
-    } else {
-      setConviteFamiliarMsg(`Convite criado — senha temporária: ${json.tempPassword}. Repasse pro familiar (${json.email}) e peça pra trocar em "Esqueceu sua senha?".`)
-      setConviteFamiliarNome('')
-      setConviteFamiliarEmail('')
-    }
-    setConvidandoFamiliar(false)
+    setCadastrandoFamiliaEmail(false)
   }
 
   async function salvarMensagemPlaca(e: React.FormEvent) {
@@ -225,13 +203,27 @@ export default function DetalheMemorial() {
     if (!memorial) return
     setSalvandoMensagemPlaca(true)
     setMensagemPlacaMsg('')
+    setMensagemPlacaConfirmada(false)
 
-    const { error } = await supabase
-      .from('homenagens')
-      .update({ mensagem_placa: mensagemPlaca || null })
-      .eq('id', memorial.id)
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/salvar-mensagem-placa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: memorial.id, mensagem: mensagemPlaca }),
+    })
+    const json = await res.json()
 
-    setMensagemPlacaMsg(error ? error.message : 'Salvo — vai junto no próximo QR Code enviado pro fornecedor.')
+    if (!res.ok) {
+      setMensagemPlacaMsg(json.error || 'Erro ao salvar mensagem')
+    } else if (json.aviso) {
+      setMensagemPlacaMsg(json.aviso)
+    } else if (json.emailConfirmacaoEnviado) {
+      setMensagemPlacaMsg('Salvo — e-mail de confirmação enviado pra família. O fornecedor só recebe depois que ela confirmar.')
+    } else if (mensagemPlaca.trim()) {
+      setMensagemPlacaMsg('Salvo, mas o e-mail de confirmação não saiu (Resend não configurado).')
+    } else {
+      setMensagemPlacaMsg('Salvo — sem mensagem, o QR Code segue direto pro fornecedor.')
+    }
     setSalvandoMensagemPlaca(false)
   }
 
@@ -528,9 +520,20 @@ export default function DetalheMemorial() {
             onChange={(e) => setMensagemPlaca(e.target.value)}
             className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
           />
-          <Button type="submit" disabled={salvandoMensagemPlaca}>
-            {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button type="submit" disabled={salvandoMensagemPlaca}>
+              {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
+            </Button>
+            {mensagemPlaca.trim() && (
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  mensagemPlacaConfirmada ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'
+                }`}
+              >
+                {mensagemPlacaConfirmada ? 'Confirmado pela família' : 'Aguardando confirmação'}
+              </span>
+            )}
+          </div>
           {mensagemPlacaMsg && <p className="text-xs text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
         </form>
       </div>
@@ -540,8 +543,8 @@ export default function DetalheMemorial() {
         <h2 className="text-sm font-medium text-zinc-400 mb-1">Privacidade — senha de acesso</h2>
         <p className="text-zinc-500 text-xs mb-4">
           {temSenha
-            ? 'Este memorial exige senha pra aparecer na busca pública. Deixe o campo em branco e salve pra tornar público de novo.'
-            : 'Este memorial está público — qualquer um encontra pelo nome na busca. Defina uma senha pra exigir acesso restrito.'}
+            ? 'Este memorial exige senha na busca pública E pra abrir a página direto (link ou QR Code). Deixe o campo em branco e salve pra tornar público de novo.'
+            : 'Este memorial está público — qualquer um encontra pelo nome na busca ou abre direto pelo link/QR Code. Defina uma senha pra exigir acesso restrito em ambos.'}
         </p>
         <form onSubmit={salvarSenha} className="flex gap-3">
           <div className="flex-1">
@@ -564,59 +567,26 @@ export default function DetalheMemorial() {
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-1">Convidar familiar responsável</h2>
+        <h2 className="text-sm font-medium text-zinc-400 mb-1">E-mail da família</h2>
         <p className="text-zinc-500 text-xs mb-4">
-          Cria acesso por e-mail pro familiar responsável — depois de entrar, ele mesmo gera um
-          código pra convidar até 3 outros parentes (máximo 4 no total).
+          Cadastre o e-mail de contato da família — o sistema gera uma senha simples sozinho e
+          manda por e-mail. Ela usa essa senha pra entrar em /familia/login e enviar fotos, vídeo
+          e a história. Esse e-mail também recebe o pedido de confirmação da mensagem da placa.
         </p>
-        <form onSubmit={convidarFamiliar} className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            placeholder="Nome do familiar"
-            value={conviteFamiliarNome}
-            onChange={(e) => setConviteFamiliarNome(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
-          />
-          <input
+        <form onSubmit={cadastrarEmailFamilia} className="flex gap-3">
+          <Input
             type="email"
-            placeholder="E-mail do familiar"
+            placeholder="email@familia.com"
             required
-            value={conviteFamiliarEmail}
-            onChange={(e) => setConviteFamiliarEmail(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+            value={familiaEmail}
+            onChange={(e) => setFamiliaEmail(e.target.value)}
+            className="bg-zinc-800 border-zinc-700 text-white flex-1"
           />
-          <Button type="submit" disabled={convidandoFamiliar} className="whitespace-nowrap">
-            {convidandoFamiliar ? 'Convidando...' : 'Convidar'}
+          <Button type="submit" disabled={cadastrandoFamiliaEmail} className="whitespace-nowrap">
+            {cadastrandoFamiliaEmail ? 'Cadastrando...' : temSenhaFamilia ? 'Gerar nova senha' : 'Cadastrar'}
           </Button>
         </form>
-        {conviteFamiliarMsg && <p className="text-xs text-zinc-400 mt-2">{conviteFamiliarMsg}</p>}
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-1">Acesso da família — senha de edição manual</h2>
-        <p className="text-zinc-500 text-xs mb-4">
-          {temSenhaFamilia
-            ? 'A família já pode editar esse memorial em /familia/login com essa senha. Diferente da senha de acesso acima — essa dá permissão de editar, não só visualizar.'
-            : 'Defina uma senha pra a família editar esse memorial sozinha (fotos, vídeo, biografia, timeline) em /familia/login, sem precisar de login com e-mail.'}
-        </p>
-        <form onSubmit={salvarSenhaFamilia} className="flex gap-3">
-          <div className="flex-1">
-            <label className="block text-xs text-zinc-500 mb-1">
-              {temSenhaFamilia ? 'Nova senha da família (ou deixe em branco pra remover acesso)' : 'Senha de edição da família'}
-            </label>
-            <Input
-              type="text"
-              placeholder="Deixe em branco pra não ter acesso"
-              value={senhaFamilia}
-              onChange={(e) => setSenhaFamilia(e.target.value)}
-              className="bg-zinc-800 border-zinc-700 text-white"
-            />
-          </div>
-          <Button type="submit" disabled={salvandoSenhaFamilia} className="self-end">
-            {salvandoSenhaFamilia ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </form>
-        {senhaFamiliaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaFamiliaMsg}</p>}
+        {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
       </div>
     </div>
   )

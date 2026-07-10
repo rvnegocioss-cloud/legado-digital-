@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search } from 'lucide-react'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
 
 const ALLOWED_ROLES = ['Admin Legado Digital', 'Operador Legado Digital']
@@ -64,6 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/cemiterios', label: 'Cemitérios', Icon: MapPin },
     { href: '/admin/memoriais', label: 'Memoriais', Icon: ScrollText },
     { href: '/admin/usuarios', label: 'Usuários', Icon: Users },
+    { href: '/admin/emails', label: 'E-mails', Icon: Mail },
     { href: '/admin/mapa', label: 'Mapa', Icon: Map },
     { href: '/busca', label: 'Página Pública', Icon: Search },
   ]

@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { gerarQrCodePng } from '@/lib/qrcode'
-import { dispararEmailFornecedor } from '@/lib/dispararEmailFornecedor'
+import { randomBytes } from 'crypto'
+import { hashSenhaMemorial } from '@/lib/senhaMemorial'
+import { enviarEmailSenhaFamilia } from '@/lib/enviarEmailSenhaFamilia'
+import { registrarEmail } from '@/lib/emailLog'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+function gerarSenhaSimples() {
+  return randomBytes(4).toString('hex')
+}
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -12,9 +18,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  const { memorialId } = await req.json()
-  if (!memorialId) {
-    return NextResponse.json({ error: 'memorialId obrigatório' }, { status: 400 })
+  const { memorialId, email } = await req.json()
+  if (!memorialId || !email) {
+    return NextResponse.json({ error: 'memorialId e email obrigatórios' }, { status: 400 })
   }
 
   const supabaseAuth = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
@@ -29,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   const { data: homenagem } = await supabaseAdmin
     .from('homenagens')
-    .select('id, slug, parceiro_id')
+    .select('id, slug, nome_completo, parceiro_id')
     .eq('id', memorialId)
     .single()
 
@@ -52,31 +58,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
   }
 
-  const url = `${req.nextUrl.origin}/homenagem/${homenagem.slug}`
-  const png = await gerarQrCodePng(url)
-  const caminho = `qrcodes/${homenagem.slug}.png`
+  const senha = gerarSenhaSimples()
+  const senhaHash = hashSenhaMemorial(memorialId, senha)
 
-  const { error: uploadError } = await supabaseAdmin.storage
-    .from('memoriais')
-    .upload(caminho, png, { contentType: 'image/png', upsert: true })
-
-  if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 })
-  }
-
-  const { data: publicUrlData } = supabaseAdmin.storage.from('memoriais').getPublicUrl(caminho)
-  const qrCodeUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`
+  const { error: upsertError } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .upsert(
+      { homenagem_id: memorialId, senha_familia_hash: senhaHash, updated_at: new Date().toISOString() },
+      { onConflict: 'homenagem_id', ignoreDuplicates: false }
+    )
+  if (upsertError) return NextResponse.json({ error: upsertError.message }, { status: 500 })
 
   const { error: updateError } = await supabaseAdmin
     .from('homenagens')
-    .update({ qr_code_url: qrCodeUrl })
+    .update({ familia_email: email })
     .eq('id', memorialId)
+  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 })
-  }
+  const url = `${req.nextUrl.origin}/familia/login`
+  const resultado = await enviarEmailSenhaFamilia({
+    destinatario: email,
+    nomeCompleto: homenagem.nome_completo,
+    slug: homenagem.slug,
+    senha,
+    url,
+  })
 
-  const resultado = await dispararEmailFornecedor(supabaseAdmin, memorialId, req.nextUrl.origin)
+  await registrarEmail(supabaseAdmin, {
+    homenagemId: memorialId,
+    tipo: 'senha_familia',
+    destinatario: email,
+    assunto: `Acesso ao memorial de ${homenagem.nome_completo}`,
+    status: resultado.enviado ? 'enviado' : 'erro',
+    erroMsg: resultado.enviado ? null : resultado.erro,
+  })
 
-  return NextResponse.json({ ok: true, qrCodeUrl, url, emailEnviado: resultado.enviado, motivo: resultado.motivo })
+  return NextResponse.json({ ok: true, emailEnviado: resultado.enviado, senha })
 }

@@ -1,4 +1,7 @@
 import { supabase } from "@/lib/supabase";
+import { cookies } from "next/headers";
+import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
+import { GateSenhaAcesso } from "@/components/public/GateSenhaAcesso";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +64,22 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   }
 
   const m = homenagem as Homenagem;
+
+  const { data: seguranca } = await supabase
+    .from("homenagens_busca_publica")
+    .select("tem_senha")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (seguranca?.tem_senha) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(`mem_acesso_${slug}`)?.value;
+    const acessoValido = verificarTokenAcessoMemorial(token, m.id);
+    if (!acessoValido) {
+      return <GateSenhaAcesso memorialId={m.id} nomeCompleto={m.nome_completo} />;
+    }
+  }
+
   const periodo = [m.data_nascimento, m.data_falecimento].filter(Boolean).join(" — ");
 
   const { data: condolenciasData } = await supabase

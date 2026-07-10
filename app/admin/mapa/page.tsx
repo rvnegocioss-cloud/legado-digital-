@@ -338,6 +338,9 @@ export default function MapaPaginas() {
           Mapa dos seis ambientes do MVP e de como um memorial circula entre a Central, os
           parceiros e o público — pra visualizar o que já existe e o que ainda falta construir.
         </p>
+        <a href="/admin/manual" style={{ color: 'var(--gold)', fontSize: '0.85rem', textDecoration: 'underline' }}>
+          Manual do sistema — o que tem em cada página →
+        </a>
       </header>
 
       <section className="section">
@@ -370,6 +373,7 @@ export default function MapaPaginas() {
                     <span className="path">/admin</span>
                     <span className="desc">Vê tudo: parceiros, cemitérios, memoriais, usuários</span>
                     <span className="pill wip">Módulos em andamento ↓</span>
+                    <a href="/admin/manual#central" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -379,15 +383,17 @@ export default function MapaPaginas() {
                     <span className="path">/parceiro</span>
                     <span className="desc">Dashboard + CRUD — cada parceiro só vê e cadastra os próprios memoriais</span>
                     <span className="pill done">Pronto</span>
+                    <a href="/admin/manual#parceiro" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
                   </div>
                 </li>
                 <li>
                   <div className="node">
-                    <span className="who">Responsáveis pelo memorial</span>
+                    <span className="who">Família do homenageado</span>
                     <span className="name">Portal da Família</span>
                     <span className="path">/familia/login + /familia/[slug]</span>
-                    <span className="desc">Responsável entra por e-mail (convite); até 3 parentes por código gerado por ele — máx. 4</span>
+                    <span className="desc">1 e-mail por memorial, senha simples gerada automaticamente — sem convite múltiplo</span>
                     <span className="pill done">Pronto</span>
+                    <a href="/admin/manual#familia" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -395,8 +401,9 @@ export default function MapaPaginas() {
                     <span className="who">Qualquer visitante</span>
                     <span className="name">Página do Memorial</span>
                     <span className="path">/homenagem/[slug]</span>
-                    <span className="desc">Acesso via QR Code, URL ou busca, conforme privacidade</span>
+                    <span className="desc">Acesso via QR Code, URL ou busca — senha (se houver) bloqueia os três</span>
                     <span className="pill done">Pronto</span>
+                    <a href="/admin/manual#memorial" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -404,8 +411,9 @@ export default function MapaPaginas() {
                     <span className="who">Público em geral</span>
                     <span className="name">Busca Pública</span>
                     <span className="path">/busca</span>
-                    <span className="desc">Buscar memorial por nome — ainda sem filtro de privacidade (todo publicado aparece)</span>
-                    <span className="pill wip">Em construção</span>
+                    <span className="desc">Busca por nome, sem sensibilidade a acento</span>
+                    <span className="pill done">Pronto</span>
+                    <a href="/admin/manual#busca" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
                   </div>
                 </li>
                 <li>
@@ -415,6 +423,7 @@ export default function MapaPaginas() {
                     <span className="path">/parceiros/[slug]</span>
                     <span className="desc">Página pública do parceiro (logo, descrição, memoriais + busca interna)</span>
                     <span className="pill done">Pronto</span>
+                    <a href="/admin/manual#sublanding" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
                   </div>
                 </li>
               </ul>
@@ -438,29 +447,41 @@ export default function MapaPaginas() {
             <span className="path">/admin/parceiros</span>
             <span className="desc">CRUD completo + ficha por parceiro (dados, plano/pagamento, memoriais dele)</span>
             <span className="pill done">Pronto</span>
+            <a href="/admin/manual#mod-parceiros" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Cemitérios</span>
             <span className="path">/admin/cemiterios</span>
             <span className="desc">Cadastro com mapa (Leaflet) pra marcar a localização</span>
             <span className="pill done">Pronto</span>
+            <a href="/admin/manual#mod-cemiterios" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Memoriais</span>
             <span className="path">/admin/memoriais</span>
             <span className="desc">CRUD completo + ficha por memorial, com link pra página pública</span>
             <span className="pill done">Pronto</span>
+            <a href="/admin/manual#mod-memoriais" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
+          </div>
+          <div className="module-card">
+            <span className="name">Central de E-mails</span>
+            <span className="path">/admin/emails</span>
+            <span className="desc">Log de senha da família, confirmação de placa, envio ao fornecedor</span>
+            <span className="pill done">Pronto</span>
+            <a href="/admin/manual#mod-emails" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Usuários</span>
             <span className="path">/admin/usuarios</span>
             <span className="desc">Tela existe, sem gestão real ainda</span>
             <span className="pill plan">Planejado</span>
+            <a href="/admin/manual#mod-usuarios" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
           </div>
           <div className="module-card">
             <span className="name">Financeiro</span>
             <span className="desc">Contratos, planos, aquisições, fechamento mensal — Fase 4</span>
             <span className="pill plan">Planejado</span>
+            <a href="/admin/manual#mod-financeiro" style={{ fontSize: '0.72rem', color: 'var(--gold)' }}>Tutorial →</a>
           </div>
         </div>
       </section>
@@ -538,14 +559,13 @@ export default function MapaPaginas() {
         <div className="callout">
           <span className="mark">OBS</span>
           <div className="body">
-            <strong>Portal da Família:</strong> ficou pronto com acesso em 2 camadas — a Central/Parceiro
-            convida o <b>responsável principal por e-mail</b> (conta de verdade, senha temporária, igual
-            ao convite de parceiro), e esse responsável — de dentro de <code>/familia/[slug]</code> —
-            gera um <b>código numérico</b> pra repassar pra até 3 outros parentes entrarem sem precisar
-            de conta. Limite duro de <b>4 familiares por memorial</b> (tabela <code>responsaveis_familiares</code>).
+            <strong>Portal da Família:</strong> simplificado (2026-07-10) — 1 e-mail de contato por
+            memorial, cadastrado na Central/Parceiro. Sistema gera senha simples sozinho e manda
+            por e-mail — família busca pelo nome do homenageado em <code>/familia/login</code> e entra
+            com essa senha. Sem conta, sem convite múltiplo, sem código pra repassar.
             <p>
-              Senha de acesso público (visualização, na busca) e senha/código de edição da família são
-              coisas separadas — nunca confundir as duas no formulário.
+              Senha de acesso público (visualização — bloqueia busca E link/QR direto) e senha da
+              família (edição) são coisas separadas — nunca confundir as duas no formulário.
             </p>
           </div>
         </div>

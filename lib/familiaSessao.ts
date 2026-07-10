@@ -7,8 +7,8 @@ function assinar(payload: string) {
   return createHmac('sha256', SEGREDO).update(payload).digest('hex')
 }
 
-export function criarTokenFamilia(memorialId: string, responsavel = false) {
-  const payload = JSON.stringify({ memorialId, responsavel, exp: Date.now() + DURACAO_MS })
+export function criarTokenFamilia(memorialId: string) {
+  const payload = JSON.stringify({ memorialId, exp: Date.now() + DURACAO_MS })
   const payloadB64 = Buffer.from(payload).toString('base64url')
   const assinatura = assinar(payloadB64)
   return `${payloadB64}.${assinatura}`
@@ -26,7 +26,6 @@ function decodificarToken(token: string) {
   try {
     return JSON.parse(Buffer.from(payloadB64, 'base64url').toString()) as {
       memorialId: string
-      responsavel: boolean
       exp: number
     }
   } catch {
@@ -41,10 +40,4 @@ export function verificarTokenFamilia(token: string | undefined | null, memorial
   if (payload.memorialId !== memorialId) return false
   if (Date.now() > payload.exp) return false
   return true
-}
-
-export function ehResponsavelFamilia(token: string | undefined | null, memorialId: string) {
-  if (!verificarTokenFamilia(token, memorialId)) return false
-  const payload = decodificarToken(token!)
-  return !!payload?.responsavel
 }

@@ -31,6 +31,7 @@ interface Memorial {
   timeline: { year?: string; title?: string; description?: string }[] | null
   qr_code_url: string | null
   mensagem_placa: string | null
+  familia_email: string | null
   created_at: string
 }
 
@@ -93,19 +94,16 @@ function ParceiroMemoriaisInner() {
   const [temSenha, setTemSenha] = useState(false)
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [senhaMsg, setSenhaMsg] = useState('')
-  const [senhaFamilia, setSenhaFamilia] = useState('')
   const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
-  const [salvandoSenhaFamilia, setSalvandoSenhaFamilia] = useState(false)
-  const [senhaFamiliaMsg, setSenhaFamiliaMsg] = useState('')
-  const [conviteFamiliarNome, setConviteFamiliarNome] = useState('')
-  const [conviteFamiliarEmail, setConviteFamiliarEmail] = useState('')
-  const [convidandoFamiliar, setConvidandoFamiliar] = useState(false)
-  const [conviteFamiliarMsg, setConviteFamiliarMsg] = useState('')
+  const [familiaEmail, setFamiliaEmail] = useState('')
+  const [cadastrandoFamiliaEmail, setCadastrandoFamiliaEmail] = useState(false)
+  const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
   const [mensagemPlaca, setMensagemPlaca] = useState('')
   const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
+  const [mensagemPlacaConfirmada, setMensagemPlacaConfirmada] = useState(false)
 
   useEffect(() => {
     load()
@@ -124,7 +122,7 @@ function ParceiroMemoriaisInner() {
     let query = supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, created_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, created_at'
       )
       .order('created_at', { ascending: false })
 
@@ -148,6 +146,7 @@ function ParceiroMemoriaisInner() {
     setTimelineEventos([])
     setQrCodeUrl('')
     setMensagemPlaca('')
+    setFamiliaEmail('')
     setErro('')
 
     // Cria o rascunho já no banco (id previsível) pra permitir upload de mídia
@@ -201,18 +200,19 @@ function ParceiroMemoriaisInner() {
     )
     setQrCodeUrl(m.qr_code_url || '')
     setMensagemPlaca(m.mensagem_placa || '')
+    setFamiliaEmail(m.familia_email || '')
+    setFamiliaEmailMsg('')
     setErro('')
-    setSenhaFamilia('')
-    setSenhaFamiliaMsg('')
     setDialogAberto(true)
 
     const { data: seguranca } = await supabase
       .from('homenagens_seguranca')
-      .select('senha_acesso_hash, senha_familia_hash')
+      .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada')
       .eq('homenagem_id', m.id)
       .maybeSingle()
     setTemSenha(!!seguranca?.senha_acesso_hash)
     setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
+    setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
   }
 
   async function salvarSenha(e: React.FormEvent) {
@@ -239,52 +239,30 @@ function ParceiroMemoriaisInner() {
     setSalvandoSenha(false)
   }
 
-  async function salvarSenhaFamilia(e: React.FormEvent) {
+  async function cadastrarEmailFamilia(e: React.FormEvent) {
     e.preventDefault()
     if (!editando) return
-    setSalvandoSenhaFamilia(true)
-    setSenhaFamiliaMsg('')
+    setCadastrandoFamiliaEmail(true)
+    setFamiliaEmailMsg('')
 
     const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/memorial-senha', {
+    const res = await fetch('/api/admin/cadastrar-email-familia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: editando.id, senha: senhaFamilia, tipo: 'familia' }),
+      body: JSON.stringify({ memorialId: editando.id, email: familiaEmail }),
     })
     const json = await res.json()
 
     if (!res.ok) {
-      setSenhaFamiliaMsg(json.error || 'Erro ao salvar senha')
+      setFamiliaEmailMsg(json.error || 'Erro ao cadastrar')
+    } else if (json.emailEnviado) {
+      setFamiliaEmailMsg('Cadastrado — e-mail com a senha de acesso enviado pra família.')
+      setTemSenhaFamilia(true)
     } else {
-      setTemSenhaFamilia(json.temSenha)
-      setSenhaFamilia('')
-      setSenhaFamiliaMsg(json.temSenha ? 'Senha definida — família já pode editar em /familia/login.' : 'Acesso da família removido.')
+      setFamiliaEmailMsg(`Cadastrado, mas o e-mail não saiu (Resend não configurado). Senha gerada: ${json.senha} — repasse manualmente.`)
+      setTemSenhaFamilia(true)
     }
-    setSalvandoSenhaFamilia(false)
-  }
-
-  async function convidarFamiliar(e: React.FormEvent) {
-    e.preventDefault()
-    if (!editando) return
-    setConvidandoFamiliar(true)
-    setConviteFamiliarMsg('')
-
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/convidar-familiar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: editando.id, nome: conviteFamiliarNome, email: conviteFamiliarEmail }),
-    })
-    const json = await res.json()
-
-    if (!res.ok) {
-      setConviteFamiliarMsg(json.error || 'Erro ao convidar')
-    } else {
-      setConviteFamiliarMsg(`Convite criado — senha temporária: ${json.tempPassword}. Repasse pro familiar (${json.email}).`)
-      setConviteFamiliarNome('')
-      setConviteFamiliarEmail('')
-    }
-    setConvidandoFamiliar(false)
+    setCadastrandoFamiliaEmail(false)
   }
 
   async function salvarMensagemPlaca(e: React.FormEvent) {
@@ -292,13 +270,27 @@ function ParceiroMemoriaisInner() {
     if (!editando) return
     setSalvandoMensagemPlaca(true)
     setMensagemPlacaMsg('')
+    setMensagemPlacaConfirmada(false)
 
-    const { error } = await supabase
-      .from('homenagens')
-      .update({ mensagem_placa: mensagemPlaca || null })
-      .eq('id', editando.id)
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/salvar-mensagem-placa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: editando.id, mensagem: mensagemPlaca }),
+    })
+    const json = await res.json()
 
-    setMensagemPlacaMsg(error ? error.message : 'Salvo — vai junto no próximo QR Code enviado pro fornecedor.')
+    if (!res.ok) {
+      setMensagemPlacaMsg(json.error || 'Erro ao salvar mensagem')
+    } else if (json.aviso) {
+      setMensagemPlacaMsg(json.aviso)
+    } else if (json.emailConfirmacaoEnviado) {
+      setMensagemPlacaMsg('Salvo — e-mail de confirmação enviado pra família. O fornecedor só recebe depois que ela confirmar.')
+    } else if (mensagemPlaca.trim()) {
+      setMensagemPlacaMsg('Salvo, mas o e-mail de confirmação não saiu (Resend não configurado).')
+    } else {
+      setMensagemPlacaMsg('Salvo — sem mensagem, o QR Code segue direto pro fornecedor.')
+    }
     setSalvandoMensagemPlaca(false)
   }
 
@@ -584,52 +576,27 @@ function ParceiroMemoriaisInner() {
             )}
 
             {editando && (
-              <form onSubmit={convidarFamiliar} className="mt-2 pt-4 border-t border-zinc-800 space-y-2">
-                <label className="block text-xs text-zinc-500 mb-1">
-                  Convidar familiar responsável (acesso por e-mail, ele mesmo gera código pros outros)
-                </label>
+              <form onSubmit={cadastrarEmailFamilia} className="mt-2 pt-4 border-t border-zinc-800 space-y-2">
+                <label className="block text-xs text-zinc-500 mb-1">E-mail da família</label>
+                <p className="text-zinc-500 text-xs">
+                  Gera senha simples sozinho e manda por e-mail — família usa em /familia/login
+                  pra enviar fotos, vídeo e história. Também recebe o pedido de confirmação da
+                  mensagem da placa.
+                </p>
                 <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="Nome"
-                    value={conviteFamiliarNome}
-                    onChange={(e) => setConviteFamiliarNome(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
-                  />
                   <Input
                     type="email"
-                    placeholder="E-mail"
+                    placeholder="email@familia.com"
                     required
-                    value={conviteFamiliarEmail}
-                    onChange={(e) => setConviteFamiliarEmail(e.target.value)}
+                    value={familiaEmail}
+                    onChange={(e) => setFamiliaEmail(e.target.value)}
                     className="bg-zinc-800 border-zinc-700 text-white flex-1"
                   />
-                  <Button type="submit" disabled={convidandoFamiliar}>
-                    {convidandoFamiliar ? 'Convidando...' : 'Convidar'}
+                  <Button type="submit" disabled={cadastrandoFamiliaEmail}>
+                    {cadastrandoFamiliaEmail ? 'Cadastrando...' : temSenhaFamilia ? 'Gerar nova senha' : 'Cadastrar'}
                   </Button>
                 </div>
-                {conviteFamiliarMsg && <p className="text-xs text-zinc-400 mt-2">{conviteFamiliarMsg}</p>}
-              </form>
-            )}
-
-            {editando && (
-              <form onSubmit={salvarSenhaFamilia} className="mt-2 pt-4 border-t border-zinc-800">
-                <label className="block text-xs text-zinc-500 mb-1">
-                  {temSenhaFamilia ? 'Nova senha da família (ou deixe em branco pra remover acesso)' : 'Senha de edição da família (permite a família editar em /familia/login)'}
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="Deixe em branco pra não ter acesso"
-                    value={senhaFamilia}
-                    onChange={(e) => setSenhaFamilia(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
-                  />
-                  <Button type="submit" disabled={salvandoSenhaFamilia}>
-                    {salvandoSenhaFamilia ? 'Salvando...' : 'Salvar'}
-                  </Button>
-                </div>
-                {senhaFamiliaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaFamiliaMsg}</p>}
+                {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
               </form>
             )}
 
@@ -677,9 +644,20 @@ function ParceiroMemoriaisInner() {
                     onChange={(e) => setMensagemPlaca(e.target.value)}
                     className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
                   />
-                  <Button type="submit" disabled={salvandoMensagemPlaca}>
-                    {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <Button type="submit" disabled={salvandoMensagemPlaca}>
+                      {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
+                    </Button>
+                    {mensagemPlaca.trim() && (
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          mensagemPlacaConfirmada ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'
+                        }`}
+                      >
+                        {mensagemPlacaConfirmada ? 'Confirmado pela família' : 'Aguardando confirmação'}
+                      </span>
+                    )}
+                  </div>
                   {mensagemPlacaMsg && <p className="text-xs text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
                 </form>
               </div>
