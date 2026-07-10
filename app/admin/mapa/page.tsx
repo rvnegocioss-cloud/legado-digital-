@@ -614,6 +614,12 @@ export default function MapaPaginas() {
               Por enquanto é 1 fornecedor só (campo único). Se amanhã tiver mais de um, esse
               campo vira um cadastro de vários — ainda não construído, não precisa por ora.
             </p>
+            <p style={{ color: 'var(--wip-fg)' }}>
+              <strong>Verificar no próximo deploy:</strong> envio de e-mail usa Resend
+              (<code>RESEND_API_KEY</code>) — ainda sem conta criada. Checar se continua sendo
+              Resend ou se troca de serviço antes de configurar; Rafael pega a API key quando
+              decidido. Sem a key, QR e download continuam normais — só o e-mail automático não sai.
+            </p>
             <form className="sugestao-form" onSubmit={salvarEmailFornecedor} style={{ marginTop: '0.8rem', maxWidth: 420 }}>
               <label htmlFor="email-fornecedor">E-mail do fornecedor de placas</label>
               <input
