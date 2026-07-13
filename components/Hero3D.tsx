@@ -1,6 +1,8 @@
 'use client'
 
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Line } from '@react-three/drei'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { useMemo, useRef, useState, useEffect } from 'react'
 import * as THREE from 'three'
 
@@ -12,7 +14,7 @@ const VERTEX_SHADER = `
     float twinkle = 0.5 + 0.5 * sin(uTime * (0.5 + aRandom * 0.4) + aRandom * 6.28);
     vAlpha = twinkle;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = (10.0 + aRandom * 6.0) * (1.0 / -mvPosition.z);
+    gl_PointSize = (16.0 + aRandom * 10.0) * (1.0 / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
   }
 `
@@ -23,17 +25,18 @@ const FRAGMENT_SHADER = `
   void main() {
     float d = length(gl_PointCoord - vec2(0.5));
     float glow = smoothstep(0.5, 0.0, d);
-    gl_FragColor = vec4(uColor, glow * vAlpha * 0.9);
+    gl_FragColor = vec4(uColor * 1.6, glow * vAlpha);
   }
 `
 
-const POINT_COUNT = 90
-const CONNECTION_DISTANCE = 1.8
+const POINT_COUNT = 70
+const CONNECTION_DISTANCE = 2.0
 const MAX_CONNECTIONS_PER_POINT = 3
 
 function Constellation() {
   const groupRef = useRef<THREE.Group>(null!)
   const materialRef = useRef<THREE.ShaderMaterial>(null!)
+  const { pointer } = useThree()
 
   const [positions, randoms] = useMemo(() => {
     const pos = new Float32Array(POINT_COUNT * 3)
@@ -47,8 +50,8 @@ function Constellation() {
     return [pos, rnd]
   }, [])
 
-  const linePositions = useMemo(() => {
-    const verts: number[] = []
+  const lineSegments = useMemo(() => {
+    const segments: [number, number, number][][] = []
     const connCount = new Array(POINT_COUNT).fill(0)
     for (let i = 0; i < POINT_COUNT; i++) {
       for (let j = i + 1; j < POINT_COUNT; j++) {
@@ -58,14 +61,16 @@ function Constellation() {
         const dz = positions[i * 3 + 2] - positions[j * 3 + 2]
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
         if (dist < CONNECTION_DISTANCE) {
-          verts.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
-          verts.push(positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2])
+          segments.push([
+            [positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]],
+            [positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]],
+          ])
           connCount[i]++
           connCount[j]++
         }
       }
     }
-    return new Float32Array(verts)
+    return segments
   }, [positions])
 
   const uniforms = useMemo(
@@ -81,19 +86,20 @@ function Constellation() {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
     }
     if (groupRef.current) {
+      const targetY = 0.15 + pointer.x * 0.25
+      const targetX = Math.sin(state.clock.elapsedTime * 0.1) * 0.08 - pointer.y * 0.15
       groupRef.current.rotation.y += delta * 0.04
-      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.08
+      groupRef.current.rotation.x += (targetX - groupRef.current.rotation.x) * 0.03
+      groupRef.current.position.x += ((pointer.x * 0.3) - groupRef.current.position.x) * 0.02
+      void targetY
     }
   })
 
   return (
     <group ref={groupRef}>
-      <lineSegments>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[linePositions, 3]} />
-        </bufferGeometry>
-        <lineBasicMaterial color="#C9A46A" transparent opacity={0.15} depthWrite={false} />
-      </lineSegments>
+      {lineSegments.map((points, i) => (
+        <Line key={i} points={points} color="#C9A46A" lineWidth={1.1} transparent opacity={0.35} depthWrite={false} toneMapped={false} />
+      ))}
       <points>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
@@ -107,6 +113,7 @@ function Constellation() {
           uniforms={uniforms}
           vertexShader={VERTEX_SHADER}
           fragmentShader={FRAGMENT_SHADER}
+          toneMapped={false}
         />
       </points>
     </group>
@@ -140,6 +147,9 @@ export default function HeroBackground() {
         gl={{ antialias: true, alpha: true }}
       >
         <Constellation />
+        <EffectComposer>
+          <Bloom luminanceThreshold={0.15} intensity={1.1} mipmapBlur radius={0.8} />
+        </EffectComposer>
       </Canvas>
     </div>
   )
