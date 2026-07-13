@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { supabase } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -130,8 +131,15 @@ export default function AdminCemiterios() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-white">Cemitérios</h1>
-        <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-          <DialogTrigger render={<Button onClick={abrirNovo}>+ Novo Cemitério</Button>} />
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/mapa/drone"
+            className="px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 text-sm font-medium whitespace-nowrap"
+          >
+            Instalação Drone
+          </Link>
+          <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
+            <DialogTrigger render={<Button onClick={abrirNovo}>+ Novo Cemitério</Button>} />
           <DialogContent className="bg-zinc-900 text-white ring-zinc-800 sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
@@ -215,7 +223,8 @@ export default function AdminCemiterios() {
               </DialogFooter>
             </form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       {cemiterios.length === 0 ? (

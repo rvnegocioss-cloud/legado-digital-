@@ -631,13 +631,10 @@ export default function MapaPaginas() {
               a vida do homenageado direto no memorial. Avaliar pro próximo deploy.
             </p>
             <p>
-              <strong>Drones no cemitério (ideia do Pedro):</strong> conectado com o mapeamento
-              abaixo — voo de drone gera ortomosaico (imagem aérea georreferenciada) do cemitério,
-              base pra marcar cada túmulo com precisão de centímetros.
-            </p>
-            <p>
-              <strong>Mapeamento + navegação tipo Waze até o túmulo (ideia de Rafael):</strong> família
-              busca por nome/código cadastrado no túmulo e o celular guia até lá. Fase 5, schema de
+              <strong>Drones + mapeamento do cemitério + navegação tipo Waze até o túmulo
+              (ideia do Pedro):</strong> voo de drone gera ortomosaico (imagem aérea georreferenciada)
+              do cemitério, base pra marcar cada túmulo com precisão de centímetros — família busca
+              por nome/código cadastrado no túmulo e o celular guia até lá. Fase 5, schema de
               jazigo/gaveta ainda não existe. Opções analisadas:
             </p>
             <p style={{ marginLeft: '0.8rem' }}>
