@@ -9,14 +9,10 @@ const VERTEX_SHADER = `
   uniform float uTime;
   varying float vAlpha;
   void main() {
-    vec3 pos = position;
-    float speed = 0.3 + aRandom * 0.05;
-    float cycle = mod(uTime * speed + aRandom * 10.0, 8.0);
-    pos.y = mod(position.y + cycle, 8.0) - 4.0;
-    pos.x += sin(uTime * 0.5 + aRandom * 6.28) * 0.4;
-    vAlpha = smoothstep(0.0, 1.0, cycle) * smoothstep(8.0, 6.0, cycle);
-    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-    gl_PointSize = (14.0 + aRandom) * (1.0 / -mvPosition.z);
+    float twinkle = 0.5 + 0.5 * sin(uTime * (0.5 + aRandom * 0.4) + aRandom * 6.28);
+    vAlpha = twinkle;
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = (10.0 + aRandom * 6.0) * (1.0 / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
   }
 `
@@ -27,28 +23,50 @@ const FRAGMENT_SHADER = `
   void main() {
     float d = length(gl_PointCoord - vec2(0.5));
     float glow = smoothstep(0.5, 0.0, d);
-    gl_FragColor = vec4(uColor, glow * vAlpha * 0.85);
+    gl_FragColor = vec4(uColor, glow * vAlpha * 0.9);
   }
 `
 
-const PARTICLE_COUNT = 800
+const POINT_COUNT = 90
+const CONNECTION_DISTANCE = 1.8
+const MAX_CONNECTIONS_PER_POINT = 3
 
-function RisingEmbers() {
+function Constellation() {
+  const groupRef = useRef<THREE.Group>(null!)
   const materialRef = useRef<THREE.ShaderMaterial>(null!)
 
   const [positions, randoms] = useMemo(() => {
-    const pos = new Float32Array(PARTICLE_COUNT * 3)
-    const rnd = new Float32Array(PARTICLE_COUNT)
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const radius = 3 + Math.random() * 2.5
-      const angle = Math.random() * Math.PI * 2
-      pos[i * 3] = Math.cos(angle) * radius
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 6
-      pos[i * 3 + 2] = Math.sin(angle) * radius * 0.6
-      rnd[i] = Math.random() * 10
+    const pos = new Float32Array(POINT_COUNT * 3)
+    const rnd = new Float32Array(POINT_COUNT)
+    for (let i = 0; i < POINT_COUNT; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 9
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 5
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 5
+      rnd[i] = Math.random()
     }
     return [pos, rnd]
   }, [])
+
+  const linePositions = useMemo(() => {
+    const verts: number[] = []
+    const connCount = new Array(POINT_COUNT).fill(0)
+    for (let i = 0; i < POINT_COUNT; i++) {
+      for (let j = i + 1; j < POINT_COUNT; j++) {
+        if (connCount[i] >= MAX_CONNECTIONS_PER_POINT || connCount[j] >= MAX_CONNECTIONS_PER_POINT) continue
+        const dx = positions[i * 3] - positions[j * 3]
+        const dy = positions[i * 3 + 1] - positions[j * 3 + 1]
+        const dz = positions[i * 3 + 2] - positions[j * 3 + 2]
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
+        if (dist < CONNECTION_DISTANCE) {
+          verts.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
+          verts.push(positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2])
+          connCount[i]++
+          connCount[j]++
+        }
+      }
+    }
+    return new Float32Array(verts)
+  }, [positions])
 
   const uniforms = useMemo(
     () => ({
@@ -58,47 +76,40 @@ function RisingEmbers() {
     []
   )
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
     }
-  })
-
-  return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-aRandom" args={[randoms, 1]} />
-      </bufferGeometry>
-      <shaderMaterial
-        ref={materialRef}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-        uniforms={uniforms}
-        vertexShader={VERTEX_SHADER}
-        fragmentShader={FRAGMENT_SHADER}
-      />
-    </points>
-  )
-}
-
-function GlowCore() {
-  const ref = useRef<THREE.Mesh>(null!)
-
-  useFrame((state) => {
-    if (ref.current) {
-      const t = state.clock.elapsedTime
-      const scale = 1 + Math.sin(t * 1.2) * 0.08
-      ref.current.scale.setScalar(scale)
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.04
+      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.08
     }
   })
 
   return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[0.6, 32, 32]} />
-      <meshBasicMaterial color="#C9A46A" transparent opacity={0.25} />
-    </mesh>
+    <group ref={groupRef}>
+      <lineSegments>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[linePositions, 3]} />
+        </bufferGeometry>
+        <lineBasicMaterial color="#C9A46A" transparent opacity={0.15} depthWrite={false} />
+      </lineSegments>
+      <points>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          <bufferAttribute attach="attributes-aRandom" args={[randoms, 1]} />
+        </bufferGeometry>
+        <shaderMaterial
+          ref={materialRef}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          uniforms={uniforms}
+          vertexShader={VERTEX_SHADER}
+          fragmentShader={FRAGMENT_SHADER}
+        />
+      </points>
+    </group>
   )
 }
 
@@ -128,8 +139,7 @@ export default function HeroBackground() {
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
       >
-        <RisingEmbers />
-        <GlowCore />
+        <Constellation />
       </Canvas>
     </div>
   )
