@@ -25,6 +25,7 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
   const [senhaInput, setSenhaInput] = useState('')
   const [senhaErro, setSenhaErro] = useState('')
   const [verificando, setVerificando] = useState(false)
+  const [erroBusca, setErroBusca] = useState('')
 
   async function buscar(e: React.FormEvent) {
     e.preventDefault()
@@ -34,11 +35,20 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
     setResultados(null)
     setSenhaAbertaId(null)
     setDesbloqueadoId(null)
+    setErroBusca('')
 
-    const { data } = await supabase.rpc('buscar_homenagens_publicas', {
+    const { data, error } = await supabase.rpc('buscar_homenagens_publicas', {
       termo: nome,
       p_parceiro_id: parceiroId || null,
     })
+
+    if (error) {
+      setErroBusca('Não foi possível buscar agora. Tente de novo em instantes.')
+      setResultados([])
+      setBuscando(false)
+      return
+    }
+
     setResultados((data || []) as Resultado[])
     setBuscando(false)
   }
@@ -83,7 +93,9 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
         </button>
       </form>
 
-      {resultados !== null && resultados.length === 0 && (
+      {erroBusca && <p style={{ color: '#e08a8a', marginTop: 14 }}>{erroBusca}</p>}
+
+      {!erroBusca && resultados !== null && resultados.length === 0 && (
         <p style={tema.vazio}>
           Nenhum memorial encontrado com o nome &ldquo;{termo}&rdquo;. Confira a grafia e tente de novo.
         </p>

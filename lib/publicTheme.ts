@@ -65,6 +65,45 @@ export const tema: Record<string, CSSProperties> = {
   },
   vazio: { color: CORES.textoFraco, marginTop: 14 },
 
+  // Seção "O que é" — bloco assimétrico texto + lista de recursos (nunca 3 cards iguais)
+  secao: { maxWidth: 960, margin: "0 auto", padding: "8px 20px 56px" },
+  secaoTitulo: { fontSize: 26, fontWeight: 400, margin: "10px 0 14px", lineHeight: 1.25, maxWidth: 460 },
+  secaoGrid: {
+    display: "grid",
+    gridTemplateColumns: "1.1fr 0.9fr",
+    gap: 40,
+    alignItems: "start",
+    marginTop: 24,
+  },
+  secaoTexto: { color: CORES.textoCorpo, fontSize: 15.5, maxWidth: 440 },
+  recursoItem: { display: "flex", gap: 12, alignItems: "flex-start", padding: "12px 0" },
+  recursoIcone: { flexShrink: 0, marginTop: 2 },
+  recursoTitulo: { fontSize: 14.5, color: CORES.textoForte, marginBottom: 2 },
+  recursoTexto: { fontSize: 13.5, color: CORES.textoFraco, lineHeight: 1.5 },
+
+  // "Como funciona" — numeração serif grande, não círculo genérico de ícone
+  passos: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: 28,
+    marginTop: 24,
+    borderTop: `1px solid ${CORES.douradoBorda}`,
+    paddingTop: 28,
+  },
+  passoNumero: { fontSize: 34, color: CORES.dourado, fontWeight: 400, lineHeight: 1, marginBottom: 8 },
+  passoTitulo: { fontSize: 15, color: CORES.textoForte, marginBottom: 6 },
+  passoTexto: { fontSize: 13.5, color: CORES.textoFraco, lineHeight: 1.5 },
+
+  citacao: {
+    borderLeft: `2px solid ${CORES.dourado}`,
+    paddingLeft: 20,
+    margin: "40px 0 0",
+    color: CORES.textoCorpo,
+    fontStyle: "italic",
+    fontSize: 15.5,
+    maxWidth: 560,
+  },
+
   // Campo de busca — full width, contorno dourado sutil, foco sem outline padrão do browser.
   buscaForm: { display: "flex", gap: 8, width: "100%", maxWidth: 480, marginTop: 28 },
   buscaInput: {
