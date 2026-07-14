@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getParceiroUser, getAdminUser, signOut, supabase } from '@/lib/auth'
+import LegadoBotWidget from '@/components/LegadoBotWidget'
 
 type ParceiroUser = {
   email: string
@@ -138,6 +139,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <LegadoBotWidget />
     </div>
   )
 }

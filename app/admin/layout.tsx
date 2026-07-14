@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
+import LegadoBotWidget from '@/components/LegadoBotWidget'
 
 const ALLOWED_ROLES = ['Admin Legado Digital', 'Operador Legado Digital']
 
@@ -131,6 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </main>
       </div>
+      <LegadoBotWidget />
     </div>
   )
 }

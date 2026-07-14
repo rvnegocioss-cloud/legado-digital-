@@ -192,6 +192,7 @@ Prioridades imediatas:
 - [ ] Modos de privacidade completos (`configuracoes_privacidade` — hoje só existe "público" e "com senha", faltam "privado por e-mail/cadastro" e "oculto" da lista de modos do MVP)
 - [ ] Website institucional finalizado
 - [ ] **Política de Privacidade e Termos de Uso** (Rafael, 2026-07-14 — "não pode esquecer isso") — não existe nenhuma dessas páginas ainda no projeto. LGPD já é premissa técnica registrada acima, mas falta a página de verdade + link no rodapé de toda tela pública (landing, busca, página do parceiro, memorial).
+- [x] **LegadoBot Fase 1 — Central + Portal do Parceiro (2026-07-14, teste)** — ver seção própria "Chatbot IA na landing" mais abaixo pro detalhe completo.
 
 ## Feedback do Pedro (sócio) — 2026-07-14, prioridade sobre o resto do backlog
 Registrado na íntegra em `mapa_sugestoes` (tabela do banco, campo de sugestões do `/admin/mapa`). Decisão do Rafael: resto do projeto espera, corrigir isso primeiro, nesta ordem:
@@ -370,6 +371,17 @@ Fazer por último, depois que o resto do MVP estiver rodando de verdade.
 - Também primeiro atendimento na **landing page** — atende o visitante e escala pra um admin humano: se veio pela landing geral, chama admin da Central; se veio pela página do parceiro (`/parceiros/[slug]`), chama o parceiro também. Objetivo explícito: não perder lead/cliente por falta de resposta rápida.
 - **Entrada por voz (microfone)** — Rafael quer microfone na IA da Central pra falar com ela. Já tem um projeto próprio começado no PC (apelidado "Jarvis") que pode ser adaptado em vez de construir do zero — checar esse projeto antes de pesquisar solução nova.
 - Ainda é só ideia sendo despejada — Rafael quer organizar tudo isso numa conversa dedicada antes de qualquer linha de código.
+
+### LegadoBot Fase 1 — implementado (2026-07-14, só teste/sócios)
+Primeira versão real construída, escopo restrito a **Central + Portal do Parceiro** (família e público ainda não têm acesso, conforme faseamento pedido). Peças:
+
+- `app/api/legadobot/chat/route.ts` — rota POST, autentica via bearer token (mesmo padrão staff-ou-dono-do-parceiro das outras rotas do projeto), monta o system prompt a partir de `docs/LEGADOBOT_PROMPT.md` + contexto da sessão (nome, e-mail, papel, `parceiro_id` se for parceiro), chama o LLM e devolve `{ resposta, acao }`.
+- `components/LegadoBotWidget.tsx` — botão flutuante + painel de chat (cores navy/dourado do padrão, ícones `lucide-react`), montado em `app/admin/layout.tsx` e `app/parceiro/layout.tsx`.
+- **Backend do LLM: `freellmapi`** (repo próprio do Rafael, `github.com/tashfeenahmed/freellmapi`) rodando local em `http://localhost:3001/v1`, compatível com a API da OpenAI. Chave e URL em `.env.local` (`FREELLMAPI_BASE_URL`, `FREELLMAPI_API_KEY`, `FREELLMAPI_MODEL=auto`).
+- **Limitação crítica, documentada e aceita pelo Rafael (2026-07-14):** freellmapi só roda na máquina local dele (`INICIAR_FREELLMAPI.bat`) — em produção (Vercel) a chamada falha, não existe rede pra `localhost:3001` de dentro do servidor da Vercel. **Isso é de propósito**: essa API é só pra teste dos sócios agora, será substituída por API paga de verdade antes de ir pra família/público — bate com a regra do projeto sobre integração externa escalável (não é gambiarra permanente, é protótipo assumido como protótipo).
+- **Escopo por papel:** staff da Central tem acesso total; Parceiro B2B só recebe contexto do próprio `parceiro_id`, nunca de outro parceiro nem dado interno da Central — reforçado tanto no prompt (`docs/LEGADOBOT_PROMPT.md`) quanto no código da rota (o filtro não depende só de instrução de texto pro modelo).
+- **Navegação automática (pedido do Rafael, 2026-07-14):** se o usuário pergunta "aonde eu vejo X", o bot pode responder E navegar sozinho — inclui uma diretiva `AÇÃO: /caminho` na última linha da resposta (lista fechada de rotas conhecidas, documentada em `docs/LEGADOBOT_PROMPT.md`), a rota do servidor extrai essa linha antes de devolver o texto, e o widget faz `router.push()` automaticamente. Parceiro só pode ser navegado dentro de `/parceiro*`, nunca pra rota da Central.
+- **Não incluído ainda:** microfone/voz (projeto "Jarvis" citado pelo Rafael, não conectado), acesso de leitura/escrita direta no banco com guardrail (ideia registrada, não construída — é a parte mais sensível), atendimento na landing pra família/público (Fase 2/3 do faseamento original).
 
 ## Ideias em avaliação (backlog não decidido, só registrado)
 - **Música gerada com IA (Suno):** opção do familiar gerar uma música sobre a vida do homenageado direto no memorial. Avaliar pro próximo deploy. Registrado 2026-07-10.

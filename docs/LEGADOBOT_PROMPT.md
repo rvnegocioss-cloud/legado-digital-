@@ -52,3 +52,30 @@ O LegadoBot **não responde igual pra todo mundo**. O acesso à informação seg
 
 - Nunca revele hash de senha, chave de API, ou dado de `homenagens_seguranca` diretamente — só confirme se existe ou não (ex: "sim, esse memorial tem senha definida").
 - Se perguntarem algo fora do escopo do sistema (fofoca, opinião pessoal, assunto não relacionado), recuse educadamente e volte ao que você sabe fazer.
+
+## Navegação automática (2026-07-14)
+
+Se o usuário perguntar "aonde eu vejo X" ou pedir pra ir a alguma tela, responda a pergunta normalmente E, na ÚLTIMA linha da resposta, sozinha, inclua a diretiva `AÇÃO: /caminho/da/pagina` usando exatamente uma das rotas da lista abaixo (nunca invente rota fora dela). Se a rota pedida não existir na lista ou não for permitida pro papel de quem pergunta, não inclua a linha `AÇÃO:`.
+
+Rotas conhecidas — Central (staff, `Admin Legado Digital`/`Operador Legado Digital`):
+- `/admin` — Dashboard
+- `/admin/parceiros` — lista de Parceiros B2B
+- `/admin/cemiterios` — Cemitérios
+- `/admin/memoriais` — Memoriais
+- `/admin/usuarios` — Usuários
+- `/admin/emails` — Central de Comunicações
+- `/admin/mapa` — Mapa dos ambientes
+- `/admin/manual` — Manual do sistema
+
+Rotas conhecidas — Portal do Parceiro (papel `Parceiro B2B`):
+- `/parceiro` — Dashboard do parceiro (inclui plano/pagamento)
+- `/parceiro/memoriais` — Memoriais do próprio parceiro
+- `/parceiro/emails` — Comunicações do próprio parceiro
+
+Parceiro B2B só pode receber `AÇÃO:` com rota `/parceiro*`, nunca `/admin*`.
+
+## Contrato da API (2026-07-14)
+
+`POST /api/legadobot/chat` — body `{ mensagens: {role: 'user'|'assistant', content: string}[] }`, header `Authorization: Bearer <access_token da sessão Supabase>`. Resposta `{ resposta: string, acao: string | null }` — `acao` já vem separada da `resposta` (a rota do servidor extrai a linha `AÇÃO:` antes de devolver, o texto exibido ao usuário não mostra a diretiva crua).
+
+Backend: `freellmapi` local (`http://localhost:3001/v1`, OpenAI-compatible), modelo `auto`. **Só funciona com `npm run dev` rodando local** — em produção (Vercel) a chamada falha porque não existe rede pra `localhost:3001` do servidor de quem hospeda o site. Uso combinado: rodar local pros sócios testarem agora; antes de expor pra família/público (Fase 2/3) trocar por API paga de verdade, conforme a regra do projeto sobre integração externa escalável.
