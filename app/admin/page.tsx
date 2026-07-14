@@ -20,6 +20,11 @@ interface MemorialQr {
   qr_code_url: string | null
 }
 
+interface RankItem {
+  nome: string
+  visualizacoes: number
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     totalParceiros: 0,
@@ -31,12 +36,62 @@ export default function AdminDashboard() {
   const [emailFornecedor, setEmailFornecedor] = useState('')
   const [salvandoEmail, setSalvandoEmail] = useState(false)
   const [emailMsg, setEmailMsg] = useState('')
+  const [totalVisualizacoes, setTotalVisualizacoes] = useState(0)
+  const [novosMemoriais, setNovosMemoriais] = useState(0)
+  const [topCemiterios, setTopCemiterios] = useState<RankItem[]>([])
+  const [topParceiros, setTopParceiros] = useState<RankItem[]>([])
 
   useEffect(() => {
     loadStats()
     loadMemoriaisQr()
     loadEmailFornecedor()
+    loadMetricas()
   }, [])
+
+  async function loadMetricas() {
+    const { data: homenagensData } = await supabase
+      .from('homenagens')
+      .select('visualizacoes, created_at, parceiro_id, lapide_id')
+
+    const { data: lapidesData } = await supabase.from('lapides').select('id, cemiterio_id')
+    const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome')
+    const { data: parceirosData } = await supabase.from('parceiros_b2b').select('id, nome_fantasia, razao_social')
+
+    const homs = homenagensData || []
+    setTotalVisualizacoes(homs.reduce((soma, h) => soma + (h.visualizacoes || 0), 0))
+
+    const seteDiasAtras = Date.now() - 7 * 86400000
+    setNovosMemoriais(homs.filter((h) => new Date(h.created_at).getTime() > seteDiasAtras).length)
+
+    const lapideParaCemiterio = new Map((lapidesData || []).map((l) => [l.id, l.cemiterio_id]))
+    const visPorCemiterio = new Map<string, number>()
+    for (const h of homs) {
+      if (!h.lapide_id) continue
+      const cemiterioId = lapideParaCemiterio.get(h.lapide_id)
+      if (!cemiterioId) continue
+      visPorCemiterio.set(cemiterioId, (visPorCemiterio.get(cemiterioId) || 0) + (h.visualizacoes || 0))
+    }
+    const nomeCemiterio = new Map((cemiteriosData || []).map((c) => [c.id, c.nome]))
+    setTopCemiterios(
+      [...visPorCemiterio.entries()]
+        .map(([id, visualizacoes]) => ({ nome: nomeCemiterio.get(id) || 'Sem nome', visualizacoes }))
+        .sort((a, b) => b.visualizacoes - a.visualizacoes)
+        .slice(0, 5)
+    )
+
+    const visPorParceiro = new Map<string, number>()
+    for (const h of homs) {
+      if (!h.parceiro_id) continue
+      visPorParceiro.set(h.parceiro_id, (visPorParceiro.get(h.parceiro_id) || 0) + (h.visualizacoes || 0))
+    }
+    const nomeParceiro = new Map((parceirosData || []).map((p) => [p.id, p.nome_fantasia || p.razao_social]))
+    setTopParceiros(
+      [...visPorParceiro.entries()]
+        .map(([id, visualizacoes]) => ({ nome: nomeParceiro.get(id) || 'Sem nome', visualizacoes }))
+        .sort((a, b) => b.visualizacoes - a.visualizacoes)
+        .slice(0, 5)
+    )
+  }
 
   async function loadStats() {
     const { count: totalParceiros } = await supabase
@@ -104,6 +159,53 @@ export default function AdminDashboard() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+          <h2 className="text-lg font-medium text-zinc-300">Visitas nos memoriais</h2>
+          <p className="text-3xl font-bold text-white mt-2">{totalVisualizacoes}</p>
+          <p className="text-zinc-500 text-xs mt-1">total acumulado desde que o contador entrou no ar</p>
+        </div>
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+          <h2 className="text-lg font-medium text-zinc-300">Novos memoriais</h2>
+          <p className="text-3xl font-bold text-white mt-2">{novosMemoriais}</p>
+          <p className="text-zinc-500 text-xs mt-1">nos últimos 7 dias</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+          <h2 className="text-sm font-medium text-zinc-400 mb-3">Cemitérios com mais visita</h2>
+          {topCemiterios.length === 0 ? (
+            <p className="text-zinc-500 text-sm">Sem memorial vinculado a lápide/cemitério ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {topCemiterios.map((c) => (
+                <li key={c.nome} className="flex justify-between text-sm">
+                  <span className="text-zinc-300">{c.nome}</span>
+                  <span className="text-white font-medium">{c.visualizacoes}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+          <h2 className="text-sm font-medium text-zinc-400 mb-3">Parceiros com mais visita</h2>
+          {topParceiros.length === 0 ? (
+            <p className="text-zinc-500 text-sm">Sem memorial vinculado a parceiro ainda.</p>
+          ) : (
+            <ul className="space-y-2">
+              {topParceiros.map((p) => (
+                <li key={p.nome} className="flex justify-between text-sm">
+                  <span className="text-zinc-300">{p.nome}</span>
+                  <span className="text-white font-medium">{p.visualizacoes}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {cards.map(card => (
           <Link

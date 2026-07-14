@@ -65,6 +65,8 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
   const m = homenagem as Homenagem;
 
+  supabase.rpc("incrementar_visualizacao", { p_slug: slug }).then(() => {});
+
   const { data: seguranca } = await supabase
     .from("homenagens_busca_publica")
     .select("tem_senha, link_habilitado, qrcode_habilitado")
