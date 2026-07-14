@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const navLinks = [
   { href: '#beneficios', label: 'Benefícios' },
@@ -26,15 +27,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl">🪦</span>
-            <div>
-              <span className="text-lg font-bold text-white">
-                LEGADO <span className="text-[#e2b714]">DIGITAL</span>
-              </span>
-              <span className="block text-[10px] tracking-[3px] text-white/40 uppercase">
-                Memoriais Digitais
-              </span>
-            </div>
+            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={160} height={64} className="h-10 w-auto object-contain" priority />
           </Link>
 
           {/* Desktop Nav */}
@@ -43,24 +36,24 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-white/60 hover:text-[#e2b714] transition-colors"
+                className="text-sm text-white/60 hover:text-[#C9A46A] transition-colors"
               >
                 {link.label}
               </Link>
             ))}
             <Link
               href="/parceiro/login"
-              className="text-sm text-white/60 hover:text-[#e2b714] transition-colors"
+              className="text-sm text-white/60 hover:text-[#C9A46A] transition-colors"
             >
               Acesso Parceiros
             </Link>
             <Link
               href="/familia/login"
-              className="text-sm text-white/60 hover:text-[#e2b714] transition-colors"
+              className="text-sm text-white/60 hover:text-[#C9A46A] transition-colors"
             >
               Acesso Familiar
             </Link>
-            <Button className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold px-6" asChild>
+            <Button className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold px-6" asChild>
               <Link href="/admin/login">Acesso Legado Central</Link>
             </Button>
           </div>
@@ -97,7 +90,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className="block text-sm text-white/60 hover:text-[#e2b714] transition-colors py-2"
+                  className="block text-sm text-white/60 hover:text-[#C9A46A] transition-colors py-2"
                 >
                   {link.label}
                 </Link>
@@ -105,18 +98,18 @@ export default function Navbar() {
               <Link
                 href="/parceiro/login"
                 onClick={() => setIsOpen(false)}
-                className="block text-sm text-white/60 hover:text-[#e2b714] transition-colors py-2"
+                className="block text-sm text-white/60 hover:text-[#C9A46A] transition-colors py-2"
               >
                 Acesso Parceiros
               </Link>
               <Link
                 href="/familia/login"
                 onClick={() => setIsOpen(false)}
-                className="block text-sm text-white/60 hover:text-[#e2b714] transition-colors py-2"
+                className="block text-sm text-white/60 hover:text-[#C9A46A] transition-colors py-2"
               >
                 Acesso Familiar
               </Link>
-              <Button className="w-full bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold" asChild>
+              <Button className="w-full bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold" asChild>
                 <Link href="/admin/login">Acesso Legado Central</Link>
               </Button>
             </div>

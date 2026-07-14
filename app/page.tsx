@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,16 +34,6 @@ export default function Home() {
       {/* ===== HERO ===== */}
       <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
         <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
-            <Badge className="mb-6 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30 px-4 py-1.5 text-xs tracking-wider uppercase">
-              🪦 Plataforma SaaS para o Setor Funerário
-            </Badge>
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -60,8 +51,8 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 text-lg md:text-xl text-white/50 max-w-2xl mx-auto"
           >
-            Transforme o luto em legado permanente. Ofereça memoriais digitais
-            elegantes com QR Code para as famílias que sua funerária atende.
+            Um espaço permanente para preservar a história de quem se foi.
+            Sua funerária oferece memoriais digitais com QR Code às famílias que atende.
           </motion.p>
 
           <motion.div
@@ -103,22 +94,6 @@ export default function Home() {
             ))}
           </motion.div>
         </div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2"
-          >
-            <div className="w-1 h-2 bg-[#C9A46A] rounded-full" />
-          </motion.div>
-        </motion.div>
       </section>
 
       {/* ===== BENEFÍCIOS ===== */}
@@ -442,14 +417,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🪦</span>
-                <span className="text-lg font-bold text-white">
-                  LEGADO <span className="text-[#C9A46A]">DIGITAL</span>
-                </span>
-              </div>
+              <Image src="/logo-legado-digital.png" alt="Legado Digital" width={180} height={72} className="h-12 w-auto object-contain mb-4" />
               <p className="text-white/40 text-sm max-w-md">
-                Transformando o luto em legado permanente. Memoriais digitais
+                Um espaço permanente para preservar histórias. Memoriais digitais
                 com QR Code para o setor funerário.
               </p>
             </div>
