@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   const [emailMsg, setEmailMsg] = useState('')
   const [totalVisualizacoes, setTotalVisualizacoes] = useState(0)
   const [novosMemoriais, setNovosMemoriais] = useState(0)
+  const [homenagensRecentes, setHomenagensRecentes] = useState(0)
   const [topCemiterios, setTopCemiterios] = useState<RankItem[]>([])
   const [topParceiros, setTopParceiros] = useState<RankItem[]>([])
 
@@ -62,6 +63,12 @@ export default function AdminDashboard() {
 
     const seteDiasAtras = Date.now() - 7 * 86400000
     setNovosMemoriais(homs.filter((h) => new Date(h.created_at).getTime() > seteDiasAtras).length)
+
+    const { count: condolenciasRecentes } = await supabase
+      .from('condolencias')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', new Date(seteDiasAtras).toISOString())
+    setHomenagensRecentes(condolenciasRecentes || 0)
 
     const lapideParaCemiterio = new Map((lapidesData || []).map((l) => [l.id, l.cemiterio_id]))
     const visPorCemiterio = new Map<string, number>()
@@ -160,7 +167,7 @@ export default function AdminDashboard() {
     <div>
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
           <h2 className="text-lg font-medium text-zinc-300">Visitas nos memoriais</h2>
           <p className="text-3xl font-bold text-white mt-2">{totalVisualizacoes}</p>
@@ -170,6 +177,11 @@ export default function AdminDashboard() {
           <h2 className="text-lg font-medium text-zinc-300">Novos memoriais</h2>
           <p className="text-3xl font-bold text-white mt-2">{novosMemoriais}</p>
           <p className="text-zinc-500 text-xs mt-1">nos últimos 7 dias</p>
+        </div>
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+          <h2 className="text-lg font-medium text-zinc-300">Homenagens recentes</h2>
+          <p className="text-3xl font-bold text-white mt-2">{homenagensRecentes}</p>
+          <p className="text-zinc-500 text-xs mt-1">condolências deixadas nos últimos 7 dias</p>
         </div>
       </div>
 
