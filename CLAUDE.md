@@ -34,6 +34,9 @@ Toda página de detalhe/edição (acessada clicando em algo de uma lista, ex: `/
 ## Regra — Layout de ficha na Central: não empilhar tudo em coluna única
 Ficha de detalhe (`/admin/memoriais/[id]` e afins) usa grid responsivo (`grid-cols-1 lg:grid-cols-3`), não uma pilha de cards um embaixo do outro. Conteúdo principal (dados/formulário) ocupa 2/3 da largura; informação de consulta rápida (ex: QR Code) fica ao lado, na coluna de 1/3, visível sem rolar a página. Em mobile reflui pra coluna única normalmente. Motivo: usuário reclamou que tudo ficava "uma coisa embaixo da outra" mesmo em tela larga — o problema não era mobile-first, era nunca ter sido montado um breakpoint de desktop. Registrado 2026-07-10.
 
+## Regra — Não perder ideias em aberto (2026-07-14)
+Se o Rafael não respondeu uma pergunta/sugestão, é porque não viu — não pode sumir da conversa. Toda ideia/pergunta minha ou dele que ainda não teve decisão vai pro **`docs/RASCUNHO_IDEIAS.md`** (arquivo separado, é rascunho). Só quando uma ideia de lá for decidida/concluída/corrigida ela sai do rascunho e vira registro definitivo aqui no CLAUDE.md. Nunca decidir/construir uma ideia do rascunho sem confirmação do Rafael primeiro.
+
 ## Regra — Integração Central ↔ Portal do Parceiro ↔ Página Pública
 Toda feature nova precisa ser refletida nos lados relevantes: se o parceiro pode editar algo sobre o próprio parceiro (ex: logo/descrição da página pública), a Central também precisa poder ver/editar isso — nunca implementar só de um lado. Se algo aparece na página pública, os dois portais internos (Central e Parceiro) devem ter visibilidade do dado por trás.
 
