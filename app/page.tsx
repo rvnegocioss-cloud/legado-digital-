@@ -83,9 +83,8 @@ export default function Home() {
           >
             {[
               { num: '4', label: 'Níveis de Acesso' },
-              { num: '3', label: 'Planos' },
               { num: '100%', label: 'Online' },
-              { num: '🔐', label: 'Privacidade Total' },
+              { num: '100%', label: 'Privacidade Total' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-3xl font-bold text-[#C9A46A]">{stat.num}</div>
@@ -238,94 +237,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== PLANOS ===== */}
-      <section id="planos" className="py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
-              Invista no Seu Negócio
-            </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold">
-              Planos <span className="gradient-text">para Sua Funerária</span>
-            </h2>
-            <p className="mt-4 text-white/50 max-w-2xl mx-auto">
-              Escolha o plano ideal para sua funerária. Todos incluem suporte técnico.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              {
-                name: 'Básico',
-                price: 'R$ 97',
-                desc: 'Para começar com memoriais digitais',
-                features: ['Até 10 memoriais', 'QR Code básico', 'Livro de condolências', 'Suporte por email'],
-                popular: false,
-              },
-              {
-                name: 'Profissional',
-                price: 'R$ 197',
-                desc: 'O mais escolhido pelas funerárias',
-                features: ['Até 50 memoriais', 'QR Code personalizado', 'Fotos e vídeos HD', 'Privacidade configurável', 'Suporte prioritário'],
-                popular: true,
-              },
-              {
-                name: 'Premium',
-                price: 'R$ 397',
-                desc: 'Solução completa com tudo incluso',
-                features: ['Memoriais ilimitados', 'QR Code premium', 'Efeitos 3D', 'Customização total', 'API para integração', 'Suporte 24/7'],
-                popular: false,
-              },
-            ].map((plano, idx) => (
-              <motion.div
-                key={plano.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className={`relative ${plano.popular ? 'md:-mt-4 md:mb-4' : ''}`}
-              >
-                <Card className={`h-full border ${plano.popular ? 'border-[#C9A46A] shadow-lg shadow-[#C9A46A]/10' : 'border-[rgba(201,168,76,0.15)]'} glass`}>
-                  {plano.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-[#C9A46A] text-[#0B1D2A] font-semibold px-4">
-                        ★ Mais Popular
-                      </Badge>
-                    </div>
-                  )}
-                  <CardHeader className={`${plano.popular ? 'pt-8' : ''}`}>
-                    <CardTitle className="text-white text-xl">{plano.name}</CardTitle>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold text-[#C9A46A]">{plano.price}</span>
-                      <span className="text-white/40 text-sm">/mês</span>
-                    </div>
-                    <CardDescription className="text-white/50 mt-2">{plano.desc}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {plano.features.map((feature) => (
-                      <div key={feature} className="flex items-center gap-3 text-sm">
-                        <span className="text-[#C9A46A]">✓</span>
-                        <span className="text-white/70">{feature}</span>
-                      </div>
-                    ))}
-                    <Button
-                      className={`w-full mt-6 ${
-                        plano.popular
-                          ? 'bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A]'
-                          : 'border-white/20 text-white hover:bg-white/5'
-                      }`}
-                      variant={plano.popular ? 'default' : 'outline'}
-                    >
-                      {plano.popular ? 'Começar Agora' : 'Ver Plano'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ===== FAQ ===== */}
       <section id="faq" className="py-24 px-4 bg-[#0B1D2A]/50">
         <div className="max-w-3xl mx-auto">
@@ -426,7 +337,7 @@ export default function Home() {
             <div>
               <h4 className="text-white font-semibold mb-4">Produto</h4>
               <div className="space-y-2 text-sm">
-                {['Benefícios', 'Planos', 'Como Funciona', 'FAQ'].map((link) => (
+                {['Benefícios', 'Como Funciona', 'FAQ'].map((link) => (
                   <div key={link} className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
                     {link}
                   </div>

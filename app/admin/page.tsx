@@ -167,21 +167,21 @@ export default function AdminDashboard() {
     <div>
       <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <h2 className="text-lg font-medium text-zinc-300">Visitas nos memoriais</h2>
-          <p className="text-3xl font-bold text-white mt-2">{totalVisualizacoes}</p>
-          <p className="text-zinc-500 text-xs mt-1">total acumulado desde que o contador entrou no ar</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+        <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3">
+          <h2 className="text-xs font-medium text-zinc-400">Visitas nos memoriais</h2>
+          <p className="text-xl font-bold text-white mt-1">{totalVisualizacoes}</p>
+          <p className="text-zinc-500 text-[11px] mt-0.5">total acumulado desde que o contador entrou no ar</p>
         </div>
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <h2 className="text-lg font-medium text-zinc-300">Novos memoriais</h2>
-          <p className="text-3xl font-bold text-white mt-2">{novosMemoriais}</p>
-          <p className="text-zinc-500 text-xs mt-1">nos últimos 7 dias</p>
+        <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3">
+          <h2 className="text-xs font-medium text-zinc-400">Novos memoriais</h2>
+          <p className="text-xl font-bold text-white mt-1">{novosMemoriais}</p>
+          <p className="text-zinc-500 text-[11px] mt-0.5">nos últimos 7 dias</p>
         </div>
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <h2 className="text-lg font-medium text-zinc-300">Homenagens recentes</h2>
-          <p className="text-3xl font-bold text-white mt-2">{homenagensRecentes}</p>
-          <p className="text-zinc-500 text-xs mt-1">condolências deixadas nos últimos 7 dias</p>
+        <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3">
+          <h2 className="text-xs font-medium text-zinc-400">Homenagens recentes</h2>
+          <p className="text-xl font-bold text-white mt-1">{homenagensRecentes}</p>
+          <p className="text-zinc-500 text-[11px] mt-0.5">condolências deixadas nos últimos 7 dias</p>
         </div>
       </div>
 

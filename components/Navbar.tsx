@@ -9,7 +9,6 @@ import Image from 'next/image'
 const navLinks = [
   { href: '#beneficios', label: 'Benefícios' },
   { href: '#como-funciona', label: 'Como Funciona' },
-  { href: '#planos', label: 'Planos' },
   { href: '#faq', label: 'FAQ' },
 ]
 
@@ -24,10 +23,10 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 glass"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+        <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={220} height={88} className="h-14 w-auto object-contain" priority />
+          <Link href="/" className="flex items-center gap-2 group ml-2 md:ml-8">
+            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={320} height={128} className="h-20 w-auto object-contain" priority />
           </Link>
 
           {/* Desktop Nav */}

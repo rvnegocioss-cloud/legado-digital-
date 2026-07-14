@@ -7,7 +7,7 @@ import { useRef, useState, useEffect } from 'react'
 import * as THREE from 'three'
 
 function LogoModel() {
-  const { scene } = useGLTF('/3d/logo-legado-digital.glb')
+  const { scene } = useGLTF('/3d/logo-icone.glb')
   const ref = useRef<THREE.Group>(null!)
 
   useEffect(() => {
@@ -16,24 +16,26 @@ function LogoModel() {
         child.material = new THREE.MeshStandardMaterial({
           color: '#C9A46A',
           metalness: 0.6,
-          roughness: 0.35,
+          roughness: 0.3,
           emissive: '#a8834a',
-          emissiveIntensity: 0.15,
+          emissiveIntensity: 0.2,
         })
       }
     })
   }, [scene])
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (ref.current) {
-      ref.current.rotation.y += delta * 0.4
+      const t = state.clock.elapsedTime
+      const pulse = 1 + Math.sin(t * 0.6) * 0.18
+      ref.current.scale.setScalar(pulse)
     }
   })
 
   return (
     <Center>
       <group ref={ref}>
-        <primitive object={scene} scale={2.2} />
+        <primitive object={scene} scale={2.4} />
       </group>
     </Center>
   )
@@ -73,4 +75,4 @@ export default function HeroBackground() {
   )
 }
 
-useGLTF.preload('/3d/logo-legado-digital.glb')
+useGLTF.preload('/3d/logo-icone.glb')
