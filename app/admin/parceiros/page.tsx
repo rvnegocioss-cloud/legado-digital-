@@ -58,6 +58,7 @@ export default function AdminParceiros() {
   const [form, setForm] = useState(FORM_INICIAL)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
+  const [consultandoCnpj, setConsultandoCnpj] = useState(false)
 
   useEffect(() => {
     loadParceiros()
@@ -116,6 +117,36 @@ export default function AdminParceiros() {
     setSalvando(false)
     setDialogAberto(false)
     loadParceiros()
+  }
+
+  async function consultarCnpj() {
+    const digits = form.cnpj.replace(/\D/g, '')
+    if (digits.length !== 14) {
+      setErro('Digite o CNPJ completo (14 dígitos) antes de consultar.')
+      return
+    }
+    setConsultandoCnpj(true)
+    setErro('')
+
+    const res = await fetch(`/api/admin/consultar-cnpj?cnpj=${digits}`)
+    const json = await res.json()
+
+    if (!res.ok) {
+      setErro(json.error || 'Não foi possível consultar esse CNPJ.')
+      setConsultandoCnpj(false)
+      return
+    }
+
+    setForm({
+      ...form,
+      razao_social: json.razao_social || form.razao_social,
+      nome_fantasia: json.nome_fantasia || form.nome_fantasia,
+      email: json.email || form.email,
+      telefone: json.telefone || form.telefone,
+      cidade: json.cidade || form.cidade,
+      estado: json.estado || form.estado,
+    })
+    setConsultandoCnpj(false)
   }
 
   async function alternarAtivo(p: Parceiro) {
@@ -201,12 +232,25 @@ export default function AdminParceiros() {
               </div>
               <div>
                 <label className="block text-xs text-zinc-500 mb-1">CNPJ</label>
-                <Input
-                  placeholder="00.000.000/0000-00"
-                  value={form.cnpj}
-                  onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="00.000.000/0000-00"
+                    value={form.cnpj}
+                    onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
+                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={consultarCnpj}
+                    disabled={consultandoCnpj}
+                  >
+                    {consultandoCnpj ? 'Consultando...' : 'Consultar Receita'}
+                  </Button>
+                </div>
+                <p className="text-zinc-500 text-[11px] mt-1">
+                  Preenche razão social, nome fantasia, e-mail, telefone, cidade e UF automaticamente — confira antes de salvar.
+                </p>
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
