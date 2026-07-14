@@ -27,7 +27,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={160} height={64} className="h-10 w-auto object-contain" priority />
+            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={220} height={88} className="h-14 w-auto object-contain" priority />
           </Link>
 
           {/* Desktop Nav */}

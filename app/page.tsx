@@ -417,7 +417,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div className="md:col-span-2">
-              <Image src="/logo-legado-digital.png" alt="Legado Digital" width={180} height={72} className="h-12 w-auto object-contain mb-4" />
+              <Image src="/logo-legado-digital.png" alt="Legado Digital" width={240} height={96} className="h-16 w-auto object-contain mb-4" />
               <p className="text-white/40 text-sm max-w-md">
                 Um espaço permanente para preservar histórias. Memoriais digitais
                 com QR Code para o setor funerário.

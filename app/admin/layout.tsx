@@ -75,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-zinc-950 text-white flex">
       <aside className="hidden md:flex md:flex-col w-60 shrink-0 border-r border-zinc-800 bg-zinc-900/60">
         <Link href="/admin" className="flex items-center h-16 px-5 border-b border-zinc-800 shrink-0">
-          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={160} height={64} className="h-10 w-auto object-contain" priority />
+          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={240} height={96} className="h-14 w-auto object-contain" priority />
         </Link>
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navItems.map(item => (
@@ -97,7 +97,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
-          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={120} height={48} className="md:hidden h-8 w-auto object-contain" />
+          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={160} height={64} className="md:hidden h-10 w-auto object-contain" />
           <div className="hidden md:block" />
           <div className="flex items-center gap-4">
             <button className="text-zinc-400 hover:text-white transition-colors" aria-label="Alertas">
