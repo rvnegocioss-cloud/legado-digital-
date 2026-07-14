@@ -26,7 +26,7 @@ const stagger = {
 
 export default function Home() {
   return (
-    <>
+    <div style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
       <Navbar />
       <HeroBackground />
 
@@ -38,7 +38,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <Badge className="mb-6 bg-[#e2b714]/10 text-[#e2b714] border-[#e2b714]/30 px-4 py-1.5 text-xs tracking-wider uppercase">
+            <Badge className="mb-6 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30 px-4 py-1.5 text-xs tracking-wider uppercase">
               🪦 Plataforma SaaS para o Setor Funerário
             </Badge>
           </motion.div>
@@ -70,7 +70,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.9 }}
             className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Button size="lg" className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold text-base px-8 h-14">
+            <Button size="lg" className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold text-base px-8 h-14">
               Começar Agora
             </Button>
             <Button
@@ -97,7 +97,7 @@ export default function Home() {
               { num: '🔐', label: 'Privacidade Total' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-[#e2b714]">{stat.num}</div>
+                <div className="text-3xl font-bold text-[#C9A46A]">{stat.num}</div>
                 <div className="text-sm text-white/40 mt-1">{stat.label}</div>
               </div>
             ))}
@@ -116,7 +116,7 @@ export default function Home() {
             transition={{ duration: 2, repeat: Infinity }}
             className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2"
           >
-            <div className="w-1 h-2 bg-[#e2b714] rounded-full" />
+            <div className="w-1 h-2 bg-[#C9A46A] rounded-full" />
           </motion.div>
         </motion.div>
       </section>
@@ -125,7 +125,7 @@ export default function Home() {
       <section id="beneficios" className="py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#e2b714]/10 text-[#e2b714] border-[#e2b714]/30">
+            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
               Por que Legado Digital?
             </Badge>
             <h2 className="text-3xl md:text-5xl font-bold">
@@ -181,7 +181,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
               >
-                <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#e2b714]/30 transition-all h-full">
+                <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#C9A46A]/30 transition-all h-full">
                   <CardHeader>
                     <div className="text-4xl mb-2">{benefit.icon}</div>
                     <CardTitle className="text-white text-lg">{benefit.title}</CardTitle>
@@ -201,11 +201,11 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="md:col-span-3"
             >
-              <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#e2b714]/30 transition-all h-full">
+              <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#C9A46A]/30 transition-all h-full">
                 <CardContent className="flex items-center justify-center p-8">
                   <Button
                     size="lg"
-                    className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold text-base px-8 h-14"
+                    className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold text-base px-8 h-14"
                     asChild
                   >
                     <Link href="/homenagem">
@@ -220,10 +220,10 @@ export default function Home() {
       </section>
 
       {/* ===== COMO FUNCIONA ===== */}
-      <section id="como-funciona" className="py-24 px-4 bg-[#0a0a12]/50">
+      <section id="como-funciona" className="py-24 px-4 bg-[#0B1D2A]/50">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#e2b714]/10 text-[#e2b714] border-[#e2b714]/30">
+            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
               Simples e Rápido
             </Badge>
             <h2 className="text-3xl md:text-5xl font-bold">
@@ -247,7 +247,7 @@ export default function Home() {
                 className="text-center"
               >
                 <div className="text-5xl mb-4">{item.icon}</div>
-                <div className="text-[#e2b714] text-sm font-mono mb-2">{item.step}</div>
+                <div className="text-[#C9A46A] text-sm font-mono mb-2">{item.step}</div>
                 <h3 className="text-white font-semibold mb-2">{item.title}</h3>
                 <p className="text-white/40 text-sm">{item.desc}</p>
               </motion.div>
@@ -257,7 +257,7 @@ export default function Home() {
           {/* Arrow connector */}
           <div className="hidden md:flex justify-center mt-8 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="w-8 h-0.5 bg-gradient-to-r from-[#e2b714]/50 to-transparent" />
+              <div key={i} className="w-8 h-0.5 bg-gradient-to-r from-[#C9A46A]/50 to-transparent" />
             ))}
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function Home() {
       <section id="planos" className="py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#e2b714]/10 text-[#e2b714] border-[#e2b714]/30">
+            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
               Invista no Seu Negócio
             </Badge>
             <h2 className="text-3xl md:text-5xl font-bold">
@@ -310,10 +310,10 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: idx * 0.15 }}
                 className={`relative ${plano.popular ? 'md:-mt-4 md:mb-4' : ''}`}
               >
-                <Card className={`h-full border ${plano.popular ? 'border-[#e2b714] shadow-lg shadow-[#e2b714]/10' : 'border-[rgba(201,168,76,0.15)]'} glass`}>
+                <Card className={`h-full border ${plano.popular ? 'border-[#C9A46A] shadow-lg shadow-[#C9A46A]/10' : 'border-[rgba(201,168,76,0.15)]'} glass`}>
                   {plano.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-[#e2b714] text-[#1a1a2e] font-semibold px-4">
+                      <Badge className="bg-[#C9A46A] text-[#0B1D2A] font-semibold px-4">
                         ★ Mais Popular
                       </Badge>
                     </div>
@@ -321,7 +321,7 @@ export default function Home() {
                   <CardHeader className={`${plano.popular ? 'pt-8' : ''}`}>
                     <CardTitle className="text-white text-xl">{plano.name}</CardTitle>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-[#e2b714]">{plano.price}</span>
+                      <span className="text-4xl font-bold text-[#C9A46A]">{plano.price}</span>
                       <span className="text-white/40 text-sm">/mês</span>
                     </div>
                     <CardDescription className="text-white/50 mt-2">{plano.desc}</CardDescription>
@@ -329,14 +329,14 @@ export default function Home() {
                   <CardContent className="space-y-4">
                     {plano.features.map((feature) => (
                       <div key={feature} className="flex items-center gap-3 text-sm">
-                        <span className="text-[#e2b714]">✓</span>
+                        <span className="text-[#C9A46A]">✓</span>
                         <span className="text-white/70">{feature}</span>
                       </div>
                     ))}
                     <Button
                       className={`w-full mt-6 ${
                         plano.popular
-                          ? 'bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e]'
+                          ? 'bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A]'
                           : 'border-white/20 text-white hover:bg-white/5'
                       }`}
                       variant={plano.popular ? 'default' : 'outline'}
@@ -352,10 +352,10 @@ export default function Home() {
       </section>
 
       {/* ===== FAQ ===== */}
-      <section id="faq" className="py-24 px-4 bg-[#0a0a12]/50">
+      <section id="faq" className="py-24 px-4 bg-[#0B1D2A]/50">
         <div className="max-w-3xl mx-auto">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#e2b714]/10 text-[#e2b714] border-[#e2b714]/30">
+            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
               Dúvidas Frequentes
             </Badge>
             <h2 className="text-3xl md:text-5xl font-bold">
@@ -394,9 +394,9 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
               >
                 <details className="group glass border border-[rgba(201,168,76,0.15)] rounded-lg overflow-hidden">
-                  <summary className="flex items-center justify-between p-5 cursor-pointer text-white font-medium hover:text-[#e2b714] transition-colors">
+                  <summary className="flex items-center justify-between p-5 cursor-pointer text-white font-medium hover:text-[#C9A46A] transition-colors">
                     {faq.q}
-                    <span className="text-[#e2b714] group-open:rotate-180 transition-transform text-xl">▼</span>
+                    <span className="text-[#C9A46A] group-open:rotate-180 transition-transform text-xl">▼</span>
                   </summary>
                   <div className="px-5 pb-5 text-white/50 text-sm leading-relaxed">
                     {faq.a}
@@ -414,7 +414,7 @@ export default function Home() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center glass border border-[#e2b714]/20 rounded-2xl p-12 md:p-20"
+          className="max-w-4xl mx-auto text-center glass border border-[#C9A46A]/20 rounded-2xl p-12 md:p-20"
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Pronto para <span className="gradient-text">Transformar</span> seu Negócio?
@@ -423,7 +423,7 @@ export default function Home() {
             Junte-se às funerárias que já oferecem memoriais digitais e se destacam no mercado.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-[#e2b714] hover:bg-[#c9a84c] text-[#1a1a2e] font-semibold text-base px-10 h-14">
+            <Button size="lg" className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold text-base px-10 h-14">
               Começar Grátis por 7 Dias
             </Button>
             <Button
@@ -445,7 +445,7 @@ export default function Home() {
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">🪦</span>
                 <span className="text-lg font-bold text-white">
-                  LEGADO <span className="text-[#e2b714]">DIGITAL</span>
+                  LEGADO <span className="text-[#C9A46A]">DIGITAL</span>
                 </span>
               </div>
               <p className="text-white/40 text-sm max-w-md">
@@ -457,7 +457,7 @@ export default function Home() {
               <h4 className="text-white font-semibold mb-4">Produto</h4>
               <div className="space-y-2 text-sm">
                 {['Benefícios', 'Planos', 'Como Funciona', 'FAQ'].map((link) => (
-                  <div key={link} className="text-white/40 hover:text-[#e2b714] cursor-pointer transition-colors">
+                  <div key={link} className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
                     {link}
                   </div>
                 ))}
@@ -467,7 +467,7 @@ export default function Home() {
               <h4 className="text-white font-semibold mb-4">Empresa</h4>
               <div className="space-y-2 text-sm">
                 {['Sobre', 'Contato', 'Privacidade', 'Termos'].map((link) => (
-                  <div key={link} className="text-white/40 hover:text-[#e2b714] cursor-pointer transition-colors">
+                  <div key={link} className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
                     {link}
                   </div>
                 ))}
@@ -481,6 +481,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   )
 }

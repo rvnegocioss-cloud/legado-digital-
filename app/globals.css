@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a12;
-  --foreground: #f5f5f5;
-  --primary: #1a1a2e;
-  --secondary: #e2b714;
-  --accent: #c9a84c;
-  --card-bg: rgba(26, 26, 46, 0.6);
-  --border: rgba(201, 168, 76, 0.15);
+  --background: #0B1D2A;
+  --foreground: #F5F2EB;
+  --primary: #0B1D2A;
+  --secondary: #C9A46A;
+  --accent: #a8834a;
+  --card-bg: rgba(11, 29, 42, 0.6);
+  --border: rgba(201, 164, 106, 0.18);
 }
 
 @theme inline {
@@ -60,7 +60,7 @@ html {
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(26, 26, 46, 0.4);
+  background: rgba(11, 29, 42, 0.4);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
 }
