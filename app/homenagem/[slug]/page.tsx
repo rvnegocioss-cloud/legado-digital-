@@ -67,9 +67,20 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
   const { data: seguranca } = await supabase
     .from("homenagens_busca_publica")
-    .select("tem_senha")
+    .select("tem_senha, link_habilitado, qrcode_habilitado")
     .eq("slug", slug)
     .maybeSingle();
+
+  if (seguranca && !seguranca.link_habilitado && !seguranca.qrcode_habilitado) {
+    return (
+      <div style={estilos.vazioWrap}>
+        <div style={estilos.vazioCard}>
+          <p style={{ fontSize: 18, color: "#C9A46A", margin: 0 }}>Acesso direto desativado.</p>
+          <p style={{ color: "#7a8a96", marginTop: 8 }}>A família restringiu o acesso por link e QR Code deste memorial.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (seguranca?.tem_senha) {
     const cookieStore = await cookies();

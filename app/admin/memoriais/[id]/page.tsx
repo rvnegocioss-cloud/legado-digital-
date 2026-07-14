@@ -97,6 +97,11 @@ export default function DetalheMemorial() {
   const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
   const [mensagemPlacaConfirmada, setMensagemPlacaConfirmada] = useState(false)
+  const [buscaHabilitada, setBuscaHabilitada] = useState(true)
+  const [linkHabilitado, setLinkHabilitado] = useState(true)
+  const [qrcodeHabilitado, setQrcodeHabilitado] = useState(true)
+  const [salvandoPrivacidade, setSalvandoPrivacidade] = useState(false)
+  const [privacidadeMsg, setPrivacidadeMsg] = useState('')
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -150,12 +155,15 @@ export default function DetalheMemorial() {
 
       const { data: seguranca } = await supabase
         .from('homenagens_seguranca')
-        .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada')
+        .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada, busca_habilitada, link_habilitado, qrcode_habilitado')
         .eq('homenagem_id', m.id)
         .maybeSingle()
       setTemSenha(!!seguranca?.senha_acesso_hash)
       setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
       setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
+      setBuscaHabilitada(seguranca?.busca_habilitada ?? true)
+      setLinkHabilitado(seguranca?.link_habilitado ?? true)
+      setQrcodeHabilitado(seguranca?.qrcode_habilitado ?? true)
 
       if (m.qr_code_url) {
         setQrCodeUrl(m.qr_code_url)
@@ -196,6 +204,28 @@ export default function DetalheMemorial() {
       setSenhaMsg(json.temSenha ? 'Senha definida — memorial agora exige senha na busca.' : 'Senha removida — memorial voltou a ser público.')
     }
     setSalvandoSenha(false)
+  }
+
+  async function salvarPrivacidade() {
+    if (!memorial) return
+    setSalvandoPrivacidade(true)
+    setPrivacidadeMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/memorial-privacidade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({
+        memorialId: memorial.id,
+        buscaHabilitada,
+        linkHabilitado,
+        qrcodeHabilitado,
+      }),
+    })
+    const json = await res.json()
+
+    setPrivacidadeMsg(res.ok ? 'Salvo.' : json.error || 'Erro ao salvar')
+    setSalvandoPrivacidade(false)
   }
 
   async function cadastrarEmailFamilia(e: React.FormEvent) {
@@ -625,6 +655,32 @@ export default function DetalheMemorial() {
           </Button>
         </form>
         {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
+        <h2 className="text-sm font-medium text-zinc-400 mb-1">Privacidade — modos de acesso</h2>
+        <p className="text-zinc-500 text-xs mb-4">
+          Os 3 caminhos começam ligados. Desative o que a família não quiser permitir — a senha
+          acima continua valendo em cima de qualquer um que fique ativo.
+        </p>
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input type="checkbox" checked={buscaHabilitada} onChange={(e) => setBuscaHabilitada(e.target.checked)} />
+            Público — aparece na busca por nome
+          </label>
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input type="checkbox" checked={linkHabilitado} onChange={(e) => setLinkHabilitado(e.target.checked)} />
+            Acesso por link direto
+          </label>
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input type="checkbox" checked={qrcodeHabilitado} onChange={(e) => setQrcodeHabilitado(e.target.checked)} />
+            Acesso por QR Code
+          </label>
+        </div>
+        <Button type="button" onClick={salvarPrivacidade} disabled={salvandoPrivacidade} className="mt-4">
+          {salvandoPrivacidade ? 'Salvando...' : 'Salvar privacidade'}
+        </Button>
+        {privacidadeMsg && <p className="text-xs text-zinc-400 mt-2">{privacidadeMsg}</p>}
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
