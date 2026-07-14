@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { signIn } from '@/lib/auth'
 
 export default function AdminLogin() {
@@ -31,7 +32,8 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-zinc-950">
       <div className="w-full max-w-md p-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Central Legado Digital</h1>
+          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={220} height={88} className="mx-auto h-16 w-auto object-contain mb-4" priority />
+          <h1 className="text-xl font-bold text-white">Central</h1>
           <p className="text-zinc-400 mt-2">Faça login para continuar</p>
         </div>
 
@@ -82,6 +84,10 @@ export default function AdminLogin() {
             Esqueceu sua senha?
           </Link>
         </form>
+
+        <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-white">
+          ← Voltar pro site
+        </Link>
       </div>
     </div>
   )

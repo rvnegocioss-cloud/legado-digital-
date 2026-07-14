@@ -24,6 +24,11 @@ Rótulo de menu/botão precisa deixar óbvia a ação (ex: "Memoriais (Cadastrar
 ## Regra — Retorno pra página anterior
 Toda página de detalhe/edição (acessada clicando em algo de uma lista, ex: `/admin/memoriais/[id]`, `/admin/parceiros/[id]`, `/familia/[slug]`) precisa ter um link visível de volta no topo (ex: "← Voltar pra Memoriais", "← Sair"). Não deixar a pessoa só no botão "voltar" do navegador. Registrado 2026-07-10 depois de aplicar em `/familia/[slug]` (não tinha nenhum retorno — família ficava presa na tela sem saída visível).
 
+**Estendida 2026-07-14:** toda página de login (`/admin/login`, `/parceiro/login`, `/familia/login`) também precisa de "← Voltar pro site" linkando pra landing (`/`) — nenhuma das 3 tinha, corrigido.
+
+## Regra — Logo real em toda página
+`public/logo-legado-digital.png` (arco dourado + planta, fundo transparente, baixada do Drive) é a logo oficial — usar via `next/image` em toda tela de acesso/identificação do produto (login de Central/Parceiro/Família, topo da sidebar da Central), nunca texto "Legado Digital" solto como substituto. Padrão profissional: mesma logo, mesmo lugar (topo, centralizada ou alinhada à esquerda conforme o layout), em todo canto do produto. Registrado 2026-07-14 depois do Rafael cobrar "padrão em tudo" — aplicado nos 3 logins e na sidebar da Central; ainda falta conferir landing (Navbar) e demais páginas públicas.
+
 ## Regra — Layout de ficha na Central: não empilhar tudo em coluna única
 Ficha de detalhe (`/admin/memoriais/[id]` e afins) usa grid responsivo (`grid-cols-1 lg:grid-cols-3`), não uma pilha de cards um embaixo do outro. Conteúdo principal (dados/formulário) ocupa 2/3 da largura; informação de consulta rápida (ex: QR Code) fica ao lado, na coluna de 1/3, visível sem rolar a página. Em mobile reflui pra coluna única normalmente. Motivo: usuário reclamou que tudo ficava "uma coisa embaixo da outra" mesmo em tela larga — o problema não era mobile-first, era nunca ter sido montado um breakpoint de desktop. Registrado 2026-07-10.
 

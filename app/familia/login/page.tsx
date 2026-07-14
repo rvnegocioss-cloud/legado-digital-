@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 interface Resultado {
@@ -61,6 +63,7 @@ export default function FamiliaLoginPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
+        <Image src="/logo-legado-digital.png" alt="Legado Digital" width={200} height={80} className="mx-auto h-14 w-auto object-contain mb-4" priority />
         <h1 className="text-xl font-bold text-white mb-1">Portal da Família</h1>
         <p className="text-zinc-400 text-sm mb-5">
           Adicione fotos, vídeo e a história de quem você ama.
@@ -158,6 +161,10 @@ export default function FamiliaLoginPage() {
         <p className="text-center text-xs text-zinc-600 mt-4">
           Esqueceu a senha? Fale com quem cadastrou o memorial (a funerária ou a Legado Digital).
         </p>
+
+        <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-white mt-4">
+          ← Voltar pro site
+        </Link>
       </div>
     </div>
   )
