@@ -13,10 +13,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  const { mensagens } = await req.json()
-  if (!Array.isArray(mensagens) || mensagens.length === 0) {
+  const { mensagens: mensagensCompletas } = await req.json()
+  if (!Array.isArray(mensagensCompletas) || mensagensCompletas.length === 0) {
     return NextResponse.json({ error: 'mensagens obrigatório' }, { status: 400 })
   }
+  // Limita histórico enviado pra não estourar rate limit/tokens do plano gratuito da Groq
+  const mensagens = mensagensCompletas.slice(-10)
 
   const supabaseAuth = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     global: { headers: { Authorization: authHeader } },
@@ -62,11 +64,13 @@ export async function POST(req: NextRequest) {
     ? `\n\n## Contexto desta conversa\nUsuário logado: ${nomeUsuario} (${userData.user.email}). Papel: staff da Central (acesso total, pode responder sobre qualquer parceiro/memorial). Cumprimente pelo nome na primeira mensagem da conversa.`
     : `\n\n## Contexto desta conversa\nUsuário logado: ${nomeUsuario} (${userData.user.email}). Papel: Parceiro B2B da empresa "${nomeParceiro}" (parceiro_id: ${parceiroId}). Responda SÓ sobre esse parceiro — nunca revele dado de outro parceiro nem informação interna da Central fora do que existe no Portal do Parceiro. Cumprimente pelo nome na primeira mensagem da conversa.`
 
-  const systemPrompt = promptBase + contexto
+  const limiteResposta = '\n\nSeja direto e curto: no máximo 3-4 frases por resposta, sem parágrafo longo. Só detalhe mais se o usuário pedir explicitamente.'
 
-  const baseUrl = process.env.FREELLMAPI_BASE_URL || 'http://localhost:3001/v1'
-  const apiKey = process.env.FREELLMAPI_API_KEY || ''
-  const model = process.env.FREELLMAPI_MODEL || 'auto'
+  const systemPrompt = promptBase + contexto + limiteResposta
+
+  const baseUrl = process.env.LEGADOBOT_LLM_BASE_URL || 'https://api.groq.com/openai/v1'
+  const apiKey = process.env.LEGADOBOT_LLM_API_KEY || ''
+  const model = process.env.LEGADOBOT_LLM_MODEL || 'llama-3.3-70b-versatile'
 
   let resposta = ''
   try {
@@ -80,15 +84,14 @@ export async function POST(req: NextRequest) {
         model,
         messages: [{ role: 'system', content: systemPrompt }, ...mensagens],
         temperature: 0.4,
+        max_tokens: 400,
       }),
     })
 
     if (!upstream.ok) {
       const texto = await upstream.text()
       return NextResponse.json(
-        {
-          error: `freellmapi respondeu erro ${upstream.status}. Confirme que ela está rodando local (INICIAR_FREELLMAPI.bat, http://localhost:3001). Detalhe: ${texto.slice(0, 300)}`,
-        },
+        { error: `LLM respondeu erro ${upstream.status}. Detalhe: ${texto.slice(0, 300)}` },
         { status: 502 }
       )
     }
@@ -97,9 +100,7 @@ export async function POST(req: NextRequest) {
     resposta = json.choices?.[0]?.message?.content || ''
   } catch (e: any) {
     return NextResponse.json(
-      {
-        error: `Não consegui conectar na freellmapi em ${baseUrl}. Ela precisa estar rodando local (INICIAR_FREELLMAPI.bat). Erro: ${e.message}`,
-      },
+      { error: `Não consegui conectar no LLM (${baseUrl}). Erro: ${e.message}` },
       { status: 502 }
     )
   }
