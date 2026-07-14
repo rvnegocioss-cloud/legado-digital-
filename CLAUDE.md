@@ -34,6 +34,9 @@ Toda página de detalhe/edição (acessada clicando em algo de uma lista, ex: `/
 ## Regra — Layout de ficha na Central: não empilhar tudo em coluna única
 Ficha de detalhe (`/admin/memoriais/[id]` e afins) usa grid responsivo (`grid-cols-1 lg:grid-cols-3`), não uma pilha de cards um embaixo do outro. Conteúdo principal (dados/formulário) ocupa 2/3 da largura; informação de consulta rápida (ex: QR Code) fica ao lado, na coluna de 1/3, visível sem rolar a página. Em mobile reflui pra coluna única normalmente. Motivo: usuário reclamou que tudo ficava "uma coisa embaixo da outra" mesmo em tela larga — o problema não era mobile-first, era nunca ter sido montado um breakpoint de desktop. Registrado 2026-07-10.
 
+## Regra — Prompt do LegadoBot atualizado junto com o sistema (2026-07-14)
+`docs/LEGADOBOT_PROMPT.md` é o system prompt do futuro chatbot de atendimento (LegadoBot). Fase 1: só conhecimento interno (Central + Portal do Parceiro) — família e público entram depois. Toda vez que uma funcionalidade muda/é criada na Central ou no Portal do Parceiro, esse arquivo precisa ser atualizado junto (mesma disciplina do CLAUDE.md — não esperar acumular).
+
 ## Regra — Não perder ideias em aberto (2026-07-14)
 Se o Rafael não respondeu uma pergunta/sugestão, é porque não viu — não pode sumir da conversa. Toda ideia/pergunta minha ou dele que ainda não teve decisão vai pro **`docs/RASCUNHO_IDEIAS.md`** (arquivo separado, é rascunho). Só quando uma ideia de lá for decidida/concluída/corrigida ela sai do rascunho e vira registro definitivo aqui no CLAUDE.md. Nunca decidir/construir uma ideia do rascunho sem confirmação do Rafael primeiro.
 
