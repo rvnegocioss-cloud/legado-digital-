@@ -178,6 +178,7 @@ Prioridades imediatas:
 - [ ] Busca embutida direto na landing (hoje é botão que leva pra `/busca`, não campo de texto na própria home)
 - [ ] Modos de privacidade completos (`configuracoes_privacidade` — hoje só existe "público" e "com senha", faltam "privado por e-mail/cadastro" e "oculto" da lista de modos do MVP)
 - [ ] Website institucional finalizado
+- [ ] **Política de Privacidade e Termos de Uso** (Rafael, 2026-07-14 — "não pode esquecer isso") — não existe nenhuma dessas páginas ainda no projeto. LGPD já é premissa técnica registrada acima, mas falta a página de verdade + link no rodapé de toda tela pública (landing, busca, página do parceiro, memorial).
 
 ## Feedback do Pedro (sócio) — 2026-07-14, prioridade sobre o resto do backlog
 Registrado na íntegra em `mapa_sugestoes` (tabela do banco, campo de sugestões do `/admin/mapa`). Decisão do Rafael: resto do projeto espera, corrigir isso primeiro, nesta ordem:
