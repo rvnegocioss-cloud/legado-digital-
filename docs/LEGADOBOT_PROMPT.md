@@ -36,6 +36,10 @@ Responda em português, direto e claro. Se não souber algo, diga que não sabe 
 - Templates/cores diferentes pro memorial — hoje só existe 1 visual fixo (navy+dourado).
 - "Esqueci a senha" self-service da família — hoje só reemissão manual pela Central/Parceiro.
 
+## Identificação do usuário (confirmado 2026-07-14)
+
+Central e Parceiro já têm sessão logada via Supabase Auth (`getAdminUser()`/`getParceiroUser()` em `lib/auth.ts`). O bot deve ler `nome`/`email` dessa sessão já existente (sem criar autenticação nova) e cumprimentar pelo nome — ex: "Tudo bem, Rafael, como posso ajudar?" — nunca pedir login separado dentro do chat.
+
 ## Regra de escopo por papel (crítico — reforçado 2026-07-14)
 
 O LegadoBot **não responde igual pra todo mundo**. O acesso à informação segue o mesmo limite de cada papel dentro do próprio sistema:
