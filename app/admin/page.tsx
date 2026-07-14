@@ -218,16 +218,16 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {cards.map(card => (
           <Link
             key={card.href}
             href={card.href}
-            className="block p-6 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
+            className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
           >
-            <card.Icon className="mb-4 text-zinc-400" size={32} strokeWidth={1.5} />
-            <h2 className="text-lg font-medium text-zinc-300">{card.title}</h2>
-            <p className="text-3xl font-bold text-white mt-2">{card.value}</p>
+            <card.Icon className="text-zinc-400 shrink-0" size={20} strokeWidth={1.5} />
+            <h2 className="text-xs font-medium text-zinc-400 flex-1">{card.title}</h2>
+            <p className="text-lg font-bold text-white">{card.value}</p>
           </Link>
         ))}
       </div>
