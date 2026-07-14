@@ -171,12 +171,26 @@ Prioridades imediatas:
 - [x] **Atribuição das ideias de drone/mapeamento unificada (2026-07-12)** — as duas ideias (drone e navegação tipo Waze até o túmulo) eram creditadas separadamente (uma ao Pedro, outra ao Rafael); na verdade são uma ideia só, do Pedro. Corrigido no `/admin/mapa` e neste arquivo.
 - [x] **Ajustes de UI (2026-07-12)** — nav da Central (`app/admin/layout.tsx`) quebrava/cortava texto em tela menor: adicionado `overflow-x-auto` + `whitespace-nowrap shrink-0` nos links. Organograma do `/admin/mapa` não deixava óbvio que dava pra arrastar pros lados pra ver todos os 6 ambientes: adicionada dica visual "← arraste pro lado pra ver todos os ambientes →" acima do organograma.
 - [x] **Limpeza de conteúdo estranho no repositório (2026-07-12)** — pastas/arquivos sem relação com Legado Digital (`mcp-finance-dossie/`, `system_prompts_leaks/`, docs soltos como `GRAPHIFY_GUIA_COMPLETO.md`, `HOMENAGEM_V2_HANDOFF.md`, etc.) estavam vazando pro escopo do TypeScript do Next.js e quebrando o build (`Cannot find module 'axios'` vindo de um adapter de trading dentro de `mcp-finance-dossie`, nada a ver com o projeto). Movidos (não apagados) pra `Desktop\Utilitários\Removido-Legado-Digital\`.
-- [x] **3D da landing refinado (2026-07-13)** — trocado de "brasas + esfera pulsando" (achado genérico demais, "rabisco na tela") pra constelação de pontos dourados conectados por linhas — depois upgrade real: linhas grossas via `Line` do `drei` (`LineBasicMaterial.linewidth` é sempre 1px no WebGL, limitação conhecida do three.js — por isso ficava fino/rabiscado), bloom de verdade via `@react-three/postprocessing` (`EffectComposer` + `Bloom`, glow com blur real, não alpha falso de shader), e parallax sutil reagindo à posição do mouse.
+- [x] **3D da landing removido (2026-07-14)** — depois de 3 rodadas (brasas → constelação → constelação com bloom+parallax), decisão final: tirar o Canvas 3D de vez, ficou "cheio de traço". `components/Hero3D.tsx` agora é só o gradiente estático dourado (mesmo fallback que já existia pra `prefers-reduced-motion`), sem Three.js/react-three-fiber/postprocessing renderizando nada. Pacotes ficam instalados (não usados) — histórico das 3 tentativas abaixo, mantido só como registro técnico.
+  - ~~3D da landing refinado (2026-07-13)~~ — trocado de "brasas + esfera pulsando" (achado genérico demais, "rabisco na tela") pra constelação de pontos dourados conectados por linhas — depois upgrade real: linhas grossas via `Line` do `drei` (`LineBasicMaterial.linewidth` é sempre 1px no WebGL, limitação conhecida do three.js — por isso ficava fino/rabiscado), bloom de verdade via `@react-three/postprocessing` (`EffectComposer` + `Bloom`, glow com blur real, não alpha falso de shader), e parallax sutil reagindo à posição do mouse.
 - [x] **Bug da busca pública corrigido (2026-07-13)** — `BuscaMemorial.tsx` chamava `supabase.rpc('buscar_homenagens_publicas', ...)` e só desestruturava `data`, ignorando `error`. Se a chamada falhasse por qualquer motivo, caía silencioso em "nenhum memorial encontrado" sem avisar erro real. Confirmado via Supabase MCP que a função e as permissões de `anon` no banco estavam corretas — o bug era só o client engolindo erro. Corrigido: erro agora aparece pra quem busca, não fica invisível.
 - [x] **Página pública do parceiro (`/parceiros/[slug]`) redesenhada (2026-07-13)** — antes só tinha logo + descrição + busca solta ("fraca, faltando elementos"). Virou página de marketing de verdade: busca de memorial subiu pra dentro do hero (topo, como pedido), seção "O que é o Legado Digital" (bloco assimétrico texto + lista de recursos com ícone, não 3 cards iguais), seção "Como funciona" em 3 passos numerados. Usa a skill `redesign-skill` como guia de auditoria visual. Já linkada dos dois lados (`/admin/parceiros/[id]` e `/parceiro`), integração preexistente, não precisou de link novo.
 - [ ] Busca embutida direto na landing (hoje é botão que leva pra `/busca`, não campo de texto na própria home)
 - [ ] Modos de privacidade completos (`configuracoes_privacidade` — hoje só existe "público" e "com senha", faltam "privado por e-mail/cadastro" e "oculto" da lista de modos do MVP)
 - [ ] Website institucional finalizado
+
+## Feedback do Pedro (sócio) — 2026-07-14, prioridade sobre o resto do backlog
+Registrado na íntegra em `mapa_sugestoes` (tabela do banco, campo de sugestões do `/admin/mapa`). Decisão do Rafael: resto do projeto espera, corrigir isso primeiro, nesta ordem:
+
+1. [x] **Menu lateral vertical na Central** — sidebar fixa à esquerda (`app/admin/layout.tsx`), topo virou barra fina só com sino de alerta + avatar/e-mail do usuário (dropdown com "Sair"). Cor da Central inteira trocada de zinc/blue genérico do Tailwind pra **navy + dourado oficial** (`#0B1D2A`/`#C9A46A`, confirmado no mockup real que o Pedro mandou no Drive, pasta "Legado Digital" — `dashboard adm legado.jpg`) — feito via remapeamento da paleta `zinc-*`/`blue-*` inteira em `app/globals.css` (`@theme inline`), não editando cada página uma por uma. Isso recolore de graça Central, Portal do Parceiro, Portal da Família e telas de senha (recuperar/redefinir), que também usavam as mesmas classes Tailwind. Logo ainda é texto "Legado Digital" em dourado — falta usar o arquivo de logo de verdade (pasta "logo vários tamanhos" no Drive) quando integrar como imagem.
+2. [ ] **Central de Comunicações** (renomeia "Central de E-mails" — `/admin/emails` + `/parceiro/emails`) — junta e-mail e WhatsApp num só lugar. Estrutura pedida: campo com e-mail e WhatsApp do parceiro (funerária), embaixo a lista dos memoriais daquele parceiro, cada memorial mostrando o contato oficial da família (o `familia_email` que já existe).
+3. [ ] **Parceiros B2B — cadastro por CNPJ** — informar CNPJ, consultar Receita (dados da empresa preenchem o formulário automático, usuário confere/edita antes de salvar). Depois de salvar, cadastro de contatos da empresa com perfil (Responsável Legal, Financeiro, Comercial, Técnico, outros — 1 usuário pode ter mais de 1 perfil). Contato pode virar usuário do sistema com visão restrita só aos dados do próprio parceiro.
+4. [ ] **Cemitério — entidade lápide** — falta número de lápide como entidade própria pra vincular memorial nela (Pedro apontou que já estava no planejamento original e sumiu).
+5. [ ] **Memorial — acesso e privacidade** — perfil de acesso da família dentro do admin (pode/não pode alterar dados); simplificar privacidade pra 3 modos (Público/busca, Acesso por Link, Acesso por QR Code — todos ligados, família desativa se quiser); aba dentro do memorial listando quais usuários têm acesso.
+6. [ ] **Usuários** — Pedro perguntou por que só ele aparece na lista — investigar.
+7. [ ] **Dashboard** — métricas: visitas nos memoriais, novos memoriais, cemitérios com mais visita, parceiros com mais visita.
+
+Plano: executar 1 (menu) primeiro, depois seguir a lista em ordem. Usar `npx skills find` (vercel-labs/skills, CLI instalada 2026-07-14) pra procurar skill pronta pra cada etapa antes de construir do zero.
 
 ## Portal do Parceiro B2B — como funciona
 Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os próprios memoriais.
@@ -359,14 +373,21 @@ Log de uso fica em `docs/USO_SKILLS_MCPS.md` (ver regra no topo do arquivo).
 - **ui-ux-pro-max, ui-styling, design-system, design, brand, banner-design, slides** (nextlevelbuilder) — banco de padrões de UI/UX, paletas, tipografia, componentes; `ui-ux-pro-max` tem script Python (`scripts/search.py --domain <x>`) searchável
 
 ## MCPs Disponíveis
+**Lista conferida de verdade via `claude mcp list` em 2026-07-13** — a versão antiga deste bloco citava `filesystem`, `n8n` e `github` como MCPs, mas nenhum dos 3 nunca esteve configurado (arquivo é lido/escrito com ferramenta nativa, git é CLI direto). Corrigido:
+
+Conectadas:
 - supabase: operações no banco
 - vercel: deploy
-- filesystem: leitura e escrita de arquivos
 - memory: memória persistente entre sessões
 - sequential-thinking: raciocínio em etapas
-- context7: documentação de libs em tempo real
-- n8n: automações (emails, notificações)
-- github: versionamento
+- playwright: automação de navegador
+- Google Calendar, Gmail, Google Drive
+- SlidesGPT, Three.js 3D Viewer, HyperFrames (HeyGen)
+
+Precisam de autenticação (pendente): Notion, Canva, Windsor.ai
+Com falha de conexão: Context7
+
+Skills (não são MCP, ficam em `~/.claude/skills/`, ver seção "Skills instaladas" abaixo)
 
 ## Comandos Úteis
 ```bash

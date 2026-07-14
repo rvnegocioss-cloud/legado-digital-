@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail } from 'lucide-react'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
 
 const ALLOWED_ROLES = ['Admin Legado Digital', 'Operador Legado Digital']
@@ -16,6 +16,7 @@ type AdminUser = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [menuAberto, setMenuAberto] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -64,52 +65,71 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/cemiterios', label: 'Cemitérios', Icon: MapPin },
     { href: '/admin/memoriais', label: 'Memoriais', Icon: ScrollText },
     { href: '/admin/usuarios', label: 'Usuários', Icon: Users },
-    { href: '/admin/emails', label: 'E-mails', Icon: Mail },
+    { href: '/admin/emails', label: 'Comunicações', Icon: Mail },
     { href: '/admin/mapa', label: 'Mapa', Icon: Map },
     { href: '/busca', label: 'Página Pública', Icon: Search },
   ]
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <nav className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <Link href="/admin" className="text-lg font-bold text-blue-400">
-                Central Legado
-              </Link>
-              <div className="hidden md:flex items-center gap-1 overflow-x-auto">
-                {navItems.map(item => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm whitespace-nowrap shrink-0 transition-colors ${
-                      pathname === item.href
-                        ? 'bg-zinc-800 text-white'
-                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                    }`}
-                  >
-                    <item.Icon size={15} className="shrink-0" />
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-zinc-400">{user.email}</span>
+    <div className="min-h-screen bg-zinc-950 text-white flex">
+      <aside className="hidden md:flex md:flex-col w-60 shrink-0 border-r border-zinc-800 bg-zinc-900/60">
+        <Link href="/admin" className="flex items-center gap-2 h-16 px-5 border-b border-zinc-800 shrink-0">
+          <span className="text-lg font-bold" style={{ color: '#C9A46A' }}>Legado Digital</span>
+        </Link>
+        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+          {navItems.map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                pathname === item.href
+                  ? 'bg-zinc-800 text-white'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+              }`}
+            >
+              <item.Icon size={16} className="shrink-0" />
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-16 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
+          <span className="md:hidden text-base font-bold" style={{ color: '#C9A46A' }}>Legado Digital</span>
+          <div className="hidden md:block" />
+          <div className="flex items-center gap-4">
+            <button className="text-zinc-400 hover:text-white transition-colors" aria-label="Alertas">
+              <Bell size={18} />
+            </button>
+            <div className="relative">
               <button
-                onClick={handleLogout}
-                className="text-sm text-zinc-400 hover:text-white transition-colors"
+                onClick={() => setMenuAberto(!menuAberto)}
+                className="flex items-center gap-2 text-sm text-zinc-300 hover:text-white transition-colors"
               >
-                Sair
+                <span className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-xs" style={{ color: '#C9A46A' }}>
+                  {user.email.charAt(0).toUpperCase()}
+                </span>
+                <span className="hidden sm:inline">{user.email}</span>
+                <ChevronDown size={14} />
               </button>
+              {menuAberto && (
+                <div className="absolute right-0 top-full mt-2 w-44 rounded-lg border border-zinc-800 bg-zinc-900 shadow-lg py-1 z-50">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800"
+                  >
+                    Sair
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </nav>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+        </header>
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

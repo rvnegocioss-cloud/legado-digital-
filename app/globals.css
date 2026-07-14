@@ -15,6 +15,26 @@
   --color-foreground: var(--foreground);
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
+
+  /* Identidade oficial Legado Digital (navy + dourado) sobrepondo a paleta
+     padrão do Tailwind — recolore Central, Portal do Parceiro, Portal da
+     Família e telas de senha de uma vez, sem editar cada arquivo. */
+  --color-zinc-950: #0B1D2A;
+  --color-zinc-900: #10222f;
+  --color-zinc-800: #1c3140;
+  --color-zinc-700: #2a4353;
+  --color-zinc-600: #3d5a6b;
+  --color-zinc-500: #58616B;
+  --color-zinc-400: #7f8b93;
+  --color-zinc-300: #a8b2b8;
+
+  --color-blue-300: #dfc08a;
+  --color-blue-400: #C9A46A;
+  --color-blue-500: #b8935c;
+  --color-blue-600: #a8834a;
+  --color-blue-700: #8a6c3c;
+  --color-blue-800: #6b5430;
+  --color-blue-900: #4a3a21;
 }
 
 * {
