@@ -242,6 +242,7 @@ export default function AdminCemiterios() {
                 <th className="text-left py-3 px-4">Localização</th>
                 <th className="text-left py-3 px-4">Status</th>
                 <th className="text-left py-3 px-4"></th>
+                <th className="text-left py-3 px-4"></th>
               </tr>
             </thead>
             <tbody>
@@ -283,6 +284,11 @@ export default function AdminCemiterios() {
                     >
                       Editar
                     </button>
+                  </td>
+                  <td className="py-3 px-4">
+                    <Link href={`/admin/cemiterios/${c.id}/lapides`} className="text-zinc-400 hover:text-white text-xs">
+                      Lápides
+                    </Link>
                   </td>
                 </tr>
               ))}

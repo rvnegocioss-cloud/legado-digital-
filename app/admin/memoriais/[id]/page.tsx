@@ -26,7 +26,19 @@ interface Memorial {
   qr_code_url: string | null
   mensagem_placa: string | null
   familia_email: string | null
+  lapide_id: string | null
   created_at: string
+}
+
+interface Cemiterio {
+  id: string
+  nome: string
+}
+
+interface Lapide {
+  id: string
+  identificacao: string
+  cemiterio_id: string
 }
 
 const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
@@ -55,7 +67,11 @@ export default function DetalheMemorial() {
     cidade: '',
     frase_preferida: '',
     biografia: '',
+    lapide_id: '',
   })
+  const [cemiterios, setCemiterios] = useState<Cemiterio[]>([])
+  const [lapides, setLapides] = useState<Lapide[]>([])
+  const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [galeria, setGaleria] = useState<string[]>([])
@@ -91,6 +107,11 @@ export default function DetalheMemorial() {
     const { data: m } = await supabase.from('homenagens').select('*').eq('id', id).single()
     setMemorial(m)
 
+    const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome').order('nome')
+    setCemiterios(cemiteriosData || [])
+    const { data: lapidesData } = await supabase.from('lapides').select('id, identificacao, cemiterio_id')
+    setLapides(lapidesData || [])
+
     if (m) {
       setForm({
         nome_completo: m.nome_completo || '',
@@ -99,7 +120,12 @@ export default function DetalheMemorial() {
         cidade: m.cidade || '',
         frase_preferida: m.frase_preferida || '',
         biografia: m.biografia || '',
+        lapide_id: m.lapide_id || '',
       })
+      if (m.lapide_id) {
+        const lapideAtual = (lapidesData || []).find((l) => l.id === m.lapide_id)
+        if (lapideAtual) setCemiterioSelecionadoId(lapideAtual.cemiterio_id)
+      }
       setFotoUrl(m.foto_url || '')
       setVideoUrl(m.video_url || '')
       setGaleria(m.galeria_fotos || [])
@@ -235,6 +261,7 @@ export default function DetalheMemorial() {
 
     const payload = {
       ...form,
+      lapide_id: form.lapide_id || null,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
       galeria_fotos: galeria,
@@ -382,6 +409,40 @@ export default function DetalheMemorial() {
               onChange={(e) => setForm({ ...form, cidade: e.target.value })}
               className="bg-zinc-800 border-zinc-700 text-white"
             />
+          </div>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-500 mb-1">Cemitério</label>
+              <select
+                value={cemiterioSelecionadoId}
+                onChange={(e) => {
+                  setCemiterioSelecionadoId(e.target.value)
+                  setForm({ ...form, lapide_id: '' })
+                }}
+                className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+              >
+                <option value="">Sem cemitério vinculado</option>
+                {cemiterios.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-500 mb-1">Lápide</label>
+              <select
+                value={form.lapide_id}
+                onChange={(e) => setForm({ ...form, lapide_id: e.target.value })}
+                disabled={!cemiterioSelecionadoId}
+                className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white disabled:opacity-50"
+              >
+                <option value="">Sem lápide vinculada</option>
+                {lapides
+                  .filter((l) => l.cemiterio_id === cemiterioSelecionadoId)
+                  .map((l) => (
+                    <option key={l.id} value={l.id}>{l.identificacao}</option>
+                  ))}
+              </select>
+            </div>
           </div>
           <div>
             <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>
