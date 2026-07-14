@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
 
@@ -73,8 +74,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex">
       <aside className="hidden md:flex md:flex-col w-60 shrink-0 border-r border-zinc-800 bg-zinc-900/60">
-        <Link href="/admin" className="flex items-center gap-2 h-16 px-5 border-b border-zinc-800 shrink-0">
-          <span className="text-lg font-bold" style={{ color: '#C9A46A' }}>Legado Digital</span>
+        <Link href="/admin" className="flex items-center h-16 px-5 border-b border-zinc-800 shrink-0">
+          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={160} height={64} className="h-10 w-auto object-contain" priority />
         </Link>
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navItems.map(item => (
@@ -96,7 +97,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
-          <span className="md:hidden text-base font-bold" style={{ color: '#C9A46A' }}>Legado Digital</span>
+          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={120} height={48} className="md:hidden h-8 w-auto object-contain" />
           <div className="hidden md:block" />
           <div className="flex items-center gap-4">
             <button className="text-zinc-400 hover:text-white transition-colors" aria-label="Alertas">
