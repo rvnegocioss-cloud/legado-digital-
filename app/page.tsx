@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
+import LegadoBotPublicoWidget from '@/components/LegadoBotPublicoWidget'
 
 const HeroBackground = dynamic(() => import('@/components/Hero3D'), { ssr: false })
 
@@ -362,6 +363,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <LegadoBotPublicoWidget />
     </div>
   )
 }

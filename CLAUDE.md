@@ -352,6 +352,7 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 - (resolvido) **Causa real do "This page couldn't load"**: `FundoParallax.tsx` (fundo 3D das velas no hero do memorial) rodava um `requestAnimationFrame` infinito reescrevendo `transform` a cada frame numa camada `preserve-3d` + `will-change` + giroscópio/`DeviceOrientation`. Em GPUs/navegadores mais fracos vazava memória do compositor até o navegador matar a aba (tela nativa de crash do Edge/Chrome). A página aparecia e depois "sumia". Veio pro ar quando os deploys da sessão rebuildaram o parallax. Corrigido: `FundoParallax` agora é **estático** (crossfade das imagens + overlay), sem loop de animação nem compute contínuo.
 
 ## Chatbot IA na landing — planejado (ÚLTIMO passo, só depois de tudo mais pronto)
+**Atualização 2026-07-14:** uma versão mínima institucional já foi construída antes do resto do backlog, a pedido direto do Rafael — ver "LegadoBot Público — landing page" mais abaixo. O plano completo abaixo (atendimento full, escalonamento pra humano, 3 públicos) continua por último.
 "Bem-vindo ao Legado Digital, como posso te ajudar?" — bolha de chat na landing, atende 3 públicos diferentes: **família** (como editar memorial, privacidade), **funerária/parceiro** (como virar parceiro, comissão, portal), **cemitério/prefeitura** (concessão, autarquia). Bot pergunta ou infere quem é o visitante e responde com FAQ correspondente.
 
 Opções de arquitetura analisadas (2026-07-10), nada decidido/implementado ainda:
@@ -382,7 +383,15 @@ Primeira versão real construída, escopo restrito a **Central + Portal do Parce
   - **Limite da conta gratuita Groq (conferido via header real da API):** 12.000 tokens/minuto, 1.000 requisições. Proteções aplicadas no código: histórico enviado ao modelo cortado pras últimas 10 mensagens, `max_tokens: 400` por resposta, prompt instrui resposta curta (3-4 frases). Antes de ir pra família/público (Fase 2/3), reavaliar limite conforme volume real ou trocar por plano pago.
 - **Escopo por papel:** staff da Central tem acesso total; Parceiro B2B só recebe contexto do próprio `parceiro_id`, nunca de outro parceiro nem dado interno da Central — reforçado tanto no prompt (`docs/LEGADOBOT_PROMPT.md`) quanto no código da rota (o filtro não depende só de instrução de texto pro modelo).
 - **Navegação automática (pedido do Rafael, 2026-07-14):** se o usuário pergunta "aonde eu vejo X", o bot pode responder E navegar sozinho — inclui uma diretiva `AÇÃO: /caminho` na última linha da resposta (lista fechada de rotas conhecidas, documentada em `docs/LEGADOBOT_PROMPT.md`), a rota do servidor extrai essa linha antes de devolver o texto, e o widget faz `router.push()` automaticamente. Parceiro só pode ser navegado dentro de `/parceiro*`, nunca pra rota da Central.
-- **Não incluído ainda:** microfone/voz (projeto "Jarvis" citado pelo Rafael, não conectado), acesso de leitura/escrita direta no banco com guardrail (ideia registrada, não construída — é a parte mais sensível), atendimento na landing pra família/público (Fase 2/3 do faseamento original).
+- **Não incluído ainda:** microfone/voz (projeto "Jarvis" citado pelo Rafael, não conectado), acesso de leitura/escrita direta no banco com guardrail (ideia registrada, não construída — é a parte mais sensível), escalonamento pra admin humano.
+
+### LegadoBot Público — landing page (2026-07-14, versão mínima)
+Antecipado do faseamento original (era "Fazer por último") a pedido do Rafael — versão bem mais simples que o LegadoBot interno, só institucional:
+
+- `docs/LEGADOBOT_PROMPT_PUBLICO.md` — prompt separado do interno, sem nenhum acesso a dado do banco/sessão. Só explica o que é o projeto, como funciona em linhas gerais, nunca inventa preço/contato/funcionalidade que não existe (landing não tem canal de contato real publicado ainda — bot é honesto sobre isso em vez de inventar).
+- `app/api/legadobot-publico/chat/route.ts` — rota sem autenticação (visitante anônimo), mesma Groq/env vars do bot interno. Proteções mais rígidas por ser endpoint público: histórico cortado pras últimas 6 mensagens, cada mensagem truncada em 500 caracteres, `max_tokens: 250`.
+- `components/LegadoBotPublicoWidget.tsx` — botão flutuante só na landing (`app/page.tsx`), saudação "Posso ajudar? Sou o assistente do Legado Digital...". Navegação automática limitada a só 2 rotas públicas: `/busca` e `/parceiro/login`.
+- É um bot separado do LegadoBot interno (`components/LegadoBotWidget.tsx` continua só em `/admin` e `/parceiro`) — não compartilham prompt nem rota, propósito e escopo de segurança são bem diferentes (um é institucional/anônimo, outro é suporte autenticado com acesso a dado real).
 
 ## Ideias em avaliação (backlog não decidido, só registrado)
 - **Música gerada com IA (Suno):** opção do familiar gerar uma música sobre a vida do homenageado direto no memorial. Avaliar pro próximo deploy. Registrado 2026-07-10.
