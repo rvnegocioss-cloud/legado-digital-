@@ -36,15 +36,17 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
         aria-label={aceso ? 'Apagar a vela' : 'Acender uma vela'}
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 8 }}
       >
+        {/* Containing block raiz: relative + tamanho explícito. Todo "bottom" dos filhos se refere a este box. */}
         <div style={{ position: 'relative', width: 60, height: 88, margin: '0 auto' }}>
-          {/* Luz ambiente ao redor, só quando acesa */}
+
+          {/* Halo — só anima opacity, então translateX inline aqui é seguro (não colide com keyframe) */}
           {aceso && (
             <div
               className="vela-glow-ambiente"
               style={{
                 position: 'absolute',
                 left: '50%',
-                top: 6,
+                bottom: 20,
                 transform: 'translateX(-50%)',
                 width: 70,
                 height: 70,
@@ -56,28 +58,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
             />
           )}
 
-          {/* Pavio + chama */}
-          <div style={{ position: 'absolute', left: '50%', bottom: 34, transform: 'translateX(-50%)' }}>
-            {/* Pavio */}
-            <div style={{ width: 2, height: 10, background: '#2a221a', margin: '0 auto' }} />
-
-            {/* Brasa (ponta do pavio, sempre visível) */}
-            {!aceso && (
-              <div className="vela-brasa" style={{ position: 'absolute', top: -3, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4 }} />
-            )}
-
-            {/* Chama, só quando acesa */}
-            {aceso && (
-              <div
-                className="vela-chama-intensidade"
-                style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', width: 16, height: 16 }}
-              >
-                <div className="vela-chama" style={{ position: 'absolute', inset: 0 }} />
-              </div>
-            )}
-          </div>
-
-          {/* Corpo da vela */}
+          {/* Corpo da vela — altura explícita (40), sem animation, translateX inline seguro. Containing block do pavio. */}
           <div
             style={{
               position: 'absolute',
@@ -90,7 +71,56 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
               background: 'radial-gradient(circle at 30% 0%, #fdfbf3 15%, #e4ddc8 60%, #c9bfa1 100%)',
               boxShadow: 'inset 0 0 10px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25)',
             }}
-          />
+          >
+            {/* Pavio — bottom:100% do corpo (encosta no topo dele). Altura explícita (10). Containing block da brasa/chama. */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: '50%',
+                marginLeft: -1,
+                width: 2,
+                height: 10,
+                background: '#2a221a',
+              }}
+            >
+              {/* Brasa (apagada) — bottom:100% do pavio = na ponta dele */}
+              {!aceso && (
+                <div
+                  className="vela-brasa"
+                  style={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    left: '50%',
+                    marginLeft: -2,
+                    width: 4,
+                    height: 4,
+                  }}
+                />
+              )}
+
+              {/* Chama — bottom:50% do pavio, sobe a partir da metade dele.
+                  Centralizada por marginLeft (nunca transform): a classe roda um
+                  keyframe que anima transform/scale, e um transform inline seria
+                  sobrescrito pela animação — era exatamente o bug da chama pulando
+                  pro lado errado quando acendia. */}
+              {aceso && (
+                <div
+                  className="vela-chama-intensidade"
+                  style={{
+                    position: 'absolute',
+                    bottom: '50%',
+                    left: '50%',
+                    marginLeft: -8,
+                    width: 16,
+                    height: 16,
+                  }}
+                >
+                  <div className="vela-chama" style={{ position: 'absolute', inset: 0 }} />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </button>
 
