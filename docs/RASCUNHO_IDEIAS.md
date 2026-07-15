@@ -4,6 +4,7 @@ Arquivo separado do CLAUDE.md. Aqui fica **tudo que foi sugerido (por mim ou pel
 
 ## Aguardando decisão do Rafael
 
+- **Modelo de negócio: vender direto pra família também, ou só via parceiro (funerária/cemitério/prefeitura)?** (2026-07-14, Rafael notou isso no prompt do LegadoBot Público — hoje o bot descreve só B2B2C, "funerária contrata e oferece à família", nunca menciona venda direta.) Rafael tem **reunião com os sócios em 2026-07-15** pra levar essa pergunta. Decisão afeta: prompt do LegadoBot Público (`docs/LEGADOBOT_PROMPT_PUBLICO.md`), texto da landing, e possivelmente fluxo de cadastro (hoje só existe caminho via parceiro). Não mudar nada disso até a decisão sair da reunião.
 - **Templates/cores do memorial pra família escolher** — hoje só existe 1 template fixo (navy+dourado), sem coluna de tema no banco. Decisão pendente: construir a feature de verdade (múltiplos templates selecionáveis) ou só mockup visual pra vender a ideia na página do parceiro?
 - **"Livro de Assinaturas" vs "Homenagens"** — mockup do Pedro mostra 2 contadores separados (Homenagens Recentes: 42, Assinaturas no Livro: 87). Hoje só existe 1 conceito no banco (`condolencias`). São 2 coisas reais (assinatura = só nome sem mensagem, homenagem = mensagem completa) ou só 2 nomes pra mesma coisa?
 - **Globo 3D (achado do Awwwards, "Susie & Jay")** — vira parte da aba "Localização" da página do memorial (substituindo o mapa simples do cemitério por globo com lugares da vida + sepultamento), ou fica separado como aba nova?
