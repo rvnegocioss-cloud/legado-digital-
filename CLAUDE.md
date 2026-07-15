@@ -20,8 +20,10 @@ Regra geral: nunca inventar arquitetura complexa sozinho sem consultar Opus prim
 
 **Um commit só, um deploy só:** CLAUDE.md e `/admin/mapa` atualizam no MESMO commit/push da modificação de código, nunca em commit separado depois. Gasta tempo e token à toa fazer 2 deploys pra mesma tarefa.
 
-## Regra — Backup automático no "Cérebro Claude" (Google Drive, 2026-07-15)
-Toda vez que o Rafael mandar um PDF/documento/material no chat (link do Drive, anexo, etc.), subir automaticamente uma cópia na pasta **"Cérebro Claude"** no Google Drive dele — não esperar ele pedir de novo cada vez. Pasta criada 2026-07-15 via Google Drive MCP (`create_file` com `mimeType: application/vnd.google-apps.folder`), guarda PDFs de referência/backup do projeto (ex: `cerebro-claude.pdf` — export do próprio CLAUDE.md, `relatorio-mcps-skills.pdf` — relatório de MCPs/skills usados).
+## Regra — Backup no "Cérebro Claude" (pasta LOCAL, corrigido 2026-07-15)
+Toda vez que o Rafael mandar PDF/documento/material relevante, ou uma técnica der certo de verdade (padrão validado, tipo a integração 3D do jazigo), registrar uma cópia em **`C:\Users\vivav\Desktop\Cerebro Claude - Legado Digital\`** (pasta local, arquivos HTML simples) — não esperar ele pedir de novo cada vez.
+
+**Histórico da decisão:** primeira tentativa (mesmo dia) foi criar pasta no Google Drive e subir PDF via `create_file` com conteúdo em base64 — **descoberto na hora que isso não escala**: um PDF de ~100KB vira ~137 mil caracteres em base64, que tokeniza pessimamente (~130 mil tokens só pra ler de volta, quase estourando o contexto da conversa). Corrigido primeiro pra Google Docs via `textContent` (texto puro, sem base64) — mais barato, mas Rafael preferiu simplificar de vez: **pasta local na área de trabalho, sem Drive nenhum**. 3 documentos já existem lá: `resumo-projeto.html`, `relatorio-mcps-skills.html`, `padroes-tecnicos.html`.
 
 ## Regra — Pesquisar antes de inventar (2026-07-15)
 Ver também `docs/TEMPLATE_PROMPT_CRIATIVO.md` — formato de brief criativo estruturado (persona, paleta com hex, tipografia, beats de storytelling, palavras-chave) pra usar toda vez que for pedir peça visual grande pra um modelo mais forte.
