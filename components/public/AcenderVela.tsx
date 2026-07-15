@@ -31,73 +31,51 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      {/* Filtro SVG de turbulência — distorce a chama de forma orgânica, zero JS */}
-      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-        <defs>
-          <filter id="vela-turbulencia">
-            <feTurbulence type="fractalNoise" baseFrequency="0.03 0.09" numOctaves={2} seed={4} result="turb">
-              <animate attributeName="baseFrequency" values="0.03 0.09;0.045 0.11;0.03 0.09" dur="2.4s" repeatCount="indefinite" />
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="turb" scale={aceso ? 4 : 0} />
-          </filter>
-        </defs>
-      </svg>
-
       <button
         onClick={alternar}
         aria-label={aceso ? 'Apagar a vela' : 'Acender uma vela'}
         style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 8 }}
       >
-        <div style={{ position: 'relative', width: 44, height: 64, margin: '0 auto' }}>
-          {/* Glow externo */}
+        <div style={{ position: 'relative', width: 60, height: 88, margin: '0 auto' }}>
+          {/* Luz ambiente ao redor, só quando acesa */}
           {aceso && (
             <div
-              className="vela-glow"
+              className="vela-glow-ambiente"
               style={{
                 position: 'absolute',
                 left: '50%',
                 top: 6,
                 transform: 'translateX(-50%)',
-                width: 46,
-                height: 46,
+                width: 70,
+                height: 70,
                 borderRadius: '50%',
-                background: 'radial-gradient(closest-side, rgba(255,180,80,0.55), transparent)',
-                filter: 'blur(6px)',
+                background: 'radial-gradient(circle, rgba(255,160,70,0.55) 0%, transparent 70%)',
+                filter: 'blur(8px)',
+                pointerEvents: 'none',
               }}
             />
           )}
 
-          {/* Chama */}
-          <div
-            className={aceso ? 'vela-nucleo' : ''}
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: 4,
-              transform: 'translateX(-50%) rotate(180deg)',
-              width: aceso ? 20 : 10,
-              height: aceso ? 28 : 12,
-              borderRadius: '50% 50% 50% 0',
-              background: aceso
-                ? 'radial-gradient(circle at 65% 35%, #fff7d6 0%, #ffd27a 35%, #ff9d3f 65%, #C9A46A 100%)'
-                : '#3a3226',
-              filter: aceso ? 'url(#vela-turbulencia) drop-shadow(0 0 8px rgba(255,170,80,0.7))' : 'none',
-              transition: 'width 0.3s ease, height 0.3s ease, background 0.3s ease',
-            }}
-          />
+          {/* Pavio + chama */}
+          <div style={{ position: 'absolute', left: '50%', bottom: 34, transform: 'translateX(-50%)' }}>
+            {/* Pavio */}
+            <div style={{ width: 2, height: 10, background: '#2a221a', margin: '0 auto' }} />
 
-          {/* Pavio */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: 30,
-              transform: 'translateX(-50%)',
-              width: 2,
-              height: 8,
-              background: '#2a221a',
-            }}
-          />
+            {/* Brasa (ponta do pavio, sempre visível) */}
+            {!aceso && (
+              <div className="vela-brasa" style={{ position: 'absolute', top: -3, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4 }} />
+            )}
+
+            {/* Chama, só quando acesa */}
+            {aceso && (
+              <div
+                className="vela-chama-intensidade"
+                style={{ position: 'absolute', bottom: 6, left: '50%', transform: 'translateX(-50%)', width: 16, height: 16 }}
+              >
+                <div className="vela-chama" style={{ position: 'absolute', inset: 0 }} />
+              </div>
+            )}
+          </div>
 
           {/* Corpo da vela */}
           <div
@@ -106,11 +84,11 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
               left: '50%',
               bottom: 0,
               transform: 'translateX(-50%)',
-              width: 30,
-              height: 34,
-              borderRadius: '3px 3px 4px 4px',
-              background: 'linear-gradient(180deg, #F5F2EB, #d8d2c4)',
-              boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+              width: 32,
+              height: 40,
+              borderRadius: '4px 10px 2px 2px',
+              background: 'radial-gradient(circle at 30% 0%, #fdfbf3 15%, #e4ddc8 60%, #c9bfa1 100%)',
+              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25)',
             }}
           />
         </div>
