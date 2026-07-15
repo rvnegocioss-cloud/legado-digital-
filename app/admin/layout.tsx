@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, MessageCircle } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 
@@ -93,6 +93,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {item.label}
             </Link>
           ))}
+          <button
+            onClick={() => window.dispatchEvent(new Event('legadobot:abrir'))}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-zinc-800/50"
+            style={{ color: '#C9A46A' }}
+          >
+            <MessageCircle size={16} className="shrink-0" />
+            LegadoBot Chat
+          </button>
         </nav>
       </aside>
 

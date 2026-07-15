@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getParceiroUser, getAdminUser, signOut, supabase } from '@/lib/auth'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
+import { MessageCircle } from 'lucide-react'
 
 type ParceiroUser = {
   email: string
@@ -124,6 +125,14 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
                     {item.label}
                   </Link>
                 ))}
+                <button
+                  onClick={() => window.dispatchEvent(new Event('legadobot:abrir'))}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-zinc-800/50"
+                  style={{ color: '#C9A46A' }}
+                >
+                  <MessageCircle size={16} className="shrink-0" />
+                  LegadoBot Chat
+                </button>
               </div>
             </div>
             <div className="flex items-center gap-4">

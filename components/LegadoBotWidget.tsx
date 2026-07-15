@@ -21,6 +21,25 @@ export default function LegadoBotWidget() {
     fimRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensagens, aberto])
 
+  useEffect(() => {
+    const abrir = () => setAberto(true)
+    window.addEventListener('legadobot:abrir', abrir)
+    return () => window.removeEventListener('legadobot:abrir', abrir)
+  }, [])
+
+  useEffect(() => {
+    async function carregarNome() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('usuarios').select('nome').eq('email', user.email).single()
+      const primeiroNome = data?.nome?.split(' ')[0]
+      if (primeiroNome) {
+        setMensagens([{ role: 'assistant', content: `Tudo bem, ${primeiroNome}? Sou o LegadoBot, pode perguntar sobre qualquer parte do sistema.` }])
+      }
+    }
+    carregarNome()
+  }, [])
+
   async function enviar() {
     const texto = input.trim()
     if (!texto || carregando) return
