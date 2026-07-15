@@ -275,13 +275,34 @@ Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servi
 ### Gap conhecido (resolvido)
 As seções só aparecem se o memorial **tiver o dado preenchido**. Antes nenhum formulário de edição tinha campo pra foto/vídeo/galeria/timeline — agora os dois formulários (`/admin/memoriais/[id]` e `/parceiro/memoriais`) têm todos esses campos, incluindo upload direto pro Storage.
 
-### Visual
-Identidade navy `#0B1D2A` + dourado `#C9A46A` (mesma do template antigo "Noturno"), tipografia serif. Estilização ainda básica (inline styles simples) — refino visual "luxo moderno" é a próxima etapa, mantendo tudo em CSS puro (sem animação contínua, sem fetch de fonte externa).
+### Visual — redesign "luxo moderno" (2026-07-15)
+Identidade navy `#0B1D2A` + dourado `#C9A46A` mantida, tipografia serif. Plano desenhado por um subagente Opus (via Agent tool, `subagent_type: "Plan"`, `model: "opus"` — Opus só planejou, execução foi feita normal por essa sessão) e executado na íntegra:
+- Tokens de apoio novos em `lib/publicTheme.ts` (`CORES.fundoProfundo/douradoClaro/douradoEscuro/douradoBordaForte/superficieCard/glowHero`) + helpers `anosDestaque()` (ano grande tipo "1950 — 2024", com guarda contra data que não parseia) e `dataPtBr()` (data completa formatada, usada nas condolências).
+- Hero: anel fino dourado (era `conic-gradient` grosso de 4 cores), glow radial estático atrás da foto (CSS puro, sem JS), monograma (iniciais) no lugar do "Sem foto" quando não há imagem, nome com `clamp()` responsivo, cidade com ícone `<MapPin>` do lucide no lugar do emoji 📍, frase citada centralizada com hairline (antes desalinhada com borda-esquerda dentro de um hero centralizado).
+- Cada seção ganha cabeçalho `<h2>` + hairline dourada fina (era `<div>` sem hierarquia semântica).
+- Biografia: drop-cap editorial (`::first-letter` via classe `.mem-bio` em `globals.css` — inline style não faz `::first-letter`).
+- Vídeo: moldura de mídia com hairline (era card com padding), `<iframe>` com `loading="lazy"`, `<video>` com `preload="metadata"` + `poster`.
+- Linha do tempo: espinha vertical com nós (bolinha dourada por evento) e fade nas pontas (`mask-image` em `globals.css`, classe `.mem-timeline-espinha`), ano em destaque grande serif dourado.
+- Galeria: grid com `aspectRatio` fixo (era altura fixa em px), `loading="lazy"` + `decoding="async"`, hover leve (`.mem-galeria-item` — `transition` CSS, não é loop de animação). Lightbox (abrir foto grande) ficou de fora — fase 2, registrado como pendência.
+- Condolências: agora mostra a data (`created_at` já existia no banco mas não era renderizado), acento dourado à esquerda no card.
+- Rodapé: logo real (`next/image`) no lugar do texto "Legado Digital" solto — cumpre a regra "Logo real em toda página".
+- **Decisão consciente:** não foi adicionado link "Privacidade"/"Termos" no rodapé (sugestão do plano) porque essas páginas ainda não existem — geraria link morto (404). Fica pendente até essas páginas serem criadas (ver backlog).
+- **Constraint mantida à risca:** zero JavaScript client contínuo na página (continua Server Component). Onde teve interatividade nova (a vela, ver abaixo), virou ilha `'use client'` isolada, sem `requestAnimationFrame` — animação é só `@keyframes` CSS (compositor da GPU, não trava a aba, navegador pausa sozinho fora de foco), com fallback `prefers-reduced-motion`.
+
+### Acender vela — implementado (2026-07-15)
+`components/public/AcenderVela.tsx`, ilha client isolada no hero da página do memorial. Pedido explícito do Rafael: "detalhe tem que ser real... elementos que vão surpreender... não quero nada amador."
+- **Chama real, não ícone que troca de cor:** camadas de `<div>` (glow externo + núcleo com gradiente radial branco→laranja→dourado) com tremelique via `@keyframes` CSS (`.vela-nucleo`/`.vela-glow` em `globals.css`, duas animações com delay diferente pra não sincronizar) — zero JS contínuo, é só CSS rodando no compositor.
+- **Distorção orgânica de verdade:** filtro SVG (`<feTurbulence>` + `<feDisplacementMap>`, com `<animate>` nativo do SVG variando `baseFrequency`) aplicado via `filter: url(#vela-turbulencia)` — técnica de fogo CSS/SVG realista, 100% declarativo, sem JavaScript nenhum calculando por frame.
+- **Persistência:** coluna `homenagens.velas_acesas` (integer, default 0) + função `acender_vela(p_slug)` (`security definer`, mesmo padrão de `incrementar_visualizacao`, retorna o novo total pro client não precisar de uma segunda query). Chamada direto do client via `supabase.rpc()` (mesmo padrão já usado em `BuscaMemorial.tsx`).
+- **Anti-spam simples:** flag em `localStorage` (`vela_{slug}`) — só conta a primeira vez que aquele navegador acende. Apagar/reacender depois disso só alterna o visual, não soma de novo no contador (contador é cumulativo de "quantas pessoas já acenderam alguma vez", nunca desce — decisão de produto: um contador de carinho não devia parecer "diminuir").
+- Respeita `prefers-reduced-motion` (desliga o tremelique, chama fica estática).
 
 ### Ainda não incluído (planejado, não construído)
 - Formulário de nova condolência (será ilha client isolada, pequena)
-- Acender/apagar vela, troca de tema, compartilhar (ilhas client, uma por vez, sem RAF)
-- Localização (cemitério/jazigo) — sem dado real ainda, schema de jazigo/gaveta não existe (Fase 5)
+- Troca de tema, compartilhar, música de fundo (ilhas client futuras, uma por vez, sem RAF) — vela já foi a primeira das 4 ideias registradas em 2026-07-14 a sair do papel
+- Lightbox da galeria (abrir foto em tela cheia) — fase 2 do redesign, grid já entrega o ganho visual sozinho por ora
+- Links de Privacidade/Termos no rodapé — aguardando essas páginas existirem
+- Localização (cemitério/jazigo) — sem dado real ainda, schema de jazigo/gaveta não existe (Fase 5). Globo 3D (ideia do Awwwards) explicitamente adiado pelo Rafael em 2026-07-15 — foco foi pra vela primeiro.
 - QR Code — ver decisão registrada em "Fase Atual".
 
 ### Decisão — Música de fundo (direitos autorais)

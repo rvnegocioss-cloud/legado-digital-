@@ -6,11 +6,17 @@ import type { CSSProperties } from "react";
 export const CORES = {
   fundoTopo: "#0f2436",
   fundoBase: "#0B1D2A",
+  fundoProfundo: "#081722",
   dourado: "#C9A46A",
+  douradoClaro: "#dfc08a",
+  douradoEscuro: "#a8834a",
   douradoBorda: "rgba(201,164,106,0.18)",
+  douradoBordaForte: "rgba(201,164,106,0.30)",
   textoForte: "#F5F2EB",
   textoCorpo: "#b0c0cc",
   textoFraco: "#7a8a96",
+  superficieCard: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+  glowHero: "radial-gradient(closest-side, rgba(201,164,106,0.15), transparent)",
 } as const;
 
 export const tema: Record<string, CSSProperties> = {
@@ -189,4 +195,27 @@ export const tema: Record<string, CSSProperties> = {
 
 export function periodoTexto(nascimento: string | null, falecimento: string | null) {
   return [nascimento, falecimento].filter(Boolean).join(" — ");
+}
+
+// Ano em destaque (ex: "1950 — 2024") pro hero do memorial. Guarda contra data
+// que não parseia — cai de volta pro texto cru, nunca quebra a página.
+export function anosDestaque(nascimento: string | null, falecimento: string | null) {
+  const anoDe = (d: string | null) => {
+    if (!d) return null;
+    const ano = new Date(d).getFullYear();
+    return Number.isFinite(ano) ? String(ano) : null;
+  };
+  const de = anoDe(nascimento);
+  const ate = anoDe(falecimento);
+  if (de || ate) return [de, ate].filter(Boolean).join(" — ");
+  return periodoTexto(nascimento, falecimento);
+}
+
+// Data completa em pt-BR (ex: "12 de março de 1950") — usada em datas menores
+// de apoio e nas condolências. Guarda contra parse inválido.
+export function dataPtBr(d: string | null) {
+  if (!d) return null;
+  const data = new Date(d);
+  if (Number.isNaN(data.getTime())) return d;
+  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(data);
 }

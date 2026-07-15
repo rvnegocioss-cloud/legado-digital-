@@ -17,3 +17,4 @@ Arquivo separado do CLAUDE.md. Aqui fica **tudo que foi sugerido (por mim ou pel
 - **3 imagens do deck do Pedro nunca abertas:** Página Memorial Pública, Aplicações Digitais/Institucionais, Presença Física e Comunicação — só Dashboard e Gestão de Memorial foram vistos até agora.
 - **Claude Design** (Anthropic Labs, lançado abril/2026) — ferramenta real confirmada, deixa exportar direto pro Claude Code. Ainda não usada nem registrada como opção de workflow.
 - **21st.dev Magic MCP** — pesquisado, nunca instalado (só o Firecrawl foi, com a chave que o Rafael passou).
+- **Pesquisar tutoriais do YouTube sobre integração de vídeo, transições 3D, frameworks e outras técnicas pro projeto (2026-07-15, Rafael pediu explicitamente pra não esquecer).** Fazer scrape/pesquisa de tutoriais reais quando for a vez de mexer em vídeo/3D de novo — ainda não pesquisado.
