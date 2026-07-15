@@ -10,6 +10,10 @@ Arquivo separado do CLAUDE.md. Aqui fica **tudo que foi sugerido (por mim ou pel
 - **Globo 3D (achado do Awwwards, "Susie & Jay")** — vira parte da aba "Localização" da página do memorial (substituindo o mapa simples do cemitério por globo com lugares da vida + sepultamento), ou fica separado como aba nova? **Adiado explicitamente (2026-07-15, Rafael): "deixa o globo para depois", foco agora é a página de homenagem.**
 - **Botão "Começar Agora" da landing → vídeo/tour (2026-07-14, Rafael):** em vez de levar direto pra alguma tela, o botão levaria pra um vídeo sentimental/tour do Legado Digital — Rafael ainda vai criar esse vídeo, não existe ainda. Em aberto: esse vídeo vira uma página própria de apresentação (a mesma que seria mostrada pra família depois?) ou só um player/modal na própria landing? Nada decidido, não construir sem o vídeo existir e sem Rafael confirmar o formato.
 
+## A verificar depois (Rafael pediu, sem ação agora)
+
+- **Conferir se o QR Code ainda é gerado automaticamente quando um memorial é criado** (2026-07-15) — funcionalidade já existia e estava marcada como pronta, Rafael pediu pra reconferir depois de tantas mudanças na sessão. Não mexer agora, só testar quando ele chamar.
+
 ## Registrado, sem construir ainda (não esquecer)
 
 - **Dashboard — elementos do mockup do Pedro que faltam:** card "Memorial em Destaque", "Comentários Recentes", "Resumo de Moderação" (pendentes/aprovados/rejeitados/denúncias), donut de QR Codes (Ativos/Pausados/Expirados/Inativos), barra "Ações Rápidas" (Novo Memorial/Registrar Homenagem/Adicionar Assinatura/Gerar QR Code/Gerenciar Usuários/Relatórios), mapa interativo de localização no cemitério dentro do próprio dashboard.
