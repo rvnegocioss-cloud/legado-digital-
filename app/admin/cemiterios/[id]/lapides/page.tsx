@@ -135,6 +135,8 @@ export default function LapidesCemiterio() {
                 <th className="text-left py-3 px-4">Lote</th>
                 <th className="text-left py-3 px-4">Observações</th>
                 <th className="text-left py-3 px-4"></th>
+                <th className="text-left py-3 px-4"></th>
+                <th className="text-left py-3 px-4"></th>
               </tr>
             </thead>
             <tbody>
@@ -144,6 +146,16 @@ export default function LapidesCemiterio() {
                   <td className="py-3 px-4 text-zinc-300">{l.quadra || '—'}</td>
                   <td className="py-3 px-4 text-zinc-300">{l.lote || '—'}</td>
                   <td className="py-3 px-4 text-zinc-400">{l.observacoes || '—'}</td>
+                  <td className="py-3 px-4">
+                    <Link href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas`} className="text-zinc-400 hover:text-white text-xs">
+                      Gavetas
+                    </Link>
+                  </td>
+                  <td className="py-3 px-4">
+                    <Link href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas-3d`} className="text-xs" style={{ color: '#C9A46A' }}>
+                      Gavetas 3D
+                    </Link>
+                  </td>
                   <td className="py-3 px-4">
                     <button onClick={() => remover(l.id)} className="text-zinc-500 hover:text-red-400 text-xs">
                       Remover
