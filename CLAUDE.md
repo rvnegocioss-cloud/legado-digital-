@@ -11,6 +11,8 @@
 **Um commit só, um deploy só:** CLAUDE.md e `/admin/mapa` atualizam no MESMO commit/push da modificação de código, nunca em commit separado depois. Gasta tempo e token à toa fazer 2 deploys pra mesma tarefa.
 
 ## Regra — Pesquisar antes de inventar (2026-07-15)
+Ver também `docs/TEMPLATE_PROMPT_CRIATIVO.md` — formato de brief criativo estruturado (persona, paleta com hex, tipografia, beats de storytelling, palavras-chave) pra usar toda vez que for pedir peça visual grande pra um modelo mais forte.
+
 **Antes de construir algo com barra de qualidade visual/técnica alta (efeito, animação, componente de UI que precisa parecer profissional), pesquisar referência real primeiro (Firecrawl, CodePen, Awwwards, etc.) — nunca inventar do zero por conta própria e torcer pra ficar bom.** Motivo: a primeira versão da vela (`components/public/AcenderVela.tsx`, 2026-07-15) foi inventada sem pesquisa — um blob genérico com filtro de distorção que ficou ruim de verdade ("ta uma porcaria", segundo o Rafael). Só funcionou depois de pesquisar um CodePen respeitado (`antoniandre/pen/aRPJoM`) e seguir a técnica real dele (transform composto pra forma de chama, não border-radius simples). "Não sabe, pesquise" — não é opcional, é padrão de trabalho.
 
 **Build passou → commit + push direto, sem perguntar.** Não fica esperando confirmação a cada vez — o usuário já autorizou isso como regra permanente (2026-07-10). Só para e avisa se o build falhar.
