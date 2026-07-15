@@ -109,10 +109,18 @@ export async function POST(req: NextRequest) {
   const match = resposta.match(/AÇÃO:\s*(\/\S+)\s*$/m)
   if (match) {
     acao = match[1]
+    resposta = resposta.replace(/\n?AÇÃO:\s*\/\S+\s*$/m, '').trim()
+
     if (!ehStaff && !acao.startsWith('/parceiro')) {
       acao = null
     }
-    resposta = resposta.replace(/\n?AÇÃO:\s*\/\S+\s*$/m, '').trim()
+
+    // Trava independente do modelo: modelo grátis tende a grudar AÇÃO em toda resposta.
+    // Só navega se a última mensagem do usuário realmente pedir navegação.
+    const ultimaDoUsuario = [...mensagens].reverse().find((m) => m.role === 'user')?.content.toLowerCase() || ''
+    if (acao && !/aonde|onde (eu )?(vejo|acho|encontro|vou)|como (eu )?(vejo|acesso|chego)|leva.*pra|me leva|abre.*p[aá]gina|ir pra|quero ver/.test(ultimaDoUsuario)) {
+      acao = null
+    }
   }
 
   return NextResponse.json({ resposta, acao })

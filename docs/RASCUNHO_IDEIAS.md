@@ -7,6 +7,7 @@ Arquivo separado do CLAUDE.md. Aqui fica **tudo que foi sugerido (por mim ou pel
 - **Templates/cores do memorial pra família escolher** — hoje só existe 1 template fixo (navy+dourado), sem coluna de tema no banco. Decisão pendente: construir a feature de verdade (múltiplos templates selecionáveis) ou só mockup visual pra vender a ideia na página do parceiro?
 - **"Livro de Assinaturas" vs "Homenagens"** — mockup do Pedro mostra 2 contadores separados (Homenagens Recentes: 42, Assinaturas no Livro: 87). Hoje só existe 1 conceito no banco (`condolencias`). São 2 coisas reais (assinatura = só nome sem mensagem, homenagem = mensagem completa) ou só 2 nomes pra mesma coisa?
 - **Globo 3D (achado do Awwwards, "Susie & Jay")** — vira parte da aba "Localização" da página do memorial (substituindo o mapa simples do cemitério por globo com lugares da vida + sepultamento), ou fica separado como aba nova?
+- **Botão "Começar Agora" da landing → vídeo/tour (2026-07-14, Rafael):** em vez de levar direto pra alguma tela, o botão levaria pra um vídeo sentimental/tour do Legado Digital — Rafael ainda vai criar esse vídeo, não existe ainda. Em aberto: esse vídeo vira uma página própria de apresentação (a mesma que seria mostrada pra família depois?) ou só um player/modal na própria landing? Nada decidido, não construir sem o vídeo existir e sem Rafael confirmar o formato.
 
 ## Registrado, sem construir ainda (não esquecer)
 

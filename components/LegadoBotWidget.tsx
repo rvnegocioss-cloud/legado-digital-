@@ -134,10 +134,16 @@ export default function LegadoBotWidget() {
       <button
         onClick={() => setAberto(!aberto)}
         aria-label="Abrir LegadoBot"
-        className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center"
+        className="relative flex items-center gap-2 pl-4 pr-5 h-14 rounded-full shadow-lg"
         style={{ background: '#C9A46A' }}
       >
-        {aberto ? <X size={22} strokeWidth={1.5} color="#0B1D2A" /> : <MessageCircle size={22} strokeWidth={1.5} color="#0B1D2A" />}
+        {!aberto && <span className="absolute inset-0 rounded-full animate-ping" style={{ background: '#C9A46A', opacity: 0.4 }} />}
+        <span className="relative flex items-center justify-center w-6 h-6 shrink-0">
+          {aberto ? <X size={22} strokeWidth={1.5} color="#0B1D2A" /> : <MessageCircle size={22} strokeWidth={1.5} color="#0B1D2A" />}
+        </span>
+        <span className="relative text-sm font-semibold whitespace-nowrap" style={{ color: '#0B1D2A' }}>
+          {aberto ? 'Fechar' : 'LegadoBot'}
+        </span>
       </button>
     </div>
   )
