@@ -429,7 +429,8 @@ export default function DetalheMemorial() {
       <div className="lg:col-span-2 rounded-xl bg-zinc-900 border border-zinc-800 p-6">
         <h2 className="text-sm font-medium text-zinc-400 mb-4">Dados do memorial</h2>
         <form onSubmit={salvar} className="space-y-3">
-          <div className="max-w-sm">
+          <div className="flex gap-6 items-start">
+          <div className="max-w-sm flex-1">
             <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
             <Input
               placeholder="Nome completo do falecido"
@@ -440,6 +441,7 @@ export default function DetalheMemorial() {
             />
           </div>
 
+          <div className="flex-1 max-w-sm">
           <SecaoRetratil titulo="Mídia (foto, vídeo, galeria)">
           <div className="space-y-3">
           <div>
@@ -516,6 +518,8 @@ export default function DetalheMemorial() {
           </div>
           </div>
           </SecaoRetratil>
+          </div>
+          </div>
 
           <div className="flex gap-3">
             <div className="flex-1">
