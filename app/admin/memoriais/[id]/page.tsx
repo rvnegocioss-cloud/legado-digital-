@@ -439,6 +439,84 @@ export default function DetalheMemorial() {
               className="bg-zinc-800 border-zinc-700 text-white"
             />
           </div>
+
+          <SecaoRetratil titulo="Mídia (foto, vídeo, galeria)">
+          <div className="space-y-3">
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
+            {fotoUrl && (
+              <div className="flex items-center gap-3 mb-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover" />
+                <button type="button" onClick={removerFotoPrincipal} className="text-xs text-zinc-500 hover:text-red-400">
+                  Remover foto
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFotoChange}
+              disabled={enviandoFoto}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+            />
+            {enviandoFoto && <p className="text-xs text-zinc-500 mt-1">Enviando foto...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
+            {videoUrl && (
+              <div className="mb-2">
+                <video src={videoUrl} controls className="w-full rounded-md max-h-48 bg-black" />
+                <button type="button" onClick={removerVideo} className="text-xs text-zinc-500 hover:text-red-400 mt-1">
+                  Remover vídeo
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="video/*"
+              onChange={handleVideoChange}
+              disabled={enviandoVideo}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+            />
+            {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">
+              Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
+            </label>
+            {galeria.length > 0 && (
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                {galeria.map((url) => (
+                  <div key={url} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removerFoto(url)}
+                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleGaleriaChange}
+              disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+            />
+            {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
+          </div>
+          </div>
+          </SecaoRetratil>
+
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-xs text-zinc-500 mb-1">Data de nascimento</label>
@@ -521,84 +599,84 @@ export default function DetalheMemorial() {
               className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
             />
           </div>
+        </form>
 
-          <SecaoRetratil titulo="Mídia (foto, vídeo, galeria)">
-          <div className="space-y-3">
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
-            {fotoUrl && (
-              <div className="flex items-center gap-3 mb-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover" />
-                <button type="button" onClick={removerFotoPrincipal} className="text-xs text-zinc-500 hover:text-red-400">
-                  Remover foto
-                </button>
+        <div className="mt-4 pt-4 border-t border-zinc-800 space-y-4">
+          <SecaoRetratil titulo="Privacidade — senha de acesso">
+            <p className="text-zinc-500 text-xs mb-4">
+              {temSenha
+                ? 'Este memorial exige senha na busca pública E pra abrir a página direto (link ou QR Code). Deixe o campo em branco e salve pra tornar público de novo.'
+                : 'Este memorial está público — qualquer um encontra pelo nome na busca ou abre direto pelo link/QR Code. Defina uma senha pra exigir acesso restrito em ambos.'}
+            </p>
+            <form onSubmit={salvarSenha} className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-xs text-zinc-500 mb-1">
+                  {temSenha ? 'Nova senha (ou deixe em branco pra remover)' : 'Senha de acesso'}
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Deixe em branco pra público"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
               </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFotoChange}
-              disabled={enviandoFoto}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-            />
-            {enviandoFoto && <p className="text-xs text-zinc-500 mt-1">Enviando foto...</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
-            {videoUrl && (
-              <div className="mb-2">
-                <video src={videoUrl} controls className="w-full rounded-md max-h-48 bg-black" />
-                <button type="button" onClick={removerVideo} className="text-xs text-zinc-500 hover:text-red-400 mt-1">
-                  Remover vídeo
-                </button>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleVideoChange}
-              disabled={enviandoVideo}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-            />
-            {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">
-              Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
-            </label>
-            {galeria.length > 0 && (
-              <div className="grid grid-cols-4 gap-2 mb-2">
-                {galeria.map((url) => (
-                  <div key={url} className="relative group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt="" className="w-full h-16 object-cover rounded" />
-                    <button
-                      type="button"
-                      onClick={() => removerFoto(url)}
-                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleGaleriaChange}
-              disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
-            />
-            {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
-          </div>
-          </div>
+              <Button type="submit" disabled={salvandoSenha} className="self-end">
+                {salvandoSenha ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </form>
+            {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
           </SecaoRetratil>
 
+          <SecaoRetratil titulo="Privacidade — modos de acesso">
+            <p className="text-zinc-500 text-xs mb-4">
+              Os 3 caminhos começam ligados. Desative o que a família não quiser permitir — a senha
+              acima continua valendo em cima de qualquer um que fique ativo.
+            </p>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <input type="checkbox" checked={buscaHabilitada} onChange={(e) => setBuscaHabilitada(e.target.checked)} />
+                Público — aparece na busca por nome
+              </label>
+              <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <input type="checkbox" checked={linkHabilitado} onChange={(e) => setLinkHabilitado(e.target.checked)} />
+                Acesso por link direto
+              </label>
+              <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <input type="checkbox" checked={qrcodeHabilitado} onChange={(e) => setQrcodeHabilitado(e.target.checked)} />
+                Acesso por QR Code
+              </label>
+            </div>
+            <Button type="button" onClick={salvarPrivacidade} disabled={salvandoPrivacidade} className="mt-4">
+              {salvandoPrivacidade ? 'Salvando...' : 'Salvar privacidade'}
+            </Button>
+            {privacidadeMsg && <p className="text-xs text-zinc-400 mt-2">{privacidadeMsg}</p>}
+          </SecaoRetratil>
+
+          <SecaoRetratil titulo="E-mail da família">
+            <p className="text-zinc-500 text-xs mb-4">
+              Cadastre o e-mail de contato da família — o sistema gera uma senha simples sozinho e
+              manda por e-mail. Ela usa essa senha pra entrar em /familia/login e enviar fotos, vídeo
+              e a história. Esse e-mail também recebe o pedido de confirmação da mensagem da placa.
+            </p>
+            <form onSubmit={cadastrarEmailFamilia} className="flex gap-3">
+              <Input
+                type="email"
+                placeholder="email@familia.com"
+                required
+                value={familiaEmail}
+                onChange={(e) => setFamiliaEmail(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-white flex-1"
+              />
+              <Button type="submit" disabled={cadastrandoFamiliaEmail} className="whitespace-nowrap">
+                {cadastrandoFamiliaEmail ? 'Cadastrando...' : temSenhaFamilia ? 'Gerar nova senha' : 'Cadastrar'}
+              </Button>
+            </form>
+            {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
+          </SecaoRetratil>
+        </div>
+
+        <form onSubmit={salvar} className="space-y-3 mt-4 pt-4 border-t border-zinc-800">
           <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
 
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
@@ -672,84 +750,6 @@ export default function DetalheMemorial() {
       </div>
       </div>
 
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <SecaoRetratil titulo="Privacidade — senha de acesso">
-        <p className="text-zinc-500 text-xs mb-4">
-          {temSenha
-            ? 'Este memorial exige senha na busca pública E pra abrir a página direto (link ou QR Code). Deixe o campo em branco e salve pra tornar público de novo.'
-            : 'Este memorial está público — qualquer um encontra pelo nome na busca ou abre direto pelo link/QR Code. Defina uma senha pra exigir acesso restrito em ambos.'}
-        </p>
-        <form onSubmit={salvarSenha} className="flex gap-3">
-          <div className="flex-1">
-            <label className="block text-xs text-zinc-500 mb-1">
-              {temSenha ? 'Nova senha (ou deixe em branco pra remover)' : 'Senha de acesso'}
-            </label>
-            <Input
-              type="text"
-              placeholder="Deixe em branco pra público"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="bg-zinc-800 border-zinc-700 text-white"
-            />
-          </div>
-          <Button type="submit" disabled={salvandoSenha} className="self-end">
-            {salvandoSenha ? 'Salvando...' : 'Salvar'}
-          </Button>
-        </form>
-        {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
-        </SecaoRetratil>
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <SecaoRetratil titulo="Privacidade — modos de acesso">
-        <p className="text-zinc-500 text-xs mb-4">
-          Os 3 caminhos começam ligados. Desative o que a família não quiser permitir — a senha
-          acima continua valendo em cima de qualquer um que fique ativo.
-        </p>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
-            <input type="checkbox" checked={buscaHabilitada} onChange={(e) => setBuscaHabilitada(e.target.checked)} />
-            Público — aparece na busca por nome
-          </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
-            <input type="checkbox" checked={linkHabilitado} onChange={(e) => setLinkHabilitado(e.target.checked)} />
-            Acesso por link direto
-          </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
-            <input type="checkbox" checked={qrcodeHabilitado} onChange={(e) => setQrcodeHabilitado(e.target.checked)} />
-            Acesso por QR Code
-          </label>
-        </div>
-        <Button type="button" onClick={salvarPrivacidade} disabled={salvandoPrivacidade} className="mt-4">
-          {salvandoPrivacidade ? 'Salvando...' : 'Salvar privacidade'}
-        </Button>
-        {privacidadeMsg && <p className="text-xs text-zinc-400 mt-2">{privacidadeMsg}</p>}
-        </SecaoRetratil>
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <SecaoRetratil titulo="E-mail da família">
-        <p className="text-zinc-500 text-xs mb-4">
-          Cadastre o e-mail de contato da família — o sistema gera uma senha simples sozinho e
-          manda por e-mail. Ela usa essa senha pra entrar em /familia/login e enviar fotos, vídeo
-          e a história. Esse e-mail também recebe o pedido de confirmação da mensagem da placa.
-        </p>
-        <form onSubmit={cadastrarEmailFamilia} className="flex gap-3">
-          <Input
-            type="email"
-            placeholder="email@familia.com"
-            required
-            value={familiaEmail}
-            onChange={(e) => setFamiliaEmail(e.target.value)}
-            className="bg-zinc-800 border-zinc-700 text-white flex-1"
-          />
-          <Button type="submit" disabled={cadastrandoFamiliaEmail} className="whitespace-nowrap">
-            {cadastrandoFamiliaEmail ? 'Cadastrando...' : temSenhaFamilia ? 'Gerar nova senha' : 'Cadastrar'}
-          </Button>
-        </form>
-        {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
-        </SecaoRetratil>
-      </div>
     </div>
   )
 }
