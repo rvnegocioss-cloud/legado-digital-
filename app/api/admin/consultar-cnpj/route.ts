@@ -8,6 +8,8 @@ export async function GET(req: NextRequest) {
 
   const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`)
   if (!res.ok) {
+    const corpoErro = await res.text().catch(() => '')
+    console.error(`[consultar-cnpj] BrasilAPI respondeu ${res.status}: ${corpoErro.slice(0, 300)}`)
     return NextResponse.json({ error: 'CNPJ não encontrado na Receita' }, { status: res.status === 404 ? 404 : 502 })
   }
 
