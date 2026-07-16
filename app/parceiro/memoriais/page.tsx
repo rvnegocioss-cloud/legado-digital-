@@ -54,6 +54,16 @@ async function subirArquivo(memorialId: string, pasta: 'foto' | 'video' | 'galer
   return data.publicUrl
 }
 
+// Apaga o arquivo antigo do Storage a partir da URL pública — sem isso, todo
+// upload novo (nome tem timestamp) deixa o arquivo anterior órfão pra sempre.
+async function removerArquivoStorage(url: string) {
+  const marcador = '/storage/v1/object/public/memoriais/'
+  const idx = url.indexOf(marcador)
+  if (idx === -1) return
+  const caminho = url.slice(idx + marcador.length)
+  await supabase.storage.from('memoriais').remove([caminho])
+}
+
 const FORM_INICIAL = {
   nome_completo: '',
   data_nascimento: '',
@@ -90,6 +100,7 @@ function ParceiroMemoriaisInner() {
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [erro, setErro] = useState('')
   const [rascunhoId, setRascunhoId] = useState('')
+  const [foiSalvo, setFoiSalvo] = useState(false)
   const [senha, setSenha] = useState('')
   const [temSenha, setTemSenha] = useState(false)
   const [salvandoSenha, setSalvandoSenha] = useState(false)
@@ -148,6 +159,7 @@ function ParceiroMemoriaisInner() {
     setMensagemPlaca('')
     setFamiliaEmail('')
     setErro('')
+    setFoiSalvo(false)
 
     // Cria o rascunho já no banco (id previsível) pra permitir upload de mídia
     // antes do formulário ser salvo — a política de storage exige que o
@@ -178,6 +190,7 @@ function ParceiroMemoriaisInner() {
 
   async function abrirEdicao(m: Memorial) {
     setEditando(m)
+    setFoiSalvo(true)
     setSenha('')
     setSenhaMsg('')
     setForm({
@@ -363,11 +376,20 @@ function ParceiroMemoriaisInner() {
     setGaleria((atual) => atual.filter((u) => u !== url))
   }
 
-  async function fecharDialog(aberto: boolean) {
-    const abandonouRascunhoSemNome = !aberto && editando?.id === rascunhoId && form.nome_completo.trim() === ''
+  function removerFotoPrincipal() {
+    setFotoUrl('')
+  }
 
-    if (abandonouRascunhoSemNome) {
-      // Rascunho criado ao abrir "Novo Memorial" mas fechado sem preencher nome — remove
+  function removerVideo() {
+    setVideoUrl('')
+  }
+
+  async function fecharDialog(aberto: boolean) {
+    const abandonouRascunho = !aberto && editando?.id === rascunhoId && !foiSalvo
+
+    if (abandonouRascunho) {
+      // Rascunho criado ao abrir "Novo Memorial" mas fechado sem clicar em Salvar — remove,
+      // mesmo que já tenha nome preenchido (evita memorial fantasma com slug "rascunho-xxx")
       await supabase.from('homenagens').delete().eq('id', rascunhoId)
       load()
     }
@@ -379,11 +401,16 @@ function ParceiroMemoriaisInner() {
     setSalvando(true)
     setErro('')
 
-    const slug = gerarSlug(form.nome_completo)
+    // Slug só é gerado na primeira vez de verdade — depois disso fica fixo,
+    // senão editar o nome troca a URL pública e quebra link/QR já compartilhado.
+    const slugAtual = editando?.slug && !editando.slug.startsWith('rascunho-')
+      ? editando.slug
+      : gerarSlug(form.nome_completo)
+
     const payload = {
       ...form,
-      slug,
-      memorial_slug: slug,
+      slug: slugAtual,
+      memorial_slug: slugAtual,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
       galeria_fotos: galeria,
@@ -398,8 +425,18 @@ function ParceiroMemoriaisInner() {
       return
     }
 
+    // Limpa do Storage qualquer foto/vídeo/galeria que foi trocado ou removido
+    // nessa edição — sem isso o arquivo antigo fica órfão no bucket pra sempre.
+    const fotoAntiga = editando?.foto_url
+    if (fotoAntiga && fotoAntiga !== fotoUrl) removerArquivoStorage(fotoAntiga)
+    const videoAntigo = editando?.video_url
+    if (videoAntigo && videoAntigo !== videoUrl) removerArquivoStorage(videoAntigo)
+    const galeriaAntiga = editando?.galeria_fotos || []
+    galeriaAntiga.filter((u) => !galeria.includes(u)).forEach(removerArquivoStorage)
+
     gerarQrCodeCliente(idParaUpload).then((url) => { if (url) setQrCodeUrl(url) })
 
+    setFoiSalvo(true)
     setSalvando(false)
     setDialogAberto(false)
     load()
@@ -418,6 +455,15 @@ function ParceiroMemoriaisInner() {
               <DialogTitle className="text-white">
                 {editando ? 'Editar Memorial' : 'Novo Memorial'}
               </DialogTitle>
+              {editando?.slug && !editando.slug.startsWith('rascunho-') && (
+                <a
+                  href={`/homenagem/${editando.slug}`}
+                  className="text-xs hover:underline"
+                  style={{ color: '#C9A46A' }}
+                >
+                  Ver página do memorial →
+                </a>
+              )}
             </DialogHeader>
 
             <form onSubmit={salvar} className="space-y-3">
@@ -483,8 +529,13 @@ function ParceiroMemoriaisInner() {
               <div>
                 <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
                 {fotoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={fotoUrl} alt="" className="w-20 h-20 rounded-full object-cover mb-2" />
+                  <div className="flex items-center gap-3 mb-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={fotoUrl} alt="" className="w-20 h-20 rounded-full object-cover" />
+                    <button type="button" onClick={removerFotoPrincipal} className="text-xs text-zinc-500 hover:text-red-400">
+                      Remover foto
+                    </button>
+                  </div>
                 )}
                 <input
                   type="file"
@@ -499,7 +550,12 @@ function ParceiroMemoriaisInner() {
               <div>
                 <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
                 {videoUrl && (
-                  <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-40 bg-black" />
+                  <div className="mb-2">
+                    <video src={videoUrl} controls className="w-full rounded-md max-h-40 bg-black" />
+                    <button type="button" onClick={removerVideo} className="text-xs text-zinc-500 hover:text-red-400 mt-1">
+                      Remover vídeo
+                    </button>
+                  </div>
                 )}
                 <input
                   type="file"

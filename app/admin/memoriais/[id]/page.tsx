@@ -51,6 +51,16 @@ async function subirArquivo(memorialId: string, pasta: 'foto' | 'video' | 'galer
   return data.publicUrl
 }
 
+// Apaga o arquivo antigo do Storage a partir da URL pública — sem isso, todo
+// upload novo (nome tem timestamp) deixa o arquivo anterior órfão pra sempre.
+async function removerArquivoStorage(url: string) {
+  const marcador = '/storage/v1/object/public/memoriais/'
+  const idx = url.indexOf(marcador)
+  if (idx === -1) return
+  const caminho = url.slice(idx + marcador.length)
+  await supabase.storage.from('memoriais').remove([caminho])
+}
+
 interface Parceiro {
   nome_fantasia: string | null
   razao_social: string
@@ -305,9 +315,26 @@ export default function DetalheMemorial() {
       return
     }
 
+    // Limpa do Storage qualquer foto/vídeo/galeria que foi trocado ou removido
+    // nessa edição — sem isso o arquivo antigo fica órfão no bucket pra sempre.
+    const fotoAntiga = memorial?.foto_url
+    if (fotoAntiga && fotoAntiga !== fotoUrl) removerArquivoStorage(fotoAntiga)
+    const videoAntigo = memorial?.video_url
+    if (videoAntigo && videoAntigo !== videoUrl) removerArquivoStorage(videoAntigo)
+    const galeriaAntiga = memorial?.galeria_fotos || []
+    galeriaAntiga.filter((u) => !galeria.includes(u)).forEach(removerArquivoStorage)
+
     setSalvando(false)
     setSalvo(true)
-    if (memorial) setMemorial({ ...memorial, ...form })
+    if (memorial) setMemorial({ ...memorial, ...form, foto_url: fotoUrl || null, video_url: videoUrl || null, galeria_fotos: galeria })
+  }
+
+  function removerFotoPrincipal() {
+    setFotoUrl('')
+  }
+
+  function removerVideo() {
+    setVideoUrl('')
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -497,8 +524,13 @@ export default function DetalheMemorial() {
           <div>
             <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
             {fotoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover mb-2" />
+              <div className="flex items-center gap-3 mb-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover" />
+                <button type="button" onClick={removerFotoPrincipal} className="text-xs text-zinc-500 hover:text-red-400">
+                  Remover foto
+                </button>
+              </div>
             )}
             <input
               type="file"
@@ -513,7 +545,12 @@ export default function DetalheMemorial() {
           <div>
             <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
             {videoUrl && (
-              <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />
+              <div className="mb-2">
+                <video src={videoUrl} controls className="w-full rounded-md max-h-48 bg-black" />
+                <button type="button" onClick={removerVideo} className="text-xs text-zinc-500 hover:text-red-400 mt-1">
+                  Remover vídeo
+                </button>
+              </div>
             )}
             <input
               type="file"
