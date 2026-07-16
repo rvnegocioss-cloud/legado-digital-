@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, MessageCircle } from 'lucide-react'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 
@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<AdminUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [menuAberto, setMenuAberto] = useState(false)
+  const [sidebarAberta, setSidebarAberta] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -74,15 +75,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex">
-      <aside className="hidden md:flex md:flex-col w-60 shrink-0 border-r border-zinc-800 bg-zinc-900/60">
-        <Link href="/admin" className="flex items-center h-16 px-5 border-b border-zinc-800 shrink-0">
-          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={240} height={96} className="h-14 w-auto object-contain" priority />
-        </Link>
+      <aside className={`hidden md:flex md:flex-col shrink-0 border-r border-zinc-800 bg-zinc-900/60 transition-all duration-200 ${sidebarAberta ? 'w-60' : 'w-16'}`}>
+        <div className="flex items-center h-16 px-3 border-b border-zinc-800 shrink-0 justify-between">
+          <Link href="/admin" className={`flex items-center overflow-hidden ${sidebarAberta ? '' : 'w-0'}`}>
+            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={240} height={96} className="h-14 w-auto object-contain shrink-0" priority />
+          </Link>
+          <button
+            onClick={() => setSidebarAberta(!sidebarAberta)}
+            className="shrink-0 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            aria-label={sidebarAberta ? 'Recolher menu' : 'Expandir menu'}
+            title={sidebarAberta ? 'Recolher menu' : 'Expandir menu'}
+          >
+            {sidebarAberta ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          </button>
+        </div>
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navItems.map(item => (
             <Link
               key={item.href}
               href={item.href}
+              title={sidebarAberta ? undefined : item.label}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 pathname === item.href
                   ? 'bg-zinc-800 text-white'
@@ -90,16 +102,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               }`}
             >
               <item.Icon size={16} className="shrink-0" />
-              {item.label}
+              {sidebarAberta && item.label}
             </Link>
           ))}
           <button
             onClick={() => window.dispatchEvent(new Event('legadobot:abrir'))}
+            title={sidebarAberta ? undefined : 'LegadoBot Chat'}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-zinc-800/50"
             style={{ color: '#C9A46A' }}
           >
             <MessageCircle size={16} className="shrink-0" />
-            LegadoBot Chat
+            {sidebarAberta && 'LegadoBot Chat'}
           </button>
         </nav>
       </aside>
