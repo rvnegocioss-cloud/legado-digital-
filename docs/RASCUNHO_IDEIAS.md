@@ -2,6 +2,10 @@
 
 Arquivo separado do CLAUDE.md. Aqui fica **tudo que foi sugerido (por mim ou pelo Rafael) e ainda não teve resposta/decisão**. Regra registrada 2026-07-14: se o Rafael não respondeu, é porque não viu — não pode sumir. Quando uma ideia daqui for decidida, concluída ou corrigida, ela sai daqui e vai pro CLAUDE.md como registro definitivo.
 
+## PRIORIDADE — Rafael marcou como urgente
+
+- **Resolução da logo (`public/logo-legado-digital.png`) não é boa — texto "Preservando Histórias" (linha debaixo do nome) ilegível (2026-07-16, Rafael)** — arquivo fonte é só 803×389px, quando exibido em qualquer tamanho de tela o subtítulo fica pequeno demais e borra. Tentativa anterior de upscale de verdade (Real-ESRGAN, grátis) **não completou** — Space do Hugging Face não respondeu (registrado no CLAUDE.md). Precisa: (a) retomar o upscale por outra via (outro Space, rodar local, ou serviço pago tipo topazlabs/letsenhance), ou (b) pedir arquivo fonte em resolução maior de novo pro Rafael (ele tem pasta "logo vários tamanhos" no Drive — conferir se lá tem versão maior antes de gerar upscale artificial). Não decidido qual caminho, só marcado como prioridade.
+
 ## Aguardando decisão do Rafael
 
 - **Modelo de negócio: vender direto pra família também, ou só via parceiro (funerária/cemitério/prefeitura)?** (2026-07-14, Rafael notou isso no prompt do LegadoBot Público — hoje o bot descreve só B2B2C, "funerária contrata e oferece à família", nunca menciona venda direta.) Rafael tem **reunião com os sócios em 2026-07-15** pra levar essa pergunta. Decisão afeta: prompt do LegadoBot Público (`docs/LEGADOBOT_PROMPT_PUBLICO.md`), texto da landing, e possivelmente fluxo de cadastro (hoje só existe caminho via parceiro). Não mudar nada disso até a decisão sair da reunião.
