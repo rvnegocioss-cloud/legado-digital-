@@ -39,6 +39,16 @@ interface Memorial {
   created_at: string
 }
 
+interface ParceiroContato {
+  id: string
+  nome: string
+  email: string | null
+  telefone: string | null
+  perfis: string[]
+}
+
+const PERFIS_DISPONIVEIS = ['Responsável Legal', 'Financeiro', 'Comercial', 'Técnico', 'Outro']
+
 const TIPO_LABEL: Record<string, string> = {
   funeraria: 'Funerária',
   plano_funerario: 'Plano Funerário',
@@ -67,6 +77,14 @@ export default function DetalheParceiro() {
   const [convidando, setConvidando] = useState(false)
   const [conviteErro, setConviteErro] = useState('')
   const [conviteSucesso, setConviteSucesso] = useState<{ email: string; tempPassword: string } | null>(null)
+
+  const [contatos, setContatos] = useState<ParceiroContato[]>([])
+  const [novoContatoNome, setNovoContatoNome] = useState('')
+  const [novoContatoEmail, setNovoContatoEmail] = useState('')
+  const [novoContatoTelefone, setNovoContatoTelefone] = useState('')
+  const [novoContatoPerfis, setNovoContatoPerfis] = useState<string[]>([])
+  const [salvandoContato, setSalvandoContato] = useState(false)
+  const [contatoErro, setContatoErro] = useState('')
 
   const [logoUrl, setLogoUrl] = useState('')
   const [descricaoPublica, setDescricaoPublica] = useState('')
@@ -143,21 +161,65 @@ export default function DetalheParceiro() {
 
   async function load(id: string) {
     setLoading(true)
-    const [{ data: p }, { data: m }] = await Promise.all([
+    const [{ data: p }, { data: m }, { data: c }] = await Promise.all([
       supabase.from('parceiros_b2b').select('*').eq('id', id).single(),
       supabase
         .from('homenagens')
         .select('id, nome_completo, cidade, created_at')
         .eq('parceiro_id', id)
         .order('created_at', { ascending: false }),
+      supabase
+        .from('parceiros_contatos')
+        .select('id, nome, email, telefone, perfis')
+        .eq('parceiro_id', id)
+        .order('created_at', { ascending: true }),
     ])
     setParceiro(p)
     setMemoriais(m || [])
+    setContatos(c || [])
     if (p) {
       setLogoUrl(p.logo_url || '')
       setDescricaoPublica(p.descricao_publica || '')
     }
     setLoading(false)
+  }
+
+  function togglePerfil(perfil: string) {
+    setNovoContatoPerfis((atual) =>
+      atual.includes(perfil) ? atual.filter((p) => p !== perfil) : [...atual, perfil]
+    )
+  }
+
+  async function adicionarContato(e: React.FormEvent) {
+    e.preventDefault()
+    if (!parceiro) return
+    setSalvandoContato(true)
+    setContatoErro('')
+
+    const { error } = await supabase.from('parceiros_contatos').insert({
+      parceiro_id: parceiro.id,
+      nome: novoContatoNome,
+      email: novoContatoEmail || null,
+      telefone: novoContatoTelefone || null,
+      perfis: novoContatoPerfis,
+    })
+
+    if (error) {
+      setContatoErro(error.message)
+    } else {
+      setNovoContatoNome('')
+      setNovoContatoEmail('')
+      setNovoContatoTelefone('')
+      setNovoContatoPerfis([])
+      await load(parceiro.id)
+    }
+    setSalvandoContato(false)
+  }
+
+  async function removerContato(contatoId: string) {
+    if (!parceiro) return
+    await supabase.from('parceiros_contatos').delete().eq('id', contatoId)
+    await load(parceiro.id)
   }
 
   if (loading) return <p className="text-zinc-400">Carregando...</p>
@@ -297,6 +359,95 @@ export default function DetalheParceiro() {
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
           >
             {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
+          </button>
+        </form>
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
+        <h2 className="text-sm font-medium text-zinc-400 mb-4">
+          Contatos da empresa {contatos.length > 0 && `(${contatos.length})`}
+        </h2>
+
+        {contatos.length > 0 && (
+          <ul className="space-y-2 mb-4">
+            {contatos.map((c) => (
+              <li key={c.id} className="flex items-center justify-between bg-zinc-800/50 rounded-lg px-3 py-2">
+                <div>
+                  <p className="text-white text-sm">{c.nome}</p>
+                  <p className="text-zinc-500 text-xs">
+                    {[c.email, c.telefone].filter(Boolean).join(' · ') || 'sem contato cadastrado'}
+                  </p>
+                  {c.perfis.length > 0 && (
+                    <div className="flex gap-1 mt-1 flex-wrap">
+                      {c.perfis.map((p) => (
+                        <span key={p} className="px-1.5 py-0.5 rounded text-[10px] bg-blue-900/50 text-blue-300">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removerContato(c.id)}
+                  className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap"
+                >
+                  Remover
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <form onSubmit={adicionarContato} className="space-y-3 max-w-md border-t border-zinc-800 pt-4">
+          <div className="flex gap-3">
+            <input
+              type="text"
+              placeholder="Nome do contato"
+              required
+              value={novoContatoNome}
+              onChange={(e) => setNovoContatoNome(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+            />
+          </div>
+          <div className="flex gap-3">
+            <input
+              type="email"
+              placeholder="E-mail"
+              value={novoContatoEmail}
+              onChange={(e) => setNovoContatoEmail(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+            />
+            <input
+              type="text"
+              placeholder="Telefone"
+              value={novoContatoTelefone}
+              onChange={(e) => setNovoContatoTelefone(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Perfil (pode marcar mais de um)</label>
+            <div className="flex gap-3 flex-wrap">
+              {PERFIS_DISPONIVEIS.map((perfil) => (
+                <label key={perfil} className="flex items-center gap-1.5 text-xs text-zinc-300">
+                  <input
+                    type="checkbox"
+                    checked={novoContatoPerfis.includes(perfil)}
+                    onChange={() => togglePerfil(perfil)}
+                  />
+                  {perfil}
+                </label>
+              ))}
+            </div>
+          </div>
+          {contatoErro && <p className="text-red-400 text-sm">{contatoErro}</p>}
+          <button
+            type="submit"
+            disabled={salvandoContato}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+          >
+            {salvandoContato ? 'Adicionando...' : '+ Adicionar contato'}
           </button>
         </form>
       </div>
