@@ -1,6 +1,22 @@
 # Status do Projeto — Legado Digital
 
-Documento separado do CLAUDE.md: só duas listas, feito e pendente, sem histórico misturado. Atualizar sempre que algo mudar de status. Fonte cruzada: CLAUDE.md, `/admin/mapa`, tabela `mapa_sugestoes`, `docs/RASCUNHO_IDEIAS.md`.
+Documento vivo, atualizado a cada mudança nessa sessão. Só 3 listas: feito, pendente, ideias. Fonte cruzada: CLAUDE.md, `/admin/mapa`, tabela `mapa_sugestoes`, `docs/RASCUNHO_IDEIAS.md`.
+
+_Última atualização: 2026-07-16._
+
+## Feito nessa sessão (2026-07-16)
+
+- **Bug do Jarvis (ponte de voz) corrigido** — loop de eco (mic captava a própria resposta falada como comando novo), pausa o mic durante o TTS agora
+- **Sessão travada da extensão VS Code identificada e abandonada** — arquivo `.jsonl` de 32MB nunca compactava, extensão ficava tentando resumir e travando toda vez
+- **Logo da navbar reposicionada** — mais perto do menu, conforme marcação sua em print (tamanho intacto, só posição)
+- **Sidebar da Central retrátil** — botão de seta recolhe pra só ícones, expande com texto
+- **Ficha do memorial reorganizada:**
+  - Nome completo encolhido + Mídia (foto/vídeo/galeria) ao lado dele, retrátil
+  - Privacidade (senha, modos de acesso) + Cadastro da família logo abaixo de Biografia, cada um retrátil
+- **Bug real corrigido: consulta de CNPJ retornava 502** — BrasilAPI bloqueava (403) requisição sem header `User-Agent` vindo da Vercel. Corrigido, testado com CNPJ real (Prefeitura de Uberlândia), funcionando em produção
+- **Cadastro da família por CPF — Fase 1 (modo teste)** — campo CPF + botão "Consultar CPF" preenche Nome do responsável automaticamente. Provedor `cpfcnpj.com.br`, token de teste (dado fictício, zero custo). CPF nunca é persistido. Planejado com Opus antes de construir.
+- **Plugin `/watch` instalado** — assistir vídeo (ffmpeg + yt-dlp), pra pesquisa de referência técnica
+- **Memory MCP em uso** — fatos duráveis salvos no grafo, além do arquivo de memória já existente
 
 ## Feito — Feedback do Pedro (2026-07-14), em ordem
 
@@ -25,21 +41,28 @@ Documento separado do CLAUDE.md: só duas listas, feito e pendente, sem históri
 - Portal da Família (1 e-mail sem conta, senha simples, cookie HMAC)
 - QR Code automático (geração + e-mail pro fornecedor + confirmação da família)
 - Página do memorial redesenhada ("luxo moderno") — hero, biografia com drop-cap, timeline em espinha, galeria, condolências
-- Vela acendível (CSS puro, sem JS contínuo) — corrigida nessa sessão (loop de eco no Jarvis não afeta isso, são projetos diferentes)
+- Vela acendível (CSS puro, sem JS contínuo)
 - LegadoBot Fase 1 (Central + Parceiro, Groq) e LegadoBot Público (landing)
-- Plugin `/watch` instalado (assistir vídeo — ffmpeg + yt-dlp)
 
 ## Pendente — Prioridade imediata
 
-1. **Logo da landing** — texto "PRESERVANDO HISTÓRIAS" ilegível, precisa upscale ou tratamento; posição também errada, precisa ficar mais perto da seção de benefícios/escritos
-2. **Sidebar retrátil na Central** — botão de seta pra recolher (só ícones) e expandir (ícones + texto), ganhar espaço de conteúdo
-3. **Contatos do parceiro com perfil** (Responsável Legal/Financeiro/Comercial/Técnico) — tabela `parceiros_contatos` nova, contato pode virar usuário com visão restrita
-4. **Confirmar com Pedro** — ele pediu "aba de usuários com acesso ao memorial" (multi-usuário família); isso foi simplificado de propósito em 2026-07-10, precisa validar se ele sabia
-5. **Confirmar formato do dashboard** — Pedro pediu memoriais/QR recentes agrupados por Parceiro+Cemitério; hoje é top-5 por visita, formato diferente
+1. **Resolução da logo** — texto "Preservando Histórias" ilegível (arquivo fonte só 803×389px). Verificar se tem versão maior no Drive ("logo vários tamanhos") antes de gerar upscale artificial (tentativa anterior via Real-ESRGAN falhou, Hugging Face não respondeu)
+2. **CPF em produção** — falta: tabela de preço dos pacotes, token de produção, resolver IP fixo (token amarrado a IP, Vercel serverless não garante IP fixo)
+3. **Contatos do parceiro com perfil** (Responsável Legal/Financeiro/Comercial/Técnico) — tabela `parceiros_contatos` nova
+4. **Confirmar com Pedro** — "aba de usuários com acesso ao memorial" (multi-usuário família) foi simplificado de propósito em 2026-07-10, precisa validar se ele sabia
+5. **Confirmar formato do dashboard** — Pedro pediu memoriais/QR agrupados por Parceiro+Cemitério, hoje é top-5 por visita
+
+## Pendente — Domínio/E-mail (você já tem legadodigital.net)
+
+1. Verificar domínio no painel Resend (Domains → Add Domain) — gera registros SPF/DKIM
+2. Adicionar esses registros DNS onde o domínio foi registrado
+3. Trocar `onboarding@resend.dev` pelo remetente real nos 3 arquivos de e-mail
+4. Testar entrega real (não só pro seu e-mail de dono da conta)
+5. Decidir se quer caixa de entrada de verdade (Google Workspace/Zoho) — Resend só envia, não recebe
 
 ## Pendente — Decisões suas em aberto (não construir sem responder)
 
-- Modelo de negócio: vender direto pra família ou só via parceiro? (era pra decidir na reunião de sócios 15/07)
+- Modelo de negócio: vender direto pra família ou só via parceiro?
 - Templates/cores do memorial — múltiplos temas de verdade ou só 1 fixo?
 - "Livro de Assinaturas" vs "Homenagens" — 2 conceitos diferentes ou 2 nomes pra mesma coisa?
 - Botão "Começar Agora" da landing → vídeo/tour (você ainda vai gravar)
@@ -56,10 +79,9 @@ Documento separado do CLAUDE.md: só duas listas, feito e pendente, sem históri
 - "Esqueci a senha" self-service da família
 - Formulário de condolência, lightbox da galeria (página do memorial)
 - 12 ideias da pesquisa de inovação família (`docs/PESQUISA_EXPERIENCIA_FAMILIA.md`) — nenhuma implementada
-- Domínio próprio (trava Resend mandar e-mail pro destinatário real)
 - `SUPABASE_SERVICE_ROLE_KEY` faltando no Vercel
 
-## Registrado, sem ação ainda
+## Ideias registradas, sem ação ainda
 
 - 3 imagens do deck do Pedro nunca abertas (Página Memorial Pública, Aplicações Digitais/Institucionais, Presença Física)
 - Dashboard: elementos do mockup do Pedro que faltam (Memorial em Destaque, Comentários Recentes, Resumo de Moderação, donut de QR Codes, Ações Rápidas)
