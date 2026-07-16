@@ -14,6 +14,8 @@ Arquivo separado do CLAUDE.md. Aqui fica **tudo que foi sugerido (por mim ou pel
 
 - **Conferir se o QR Code ainda é gerado automaticamente quando um memorial é criado** (2026-07-15) — funcionalidade já existia e estava marcada como pronta, Rafael pediu pra reconferir depois de tantas mudanças na sessão. Não mexer agora, só testar quando ele chamar.
 
+- **Inovação na experiência da família na página do memorial (2026-07-15, pesquisa paralela feita a pedido do Rafael)** — 2 pesquisas Opus em paralelo, relatório completo em `docs/PESQUISA_EXPERIENCIA_FAMILIA.md`, 12 ideias concretas com referência real (StoryWorth, Remento, Evaheld, Murial, etc). **Gap estrutural achado:** todo líder de mercado usa dono+contribuidores convidados+moderação+2 camadas de privacidade — o projeto simplificou pra 1 e-mail sem conta de propósito em 2026-07-10. Reintroduzir isso é decisão grande, precisa confirmação explícita (e talvez confirmar com o Pedro). Nada construído ainda.
+
 ## Registrado, sem construir ainda (não esquecer)
 
 - **Dashboard — elementos do mockup do Pedro que faltam:** card "Memorial em Destaque", "Comentários Recentes", "Resumo de Moderação" (pendentes/aprovados/rejeitados/denúncias), donut de QR Codes (Ativos/Pausados/Expirados/Inativos), barra "Ações Rápidas" (Novo Memorial/Registrar Homenagem/Adicionar Assinatura/Gerar QR Code/Gerenciar Usuários/Relatórios), mapa interativo de localização no cemitério dentro do próprio dashboard.
