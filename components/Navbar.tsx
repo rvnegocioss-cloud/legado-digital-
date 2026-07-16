@@ -24,11 +24,6 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 lg:h-24">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={320} height={128} className="h-20 lg:h-24 w-auto object-contain" priority />
-          </Link>
-
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
@@ -56,6 +51,11 @@ export default function Navbar() {
               <Link href="/admin/login">Acesso Legado Central</Link>
             </Button>
           </div>
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={320} height={128} className="h-16 lg:h-20 w-auto object-contain" priority />
+          </Link>
 
           {/* Mobile toggle */}
           <button

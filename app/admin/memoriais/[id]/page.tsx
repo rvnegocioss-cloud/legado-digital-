@@ -8,6 +8,7 @@ import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
+import SecaoRetratil from '@/components/admin/SecaoRetratil'
 
 interface Memorial {
   id: string
@@ -428,7 +429,7 @@ export default function DetalheMemorial() {
       <div className="lg:col-span-2 rounded-xl bg-zinc-900 border border-zinc-800 p-6">
         <h2 className="text-sm font-medium text-zinc-400 mb-4">Dados do memorial</h2>
         <form onSubmit={salvar} className="space-y-3">
-          <div>
+          <div className="max-w-sm">
             <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
             <Input
               placeholder="Nome completo do falecido"
@@ -521,6 +522,8 @@ export default function DetalheMemorial() {
             />
           </div>
 
+          <SecaoRetratil titulo="Mídia (foto, vídeo, galeria)">
+          <div className="space-y-3">
           <div>
             <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
             {fotoUrl && (
@@ -593,6 +596,8 @@ export default function DetalheMemorial() {
             />
             {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
           </div>
+          </div>
+          </SecaoRetratil>
 
           <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
 
@@ -668,7 +673,7 @@ export default function DetalheMemorial() {
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-1">Privacidade — senha de acesso</h2>
+        <SecaoRetratil titulo="Privacidade — senha de acesso">
         <p className="text-zinc-500 text-xs mb-4">
           {temSenha
             ? 'Este memorial exige senha na busca pública E pra abrir a página direto (link ou QR Code). Deixe o campo em branco e salve pra tornar público de novo.'
@@ -692,10 +697,11 @@ export default function DetalheMemorial() {
           </Button>
         </form>
         {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
+        </SecaoRetratil>
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-1">Privacidade — modos de acesso</h2>
+        <SecaoRetratil titulo="Privacidade — modos de acesso">
         <p className="text-zinc-500 text-xs mb-4">
           Os 3 caminhos começam ligados. Desative o que a família não quiser permitir — a senha
           acima continua valendo em cima de qualquer um que fique ativo.
@@ -718,10 +724,11 @@ export default function DetalheMemorial() {
           {salvandoPrivacidade ? 'Salvando...' : 'Salvar privacidade'}
         </Button>
         {privacidadeMsg && <p className="text-xs text-zinc-400 mt-2">{privacidadeMsg}</p>}
+        </SecaoRetratil>
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 max-w-xl mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-1">E-mail da família</h2>
+        <SecaoRetratil titulo="E-mail da família">
         <p className="text-zinc-500 text-xs mb-4">
           Cadastre o e-mail de contato da família — o sistema gera uma senha simples sozinho e
           manda por e-mail. Ela usa essa senha pra entrar em /familia/login e enviar fotos, vídeo
@@ -741,6 +748,7 @@ export default function DetalheMemorial() {
           </Button>
         </form>
         {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
+        </SecaoRetratil>
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import { Building2, ScrollText, Users } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import SecaoRetratil from '@/components/admin/SecaoRetratil'
 
 interface Stats {
   totalParceiros: number
@@ -253,7 +254,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mt-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-4">Memoriais e QR Codes</h2>
+        <SecaoRetratil titulo="Memoriais e QR Codes">
         {memoriaisQr.length === 0 ? (
           <p className="text-zinc-400 text-sm">Nenhum memorial cadastrado ainda.</p>
         ) : (
@@ -307,6 +308,7 @@ export default function AdminDashboard() {
             </table>
           </div>
         )}
+        </SecaoRetratil>
       </div>
     </div>
   )
