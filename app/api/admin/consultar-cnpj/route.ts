@@ -6,7 +6,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'CNPJ inválido' }, { status: 400 })
   }
 
-  const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`)
+  const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (compatible; LegadoDigital/1.0; +https://legado-digital-two.vercel.app)',
+      Accept: 'application/json',
+    },
+  })
   if (!res.ok) {
     const corpoErro = await res.text().catch(() => '')
     console.error(`[consultar-cnpj] BrasilAPI respondeu ${res.status}: ${corpoErro.slice(0, 300)}`)
