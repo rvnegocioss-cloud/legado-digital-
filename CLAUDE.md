@@ -289,6 +289,8 @@ Sem Resend configurado, a API ainda retorna a senha gerada na resposta pro staff
 
 **Ainda falta:** "esqueci a senha" da família — hoje só reemitindo (botão "Gerar nova senha" na Central/Parceiro).
 
+**Cadastro do responsável por CPF (2026-07-16, modo teste apenas)** — na Central (`/admin/memoriais/[id]`), a seção virou "Cadastro da família": campo CPF + botão "Consultar CPF" (`POST /api/admin/consultar-cpf`, staff-only) preenche o Nome do responsável automaticamente, antes do e-mail. Provedor `cpfcnpj.com.br`, token de teste (dado fictício, sem custo) — CPF nunca é persistido, só usado pra consulta e descartado, só o nome é editável/salvo. **Não é produção ainda:** falta confirmar tabela de preço dos pacotes, gerar token de produção, e resolver que o token de produção é amarrado a IP fixo enquanto a Vercel tem IP de egress dinâmico (bloqueio técnico sem solução ainda). Plano completo com decisões (Opus) registrado em `docs/RASCUNHO_IDEIAS.md`.
+
 ## Página do Memorial (`/homenagem/[slug]`) — como funciona
 Pública, sem login. Reescrita do zero (2026-07-07) como **componente 100% servidor** — zero JS client na rota, sem risco de travar o navegador (ver Bugs conhecidos).
 
