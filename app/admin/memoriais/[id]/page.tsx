@@ -102,6 +102,11 @@ export default function DetalheMemorial() {
   const [familiaEmail, setFamiliaEmail] = useState('')
   const [cadastrandoFamiliaEmail, setCadastrandoFamiliaEmail] = useState(false)
   const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
+  const [familiaCpf, setFamiliaCpf] = useState('')
+  const [familiaNome, setFamiliaNome] = useState('')
+  const [consultandoCpf, setConsultandoCpf] = useState(false)
+  const [cpfMsg, setCpfMsg] = useState('')
+  const [cpfModoTeste, setCpfModoTeste] = useState(false)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
   const [mensagemPlaca, setMensagemPlaca] = useState('')
@@ -237,6 +242,28 @@ export default function DetalheMemorial() {
 
     setPrivacidadeMsg(res.ok ? 'Salvo.' : json.error || 'Erro ao salvar')
     setSalvandoPrivacidade(false)
+  }
+
+  async function consultarCpf() {
+    setConsultandoCpf(true)
+    setCpfMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/consultar-cpf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ cpf: familiaCpf }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setCpfMsg(json.error || 'Erro ao consultar CPF')
+    } else {
+      setFamiliaNome(json.nome || '')
+      setCpfModoTeste(!!json.modoTeste)
+      setCpfMsg(json.modoTeste ? 'Preenchido — dado fictício (modo teste, sem token de produção).' : 'Preenchido.')
+    }
+    setConsultandoCpf(false)
   }
 
   async function cadastrarEmailFamilia(e: React.FormEvent) {
@@ -657,12 +684,41 @@ export default function DetalheMemorial() {
             {privacidadeMsg && <p className="text-xs text-zinc-400 mt-2">{privacidadeMsg}</p>}
           </SecaoRetratil>
 
-          <SecaoRetratil titulo="E-mail da família">
+          <SecaoRetratil titulo="Cadastro da família">
             <p className="text-zinc-500 text-xs mb-4">
-              Cadastre o e-mail de contato da família — o sistema gera uma senha simples sozinho e
-              manda por e-mail. Ela usa essa senha pra entrar em /familia/login e enviar fotos, vídeo
-              e a história. Esse e-mail também recebe o pedido de confirmação da mensagem da placa.
+              CPF do responsável (opcional, preenche o nome automaticamente) e e-mail de contato —
+              o sistema gera uma senha simples sozinho e manda por e-mail. Ela usa essa senha pra
+              entrar em /familia/login e enviar fotos, vídeo e a história. Esse e-mail também recebe
+              o pedido de confirmação da mensagem da placa.
             </p>
+
+            <div className="flex gap-3 mb-3">
+              <div className="flex-1">
+                <label className="block text-xs text-zinc-500 mb-1">CPF do responsável</label>
+                <Input
+                  placeholder="000.000.000-00"
+                  value={familiaCpf}
+                  onChange={(e) => setFamiliaCpf(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              <Button type="button" onClick={consultarCpf} disabled={consultandoCpf} className="self-end whitespace-nowrap">
+                {consultandoCpf ? 'Consultando...' : 'Consultar CPF'}
+              </Button>
+            </div>
+            {cpfMsg && (
+              <p className={`text-xs mb-3 ${cpfModoTeste ? 'text-yellow-400' : 'text-zinc-400'}`}>{cpfMsg}</p>
+            )}
+            <div className="mb-4">
+              <label className="block text-xs text-zinc-500 mb-1">Nome do responsável</label>
+              <Input
+                placeholder="Preenchido pela consulta ou digite manualmente"
+                value={familiaNome}
+                onChange={(e) => setFamiliaNome(e.target.value)}
+                className="bg-zinc-800 border-zinc-700 text-white"
+              />
+            </div>
+
             <form onSubmit={cadastrarEmailFamilia} className="flex gap-3">
               <Input
                 type="email"
