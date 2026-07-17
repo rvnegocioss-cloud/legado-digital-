@@ -1,5 +1,14 @@
 # Legado Digital — Briefing do Projeto
 
+## Regra Obrigatória — Proteção contra ação destrutiva (2026-07-17)
+Rafael pediu trava explícita contra eu apagar/destruir o projeto sem querer — tenho acesso amplo (Bash, git, Supabase com service role, Vercel), preciso de limite claro. **Nunca, sem confirmação explícita dele mostrando a ação exata primeiro:**
+- `DROP TABLE`, `DELETE` sem filtro, `TRUNCATE`, ou qualquer coisa que apague dado em massa no Supabase
+- Migração que ALTERA ou REMOVE coluna/tabela existente (diferente de só `CREATE TABLE IF NOT EXISTS`) — sempre mostrar a query exata antes
+- `git push --force`, `git reset --hard`, deletar branch
+- `rm -rf` ou deletar pasta do projeto inteira
+
+**Achado real (2026-07-17):** Supabase do projeto tá no plano **free — sem PITR** (recuperação por ponto no tempo). Isso é risco de infraestrutura independente de mim; recomendado upgrade pro plano Pro quando o orçamento permitir. Branch protection no GitHub (`main`, exigir PR, proibir force push/delete) também recomendado — ação do Rafael, não minha, fica configurada direto no GitHub, trava real que nem eu consigo burlar.
+
 ## Regra — Tudo tem que ser escalável (2026-07-15)
 **Todo planejamento/construção precisa ser expansivo desde o início** — se der certo, o uso vai escalar rápido, o sistema precisa estar preparado. Não é só sobre integração externa (regra antiga já cobria isso), é sobre qualquer decisão técnica: schema de banco, upload de arquivo, geração de identificador (slug), etc. Gambiarra que funciona só em escala pequena não é aceitável mesmo que "resolva por agora". Motivo concreto (2026-07-15): achado nessa sessão que upload de foto/vídeo/galeria nunca limpa o arquivo antigo do Supabase Storage (todo upload novo cria objeto novo com timestamp, o antigo fica órfão pra sempre) — funciona hoje com poucos memoriais, mas acumula custo de armazenamento sem limite conforme o uso cresce. Corrigido no mesmo dia que descoberto.
 
