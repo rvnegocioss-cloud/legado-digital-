@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
@@ -69,6 +69,7 @@ interface Parceiro {
 
 export default function DetalheMemorial() {
   const params = useParams<{ id: string }>()
+  const router = useRouter()
   const [memorial, setMemorial] = useState<Memorial | null>(null)
   const [parceiro, setParceiro] = useState<Parceiro | null>(null)
   const [form, setForm] = useState({
@@ -116,6 +117,7 @@ export default function DetalheMemorial() {
   const [buscaHabilitada, setBuscaHabilitada] = useState(true)
   const [linkHabilitado, setLinkHabilitado] = useState(true)
   const [qrcodeHabilitado, setQrcodeHabilitado] = useState(true)
+  const [acessandoFamilia, setAcessandoFamilia] = useState(false)
   const [salvandoPrivacidade, setSalvandoPrivacidade] = useState(false)
   const [privacidadeMsg, setPrivacidadeMsg] = useState('')
 
@@ -242,6 +244,26 @@ export default function DetalheMemorial() {
 
     setPrivacidadeMsg(res.ok ? 'Salvo.' : json.error || 'Erro ao salvar')
     setSalvandoPrivacidade(false)
+  }
+
+  async function acessarPortalFamilia() {
+    if (!memorial) return
+    setAcessandoFamilia(true)
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/acessar-familia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ memorialId: memorial.id }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setErro(json.error || 'Erro ao acessar o Portal da Família')
+      setAcessandoFamilia(false)
+      return
+    }
+    router.push(`/familia/${json.slug}`)
   }
 
   async function consultarCpf() {
@@ -443,12 +465,22 @@ export default function DetalheMemorial() {
           </p>
         </div>
         {memorial.slug && (
-          <a
-            href={`/homenagem/${memorial.slug}`}
-            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap"
-          >
-            Acessar página do memorial
-          </a>
+          <div className="flex gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={acessarPortalFamilia}
+              disabled={acessandoFamilia}
+              className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white text-sm font-medium whitespace-nowrap disabled:opacity-60"
+            >
+              {acessandoFamilia ? 'Entrando...' : 'Acessar Portal da Família'}
+            </button>
+            <a
+              href={`/homenagem/${memorial.slug}`}
+              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap"
+            >
+              Acessar página do memorial
+            </a>
+          </div>
         )}
       </div>
 
