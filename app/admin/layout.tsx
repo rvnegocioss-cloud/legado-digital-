@@ -78,7 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={`hidden md:flex md:flex-col shrink-0 border-r border-zinc-800 bg-zinc-900/60 transition-all duration-200 ${sidebarAberta ? 'w-60' : 'w-16'}`}>
         <div className="flex items-center h-16 px-3 border-b border-zinc-800 shrink-0 justify-between">
           <Link href="/admin" className={`flex items-center overflow-hidden ${sidebarAberta ? '' : 'w-0'}`}>
-            <Image src="/logo-legado-digital.png" alt="Legado Digital" width={240} height={96} className="h-14 w-auto object-contain shrink-0" priority />
+            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={240} height={96} className="h-14 w-auto object-contain shrink-0" priority />
           </Link>
           <button
             onClick={() => setSidebarAberta(!sidebarAberta)}
@@ -119,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
-          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={160} height={64} className="md:hidden h-10 w-auto object-contain" />
+          <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={160} height={64} className="md:hidden h-10 w-auto object-contain" />
           <div className="hidden md:block" />
           <div className="flex items-center gap-4">
             <button className="text-zinc-400 hover:text-white transition-colors" aria-label="Alertas">

@@ -32,7 +32,7 @@ export default function ParceiroLogin() {
     <div className="min-h-screen flex items-center justify-center bg-zinc-950">
       <div className="w-full max-w-md p-8 space-y-6">
         <div className="text-center">
-          <Image src="/logo-legado-digital.png" alt="Legado Digital" width={320} height={128} className="mx-auto h-24 w-auto object-contain mb-4" priority />
+          <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={320} height={128} className="mx-auto h-24 w-auto object-contain mb-4" priority />
           <h1 className="text-xl font-bold text-white">Portal do Parceiro</h1>
           <p className="text-zinc-400 mt-2">Acesso pra funerárias e demais parceiros</p>
         </div>

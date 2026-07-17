@@ -282,7 +282,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
       </main>
 
       <footer style={estilos.footer}>
-        <Image src="/logo-legado-digital.png" alt="Legado Digital" width={160} height={64} style={{ height: 32, width: "auto" }} />
+        <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={160} height={64} style={{ height: 32, width: "auto" }} />
         <span style={{ color: CORES.textoFraco, fontSize: 12 }}>Preservando histórias</span>
       </footer>
     </div>
