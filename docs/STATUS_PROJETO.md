@@ -4,6 +4,15 @@ Documento vivo, atualizado a cada mudança nessa sessão. Só 3 listas: feito, p
 
 _Última atualização: 2026-07-17._
 
+## Modelo de senhas (organizado, referência — confirmado com o Rafael)
+
+**São 2 senhas separadas, cada uma com um papel só:**
+
+1. **Senha da família** (`homenagens_seguranca.senha_familia_hash`) — uma só por memorial. Serve pra família **logar e editar** o memorial (foto, vídeo, bio, timeline) em `/familia/login`.
+2. **Senha de acesso** / "senha do QR Code" (`homenagens_seguranca.senha_acesso_hash`) — serve pros **dois caminhos de visitante ao mesmo tempo**: abrir a página direto pelo QR Code/link, E aparecer no resultado da busca pública por nome (`/busca`). Não são senhas diferentes pra cada caminho — é a mesma, bloqueando os dois juntos (já que QR e link são a mesma URL por baixo).
+
+O "Como Chegar" (rota + guia até o túmulo) vive dentro da própria página do memorial, então herda automaticamente essa proteção — não tem senha própria, nem precisa.
+
 ## Feito nessa sessão (2026-07-16)
 
 - **Bug do Jarvis (ponte de voz) corrigido** — loop de eco (mic captava a própria resposta falada como comando novo), pausa o mic durante o TTS agora

@@ -84,8 +84,10 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
   }
 
   const distancia = minhaPos && temTumulo ? distanciaMetros(minhaPos.lat, minhaPos.lng, lapideLat!, lapideLng!) : null
-  const pontosRota: [number, number][] =
-    minhaPos && temTumulo ? [[minhaPos.lat, minhaPos.lng], [lapideLat!, lapideLng!]] : []
+  // Linha e sempre fixa: portao/entrada do cemiterio ate o tumulo - nao do
+  // GPS atual da pessoa (que pode estar em qualquer lugar da cidade antes
+  // de chegar). O ponto azul "voce esta aqui" e informativo, separado.
+  const pontosRota: [number, number][] = temTumulo ? [[cemiterioLat, cemiterioLng], [lapideLat!, lapideLng!]] : []
 
   return (
     <div className="space-y-3">
