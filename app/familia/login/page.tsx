@@ -25,6 +25,11 @@ export default function FamiliaLoginPage() {
   const [entrando, setEntrando] = useState(false)
   const [erro, setErro] = useState('')
 
+  const [mostrarEsqueci, setMostrarEsqueci] = useState(false)
+  const [emailRecuperacao, setEmailRecuperacao] = useState('')
+  const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false)
+  const [msgRecuperacao, setMsgRecuperacao] = useState('')
+
   async function buscarNome(e: React.FormEvent) {
     e.preventDefault()
     const nome = nomeBusca.trim()
@@ -58,6 +63,23 @@ export default function FamiliaLoginPage() {
       return
     }
     router.push(`/familia/${json.slug}`)
+  }
+
+  async function enviarRecuperacao(e: React.FormEvent) {
+    e.preventDefault()
+    if (!selecionado?.slug) return
+    setEnviandoRecuperacao(true)
+    setMsgRecuperacao('')
+
+    const res = await fetch('/api/familia-esqueci-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug: selecionado.slug, email: emailRecuperacao }),
+    })
+    const json = await res.json()
+
+    setMsgRecuperacao(res.ok ? json.mensagem : json.error || 'Erro ao enviar')
+    setEnviandoRecuperacao(false)
   }
 
   return (
@@ -155,12 +177,46 @@ export default function FamiliaLoginPage() {
             >
               {entrando ? 'Entrando...' : 'Entrar'}
             </button>
+
+            {!mostrarEsqueci ? (
+              <button
+                type="button"
+                onClick={() => { setMostrarEsqueci(true); setMsgRecuperacao('') }}
+                className="block w-full text-center text-xs text-zinc-500 hover:text-white"
+              >
+                Esqueci minha senha
+              </button>
+            ) : (
+              <div className="pt-2 border-t border-zinc-800 space-y-2">
+                <p className="text-xs text-zinc-500">
+                  Digite o e-mail cadastrado pra esse memorial — se estiver certo, mandamos uma senha nova.
+                </p>
+                <input
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={emailRecuperacao}
+                  onChange={(e) => setEmailRecuperacao(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
+                />
+                <button
+                  type="button"
+                  onClick={enviarRecuperacao}
+                  disabled={enviandoRecuperacao || !emailRecuperacao}
+                  className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg"
+                >
+                  {enviandoRecuperacao ? 'Enviando...' : 'Enviar nova senha por e-mail'}
+                </button>
+                {msgRecuperacao && <p className="text-xs text-zinc-400">{msgRecuperacao}</p>}
+              </div>
+            )}
           </form>
         )}
 
-        <p className="text-center text-xs text-zinc-600 mt-4">
-          Esqueceu a senha? Fale com quem cadastrou o memorial (a funerária ou a Legado Digital).
-        </p>
+        {!selecionado && (
+          <p className="text-center text-xs text-zinc-600 mt-4">
+            Esqueceu a senha? Busque o nome, escolha o memorial e use "Esqueci minha senha".
+          </p>
+        )}
 
         <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-white mt-4">
           ← Voltar pro site
