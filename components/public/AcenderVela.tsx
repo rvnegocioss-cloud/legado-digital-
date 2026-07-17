@@ -99,25 +99,30 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
                 />
               )}
 
-              {/* Chama — bottom:50% do pavio, sobe a partir da metade dele.
-                  Centralizada por marginLeft (nunca transform): a classe roda um
-                  keyframe que anima transform/scale, e um transform inline seria
-                  sobrescrito pela animação — era exatamente o bug da chama pulando
-                  pro lado errado quando acendia. */}
+              {/* TESTE — chama real (video de fogo de verdade, fundo preto, mix-blend-mode
+                  "screen" apaga o preto e deixa só a chama) no lugar da chama desenhada
+                  em CSS. bottom:35% do pavio (vídeo tem mais moldura que a chama CSS). */}
               {aceso && (
-                <div
-                  className="vela-chama-intensidade"
+                <video
+                  className="vela-chama-real"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   style={{
                     position: 'absolute',
-                    bottom: '50%',
+                    bottom: '35%',
                     left: '50%',
-                    marginLeft: -8,
-                    width: 16,
-                    height: 16,
+                    marginLeft: -22,
+                    width: 44,
+                    height: 66,
+                    objectFit: 'cover',
+                    mixBlendMode: 'screen',
+                    pointerEvents: 'none',
                   }}
                 >
-                  <div className="vela-chama" style={{ position: 'absolute', inset: 0 }} />
-                </div>
+                  <source src="/videos/vela-chama-teste.mp4" type="video/mp4" />
+                </video>
               )}
             </div>
           </div>
