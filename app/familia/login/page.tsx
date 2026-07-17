@@ -85,7 +85,7 @@ export default function FamiliaLoginPage() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={280} height={112} className="mx-auto h-20 w-auto object-contain mb-4" priority />
+        <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={280} height={112} className="mx-auto h-28 w-auto object-contain mb-4" priority />
         <h1 className="text-xl font-bold text-white mb-1">Portal da Família</h1>
         <p className="text-zinc-400 text-sm mb-5">
           Adicione fotos, vídeo e a história de quem você ama.

@@ -37,7 +37,7 @@ export default function PoliticaPrivacidadePage() {
             alt="Legado Digital"
             width={200}
             height={80}
-            style={{ height: 56, width: "auto", margin: "0 auto" }}
+            style={{ height: 72, width: "auto", margin: "0 auto" }}
           />
         </div>
 

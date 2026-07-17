@@ -23,10 +23,10 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 glass"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 lg:h-24">
+        <div className="flex items-center justify-between h-24 lg:h-28">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group ml-16 md:ml-56">
-            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={320} height={128} className="h-16 lg:h-20 w-auto object-contain" priority />
+            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={320} height={128} className="h-20 lg:h-24 w-auto object-contain" priority />
           </Link>
 
           {/* Desktop Nav */}
