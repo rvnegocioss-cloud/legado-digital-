@@ -163,7 +163,10 @@ export default async function ParceiroPublicoPage({
         >
           Legado Digital
         </a>
-        <span style={{ color: "#7a8a96", fontSize: 12 }}>Preservando histórias</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>
+          <a href="/termos-de-uso" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Termos</a>
+        </div>
       </footer>
     </div>
   );

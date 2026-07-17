@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import LegadoBotPublicoWidget from '@/components/LegadoBotPublicoWidget'
+import { QrCode, Lock, Sparkles, BookOpen, Users, LayoutDashboard, Eye, Building2, MessageCircle } from 'lucide-react'
 
 const HeroBackground = dynamic(() => import('@/components/Hero3D'), { ssr: false })
 
@@ -114,37 +115,37 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: '📱',
+                Icon: QrCode,
                 title: 'QR Code na Placa',
                 desc: 'Um QR Code único e discreto instalado na placa memorial. Qualquer visitante escaneia e acessa a homenagem.',
               },
               {
-                icon: '🔒',
+                Icon: Lock,
                 title: 'Privacidade Total',
                 desc: 'A família controla quem acessa: público, privado ou com senha. O respeito ao falecido é prioridade.',
               },
               {
-                icon: '🎨',
+                Icon: Sparkles,
                 title: 'Memorial Elegante',
                 desc: 'Design moderno com fotos, vídeos, biografia e linha do tempo. Uma verdadeira homenagem digital.',
               },
               {
-                icon: '💬',
+                Icon: BookOpen,
                 title: 'Livro de Condolências',
                 desc: 'Visitantes deixam mensagens de carinho. A família pode ver e moderar cada homenagem.',
               },
               {
-                icon: '👨‍👩‍👧‍👦',
+                Icon: Users,
                 title: 'Família Participa',
                 desc: 'Parentes recebem acesso para editar, adicionar fotos e personalizar o memorial do ente querido.',
               },
               {
-                icon: '📊',
+                Icon: LayoutDashboard,
                 title: 'Gestão Completa',
                 desc: 'Dashboard para funerária gerenciar todos os memoriais em um só lugar. Simples e intuitivo.',
               },
               {
-                icon: '👁️',
+                Icon: Eye,
                 title: 'Ver Demonstração',
                 desc: 'Veja um exemplo real de como fica um memorial digital. Clique para acessar uma homenagem de demonstração.',
               },
@@ -158,7 +159,7 @@ export default function Home() {
               >
                 <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#C9A46A]/30 transition-all h-full">
                   <CardHeader>
-                    <div className="text-4xl mb-2">{benefit.icon}</div>
+                    <benefit.Icon className="mb-2 text-[#C9A46A]" size={36} strokeWidth={1.5} />
                     <CardTitle className="text-white text-lg">{benefit.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -208,10 +209,10 @@ export default function Home() {
 
           <div className="grid md:grid-cols-4 gap-8">
             {[
-              { step: '01', icon: '🏢', title: 'Funerária Cadastra', desc: 'Cadastre o falecido na plataforma em 2 minutos.' },
-              { step: '02', icon: '👨‍👩‍👧‍👦', title: 'Família Personaliza', desc: 'Parentes recebem acesso e montam o memorial.' },
-              { step: '03', icon: '📱', title: 'QR Code Gerado', desc: 'QR Code único é gerado e instalado na placa.' },
-              { step: '04', icon: '💬', title: 'Homenagens Chegam', desc: 'Visitantes escaneiam e deixam condolências.' },
+              { step: '01', Icon: Building2, title: 'Funerária Cadastra', desc: 'Cadastre o falecido na plataforma em 2 minutos.' },
+              { step: '02', Icon: Users, title: 'Família Personaliza', desc: 'Parentes recebem acesso e montam o memorial.' },
+              { step: '03', Icon: QrCode, title: 'QR Code Gerado', desc: 'QR Code único é gerado e instalado na placa.' },
+              { step: '04', Icon: MessageCircle, title: 'Homenagens Chegam', desc: 'Visitantes escaneiam e deixam condolências.' },
             ].map((item, idx) => (
               <motion.div
                 key={item.step}
@@ -221,7 +222,7 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: idx * 0.15 }}
                 className="text-center"
               >
-                <div className="text-5xl mb-4">{item.icon}</div>
+                <item.Icon className="mx-auto mb-4 text-[#C9A46A]" size={40} strokeWidth={1.5} />
                 <div className="text-[#C9A46A] text-sm font-mono mb-2">{item.step}</div>
                 <h3 className="text-white font-semibold mb-2">{item.title}</h3>
                 <p className="text-white/40 text-sm">{item.desc}</p>
@@ -348,11 +349,17 @@ export default function Home() {
             <div>
               <h4 className="text-white font-semibold mb-4">Empresa</h4>
               <div className="space-y-2 text-sm">
-                {['Sobre', 'Contato', 'Privacidade', 'Termos'].map((link) => (
+                {['Sobre', 'Contato'].map((link) => (
                   <div key={link} className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
                     {link}
                   </div>
                 ))}
+                <Link href="/politica-de-privacidade" className="block text-white/40 hover:text-[#C9A46A] transition-colors">
+                  Privacidade
+                </Link>
+                <Link href="/termos-de-uso" className="block text-white/40 hover:text-[#C9A46A] transition-colors">
+                  Termos
+                </Link>
               </div>
             </div>
           </div>
