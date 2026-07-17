@@ -337,12 +337,13 @@ Identidade navy `#0B1D2A` + dourado `#C9A46A` mantida, tipografia serif. Plano d
 - Respeita `prefers-reduced-motion` (desliga o tremelique, chama fica estática).
 
 ### Ainda não incluído (planejado, não construído)
-- Formulário de nova condolência (será ilha client isolada, pequena)
 - Troca de tema, compartilhar, música de fundo (ilhas client futuras, uma por vez, sem RAF) — vela já foi a primeira das 4 ideias registradas em 2026-07-14 a sair do papel
 - Lightbox da galeria (abrir foto em tela cheia) — fase 2 do redesign, grid já entrega o ganho visual sozinho por ora
 - Links de Privacidade/Termos no rodapé — aguardando essas páginas existirem
-- Localização (cemitério/jazigo) — sem dado real ainda, schema de jazigo/gaveta não existe (Fase 5). Globo 3D (ideia do Awwwards) explicitamente adiado pelo Rafael em 2026-07-15 — foco foi pra vela primeiro.
 - QR Code — ver decisão registrada em "Fase Atual".
+
+### Pedido — página estilo rede social (Facebook/Instagram) (2026-07-17, Pedro via Rafael)
+Pedro pediu que a parte de condolências/homenagens da página do memorial fique parecida com rede social (Facebook/Instagram). Rafael reforçou: página hoje "tá muito pobre, sem campos, sem nada" — quer aproveitar melhor o espaço. **Não construído ainda, registrado pra desenvolver depois.** Formulário de condolência básico (nome+mensagem) já existe (`components/public/FormularioCondolencia.tsx`, 2026-07-17) — o pedido aqui é ir além: layout tipo feed, possivelmente reações/curtidas, mais campos de interação, hierarquia visual mais rica. Não decidido o escopo exato, nem se cruza com as 12 ideias já registradas em `docs/PESQUISA_EXPERIENCIA_FAMILIA.md` (mural de recado por voz, capítulos por prompt semanal, etc. já apontam nessa direção "mais social"). Avaliar junto, não construir do zero sem revisitar essa pesquisa.
 
 ### Decisão — Música de fundo (direitos autorais)
 **Família NÃO pode fazer upload de música livre.** Risco jurídico real: tocar música protegida publicamente é "comunicação ao público" pela Lei 9.610/98 (Lei de Direitos Autorais) — pode gerar notificação de remoção, cobrança do ECAD (arrecadação de execução pública no Brasil) ou processo de gravadora/artista.

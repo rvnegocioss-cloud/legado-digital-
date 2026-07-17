@@ -62,10 +62,10 @@ O "Como Chegar" (rota + guia até o túmulo) vive dentro da própria página do 
 3. **Confirmar com Pedro** — "aba de usuários com acesso ao memorial" (multi-usuário família) foi simplificado de propósito em 2026-07-10, precisa validar se ele sabia
 4. **Confirmar formato do dashboard** — Pedro pediu memoriais/QR agrupados por Parceiro+Cemitério, hoje é top-5 por visita
 
-## Pendente — Domínio/E-mail (você já tem legadodigital.net)
+## Pendente — Domínio/E-mail (você já tem legadodigital.net, registrado na Hostinger)
 
 1. Verificar domínio no painel Resend (Domains → Add Domain) — gera registros SPF/DKIM
-2. Adicionar esses registros DNS onde o domínio foi registrado
+2. Adicionar esses registros no DNS da **Hostinger** (ação manual sua/Pedro — sem acesso meu a nenhum painel)
 3. Trocar `onboarding@resend.dev` pelo remetente real nos 3 arquivos de e-mail
 4. Testar entrega real (não só pro seu e-mail de dono da conta)
 5. Decidir se quer caixa de entrada de verdade (Google Workspace/Zoho) — Resend só envia, não recebe

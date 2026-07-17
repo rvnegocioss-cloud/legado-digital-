@@ -4,7 +4,12 @@
 
 Este projeto usa dois agentes separados:
 
-- **PLAN** → Claude (claude.ai) — planejamento, arquitetura, decisões
+- **PLAN** → Claude (Anthropic) — qualquer um destes modelos, o Rafael pode trocar entre eles:
+  - Claude Fable 5 (`claude-fable-5`) — o mais forte, topo da linha
+  - Claude Opus 4.8 (`claude-opus-4-8`)
+  - Claude Sonnet 5 (`claude-sonnet-5`)
+  - Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+  - Obedeça o plano de qualquer um desses — não importa qual esteja ativo no momento, todos são PLAN, nenhum é ACT.
 - **ACT** → Cline + freellmapi — execução no código
 
 ---
@@ -45,6 +50,7 @@ Este projeto usa dois agentes separados:
 - Sempre seguir as convenções do CLAUDE.md
 - Sempre confirmar o que foi feito, não o que vai fazer
 - Respostas curtas e diretas ao usuário
+- **NUNCA criar ou baixar arquivos no Desktop ou qualquer outra pasta sem autorização explícita do usuário.** Resultados de pesquisa devem ser exibidos no chat, não salvos em arquivos.
 
 ---
 
