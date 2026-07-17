@@ -2,7 +2,22 @@
 
 Documento vivo, atualizado a cada mudança nessa sessão. Só 3 listas: feito, pendente, ideias. Fonte cruzada: CLAUDE.md, `/admin/mapa`, tabela `mapa_sugestoes`, `docs/RASCUNHO_IDEIAS.md`.
 
-_Última atualização: 2026-07-17._
+_Última atualização: 2026-07-17 (sessão longa — nav/família/layout/usuários/LGPD/logo)._
+
+## Feito nessa sessão (2026-07-17)
+
+- Sidebar da Central: links "Portal da Família" e "Voltar pro Site" (faltavam)
+- Lightbox na galeria da página do memorial (setas, ESC, contador)
+- Acesso direto Central/Parceiro → Portal da Família sem senha (ficha do memorial + tabela de QR do parceiro)
+- Bug corrigido: nome errado no topo ao ver parceiro pela Central (conta staff tinha vínculo próprio de teste "RAFA", removido)
+- Layout da ficha do parceiro reestruturado 2x (1ª corrigiu o vão dentro do par label+valor, 2ª — com Opus Plan — matou os vãos entre os cards, virou grid denso) — regra nova no CLAUDE.md sobre quando usar 2/3+1/3 vs grid parelho
+- "Esqueci minha senha" self-service da família (`/familia/login`)
+- Módulo de Usuários completo (`/admin/usuarios`): criar staff, trocar papel, ativar/desativar
+- Política de Privacidade + Termos de Uso (páginas reais, linkadas no rodapé das 4 telas públicas)
+- Landing: 11 emojis trocados por ícones `lucide-react`
+- Logo aumentada proporcionalmente em todo canto (sidebar, Navbar, rodapés, logins) — subtítulo "Preservando Histórias" ilegível em tamanho pequeno mesmo sendo vetor
+- LegadoBot (`docs/LEGADOBOT_PROMPT.md`) atualizado com as mudanças acima
+- Migration explorada e revertida na conversa: modos de privacidade "cadastro"/"e-mail"/"oculto" — Rafael decidiu não seguir por enquanto (schema ficou criado no banco, vazio, sem UI/rota)
 
 ## Modelo de senhas (organizado, referência — confirmado com o Rafael)
 
@@ -57,10 +72,9 @@ O "Como Chegar" (rota + guia até o túmulo) vive dentro da própria página do 
 
 ## Pendente — Prioridade imediata
 
-1. **Resolução da logo** — texto "Preservando Histórias" ilegível (arquivo fonte só 803×389px). Verificar se tem versão maior no Drive ("logo vários tamanhos") antes de gerar upscale artificial (tentativa anterior via Real-ESRGAN falhou, Hugging Face não respondeu)
-2. **CPF em produção** — falta: tabela de preço dos pacotes, token de produção, resolver IP fixo (token amarrado a IP, Vercel serverless não garante IP fixo)
-3. **Confirmar com Pedro** — "aba de usuários com acesso ao memorial" (multi-usuário família) foi simplificado de propósito em 2026-07-10, precisa validar se ele sabia
-4. **Confirmar formato do dashboard** — Pedro pediu memoriais/QR agrupados por Parceiro+Cemitério, hoje é top-5 por visita
+1. **CPF em produção** — falta: tabela de preço dos pacotes, token de produção, resolver IP fixo (token amarrado a IP, Vercel serverless não garante IP fixo)
+2. **Confirmar com Pedro** — "aba de usuários com acesso ao memorial" (multi-usuário família) foi simplificado de propósito em 2026-07-10, precisa validar se ele sabia
+3. **Confirmar formato do dashboard** — Pedro pediu memoriais/QR agrupados por Parceiro+Cemitério, hoje é top-5 por visita
 
 ## Pendente — Domínio/E-mail (você já tem legadodigital.net, registrado na Hostinger)
 
@@ -80,16 +94,12 @@ O "Como Chegar" (rota + guia até o túmulo) vive dentro da própria página do 
 
 ## Pendente — Backlog maior (sem prazo)
 
-- Módulo Financeiro completo (contratos/planos/aquisições/fechamento mensal)
-- Módulo de Usuários
-- Política de Privacidade + Termos de Uso
-- Website institucional finalizado
-- Busca embutida direto na landing
-- Modos de privacidade: "privado por e-mail/cadastro" e "oculto"
-- "Esqueci a senha" self-service da família
-- Formulário de condolência, lightbox da galeria (página do memorial)
+- Módulo Financeiro completo (contratos/planos/aquisições/fechamento mensal) — Fase 4, mexe com decisão de negócio
+- Busca embutida direto na landing — avaliado, Rafael decidiu deixar como está (botão pra `/busca` já funciona)
+- Modos de privacidade "privado por e-mail/cadastro"/"oculto" — Rafael decidiu não seguir por enquanto
 - 12 ideias da pesquisa de inovação família (`docs/PESQUISA_EXPERIENCIA_FAMILIA.md`) — nenhuma implementada
-- `SUPABASE_SERVICE_ROLE_KEY` faltando no Vercel
+- Layout denso (grid parelho, sem vão vazio) só foi aplicado em `/admin/parceiros/[id]` até agora — vale revisar as outras fichas/listas da Central com o mesmo critério se aparecer o mesmo problema
+- Levar UI de privacidade (3 toggles) pro `/parceiro/memoriais` — hoje só existe em `/admin/memoriais/[id]`
 
 ## Ideias registradas, sem ação ainda
 
