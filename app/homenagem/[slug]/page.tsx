@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
 import { GateSenhaAcesso } from "@/components/public/GateSenhaAcesso";
 import { AcenderVela } from "@/components/public/AcenderVela";
+import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
 
 export const dynamic = "force-dynamic";
@@ -131,6 +132,20 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
   const galeria = Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : [];
 
+  const { data: localizacaoData } = await supabase
+    .rpc("obter_localizacao_memorial", { p_slug: slug })
+    .maybeSingle();
+  const localizacao = localizacaoData as {
+    cemiterio_nome: string;
+    cemiterio_lat: number | null;
+    cemiterio_lng: number | null;
+    lapide_lat: number | null;
+    lapide_lng: number | null;
+    quadra: string | null;
+    lote: string | null;
+    identificacao: string | null;
+  } | null;
+
   return (
     <div style={estilos.page}>
       <header style={estilos.hero}>
@@ -255,6 +270,23 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
                   style={estilos.galeriaFoto}
                 />
               ))}
+            </div>
+          </section>
+        )}
+
+        {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
+          <section style={{ marginTop: 56 }}>
+            <SecaoTitulo texto="Como Chegar" />
+            <div style={{ marginTop: 14 }}>
+              <GuiaTumulo
+                cemiterioNome={localizacao.cemiterio_nome}
+                cemiterioLat={localizacao.cemiterio_lat}
+                cemiterioLng={localizacao.cemiterio_lng}
+                lapideLat={localizacao.lapide_lat}
+                lapideLng={localizacao.lapide_lng}
+                quadra={localizacao.quadra}
+                lote={localizacao.lote}
+              />
             </div>
           </section>
         )}
