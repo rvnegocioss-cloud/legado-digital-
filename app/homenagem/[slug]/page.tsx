@@ -6,6 +6,7 @@ import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
 import { GateSenhaAcesso } from "@/components/public/GateSenhaAcesso";
 import { AcenderVela } from "@/components/public/AcenderVela";
 import { FormularioCondolencia } from "@/components/public/FormularioCondolencia";
+import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
 
@@ -258,19 +259,8 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         {galeria.length > 0 && (
           <section style={{ marginTop: 56 }}>
             <SecaoTitulo texto="Galeria" />
-            <div style={estilos.galeriaGrid}>
-              {galeria.map((url, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={i}
-                  src={url}
-                  alt={`Foto ${i + 1}`}
-                  loading="lazy"
-                  decoding="async"
-                  className="mem-galeria-item"
-                  style={estilos.galeriaFoto}
-                />
-              ))}
+            <div style={{ marginTop: 14 }}>
+              <GaleriaFotos fotos={galeria} />
             </div>
           </section>
         )}
@@ -447,13 +437,6 @@ const estilos: Record<string, React.CSSProperties> = {
   timelineAno: { color: CORES.dourado, fontSize: 24, fontFamily: "Georgia, serif", lineHeight: 1 },
   timelineTitulo: { fontSize: 17, marginTop: 6, color: CORES.textoForte },
   timelineDesc: { color: CORES.textoFraco, fontSize: 14.5, marginTop: 4, lineHeight: 1.6 },
-  galeriaGrid: {
-    marginTop: 18,
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-    gap: 12,
-  },
-  galeriaFoto: { width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 10, border: `1px solid ${CORES.douradoBorda}` },
   condolenciasWrap: { marginTop: 18, display: "flex", flexDirection: "column", gap: 12 },
   condolenciaCard: {
     background: CORES.superficieCard,

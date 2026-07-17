@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart } from 'lucide-react'
 import { getAdminUser, signOut } from '@/lib/auth'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 
@@ -71,6 +71,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/emails', label: 'Comunicações', Icon: Mail },
     { href: '/admin/mapa', label: 'Mapa', Icon: Map },
     { href: '/busca', label: 'Página Pública', Icon: Search },
+    { href: '/familia/login', label: 'Portal da Família', Icon: Heart },
+    { href: '/', label: 'Voltar pro Site', Icon: Home },
   ]
 
   return (
