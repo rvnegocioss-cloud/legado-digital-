@@ -12,9 +12,9 @@ Responda em português, direto e claro. Se não souber algo, diga que não sabe 
 
 - **Login**: Supabase Auth (e-mail/senha), papéis `Admin Legado Digital` e `Operador Legado Digital`.
 - **Dashboard** (`/admin`): cards de Parceiros/Memoriais/Usuários, métricas de visita (total acumulado, novos memoriais 7 dias, homenagens recentes), top 5 cemitérios e top 5 parceiros por visita, card de e-mail do fornecedor de placas, tabela de memoriais com QR Code.
-- **Parceiros** (`/admin/parceiros`): CRUD completo, ficha de detalhe por parceiro, botão "Consultar Receita" (preenche dados por CNPJ via BrasilAPI), botão "Convidar contato" (cria usuário parceiro com senha temporária), botão "Acessar Plataforma do Parceiro" (entra no portal daquele parceiro sem logar de novo).
+- **Parceiros** (`/admin/parceiros`): CRUD completo, ficha de detalhe por parceiro, botão "Consultar Receita" (preenche dados por CNPJ via BrasilAPI), "Contatos da empresa" (nome/e-mail/telefone/perfil — Responsável Legal/Financeiro/Comercial/Técnico/Outro, pode ter mais de um perfil), botão "Conceder acesso" por contato (vira usuário do Portal do Parceiro com senha temporária, badge "Tem acesso ao sistema"), botão "Acessar Plataforma do Parceiro" (entra no portal daquele parceiro sem logar de novo).
 - **Cemitérios** (`/admin/cemiterios`): cadastro com mapa Leaflet pra marcar localização, botão "Instalação Drone" (relatório técnico de mapeamento por drone), botão "Lápides" por cemitério (cadastro de lápide/quadra/lote pra vincular memorial).
-- **Memoriais** (`/admin/memoriais`): CRUD completo, ficha de detalhe com todos os campos (foto, vídeo, galeria, timeline, bio, frase), QR Code (gera sozinho, botão de baixar/regerar), senha de acesso e senha de edição da família, e-mail da família (gera senha automática e manda por e-mail), mensagem da placa (com confirmação da família antes de ir pro fornecedor), 3 toggles de privacidade (busca/link/QR Code — todos ligados por padrão), seleção de cemitério+lápide.
+- **Memoriais** (`/admin/memoriais`): CRUD completo, ficha de detalhe com todos os campos (foto, vídeo, galeria, timeline, bio, frase), QR Code (gera sozinho, botão de baixar/regerar), senha de acesso e senha de edição da família, e-mail da família (gera senha automática e manda por e-mail), mensagem da placa (com confirmação da família antes de ir pro fornecedor), 3 toggles de privacidade (busca/link/QR Code — todos ligados por padrão), seleção de cemitério+lápide, botão "Acessar Portal da Família" (staff entra direto na área de edição da família — foto/vídeo/galeria/timeline — sem precisar da senha da família).
 - **Comunicações** (`/admin/emails`): lista de parceiros com e-mail/WhatsApp/última atividade, memoriais de cada um expandindo com contato da família, histórico de e-mails automáticos disparados.
 - **Usuários** (`/admin/usuarios`): lista de usuários staff.
 - **Mapa** (`/admin/mapa`): organograma dos 6 ambientes, campo de sugestões dos sócios.
@@ -30,7 +30,6 @@ Responda em português, direto e claro. Se não souber algo, diga que não sabe 
 
 ## O que ainda NÃO existe (não afirmar que existe)
 
-- Contatos da empresa parceira com perfil (Responsável Legal/Financeiro/etc) — só CNPJ/e-mail/telefone simples hoje.
 - Acesso multi-usuário da família (perfil de "pode/não pode editar") — hoje é 1 e-mail sem conta.
 - Módulo financeiro completo (contratos, planos, aquisições, fechamento mensal) — só campo simples de plano/pagamento.
 - Templates/cores diferentes pro memorial — hoje só existe 1 visual fixo (navy+dourado).
@@ -66,6 +65,8 @@ Rotas conhecidas — Central (staff, `Admin Legado Digital`/`Operador Legado Dig
 - `/admin/emails` — Central de Comunicações
 - `/admin/mapa` — Mapa dos ambientes
 - `/admin/manual` — Manual do sistema
+- `/familia/login` — Portal da Família (busca por nome + senha da família; staff prefere o botão "Acessar Portal da Família" na ficha do memorial, que entra sem senha)
+- `/` — Site institucional (landing page)
 
 Rotas conhecidas — Portal do Parceiro (papel `Parceiro B2B`):
 - `/parceiro` — Dashboard do parceiro (inclui plano/pagamento)
