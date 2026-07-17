@@ -295,77 +295,90 @@ export default function DetalheParceiro() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">Dados cadastrais</h2>
-            <dl>
-              <Campo label="Razão social">{parceiro.razao_social}</Campo>
-              <Campo label="CNPJ">{parceiro.cnpj || '—'}</Campo>
-              <Campo label="E-mail">{parceiro.email || '—'}</Campo>
-              <Campo label="Telefone">{parceiro.telefone || '—'}</Campo>
-            </dl>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+          <h2 className="text-sm font-medium text-zinc-400 mb-3">Dados cadastrais</h2>
+          <dl>
+            <Campo label="Razão social">{parceiro.razao_social}</Campo>
+            <Campo label="CNPJ">{parceiro.cnpj || '—'}</Campo>
+            <Campo label="E-mail">{parceiro.email || '—'}</Campo>
+            <Campo label="Telefone">{parceiro.telefone || '—'}</Campo>
+          </dl>
+        </div>
 
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-zinc-400">Página pública do parceiro</h2>
-              {parceiro.slug && (
-                <a
-                  href={`/parceiros/${parceiro.slug}`}
-                  className="text-blue-400 hover:underline text-xs"
-                >
-                  Ver página pública
-                </a>
-              )}
-            </div>
-            {!parceiro.slug && (
-              <p className="text-yellow-500 text-sm mb-3">
-                Este parceiro ainda não tem slug — rode a migração de backfill antes de publicar.
-              </p>
-            )}
-            <form onSubmit={salvarPaginaPublica} className="space-y-3 max-w-md">
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">Logo</label>
-                {logoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-zinc-800 rounded p-2" />
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  disabled={enviandoLogo}
-                  className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-                />
-                {enviandoLogo && <p className="text-xs text-zinc-500 mt-1">Enviando logo...</p>}
-              </div>
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">Descrição institucional (aparece na página pública)</label>
-                <textarea
-                  placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
-                  rows={3}
-                  value={descricaoPublica}
-                  onChange={(e) => setDescricaoPublica(e.target.value)}
-                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
-                />
-              </div>
-              {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
-              {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
-              <button
-                type="submit"
-                disabled={salvandoPagina}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+          <h2 className="text-sm font-medium text-zinc-400 mb-3">Plano e pagamento</h2>
+          <dl>
+            <Campo label="Plano">{parceiro.plano_contratado || '—'}</Campo>
+            <Campo label="Pagamento">
+              <span className={`px-2 py-0.5 rounded text-xs ${pagamento.className}`}>
+                {pagamento.label}
+              </span>
+            </Campo>
+            <Campo label="Desde">{new Date(parceiro.created_at).toLocaleDateString('pt-BR')}</Campo>
+          </dl>
+        </div>
+
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-medium text-zinc-400">Página pública do parceiro</h2>
+            {parceiro.slug && (
+              <a
+                href={`/parceiros/${parceiro.slug}`}
+                className="text-blue-400 hover:underline text-xs"
               >
-                {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
-              </button>
-            </form>
+                Ver página pública
+              </a>
+            )}
           </div>
+          {!parceiro.slug && (
+            <p className="text-yellow-500 text-sm mb-3">
+              Este parceiro ainda não tem slug — rode a migração de backfill antes de publicar.
+            </p>
+          )}
+          <form onSubmit={salvarPaginaPublica} className="space-y-3">
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1">Logo</label>
+              {logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-zinc-800 rounded p-2" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                disabled={enviandoLogo}
+                className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+              />
+              {enviandoLogo && <p className="text-xs text-zinc-500 mt-1">Enviando logo...</p>}
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1">Descrição institucional (aparece na página pública)</label>
+              <textarea
+                placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
+                rows={3}
+                value={descricaoPublica}
+                onChange={(e) => setDescricaoPublica(e.target.value)}
+                className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+              />
+            </div>
+            {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
+            {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
+            <button
+              type="submit"
+              disabled={salvandoPagina}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+            >
+              {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
+            </button>
+          </form>
+        </div>
 
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 space-y-5">
+        <div className="lg:col-span-2 xl:col-span-3 rounded-xl bg-zinc-900 border border-zinc-800 p-5 space-y-5">
             <SecaoRetratil titulo={`Contatos da empresa ${contatos.length > 0 ? `(${contatos.length})` : ''}`} abertoPorPadrao>
+              <div className="grid md:grid-cols-2 gap-6 items-start">
               {contatos.length > 0 && (
-                <ul className="space-y-2 mb-4">
+                <ul className="space-y-2">
                   {contatos.map((c) => (
                     <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2">
                       <div className="flex items-center justify-between">
@@ -417,7 +430,7 @@ export default function DetalheParceiro() {
                 </ul>
               )}
 
-              <form onSubmit={adicionarContato} className="space-y-3 max-w-md border-t border-zinc-800 pt-4">
+              <form onSubmit={adicionarContato} className="space-y-3 md:border-l md:border-zinc-800 md:pl-6">
                 <div className="flex gap-3">
                   <input
                     type="text"
@@ -468,6 +481,7 @@ export default function DetalheParceiro() {
                   {salvandoContato ? 'Adicionando...' : '+ Adicionar contato'}
                 </button>
               </form>
+              </div>
             </SecaoRetratil>
 
             <SecaoRetratil titulo="Acesso ao Portal do Parceiro (convite avulso)">
@@ -535,22 +549,6 @@ export default function DetalheParceiro() {
                 </table>
               )}
             </SecaoRetratil>
-          </div>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">Plano e pagamento</h2>
-            <dl>
-              <Campo label="Plano">{parceiro.plano_contratado || '—'}</Campo>
-              <Campo label="Pagamento">
-                <span className={`px-2 py-0.5 rounded text-xs ${pagamento.className}`}>
-                  {pagamento.label}
-                </span>
-              </Campo>
-              <Campo label="Desde">{new Date(parceiro.created_at).toLocaleDateString('pt-BR')}</Campo>
-            </dl>
-          </div>
         </div>
       </div>
     </div>
