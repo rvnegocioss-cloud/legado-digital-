@@ -83,7 +83,7 @@ Plataforma B2B2C para criação, gestão e acesso a memoriais digitais vinculado
 Famílias preservam histórias, fotos, vídeos, mensagens e registros de pessoas falecidas, com configurações de privacidade e governança definidas pelos próprios familiares.
 
 ## Modelo de Negócio
-B2B2C — parceiros privados e públicos como canais de venda, ativação e operação.
+B2B2C — parceiros privados e públicos como canais de venda, ativação e operação. **Confirmado em ata de reunião de sócios (16/07/2026, ver `docs/ATA_REUNIAO_SOCIOS.md`): não é venda direta pra família.** Funerárias oferecem o Legado Digital como benefício adicional aos clientes delas; monetização via taxa anual integrada aos planos já existentes da funerária. Pergunta que estava em aberto desde 14/07 (venda direta vs só parceiro) está resolvida.
 
 ## Stack Técnica
 - Frontend/Backend: Next.js 16 + TypeScript (App Router)
