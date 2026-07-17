@@ -33,6 +33,26 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // ?parceiro_id= na URL só existe quando veio do botão "Acessar Plataforma do Parceiro"
+        // da Central — checa staff PRIMEIRO. Senão, uma conta que é staff E também tem
+        // vínculo próprio em parceiros_usuarios (ex: teste antigo) ficava presa mostrando
+        // o próprio parceiro dela em vez do parceiro escolhido na Central.
+        if (parceiroIdParam) {
+          const adminUser = await getAdminUser()
+          if (adminUser) {
+            const { data } = await supabase
+              .from('parceiros_b2b')
+              .select('nome_fantasia, razao_social')
+              .eq('id', parceiroIdParam)
+              .single()
+            setNomeParceiro(data?.nome_fantasia || data?.razao_social || 'Parceiro')
+            setEmail(adminUser.email)
+            setModoStaff(true)
+            setLoading(false)
+            return
+          }
+        }
+
         const parceiroUser = (await getParceiroUser()) as ParceiroUser | null
 
         if (parceiroUser) {
@@ -40,21 +60,6 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
           setNomeParceiro(parceiros[0]?.nome_fantasia || parceiros[0]?.razao_social || 'Parceiro')
           setEmail(parceiroUser.email)
           setModoStaff(false)
-          setLoading(false)
-          return
-        }
-
-        // Não tem papel de parceiro — se for equipe da Central visualizando um parceiro específico, libera
-        const adminUser = await getAdminUser()
-        if (adminUser && parceiroIdParam) {
-          const { data } = await supabase
-            .from('parceiros_b2b')
-            .select('nome_fantasia, razao_social')
-            .eq('id', parceiroIdParam)
-            .single()
-          setNomeParceiro(data?.nome_fantasia || data?.razao_social || 'Parceiro')
-          setEmail(adminUser.email)
-          setModoStaff(true)
           setLoading(false)
           return
         }

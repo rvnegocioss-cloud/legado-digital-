@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ScrollText, ClipboardList, CreditCard } from 'lucide-react'
 import { supabase, getParceiroUser } from '@/lib/auth'
@@ -22,6 +22,18 @@ interface MemorialQr {
   nome_completo: string
   slug: string | null
   qr_code_url: string | null
+}
+
+async function acessarPortalFamilia(memorialId: string): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession()
+  const res = await fetch('/api/admin/acessar-familia', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+    body: JSON.stringify({ memorialId }),
+  })
+  const json = await res.json()
+  if (!res.ok) throw new Error(json.error || 'Erro ao acessar o Portal da Família')
+  return json.slug as string
 }
 
 async function subirLogo(parceiroId: string, file: File) {
@@ -47,6 +59,7 @@ export default function ParceiroDashboard() {
 }
 
 function ParceiroDashboardInner() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const parceiroIdParam = searchParams.get('parceiro_id')
 
@@ -54,6 +67,8 @@ function ParceiroDashboardInner() {
   const [totalMemoriais, setTotalMemoriais] = useState(0)
   const [memoriaisQr, setMemoriaisQr] = useState<MemorialQr[]>([])
   const [loading, setLoading] = useState(true)
+  const [acessandoFamiliaId, setAcessandoFamiliaId] = useState<string | null>(null)
+  const [erroFamilia, setErroFamilia] = useState('')
 
   const [logoUrl, setLogoUrl] = useState('')
   const [descricaoPublica, setDescricaoPublica] = useState('')
@@ -106,6 +121,18 @@ function ParceiroDashboardInner() {
       setDescricaoPublica(p.descricao_publica || '')
     }
     setLoading(false)
+  }
+
+  async function handleAcessarFamilia(m: MemorialQr) {
+    setAcessandoFamiliaId(m.id)
+    setErroFamilia('')
+    try {
+      const slug = await acessarPortalFamilia(m.id)
+      router.push(`/familia/${slug}`)
+    } catch (err: any) {
+      setErroFamilia(err.message)
+      setAcessandoFamiliaId(null)
+    }
   }
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -194,6 +221,7 @@ function ParceiroDashboardInner() {
 
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
         <h2 className="text-sm font-medium text-zinc-400 mb-4">Memoriais e QR Codes</h2>
+        {erroFamilia && <p className="text-red-400 text-xs mb-2">{erroFamilia}</p>}
         {memoriaisQr.length === 0 ? (
           <p className="text-zinc-400 text-sm">Nenhum memorial cadastrado ainda.</p>
         ) : (
@@ -203,6 +231,7 @@ function ParceiroDashboardInner() {
                 <tr className="text-zinc-400 border-b border-zinc-800">
                   <th className="text-left py-2 px-3">QR Code</th>
                   <th className="text-left py-2 px-3">Nome</th>
+                  <th className="text-left py-2 px-3"></th>
                   <th className="text-left py-2 px-3"></th>
                   <th className="text-left py-2 px-3"></th>
                 </tr>
@@ -235,6 +264,18 @@ function ParceiroDashboardInner() {
                         <a href={`/homenagem/${m.slug}`} className="text-zinc-400 hover:text-white text-xs">
                           Ver página
                         </a>
+                      )}
+                    </td>
+                    <td className="py-2 px-3">
+                      {m.slug && (
+                        <button
+                          type="button"
+                          onClick={() => handleAcessarFamilia(m)}
+                          disabled={acessandoFamiliaId === m.id}
+                          className="text-amber-400 hover:underline text-xs whitespace-nowrap disabled:opacity-60"
+                        >
+                          {acessandoFamiliaId === m.id ? 'Entrando...' : 'Portal da Família'}
+                        </button>
                       )}
                     </td>
                   </tr>
