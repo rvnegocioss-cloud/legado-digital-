@@ -370,7 +370,7 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 4. [x] Portal do Parceiro B2B
 5. [x] CRUD de Memoriais (Central)
 6. [ ] Módulo Financeiro completo
-7. [ ] Módulo de Usuários
+7. [x] Módulo de Usuários (2026-07-17) — `/admin/usuarios`: "+ Novo Usuário" (nome/e-mail/papel, senha temporária, mesmo padrão de convidar parceiro), trocar papel (Admin ↔ Operador) e Ativar/Desativar direto na lista. `usuarios.ativo=false` já bloqueava login (`getAdminUser()`/`getParceiroUser()` checam isso) — só faltava o botão. RLS novo: `usuarios_staff_update_all` (UPDATE) e `usuarios_perfis_staff_all` (ALL), staff só tinha SELECT antes. Não deixa desativar a própria conta (linha "você" em vez do botão).
 
 ## Sócios — Emails
 - Rafael (admin): rvnegocioss@gmail.com
