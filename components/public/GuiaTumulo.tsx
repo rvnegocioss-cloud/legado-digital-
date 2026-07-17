@@ -1,25 +1,25 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import Map, { Marker, Source, Layer, NavigationControl, type MapRef } from 'react-map-gl/maplibre'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { Navigation, ChevronDown, ChevronRight, MapPin } from 'lucide-react'
 
-const iconTumulo = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-})
-
-const iconVoce = L.divIcon({
-  className: '',
-  html: '<div style="width:16px;height:16px;border-radius:50%;background:#4285F4;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.4)"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-})
+// Camada raster de satelite (Esri, gratis, sem chave) - mesma fonte que
+// ja era usada no Leaflet, so descrita no formato de estilo do MapLibre.
+const ESTILO_SATELITE = {
+  version: 8 as const,
+  sources: {
+    esri: {
+      type: 'raster' as const,
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize: 256,
+      attribution: 'Tiles &copy; Esri',
+      maxzoom: 20,
+    },
+  },
+  layers: [{ id: 'esri-satelite', type: 'raster' as const, source: 'esri' }],
+}
 
 interface Props {
   cemiterioNome: string
@@ -46,21 +46,13 @@ function linkRotaCarro(lat: number, lng: number) {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`
 }
 
-function AjustarVisao({ pontos }: { pontos: [number, number][] }) {
-  const map = useMap()
-  useEffect(() => {
-    if (pontos.length < 2) return
-    map.fitBounds(pontos, { padding: [40, 40], maxZoom: 20 })
-  }, [pontos, map])
-  return null
-}
-
 export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, lapideLat, lapideLng, quadra, lote }: Props) {
   const [aberto, setAberto] = useState(false)
   const [minhaPos, setMinhaPos] = useState<{ lat: number; lng: number } | null>(null)
   const [erroGps, setErroGps] = useState('')
   const [navegando, setNavegando] = useState(false)
   const watchId = useRef<number | null>(null)
+  const mapRef = useRef<MapRef | null>(null)
 
   const temTumulo = lapideLat != null && lapideLng != null
 
@@ -69,6 +61,18 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
       if (watchId.current != null) navigator.geolocation.clearWatch(watchId.current)
     }
   }, [])
+
+  // Enquadra o portao e o tumulo na tela assim que o mapa carrega
+  function aoCarregarMapa() {
+    if (!temTumulo || !mapRef.current) return
+    mapRef.current.fitBounds(
+      [
+        [Math.min(cemiterioLng, lapideLng!), Math.min(cemiterioLat, lapideLat!)],
+        [Math.max(cemiterioLng, lapideLng!), Math.max(cemiterioLat, lapideLat!)],
+      ],
+      { padding: 50, maxZoom: 20, duration: 0 }
+    )
+  }
 
   function iniciarNavegacao() {
     if (!('geolocation' in navigator)) {
@@ -84,10 +88,23 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
   }
 
   const distancia = minhaPos && temTumulo ? distanciaMetros(minhaPos.lat, minhaPos.lng, lapideLat!, lapideLng!) : null
-  // Linha e sempre fixa: portao/entrada do cemiterio ate o tumulo - nao do
-  // GPS atual da pessoa (que pode estar em qualquer lugar da cidade antes
-  // de chegar). O ponto azul "voce esta aqui" e informativo, separado.
-  const pontosRota: [number, number][] = temTumulo ? [[cemiterioLat, cemiterioLng], [lapideLat!, lapideLng!]] : []
+
+  // Linha fixa: portao ate o tumulo (referencia estavel, nao muda com o GPS
+  // da pessoa). Ponto de partida ainda usa a coordenada geral do cemiterio -
+  // sabidamente impreciso (marcado no centro, nao na entrada de verdade),
+  // deixado assim de proposito por enquanto a pedido do Rafael.
+  const linhaRota =
+    temTumulo && {
+      type: 'Feature' as const,
+      geometry: {
+        type: 'LineString' as const,
+        coordinates: [
+          [cemiterioLng, cemiterioLat],
+          [lapideLng!, lapideLat!],
+        ],
+      },
+      properties: {},
+    }
 
   return (
     <div className="space-y-3">
@@ -116,21 +133,37 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
 
           {aberto && (
             <div className="rounded-xl border overflow-hidden mt-3" style={{ borderColor: 'rgba(201,164,106,0.2)' }}>
-              <MapContainer center={[lapideLat!, lapideLng!]} zoom={19} style={{ height: '260px', width: '100%' }} scrollWheelZoom={false}>
-                <TileLayer
-                  attribution="Tiles &copy; Esri"
-                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                  maxZoom={20}
-                />
-                <Marker position={[lapideLat!, lapideLng!]} icon={iconTumulo} />
-                {minhaPos && <Marker position={[minhaPos.lat, minhaPos.lng]} icon={iconVoce} />}
-                {pontosRota.length === 2 && (
-                  <>
-                    <Polyline positions={pontosRota} pathOptions={{ color: '#C9A46A', weight: 4, dashArray: '2 8', lineCap: 'round' }} />
-                    <AjustarVisao pontos={pontosRota} />
-                  </>
+              <Map
+                ref={mapRef}
+                onLoad={aoCarregarMapa}
+                initialViewState={{ longitude: lapideLng!, latitude: lapideLat!, zoom: 19, pitch: 55, bearing: -20 }}
+                mapStyle={ESTILO_SATELITE as any}
+                style={{ height: 260, width: '100%' }}
+                maxPitch={70}
+              >
+                <NavigationControl visualizePitch showZoom position="top-right" />
+
+                {linhaRota && (
+                  <Source id="linha-rota" type="geojson" data={linhaRota}>
+                    <Layer
+                      id="linha-rota-layer"
+                      type="line"
+                      paint={{ 'line-color': '#C9A46A', 'line-width': 4, 'line-dasharray': [2, 3] }}
+                      layout={{ 'line-cap': 'round' }}
+                    />
+                  </Source>
                 )}
-              </MapContainer>
+
+                <Marker longitude={lapideLng!} latitude={lapideLat!} anchor="bottom">
+                  <MapPin size={30} strokeWidth={2} fill="#C9A46A" style={{ color: '#0B1D2A' }} />
+                </Marker>
+
+                {minhaPos && (
+                  <Marker longitude={minhaPos.lng} latitude={minhaPos.lat} anchor="center">
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#4285F4', border: '3px solid white', boxShadow: '0 0 6px rgba(0,0,0,0.4)' }} />
+                  </Marker>
+                )}
+              </Map>
 
               <div className="p-4" style={{ background: 'rgba(11,29,42,0.4)' }}>
                 {(quadra || lote) && (
@@ -160,7 +193,7 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
                       <p className="text-xs" style={{ color: '#F5F2EB', opacity: 0.6 }}>Buscando sua localização...</p>
                     )}
                     <p className="mt-1 text-[11px]" style={{ color: '#F5F2EB', opacity: 0.5 }}>
-                      Siga a linha pontilhada no mapa — GPS tem margem de alguns metros, use a placa da lápide pra confirmar.
+                      Arraste com 2 dedos (ou botão direito) pra girar/inclinar o mapa em 3D. GPS tem margem de alguns metros — use a placa da lápide pra confirmar.
                     </p>
                   </div>
                 )}
