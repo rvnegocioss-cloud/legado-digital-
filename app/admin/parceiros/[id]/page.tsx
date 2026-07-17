@@ -4,6 +4,16 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
+import SecaoRetratil from '@/components/admin/SecaoRetratil'
+
+function Campo({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[110px_1fr] gap-x-3 py-1.5 border-b border-zinc-800/60 last:border-0 items-center">
+      <dt className="text-zinc-500">{label}</dt>
+      <dd className="text-white truncate">{children}</dd>
+    </div>
+  )
+}
 
 interface Parceiro {
   id: string
@@ -285,288 +295,263 @@ export default function DetalheParceiro() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <h2 className="text-sm font-medium text-zinc-400 mb-4">Dados cadastrais</h2>
-          <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-zinc-500">Razão social</dt>
-              <dd className="text-white">{parceiro.razao_social}</dd>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+            <h2 className="text-sm font-medium text-zinc-400 mb-3">Dados cadastrais</h2>
+            <dl>
+              <Campo label="Razão social">{parceiro.razao_social}</Campo>
+              <Campo label="CNPJ">{parceiro.cnpj || '—'}</Campo>
+              <Campo label="E-mail">{parceiro.email || '—'}</Campo>
+              <Campo label="Telefone">{parceiro.telefone || '—'}</Campo>
+            </dl>
+          </div>
+
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-medium text-zinc-400">Página pública do parceiro</h2>
+              {parceiro.slug && (
+                <a
+                  href={`/parceiros/${parceiro.slug}`}
+                  className="text-blue-400 hover:underline text-xs"
+                >
+                  Ver página pública
+                </a>
+              )}
             </div>
-            <div className="flex justify-between">
-              <dt className="text-zinc-500">CNPJ</dt>
-              <dd className="text-white">{parceiro.cnpj || '—'}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-zinc-500">E-mail</dt>
-              <dd className="text-white">{parceiro.email || '—'}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-zinc-500">Telefone</dt>
-              <dd className="text-white">{parceiro.telefone || '—'}</dd>
-            </div>
-          </dl>
+            {!parceiro.slug && (
+              <p className="text-yellow-500 text-sm mb-3">
+                Este parceiro ainda não tem slug — rode a migração de backfill antes de publicar.
+              </p>
+            )}
+            <form onSubmit={salvarPaginaPublica} className="space-y-3 max-w-md">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Logo</label>
+                {logoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-zinc-800 rounded p-2" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  disabled={enviandoLogo}
+                  className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+                />
+                {enviandoLogo && <p className="text-xs text-zinc-500 mt-1">Enviando logo...</p>}
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Descrição institucional (aparece na página pública)</label>
+                <textarea
+                  placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
+                  rows={3}
+                  value={descricaoPublica}
+                  onChange={(e) => setDescricaoPublica(e.target.value)}
+                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                />
+              </div>
+              {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
+              {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
+              <button
+                type="submit"
+                disabled={salvandoPagina}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+              >
+                {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
+              </button>
+            </form>
+          </div>
+
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 space-y-5">
+            <SecaoRetratil titulo={`Contatos da empresa ${contatos.length > 0 ? `(${contatos.length})` : ''}`} abertoPorPadrao>
+              {contatos.length > 0 && (
+                <ul className="space-y-2 mb-4">
+                  {contatos.map((c) => (
+                    <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white text-sm">{c.nome}</p>
+                          <p className="text-zinc-500 text-xs">
+                            {[c.email, c.telefone].filter(Boolean).join(' · ') || 'sem contato cadastrado'}
+                          </p>
+                          <div className="flex gap-1 mt-1 flex-wrap items-center">
+                            {c.perfis.map((p) => (
+                              <span key={p} className="px-1.5 py-0.5 rounded text-[10px] bg-blue-900/50 text-blue-300">
+                                {p}
+                              </span>
+                            ))}
+                            {c.usuario_id && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] bg-green-900/50 text-green-400">
+                                Tem acesso ao sistema
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {!c.usuario_id && c.email && (
+                            <button
+                              type="button"
+                              onClick={() => concederAcesso(c)}
+                              disabled={concedendoAcessoId === c.id}
+                              className="text-xs text-blue-400 hover:underline whitespace-nowrap"
+                            >
+                              {concedendoAcessoId === c.id ? 'Concedendo...' : 'Conceder acesso'}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removerContato(c.id)}
+                            className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap"
+                          >
+                            Remover
+                          </button>
+                        </div>
+                      </div>
+                      {acessoConcedido?.contatoId === c.id && (
+                        <p className="text-green-400 text-xs mt-2">
+                          Acesso criado — senha temporária: <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{acessoConcedido.tempPassword}</code> (repasse e peça pra trocar)
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <form onSubmit={adicionarContato} className="space-y-3 max-w-md border-t border-zinc-800 pt-4">
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    placeholder="Nome do contato"
+                    required
+                    value={novoContatoNome}
+                    onChange={(e) => setNovoContatoNome(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    placeholder="E-mail"
+                    value={novoContatoEmail}
+                    onChange={(e) => setNovoContatoEmail(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Telefone"
+                    value={novoContatoTelefone}
+                    onChange={(e) => setNovoContatoTelefone(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1">Perfil (pode marcar mais de um)</label>
+                  <div className="flex gap-3 flex-wrap">
+                    {PERFIS_DISPONIVEIS.map((perfil) => (
+                      <label key={perfil} className="flex items-center gap-1.5 text-xs text-zinc-300">
+                        <input
+                          type="checkbox"
+                          checked={novoContatoPerfis.includes(perfil)}
+                          onChange={() => togglePerfil(perfil)}
+                        />
+                        {perfil}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {contatoErro && <p className="text-red-400 text-sm">{contatoErro}</p>}
+                <button
+                  type="submit"
+                  disabled={salvandoContato}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+                >
+                  {salvandoContato ? 'Adicionando...' : '+ Adicionar contato'}
+                </button>
+              </form>
+            </SecaoRetratil>
+
+            <SecaoRetratil titulo="Acesso ao Portal do Parceiro (convite avulso)">
+              <p className="text-zinc-500 text-sm mb-4">
+                Cria (ou atualiza) o login desse contato pro Portal do Parceiro, com senha temporária.
+              </p>
+              <form onSubmit={convidarContato} className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Nome do contato"
+                  value={conviteNome}
+                  onChange={(e) => setConviteNome(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                />
+                <input
+                  type="email"
+                  placeholder="E-mail do contato"
+                  required
+                  value={conviteEmail}
+                  onChange={(e) => setConviteEmail(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                />
+                <button
+                  type="submit"
+                  disabled={convidando}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg whitespace-nowrap"
+                >
+                  {convidando ? 'Criando...' : 'Convidar contato'}
+                </button>
+              </form>
+              {conviteErro && <p className="text-red-400 text-sm mt-3">{conviteErro}</p>}
+              {conviteSucesso && (
+                <p className="text-green-400 text-sm mt-3">
+                  Acesso criado pra <strong>{conviteSucesso.email}</strong> — senha temporária:{' '}
+                  <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{conviteSucesso.tempPassword}</code>{' '}
+                  (repasse pro parceiro e peça pra trocar). Login em{' '}
+                  <code className="bg-zinc-800 px-1.5 py-0.5 rounded">/parceiro/login</code>.
+                </p>
+              )}
+            </SecaoRetratil>
+
+            <SecaoRetratil titulo={`Memoriais ${memoriais.length > 0 ? `(${memoriais.length})` : ''}`}>
+              {memoriais.length === 0 ? (
+                <p className="text-zinc-500 text-sm">Nenhum memorial cadastrado por este parceiro ainda.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-zinc-400 border-b border-zinc-800">
+                      <th className="text-left py-2">Nome</th>
+                      <th className="text-left py-2">Cidade</th>
+                      <th className="text-left py-2">Criado em</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {memoriais.map((m) => (
+                      <tr key={m.id} className="border-b border-zinc-800/50">
+                        <td className="py-2 text-white">{m.nome_completo}</td>
+                        <td className="py-2 text-zinc-300">{m.cidade || '-'}</td>
+                        <td className="py-2 text-zinc-400">
+                          {new Date(m.created_at).toLocaleDateString('pt-BR')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </SecaoRetratil>
+          </div>
         </div>
 
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <h2 className="text-sm font-medium text-zinc-400 mb-4">Plano e pagamento</h2>
-          <dl className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-zinc-500">Plano contratado</dt>
-              <dd className="text-white">{parceiro.plano_contratado || '—'}</dd>
-            </div>
-            <div className="flex justify-between items-center">
-              <dt className="text-zinc-500">Status de pagamento</dt>
-              <dd>
+        <div className="lg:col-span-1">
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+            <h2 className="text-sm font-medium text-zinc-400 mb-3">Plano e pagamento</h2>
+            <dl>
+              <Campo label="Plano">{parceiro.plano_contratado || '—'}</Campo>
+              <Campo label="Pagamento">
                 <span className={`px-2 py-0.5 rounded text-xs ${pagamento.className}`}>
                   {pagamento.label}
                 </span>
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-zinc-500">Parceiro desde</dt>
-              <dd className="text-white">
-                {new Date(parceiro.created_at).toLocaleDateString('pt-BR')}
-              </dd>
-            </div>
-          </dl>
+              </Campo>
+              <Campo label="Desde">{new Date(parceiro.created_at).toLocaleDateString('pt-BR')}</Campo>
+            </dl>
+          </div>
         </div>
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-zinc-400">Página pública do parceiro</h2>
-          {parceiro.slug && (
-            <a
-              href={`/parceiros/${parceiro.slug}`}
-              className="text-blue-400 hover:underline text-xs"
-            >
-              Ver página pública
-            </a>
-          )}
-        </div>
-        {!parceiro.slug && (
-          <p className="text-yellow-500 text-sm mb-4">
-            Este parceiro ainda não tem slug — rode a migração de backfill antes de publicar.
-          </p>
-        )}
-        <form onSubmit={salvarPaginaPublica} className="space-y-3 max-w-md">
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">Logo</label>
-            {logoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-zinc-800 rounded p-2" />
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-              disabled={enviandoLogo}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-            />
-            {enviandoLogo && <p className="text-xs text-zinc-500 mt-1">Enviando logo...</p>}
-          </div>
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">Descrição institucional (aparece na página pública)</label>
-            <textarea
-              placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
-              rows={3}
-              value={descricaoPublica}
-              onChange={(e) => setDescricaoPublica(e.target.value)}
-              className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
-            />
-          </div>
-          {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
-          {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
-          <button
-            type="submit"
-            disabled={salvandoPagina}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
-          >
-            {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
-          </button>
-        </form>
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
-        <h2 className="text-sm font-medium text-zinc-400 mb-4">
-          Contatos da empresa {contatos.length > 0 && `(${contatos.length})`}
-        </h2>
-
-        {contatos.length > 0 && (
-          <ul className="space-y-2 mb-4">
-            {contatos.map((c) => (
-              <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white text-sm">{c.nome}</p>
-                    <p className="text-zinc-500 text-xs">
-                      {[c.email, c.telefone].filter(Boolean).join(' · ') || 'sem contato cadastrado'}
-                    </p>
-                    <div className="flex gap-1 mt-1 flex-wrap items-center">
-                      {c.perfis.map((p) => (
-                        <span key={p} className="px-1.5 py-0.5 rounded text-[10px] bg-blue-900/50 text-blue-300">
-                          {p}
-                        </span>
-                      ))}
-                      {c.usuario_id && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-green-900/50 text-green-400">
-                          Tem acesso ao sistema
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {!c.usuario_id && c.email && (
-                      <button
-                        type="button"
-                        onClick={() => concederAcesso(c)}
-                        disabled={concedendoAcessoId === c.id}
-                        className="text-xs text-blue-400 hover:underline whitespace-nowrap"
-                      >
-                        {concedendoAcessoId === c.id ? 'Concedendo...' : 'Conceder acesso'}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => removerContato(c.id)}
-                      className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap"
-                    >
-                      Remover
-                    </button>
-                  </div>
-                </div>
-                {acessoConcedido?.contatoId === c.id && (
-                  <p className="text-green-400 text-xs mt-2">
-                    Acesso criado — senha temporária: <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{acessoConcedido.tempPassword}</code> (repasse e peça pra trocar)
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <form onSubmit={adicionarContato} className="space-y-3 max-w-md border-t border-zinc-800 pt-4">
-          <div className="flex gap-3">
-            <input
-              type="text"
-              placeholder="Nome do contato"
-              required
-              value={novoContatoNome}
-              onChange={(e) => setNovoContatoNome(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
-            />
-          </div>
-          <div className="flex gap-3">
-            <input
-              type="email"
-              placeholder="E-mail"
-              value={novoContatoEmail}
-              onChange={(e) => setNovoContatoEmail(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
-            />
-            <input
-              type="text"
-              placeholder="Telefone"
-              value={novoContatoTelefone}
-              onChange={(e) => setNovoContatoTelefone(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-zinc-500 mb-1">Perfil (pode marcar mais de um)</label>
-            <div className="flex gap-3 flex-wrap">
-              {PERFIS_DISPONIVEIS.map((perfil) => (
-                <label key={perfil} className="flex items-center gap-1.5 text-xs text-zinc-300">
-                  <input
-                    type="checkbox"
-                    checked={novoContatoPerfis.includes(perfil)}
-                    onChange={() => togglePerfil(perfil)}
-                  />
-                  {perfil}
-                </label>
-              ))}
-            </div>
-          </div>
-          {contatoErro && <p className="text-red-400 text-sm">{contatoErro}</p>}
-          <button
-            type="submit"
-            disabled={salvandoContato}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
-          >
-            {salvandoContato ? 'Adicionando...' : '+ Adicionar contato'}
-          </button>
-        </form>
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8">
-        <h2 className="text-sm font-medium text-zinc-400 mb-4">Acesso ao Portal do Parceiro</h2>
-        <p className="text-zinc-500 text-sm mb-4">
-          Cria (ou atualiza) o login desse contato pro Portal do Parceiro, com senha temporária.
-        </p>
-        <form onSubmit={convidarContato} className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            placeholder="Nome do contato"
-            value={conviteNome}
-            onChange={(e) => setConviteNome(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
-          />
-          <input
-            type="email"
-            placeholder="E-mail do contato"
-            required
-            value={conviteEmail}
-            onChange={(e) => setConviteEmail(e.target.value)}
-            className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
-          />
-          <button
-            type="submit"
-            disabled={convidando}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg whitespace-nowrap"
-          >
-            {convidando ? 'Criando...' : 'Convidar contato'}
-          </button>
-        </form>
-        {conviteErro && <p className="text-red-400 text-sm mt-3">{conviteErro}</p>}
-        {conviteSucesso && (
-          <p className="text-green-400 text-sm mt-3">
-            Acesso criado pra <strong>{conviteSucesso.email}</strong> — senha temporária:{' '}
-            <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{conviteSucesso.tempPassword}</code>{' '}
-            (repasse pro parceiro e peça pra trocar). Login em{' '}
-            <code className="bg-zinc-800 px-1.5 py-0.5 rounded">/parceiro/login</code>.
-          </p>
-        )}
-      </div>
-
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-4">
-          Memoriais {memoriais.length > 0 && `(${memoriais.length})`}
-        </h2>
-        {memoriais.length === 0 ? (
-          <p className="text-zinc-500 text-sm">Nenhum memorial cadastrado por este parceiro ainda.</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800">
-                <th className="text-left py-2">Nome</th>
-                <th className="text-left py-2">Cidade</th>
-                <th className="text-left py-2">Criado em</th>
-              </tr>
-            </thead>
-            <tbody>
-              {memoriais.map((m) => (
-                <tr key={m.id} className="border-b border-zinc-800/50">
-                  <td className="py-2 text-white">{m.nome_completo}</td>
-                  <td className="py-2 text-zinc-300">{m.cidade || '-'}</td>
-                  <td className="py-2 text-zinc-400">
-                    {new Date(m.created_at).toLocaleDateString('pt-BR')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
       </div>
     </div>
   )
