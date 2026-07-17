@@ -2,7 +2,7 @@
 
 Documento vivo, atualizado a cada mudança nessa sessão. Só 3 listas: feito, pendente, ideias. Fonte cruzada: CLAUDE.md, `/admin/mapa`, tabela `mapa_sugestoes`, `docs/RASCUNHO_IDEIAS.md`.
 
-_Última atualização: 2026-07-16._
+_Última atualização: 2026-07-17._
 
 ## Feito nessa sessão (2026-07-16)
 
@@ -15,7 +15,8 @@ _Última atualização: 2026-07-16._
   - Privacidade (senha, modos de acesso) + Cadastro da família logo abaixo de Biografia, cada um retrátil
 - **Bug real corrigido: consulta de CNPJ retornava 502** — BrasilAPI bloqueava (403) requisição sem header `User-Agent` vindo da Vercel. Corrigido, testado com CNPJ real (Prefeitura de Uberlândia), funcionando em produção
 - **Cadastro da família por CPF — Fase 1 (modo teste)** — campo CPF + botão "Consultar CPF" preenche Nome do responsável automaticamente. Provedor `cpfcnpj.com.br`, token de teste (dado fictício, zero custo). CPF nunca é persistido. Planejado com Opus antes de construir.
-- **Contatos da empresa parceira com perfil (item 3 do Pedro, parte final)** — tabela `parceiros_contatos` (nome/e-mail/telefone/perfis — Legal/Financeiro/Comercial/Técnico/Outro, 1 contato pode ter +1 perfil), RLS staff+dono. UI em `/admin/parceiros/[id]`. Falta só: contato virar usuário do sistema com visão restrita (reusa o fluxo de convite já existente, ainda não ligado ao contato).
+- **Contatos da empresa parceira com perfil — item 3 do Pedro FECHADO** — tabela `parceiros_contatos` (nome/e-mail/telefone/perfis), UI em `/admin/parceiros/[id]`, botão "Conceder acesso" por contato liga direto no fluxo de convite existente (badge "Tem acesso ao sistema" quando já concedido)
+- **Deploy corrigido** — falha pontual da Vercel (não injetou env var num build específico), rebuild limpo resolveu, site nunca ficou fora do ar
 - **Plugin `/watch` instalado** — assistir vídeo (ffmpeg + yt-dlp), pra pesquisa de referência técnica
 - **Memory MCP em uso** — fatos duráveis salvos no grafo, além do arquivo de memória já existente
 
@@ -49,9 +50,8 @@ _Última atualização: 2026-07-16._
 
 1. **Resolução da logo** — texto "Preservando Histórias" ilegível (arquivo fonte só 803×389px). Verificar se tem versão maior no Drive ("logo vários tamanhos") antes de gerar upscale artificial (tentativa anterior via Real-ESRGAN falhou, Hugging Face não respondeu)
 2. **CPF em produção** — falta: tabela de preço dos pacotes, token de produção, resolver IP fixo (token amarrado a IP, Vercel serverless não garante IP fixo)
-3. **Contato do parceiro virar usuário do sistema** — cadastro de contato com perfil já existe, falta ligar ao fluxo de convite (visão restrita ao próprio parceiro)
-4. **Confirmar com Pedro** — "aba de usuários com acesso ao memorial" (multi-usuário família) foi simplificado de propósito em 2026-07-10, precisa validar se ele sabia
-5. **Confirmar formato do dashboard** — Pedro pediu memoriais/QR agrupados por Parceiro+Cemitério, hoje é top-5 por visita
+3. **Confirmar com Pedro** — "aba de usuários com acesso ao memorial" (multi-usuário família) foi simplificado de propósito em 2026-07-10, precisa validar se ele sabia
+4. **Confirmar formato do dashboard** — Pedro pediu memoriais/QR agrupados por Parceiro+Cemitério, hoje é top-5 por visita
 
 ## Pendente — Domínio/E-mail (você já tem legadodigital.net)
 
