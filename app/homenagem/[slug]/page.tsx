@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
 import { GateSenhaAcesso } from "@/components/public/GateSenhaAcesso";
 import { AcenderVela } from "@/components/public/AcenderVela";
+import { FormularioCondolencia } from "@/components/public/FormularioCondolencia";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
 
@@ -310,6 +311,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
               ))}
             </div>
           )}
+          <FormularioCondolencia memorialId={m.id} />
         </section>
       </main>
 
