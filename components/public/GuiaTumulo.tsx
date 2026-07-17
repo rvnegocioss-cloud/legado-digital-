@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { Navigation, Compass } from 'lucide-react'
+import { Navigation, Compass, ChevronDown, ChevronRight } from 'lucide-react'
 
 const iconTumulo = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -49,6 +49,7 @@ function linkRotaCarro(lat: number, lng: number) {
 }
 
 export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, lapideLat, lapideLng, quadra, lote }: Props) {
+  const [aberto, setAberto] = useState(false)
   const [minhaPos, setMinhaPos] = useState<{ lat: number; lng: number } | null>(null)
   const [heading, setHeading] = useState<number | null>(null)
   const [erroGps, setErroGps] = useState('')
@@ -96,20 +97,32 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
   const rotacaoSeta = rumoTumulo != null && heading != null ? rumoTumulo - heading : rumoTumulo
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <a
         href={linkRotaCarro(cemiterioLat, cemiterioLng)}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-medium text-sm"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-xs"
         style={{ background: '#C9A46A', color: '#0B1D2A' }}
       >
-        <Navigation size={16} strokeWidth={1.5} />
+        <Navigation size={14} strokeWidth={1.5} />
         Rota de carro até {cemiterioNome}
       </a>
 
       {temTumulo && (
-        <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'rgba(201,164,106,0.2)' }}>
+        <div>
+          <button
+            type="button"
+            onClick={() => setAberto(!aberto)}
+            className="flex items-center gap-1.5 text-xs"
+            style={{ color: '#C9A46A' }}
+          >
+            {aberto ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            Guia até o túmulo dentro do cemitério
+          </button>
+
+          {aberto && (
+          <div className="rounded-xl border overflow-hidden mt-3" style={{ borderColor: 'rgba(201,164,106,0.2)' }}>
           <MapContainer center={[lapideLat!, lapideLng!]} zoom={19} style={{ height: '220px', width: '100%' }} scrollWheelZoom={false}>
             <TileLayer
               attribution="Tiles &copy; Esri"
@@ -161,6 +174,8 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
             )}
             {erroGps && <p className="text-xs text-red-400 mt-2">{erroGps}</p>}
           </div>
+          </div>
+          )}
         </div>
       )}
     </div>
