@@ -45,6 +45,7 @@ interface ParceiroContato {
   email: string | null
   telefone: string | null
   perfis: string[]
+  usuario_id: string | null
 }
 
 const PERFIS_DISPONIVEIS = ['Responsável Legal', 'Financeiro', 'Comercial', 'Técnico', 'Outro']
@@ -85,6 +86,8 @@ export default function DetalheParceiro() {
   const [novoContatoPerfis, setNovoContatoPerfis] = useState<string[]>([])
   const [salvandoContato, setSalvandoContato] = useState(false)
   const [contatoErro, setContatoErro] = useState('')
+  const [concedendoAcessoId, setConcedendoAcessoId] = useState<string | null>(null)
+  const [acessoConcedido, setAcessoConcedido] = useState<{ contatoId: string; email: string; tempPassword: string } | null>(null)
 
   const [logoUrl, setLogoUrl] = useState('')
   const [descricaoPublica, setDescricaoPublica] = useState('')
@@ -170,7 +173,7 @@ export default function DetalheParceiro() {
         .order('created_at', { ascending: false }),
       supabase
         .from('parceiros_contatos')
-        .select('id, nome, email, telefone, perfis')
+        .select('id, nome, email, telefone, perfis, usuario_id')
         .eq('parceiro_id', id)
         .order('created_at', { ascending: true }),
     ])
@@ -220,6 +223,28 @@ export default function DetalheParceiro() {
     if (!parceiro) return
     await supabase.from('parceiros_contatos').delete().eq('id', contatoId)
     await load(parceiro.id)
+  }
+
+  async function concederAcesso(contato: ParceiroContato) {
+    if (!parceiro || !contato.email) return
+    setConcedendoAcessoId(contato.id)
+    setContatoErro('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/convidar-parceiro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ parceiroId: parceiro.id, email: contato.email, nome: contato.nome, contatoId: contato.id }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setContatoErro(json.error || 'Erro ao conceder acesso')
+    } else {
+      setAcessoConcedido({ contatoId: contato.id, email: json.email, tempPassword: json.tempPassword })
+      await load(parceiro.id)
+    }
+    setConcedendoAcessoId(null)
   }
 
   if (loading) return <p className="text-zinc-400">Carregando...</p>
@@ -371,29 +396,51 @@ export default function DetalheParceiro() {
         {contatos.length > 0 && (
           <ul className="space-y-2 mb-4">
             {contatos.map((c) => (
-              <li key={c.id} className="flex items-center justify-between bg-zinc-800/50 rounded-lg px-3 py-2">
-                <div>
-                  <p className="text-white text-sm">{c.nome}</p>
-                  <p className="text-zinc-500 text-xs">
-                    {[c.email, c.telefone].filter(Boolean).join(' · ') || 'sem contato cadastrado'}
-                  </p>
-                  {c.perfis.length > 0 && (
-                    <div className="flex gap-1 mt-1 flex-wrap">
+              <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white text-sm">{c.nome}</p>
+                    <p className="text-zinc-500 text-xs">
+                      {[c.email, c.telefone].filter(Boolean).join(' · ') || 'sem contato cadastrado'}
+                    </p>
+                    <div className="flex gap-1 mt-1 flex-wrap items-center">
                       {c.perfis.map((p) => (
                         <span key={p} className="px-1.5 py-0.5 rounded text-[10px] bg-blue-900/50 text-blue-300">
                           {p}
                         </span>
                       ))}
+                      {c.usuario_id && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-green-900/50 text-green-400">
+                          Tem acesso ao sistema
+                        </span>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {!c.usuario_id && c.email && (
+                      <button
+                        type="button"
+                        onClick={() => concederAcesso(c)}
+                        disabled={concedendoAcessoId === c.id}
+                        className="text-xs text-blue-400 hover:underline whitespace-nowrap"
+                      >
+                        {concedendoAcessoId === c.id ? 'Concedendo...' : 'Conceder acesso'}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removerContato(c.id)}
+                      className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap"
+                    >
+                      Remover
+                    </button>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removerContato(c.id)}
-                  className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap"
-                >
-                  Remover
-                </button>
+                {acessoConcedido?.contatoId === c.id && (
+                  <p className="text-green-400 text-xs mt-2">
+                    Acesso criado — senha temporária: <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{acessoConcedido.tempPassword}</code> (repasse e peça pra trocar)
+                  </p>
+                )}
               </li>
             ))}
           </ul>

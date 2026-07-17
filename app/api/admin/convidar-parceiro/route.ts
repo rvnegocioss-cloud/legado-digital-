@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão pra convidar parceiros' }, { status: 403 })
   }
 
-  const { parceiroId, email, nome } = await req.json()
+  const { parceiroId, email, nome, contatoId } = await req.json()
   if (!parceiroId || !email) {
     return NextResponse.json({ error: 'parceiroId e email são obrigatórios' }, { status: 400 })
   }
@@ -88,6 +88,10 @@ export async function POST(req: NextRequest) {
   await admin
     .from('parceiros_usuarios')
     .upsert({ usuario_id: userId, parceiro_id: parceiroId }, { onConflict: 'usuario_id,parceiro_id' })
+
+  if (contatoId) {
+    await admin.from('parceiros_contatos').update({ usuario_id: userId }).eq('id', contatoId)
+  }
 
   return NextResponse.json({ success: true, email, tempPassword: TEMP_PASSWORD })
 }
