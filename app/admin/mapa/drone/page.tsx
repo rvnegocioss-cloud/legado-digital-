@@ -142,6 +142,7 @@ export default function RelatorioMapeamentoDrone() {
             <li><a href="#claude">6. O que o Claude Code faz e não faz</a></li>
             <li><a href="#custo">7. Estimativa de custo e esforço</a></li>
             <li><a href="#onde">8. Onde estudar cada parte</a></li>
+            <li><a href="#integracao">9. Integração com o mapa já construído</a></li>
           </ol>
         </nav>
 
@@ -321,9 +322,56 @@ export default function RelatorioMapeamentoDrone() {
           </p>
         </section>
 
+        <section id="integracao">
+          <h2><span className="num">09</span>Integração com o mapa já construído (2026-07-17)</h2>
+          <p>
+            A parte de navegação já saiu do papel — não é mais teórica. A página pública do memorial
+            (<code>/homenagem/[slug]</code>) tem uma seção &quot;Como Chegar&quot; funcionando de verdade:
+            botão de rota de carro (abre o Google Maps/Waze já instalado no celular, aponta pro
+            cemitério) + um mapa próprio guiando do portão até o túmulo, com o GPS do visitante ao vivo.
+          </p>
+          <div className="callout">
+            <span className="mark">i</span>
+            <div className="body">
+              O mapa desse guia usa <strong>MapLibre GL</strong> (gratuito, open source) em vez do Leaflet
+              usado no resto do admin — suporta inclinar/girar em 3D de verdade (arrastar com 2 dedos no
+              celular ou botão direito no desktop), igual Google Earth/Maps 3D.
+            </div>
+          </div>
+          <p>
+            Hoje esse mapa mostra a imagem de satélite pública Esri World Imagery como camada de fundo —
+            gratuita, sem chave, mas com a mesma limitação de precisão de qualquer satélite comum
+            (não é nítida o bastante pra distinguir túmulos muito próximos).
+          </p>
+          <p>
+            <strong>É exatamente aqui que o ortomosaico do drone entra.</strong> Não substitui o mapa —
+            substitui só a <em>imagem por baixo dele</em>. O componente já foi construído pensando nessa
+            troca: quando o ortomosaico existir (seção 4), a URL da camada de satélite Esri é trocada
+            pela URL/tiles do ortomosaico georreferenciado. O mapa continua 3D, continua girando, a
+            navegação por GPS continua igual — só a nitidez da imagem muda, de &quot;satélite genérico&quot;
+            pra &quot;foto real do nosso próprio cemitério, em centímetros de precisão&quot;.
+          </p>
+          <p>
+            Isso beneficia dois lugares ao mesmo tempo: o mapa público (visitante vendo uma imagem mais
+            nítida do cemitério) e a tela de marcação no admin (staff clicando no túmulo certo com muito
+            mais confiança, sem risco de marcar o vizinho errado — ver seção 3, túmulo fica a ~1m do
+            vizinho).
+          </p>
+          <div className="callout warn">
+            <span className="mark">!</span>
+            <div className="body">
+              O drone melhora a precisão de <strong>onde marcamos o túmulo no mapa</strong>. Não muda a
+              precisão do GPS do celular de quem está visitando (isso é limite de hardware do aparelho
+              dela, continua 3-10m de erro independente da qualidade da nossa imagem de fundo).
+            </div>
+          </div>
+        </section>
+
         <footer>
-          Relatório preparado pra decisão dos sócios — nada aqui foi implementado ainda. Fase 5 do
-          roadmap (Geolocalização avançada, mapeamento cemiterial).
+          Seções 1-8 preparadas pra decisão dos sócios sobre o mapeamento por drone em si — ainda não
+          implementadas (voo, GCP, processamento). Seção 9 documenta o que já está em produção agora
+          (2026-07-17): navegação GPS + mapa 3D funcionando, pronto pra receber o ortomosaico assim que
+          ele existir. Fase 5 do roadmap (Geolocalização avançada, mapeamento cemiterial).
         </footer>
       </div>
     </div>
