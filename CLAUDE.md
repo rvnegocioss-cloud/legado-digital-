@@ -238,6 +238,7 @@ Prioridades imediatas:
 - [x] **Política de Privacidade e Termos de Uso** (Rafael, 2026-07-14 — "não pode esquecer isso") — feito 2026-07-17: `/politica-de-privacidade` e `/termos-de-uso`, conteúdo real cobrindo LGPD (dados coletados, finalidade, subprocessadores Supabase/Vercel/Resend, direitos do titular) e termos de uso do modelo B2B2C. Linkadas no rodapé das 4 telas públicas (landing, `/busca`, `/parceiros/[slug]`, `/homenagem/[slug]`). **Pendência real:** razão social/CNPJ da própria Legado Digital ainda não existem (empresa em formalização) — texto marca isso como placeholder explícito, não inventou dado. Atualizar assim que o registro societário sair.
 - [x] **Landing sem emoji como ícone** (pendência do item 8 do Pedro, 2026-07-14) — feito 2026-07-17: os 11 emojis usados como ícone de feature/passo (📱🔒🎨💬👨‍👩‍👧‍👦📊👁️🏢) trocados por `lucide-react` (`QrCode`, `Lock`, `Sparkles`, `BookOpen`, `Users`, `LayoutDashboard`, `Eye`, `Building2`, `MessageCircle`), `strokeWidth={1.5}`, cor dourada — mesma convenção já usada no resto do site.
 - [x] **LegadoBot Fase 1 — Central + Portal do Parceiro (2026-07-14, teste)** — ver seção própria "Chatbot IA na landing" mais abaixo pro detalhe completo.
+- [x] **Rate limit middleware centralizado (2026-07-22)** — `app/middleware.ts` implementa rate limiting global Next.js: login/logout 3/min, upload 5/min (família) / 10/min (staff), API geral 30/min. Rastreamento por usuário (email Supabase Auth) ou IP (fallback `x-forwarded-for`). Cache em memória com garbage collection automático (entries > 1h). Headers de cache apropriados por rota (`no-store` /admin, `private` /parceiro, /familia). Logs de 429 pra detecção de ataque. Utilitários adicionais em `lib/rateLimitUtil.ts` pra validações por recurso (memorial, parceiro). Docs/teste em `scripts/test-ratelimit.md`.
 
 ## Feedback do Pedro (sócio) — 2026-07-14, prioridade sobre o resto do backlog
 Registrado na íntegra em `mapa_sugestoes` (tabela do banco, campo de sugestões do `/admin/mapa`). Decisão do Rafael: resto do projeto espera, corrigir isso primeiro, nesta ordem:
@@ -414,6 +415,7 @@ Quantidade de fotos/vídeo por memorial ainda **não foi definida com número re
 - QR Code de cada memorial (`lib/qrcode.ts`, `app/api/memorial-qrcode/route.ts`) — gerado automaticamente ao criar/salvar memorial, botão de download na Central e no Portal do Parceiro
 - Next.js 16 + TypeScript + Tailwind funcionando
 - Build passando sem erros
+- **Rate limit middleware centralizado** (`app/middleware.ts`) — proteção global contra abuso: login/logout 3/min, upload 5-10/min (família/staff), API geral 30/min. Rastreamento por usuário/IP, cache em memória com garbage collection, logs de 429 pra monitorar padrão de ataque.
 - Repositório GitHub: rvnegocioss-cloud/legado-digital-
 
 ## Bugs conhecidos
@@ -564,5 +566,5 @@ npm run lint     # verifica erros
 
 ---
 
-**Last Updated**: 2026-07-09
+**Last Updated**: 2026-07-22
 **Optimized with**: [Claude Token Optimizer](https://github.com/nadimtuhin/claude-token-optimizer)
