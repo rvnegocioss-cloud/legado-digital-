@@ -533,10 +533,41 @@ Skills (não são MCP, ficam em `~/.claude/skills/`, ver seção "Skills instala
 
 ## Comandos Úteis
 ```bash
-npm run dev      # inicia servidor local
-npm run build    # build de produção
-npm run lint     # verifica erros
+npm run dev        # inicia servidor local
+npm run build      # build de produção
+npm run lint       # verifica erros de estilo/linting
+npm run typecheck  # verifica erros de tipo TypeScript
+npm run start      # inicia servidor de produção
 ```
+
+## CI/CD — GitHub Actions
+**Implementado em `.github/workflows/ci.yml` (2026-07-22)**
+
+Toda vez que um commit é enviado (push) ou um pull request é aberto, GitHub Actions roda automaticamente:
+
+### Jobs do CI
+1. **Lint** (`npm run lint`) — Verifica estilo de código com ESLint, falha se houver erros
+2. **TypeScript Check** (`npm run typecheck`) — Valida tipos TS com `tsc --noEmit`, falha se houver tipo errado
+3. **Build** (`npm run build`) — Executa build do Next.js, falha se houver erro de compilação
+
+### Comportamento
+- **Paralelo:** Os 3 jobs rodam simultâneos (mais rápido)
+- **Cache:** npm e `.next/` são cacheados entre runs (acelera execução)
+- **Falha:** Se qualquer job falhar, o workflow inteiro falha (vermelho ❌ no commit/PR)
+- **Sucesso:** Se todos passarem, workflow marca sucesso (verde ✅)
+
+### Branch Protection (recomendado — configurar manual no GitHub)
+**Settings → Branches → Branch protection rules:**
+1. Aplicar ao branch `main`
+2. ✅ "Require status checks to pass before merging"
+3. ✅ Adicionar: `ci/lint`, `ci/typecheck`, `ci/build`
+4. Resultado: PR não deixa fazer merge se CI falhar
+
+### Logs
+- Falha de lint → link para arquivo e linha do erro no GitHub
+- Falha de typecheck → tipo errado explícito
+- Falha de build → erro completo do Next.js
+- Clique no workflow (vermelho ❌) pra ver logs detalhados
 
 ## Credenciais (apenas referência — nunca commitar)
 - Supabase Project Ref: yegvazxycfrbhblyzvhg
