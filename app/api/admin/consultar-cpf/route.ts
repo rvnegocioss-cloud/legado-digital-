@@ -4,7 +4,6 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const TOKEN_TESTE = '5ae973d7a997af13f0aaf2bf60e65803'
 // TODO: confirmar o pacote certo (preço/dados) na doc "IDs dos Pacotes e Preços"
 // antes de qualquer consulta de producao — pacote 1 ("CPF A") e so um exemplo.
 const PACOTE_CPF = '1'
@@ -42,13 +41,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
   }
 
-  const tokenProducao = process.env.CPFCNPJ_API_TOKEN
-  const modoTeste = !tokenProducao
-  const tokenEfetivo = tokenProducao || TOKEN_TESTE
+  const token = process.env.CPFCNPJ_API_TOKEN
+  if (!token) {
+    return NextResponse.json({ error: 'Configuração incompleta: CPFCNPJ_API_TOKEN faltando' }, { status: 500 })
+  }
 
   let res: Response
   try {
-    res = await fetch(`https://api.cpfcnpj.com.br/${tokenEfetivo}/${PACOTE_CPF}/${cpfLimpo}`, {
+    res = await fetch(`https://api.cpfcnpj.com.br/${token}/${PACOTE_CPF}/${cpfLimpo}`, {
       signal: AbortSignal.timeout(60000),
     })
   } catch {
@@ -66,6 +66,5 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     nome: data.nome || data.nome_da_pj || '',
     situacao: data.situacao || '',
-    modoTeste,
   })
 }

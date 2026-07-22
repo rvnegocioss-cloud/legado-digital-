@@ -48,6 +48,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
   }
 
+  // Whitelist de rotas permitidas para navegação automática
+  const ALLOWED_ROUTES = ['/parceiro', '/parceiro/memoriais', '/parceiro/emails', '/admin', '/admin/mapa']
+
   const parceiroVinculo = ((usuario as any).parceiros_usuarios || [])[0]
   const parceiroId = parceiroVinculo?.parceiro_id ?? null
   const nomeParceiro = parceiroVinculo?.parceiros_b2b?.nome_fantasia || parceiroVinculo?.parceiros_b2b?.razao_social || null
@@ -111,7 +114,14 @@ export async function POST(req: NextRequest) {
     acao = match[1]
     resposta = resposta.replace(/\n?AÇÃO:\s*\/\S+\s*$/m, '').trim()
 
-    if (!ehStaff && !acao.startsWith('/parceiro')) {
+    // Validar rota contra whitelist
+    const isAllowed = ALLOWED_ROUTES.some(route => acao!.startsWith(route))
+    if (!isAllowed) {
+      acao = null
+    }
+
+    // Validar permissões por papel: staff pode navegar /admin*, parceiro só /parceiro*
+    if (acao && !ehStaff && !acao.startsWith('/parceiro')) {
       acao = null
     }
 

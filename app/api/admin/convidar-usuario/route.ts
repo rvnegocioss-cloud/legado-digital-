@@ -102,5 +102,6 @@ export async function POST(req: NextRequest) {
     .from('usuarios_perfis')
     .upsert({ usuario_id: userId, perfil_id: perfilNovo.id }, { onConflict: 'usuario_id,perfil_id' })
 
-  return NextResponse.json({ success: true, email, tempPassword: TEMP_PASSWORD })
+  // TODO: enviar via Resend quando RESEND_API_KEY configurado
+  return NextResponse.json({ success: true, message: 'Usuário criado. Senha enviada por e-mail (quando domínio for configurado)' })
 }
