@@ -502,9 +502,25 @@ export default function DetalheMemorial() {
 
           <div className="flex-1 max-w-sm">
           <SecaoRetratil titulo="Mídia (foto, vídeo, galeria)">
-          <div className="space-y-3">
+          <div className="space-y-4">
+            <div className="pb-3 border-b border-zinc-800">
+              <p className="text-xs text-zinc-500 mb-2">Armazenamento do memorial</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-colors ${
+                      250 < 250 ? 'bg-green-500' : 250 < 400 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${(250 / 500) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs text-zinc-400 whitespace-nowrap">250MB / 500MB</span>
+              </div>
+            </div>
+
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
+            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
+            <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
             {fotoUrl && (
               <div className="flex items-center gap-3 mb-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -525,7 +541,8 @@ export default function DetalheMemorial() {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
+            <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
+            <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
             {videoUrl && (
               <div className="mb-2">
                 <video src={videoUrl} controls className="w-full rounded-md max-h-48 bg-black" />
@@ -548,6 +565,7 @@ export default function DetalheMemorial() {
             <label className="block text-xs text-zinc-500 mb-1">
               Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
             </label>
+            <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
             {galeria.length > 0 && (
               <div className="grid grid-cols-4 gap-2 mb-2">
                 {galeria.map((url) => (

@@ -527,7 +527,12 @@ function ParceiroMemoriaisInner() {
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
+                <p className="text-xs text-zinc-500 mb-3 pb-3 border-b border-zinc-800">Armazenamento: 250MB / 500MB</p>
+              </div>
+
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
+                <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
                 {fotoUrl && (
                   <div className="flex items-center gap-3 mb-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -548,7 +553,8 @@ function ParceiroMemoriaisInner() {
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
+                <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
+                <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
                 {videoUrl && (
                   <div className="mb-2">
                     <video src={videoUrl} controls className="w-full rounded-md max-h-40 bg-black" />
@@ -571,6 +577,7 @@ function ParceiroMemoriaisInner() {
                 <label className="block text-xs text-zinc-500 mb-1">
                   Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
                 </label>
+                <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
                 {galeria.length > 0 && (
                   <div className="grid grid-cols-4 gap-2 mb-2">
                     {galeria.map((url) => (

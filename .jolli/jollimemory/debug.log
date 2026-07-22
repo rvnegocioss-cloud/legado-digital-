@@ -974,3 +974,81 @@
 [2026-07-22T13:52:04.266Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
 [2026-07-22T13:52:04.266Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
 [2026-07-22T13:52:04.480Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=8, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T14:57:02.492Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T14:57:02.529Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T14:57:02.866Z] INFO  [PostCommitHook] [trace=7d9dec49daa5f10424690fc12de2ddbc] Detected operation: commit
+[2026-07-22T14:57:02.930Z] INFO  [PostCommitHook] [trace=7d9dec49daa5f10424690fc12de2ddbc] Enqueued: type=commit hash=9cd5f3b6
+[2026-07-22T14:57:02.930Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Launching background worker
+[2026-07-22T14:57:02.936Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Background worker spawned (PID: 13648)
+[2026-07-22T14:57:03.026Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T14:57:03.030Z] INFO  [StorageFactory] [trace=7d9dec49daa5f10424690fc12de2ddbc] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T14:57:03.089Z] INFO  [StorageFactory] [trace=7d9dec49daa5f10424690fc12de2ddbc] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T14:57:03.091Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Processing queue entry: type=commit hash=9cd5f3b6
+[2026-07-22T14:57:03.126Z] INFO  [GitOps] [trace=7d9dec49daa5f10424690fc12de2ddbc] Commit 9cd5f3b6: fix: lint errors — useCallback/useEffect pattern em gavetas/
+[2026-07-22T14:57:03.126Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Commit: 9cd5f3b6 - fix: lint errors — useCallback/useEffect pattern em gavetas/emails pages (34ms)
+[2026-07-22T14:57:03.131Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Discovered 1 Copilot Chat session(s)
+[2026-07-22T14:57:03.143Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Transcript source: session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, lines=756→852, entries=8
+[2026-07-22T14:57:03.222Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Git diff: 12 files changed, +530 -32 (73ms)
+[2026-07-22T14:57:03.331Z] WARN  [GitOps] [trace=7d9dec49daa5f10424690fc12de2ddbc] Diff exceeds 60000-char budget (68342 chars) — prepending --stat file list and truncating body
+[2026-07-22T14:57:03.337Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Prompt blocks: plans=0 notes=0 references=0 (AI soft-excluded 0)
+[2026-07-22T14:57:03.337Z] INFO  [Summarizer] [trace=7d9dec49daa5f10424690fc12de2ddbc] Generating summary for commit 9cd5f3b6
+[2026-07-22T14:57:03.337Z] INFO  [Summarizer] [trace=7d9dec49daa5f10424690fc12de2ddbc] Context: transcript=8, files=12, lines=530+32
+[2026-07-22T14:57:03.338Z] WARN  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T14:57:04.443Z] INFO  [PrePushHook] [trace=9d676fb7d7bb8dac85b3913746f1e722] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T14:57:04.482Z] INFO  [PushPendingStore] [trace=9d676fb7d7bb8dac85b3913746f1e722] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T14:57:04.483Z] INFO  [PrePushHook] [trace=9d676fb7d7bb8dac85b3913746f1e722] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T14:57:04.483Z] INFO  [PrePushHook] [trace=9d676fb7d7bb8dac85b3913746f1e722] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T14:57:04.484Z] INFO  [StorageFactory] [trace=9d676fb7d7bb8dac85b3913746f1e722] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T14:57:04.537Z] INFO  [StorageFactory] [trace=9d676fb7d7bb8dac85b3913746f1e722] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T14:57:05.350Z] INFO  [Summarizer] [trace=7d9dec49daa5f10424690fc12de2ddbc] Generating summary for commit 9cd5f3b6
+[2026-07-22T14:57:05.350Z] INFO  [Summarizer] [trace=7d9dec49daa5f10424690fc12de2ddbc] Context: transcript=8, files=12, lines=530+32
+[2026-07-22T14:57:05.350Z] ERROR [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T14:57:05.351Z] WARN  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Saving summary with empty topics + summaryError marker for commit 9cd5f3b6
+[2026-07-22T14:57:05.351Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] API summary generated (2.0s)
+[2026-07-22T14:57:05.353Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Plan registry scan: found 0 uncommitted slug(s) on main: []
+[2026-07-22T14:57:05.353Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Plan association: detected 0 slug(s) from transcripts: []
+[2026-07-22T14:57:05.353Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T14:57:05.354Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Note association: detected 0 note(s): []
+[2026-07-22T14:57:05.355Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T14:57:05.355Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Summary built for 9cd5f3b6: recap=no, topics=0, plans=absent, notes=absent, references=absent
+[2026-07-22T14:57:05.652Z] INFO  [GitOps] [trace=7d9dec49daa5f10424690fc12de2ddbc] Updated branch 'jollimemory/summaries/v3': 4 written, 0 deleted (via fast-import)
+[2026-07-22T14:57:05.665Z] INFO  [MetadataManager] [trace=7d9dec49daa5f10424690fc12de2ddbc] Manifest updated: main/fix-lint-errors-usecallbackuseeffect-pattern-em-ga-9cd5f3b6.md (commit)
+[2026-07-22T14:57:05.665Z] INFO  [FolderStorage] [trace=7d9dec49daa5f10424690fc12de2ddbc] Markdown generated: main/fix-lint-errors-usecallbackuseeffect-pattern-em-ga-9cd5f3b6.md
+[2026-07-22T14:57:05.668Z] INFO  [FolderStorage] [trace=7d9dec49daa5f10424690fc12de2ddbc] Wrote 4 files, deleted 0 (Add summary for 9cd5f3b6: fix: lint errors — useCallback/useEffect pattern e)
+[2026-07-22T14:57:05.668Z] INFO  [SummaryStore] [trace=7d9dec49daa5f10424690fc12de2ddbc] Summary stored successfully for commit 9cd5f3b6
+[2026-07-22T14:57:05.669Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Summary stored successfully for commit 9cd5f3b6 (314ms, 0 plans, 0 notes, 0 references)
+[2026-07-22T14:57:05.669Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] === Pipeline completed in 2.6s ===
+[2026-07-22T14:57:05.669Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] === Summary content (0 topics) ===
+[2026-07-22T14:57:05.700Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Processed 1 queue entries
+[2026-07-22T14:57:05.704Z] INFO  [SessionTracker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Enqueued queue operation: type=ingest tag=ingest file=1784732225703-00000001-cd712567-ingest.json
+[2026-07-22T14:57:05.705Z] INFO  [PushExecutor] [trace=7d9dec49daa5f10424690fc12de2ddbc] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T14:57:05.707Z] INFO  [PushExecutor] [trace=7d9dec49daa5f10424690fc12de2ddbc] processPushPending(post-queue): 8 pending entr(ies) (filtered to 1 hash(es))
+[2026-07-22T14:57:05.707Z] INFO  [PushExecutor] [trace=7d9dec49daa5f10424690fc12de2ddbc] processPushPending(post-queue): not signed in — keeping 8 entries for later
+[2026-07-22T14:57:05.708Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] === Queue worker finished ===
+[2026-07-22T14:57:05.711Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] Processing queue entry: type=ingest triggeredBy=post-commit
+[2026-07-22T14:57:05.713Z] INFO  [QueueWorker] [trace=7d9dec49daa5f10424690fc12de2ddbc] No API key configured — skipping ingest (post-commit)
+[2026-07-22T14:57:05.868Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T14:57:05.869Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T14:57:05.869Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T14:57:06.103Z] INFO  [bridge] Merged mode activated {"branch":"main","creationPoint":"f01770b4","author":"Claude Code Agent"}
+[2026-07-22T14:57:43.907Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T14:57:43.907Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T14:57:43.911Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T14:57:43.956Z] INFO  [PlanDiscovery] Plan discovery: archived plan Legado Digital file changed — creating new entry
+[2026-07-22T14:57:43.960Z] INFO  [PlanDiscovery] Plan discovery: upserted 1 slug(s) + 2 external path(s) into plans.json
+[2026-07-22T14:57:44.109Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T14:57:44.117Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T14:57:44.119Z] INFO  [plans] detectPlans found 2 plans (5 in registry)
+[2026-07-22T14:57:44.119Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T14:57:44.322Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=9, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T14:57:44.618Z] INFO  [plans] detectPlans found 2 plans (5 in registry)
+[2026-07-22T14:57:44.618Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T14:57:44.618Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T15:48:19.292Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T15:48:19.293Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T15:48:19.296Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T15:48:19.489Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T15:48:19.492Z] INFO  [plans] detectPlans found 2 plans (5 in registry)
+[2026-07-22T15:48:19.492Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T15:48:19.492Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T15:48:19.708Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=9, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true

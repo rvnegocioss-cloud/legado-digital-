@@ -288,8 +288,23 @@ export default function FamiliaEdicaoPage() {
               />
             </div>
 
+            <div className="pb-4 border-b border-zinc-800 mb-4">
+              <p className="text-xs text-zinc-500">Armazenamento: 250MB / 500MB</p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${
+                      250 < 250 ? 'bg-green-500' : 250 < 400 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${(250 / 500) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado</label>
+              <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
+              <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
               {fotoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover mb-2" />
@@ -305,7 +320,8 @@ export default function FamiliaEdicaoPage() {
             </div>
 
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Vídeo</label>
+              <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
+              <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
               {videoUrl && <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />}
               <input
                 type="file"
@@ -321,6 +337,7 @@ export default function FamiliaEdicaoPage() {
               <label className="block text-xs text-zinc-500 mb-1">
                 Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
               </label>
+              <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
               {galeria.length > 0 && (
                 <div className="grid grid-cols-4 gap-2 mb-2">
                   {galeria.map((url) => (
