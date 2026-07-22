@@ -22,7 +22,9 @@
       "mcp__claude_ai_Supabase__get_advisors",
       "mcp__claude_ai_Vercel__get_deployment",
       "mcp__claude_ai_Vercel__get_project",
-      "mcp__claude_ai_Vercel__list_deployments"
+      "mcp__claude_ai_Vercel__list_deployments",
+      "Bash(git commit -m 'docs: registra validações de upload em CLAUDE.md *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

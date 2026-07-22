@@ -5,11 +5,11 @@
 			"slug": "Legado Digital",
 			"title": "Legado Digital.md",
 			"sourcePath": "C:\\Users\\rafa\\Documents\\claude vault\\claude vault\\Projects\\Legado Digital.md",
-			"addedAt": "2026-07-22T11:14:22.163Z",
-			"updatedAt": "2026-07-22T12:25:50.086Z",
-			"commitHash": "f843ba241fa3d612968c4d092dfb3840fbe951da",
+			"addedAt": "2026-07-22T13:15:28.779Z",
+			"updatedAt": "2026-07-22T13:22:41.060Z",
+			"commitHash": "5607211a34da08810727e60c17fe654c351432ef",
 			"branch": "main",
-			"contentHashAtCommit": "7f7ff6cd02f10251bbda03c6319673196377d0d05523069b5d4d4407e7e2b50f"
+			"contentHashAtCommit": "a5aa957a004804f5f7cc44ee4674d5e1818a6ac98c6134f4d4b008dc8316fb6b"
 		},
 		"BACKUP_STRATEGY": {
 			"slug": "BACKUP_STRATEGY",
@@ -20,6 +20,26 @@
 			"commitHash": "f843ba241fa3d612968c4d092dfb3840fbe951da",
 			"branch": "main",
 			"contentHashAtCommit": "387b9f48760ed245c966255c28edc3e1485262343b1c7d6577751a45ab5d3ea0"
+		},
+		"Backups": {
+			"slug": "Backups",
+			"title": "Backups Legado Digital",
+			"sourcePath": "C:\\Users\\rafa\\Documents\\claude vault\\claude vault\\Projects\\Legado Digital\\Backups.md",
+			"addedAt": "2026-07-22T13:15:28.779Z",
+			"updatedAt": "2026-07-22T13:22:41.063Z",
+			"commitHash": "5607211a34da08810727e60c17fe654c351432ef",
+			"branch": "main",
+			"contentHashAtCommit": "07c0ad7bc8fa7088546763c6f692bce31472f092b49e952fbcce09152cfc4bfd"
+		},
+		"2026-07-22 - Sprint 0 Legado Digital": {
+			"slug": "2026-07-22 - Sprint 0 Legado Digital",
+			"title": "Sprint 0 — 2026-07-22 Legado Digital",
+			"sourcePath": "C:\\Users\\rafa\\Documents\\claude vault\\claude vault\\Dev Logs\\2026-07-22 - Sprint 0 Legado Digital.md",
+			"addedAt": "2026-07-22T13:15:28.779Z",
+			"updatedAt": "2026-07-22T13:22:41.067Z",
+			"commitHash": "5607211a34da08810727e60c17fe654c351432ef",
+			"branch": "main",
+			"contentHashAtCommit": "5815bfad2ea01b607ce4a5ad04ee66f1b5d00bb372d584c77703c499bf2cfd2f"
 		}
 	}
 }

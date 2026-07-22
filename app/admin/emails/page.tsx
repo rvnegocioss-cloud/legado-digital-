@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/auth'
 
 interface EmailEnviado {
@@ -59,11 +59,7 @@ export default function AdminComunicacoes() {
   const [loading, setLoading] = useState(true)
   const [abertoId, setAbertoId] = useState<string | null>(null)
 
-  useEffect(() => {
-    load()
-  }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
 
     const { data: emailsData } = await supabase
@@ -102,7 +98,11 @@ export default function AdminComunicacoes() {
     setParceiros(lista)
 
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   if (loading) return <p className="text-zinc-400">Carregando...</p>
 

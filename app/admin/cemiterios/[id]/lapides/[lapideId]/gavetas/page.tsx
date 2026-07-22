@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/auth'
@@ -35,11 +35,7 @@ export default function GavetasLapide() {
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
 
-  useEffect(() => {
-    load()
-  }, [lapideId])
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     const { data: lapide } = await supabase.from('lapides').select('identificacao').eq('id', lapideId).single()
     setLapideNome(lapide?.identificacao || '')
@@ -59,7 +55,11 @@ export default function GavetasLapide() {
     setHomenagens(homenagensData || [])
 
     setLoading(false)
-  }
+  }, [lapideId])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault()

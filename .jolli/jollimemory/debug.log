@@ -594,3 +594,383 @@
 [2026-07-22T13:09:45.828Z] INFO  [PrePushHook] [trace=0ebb4bdb73284ea438a44db7bbe09961] Recorded 1 commit(s) for later sync — not signed in to Jolli
 [2026-07-22T13:09:45.829Z] INFO  [StorageFactory] [trace=0ebb4bdb73284ea438a44db7bbe09961] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
 [2026-07-22T13:09:45.887Z] INFO  [StorageFactory] [trace=0ebb4bdb73284ea438a44db7bbe09961] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:11:55.648Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:11:55.649Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:11:55.653Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:11:55.835Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:11:55.837Z] INFO  [plans] detectPlans found 1 plans (2 in registry)
+[2026-07-22T13:11:55.837Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:11:55.837Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:11:56.075Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=3, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:13:26.106Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T13:13:26.249Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T13:13:26.571Z] INFO  [PostCommitHook] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Detected operation: commit
+[2026-07-22T13:13:26.624Z] INFO  [PostCommitHook] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Enqueued: type=commit hash=bd2fd16d
+[2026-07-22T13:13:26.624Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Launching background worker
+[2026-07-22T13:13:26.630Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Background worker spawned (PID: 14532)
+[2026-07-22T13:13:26.723Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T13:13:26.727Z] INFO  [StorageFactory] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:13:26.785Z] INFO  [StorageFactory] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:13:26.787Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Processing queue entry: type=commit hash=bd2fd16d
+[2026-07-22T13:13:26.817Z] INFO  [GitOps] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Commit bd2fd16d: docs: registra validações de upload em CLAUDE.md
+[2026-07-22T13:13:26.817Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Commit: bd2fd16d - docs: registra validações de upload em CLAUDE.md (28ms)
+[2026-07-22T13:13:26.821Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Discovered 1 Copilot Chat session(s)
+[2026-07-22T13:13:26.829Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Transcript source: session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, lines=611→668, entries=2
+[2026-07-22T13:13:26.893Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Git diff: 1 files changed, +8 -2 (58ms)
+[2026-07-22T13:13:26.960Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Prompt blocks: plans=0 notes=0 references=0 (AI soft-excluded 0)
+[2026-07-22T13:13:26.961Z] INFO  [Summarizer] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Generating summary for commit bd2fd16d
+[2026-07-22T13:13:26.961Z] INFO  [Summarizer] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Context: transcript=2, files=1, lines=8+2
+[2026-07-22T13:13:26.961Z] WARN  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T13:13:28.971Z] INFO  [Summarizer] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Generating summary for commit bd2fd16d
+[2026-07-22T13:13:28.971Z] INFO  [Summarizer] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Context: transcript=2, files=1, lines=8+2
+[2026-07-22T13:13:28.971Z] ERROR [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:13:28.971Z] WARN  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Saving summary with empty topics + summaryError marker for commit bd2fd16d
+[2026-07-22T13:13:28.971Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] API summary generated (2.0s)
+[2026-07-22T13:13:28.972Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Plan registry scan: found 1 uncommitted slug(s) on main: [Legado Digital]
+[2026-07-22T13:13:28.972Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Plan association: detected 1 slug(s) from transcripts: [Legado Digital]
+[2026-07-22T13:13:28.973Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Plan association: registry has 2 entries: [Legado Digital(commitHash=f843ba241fa3d612968c4d092dfb3840fbe951da), BACKUP_STRATEGY(commitHash=f843ba241fa3d612968c4d092dfb3840fbe951da)]
+[2026-07-22T13:13:28.977Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Plan archived: Legado Digital → Legado Digital-bd2fd16d (hash=a97f5a48b01c)
+[2026-07-22T13:13:29.202Z] INFO  [GitOps] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Updated branch 'jollimemory/summaries/v3': 1 written, 0 deleted (via fast-import)
+[2026-07-22T13:13:29.208Z] INFO  [MetadataManager] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Manifest updated: main/plan--Legado Digital-bd2fd16d.md (plan)
+[2026-07-22T13:13:29.208Z] INFO  [FolderStorage] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Plan markdown generated: main/plan--Legado Digital-bd2fd16d.md
+[2026-07-22T13:13:29.208Z] INFO  [FolderStorage] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Wrote 1 files, deleted 0 (Archive 1 plan(s) for commit bd2fd16d)
+[2026-07-22T13:13:29.208Z] INFO  [SummaryStore] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Stored 1 plan file(s)
+[2026-07-22T13:13:29.209Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Associated 1 plan(s) with commit bd2fd16d
+[2026-07-22T13:13:29.210Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T13:13:29.210Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Note association: detected 0 note(s): []
+[2026-07-22T13:13:29.211Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T13:13:29.212Z] WARN  [PlanProgressEvaluator] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Plan progress LLM call failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:13:29.212Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Plan progress: evaluated 0/1 plan(s)
+[2026-07-22T13:13:29.212Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Summary built for bd2fd16d: recap=no, topics=0, plans=1 ref(s): [Legado Digital-bd2fd16d], notes=absent, references=absent
+[2026-07-22T13:13:29.477Z] INFO  [GitOps] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Updated branch 'jollimemory/summaries/v3': 4 written, 0 deleted (via fast-import)
+[2026-07-22T13:13:29.491Z] INFO  [MetadataManager] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Manifest updated: main/docs-registra-validaes-de-upload-em-claudemd-bd2fd16d.md (commit)
+[2026-07-22T13:13:29.491Z] INFO  [FolderStorage] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Markdown generated: main/docs-registra-validaes-de-upload-em-claudemd-bd2fd16d.md
+[2026-07-22T13:13:29.494Z] INFO  [FolderStorage] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Wrote 4 files, deleted 0 (Add summary for bd2fd16d: docs: registra validações de upload em CLAUDE.md)
+[2026-07-22T13:13:29.494Z] INFO  [SummaryStore] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Summary stored successfully for commit bd2fd16d
+[2026-07-22T13:13:29.495Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Summary stored successfully for commit bd2fd16d (283ms, 1 plans, 0 notes, 0 references)
+[2026-07-22T13:13:29.495Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] === Pipeline completed in 2.7s ===
+[2026-07-22T13:13:29.495Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] === Summary content (0 topics) ===
+[2026-07-22T13:13:29.528Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Processed 1 queue entries
+[2026-07-22T13:13:29.530Z] INFO  [PushExecutor] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T13:13:29.532Z] INFO  [PushExecutor] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] processPushPending(post-queue): 2 pending entr(ies) (filtered to 1 hash(es))
+[2026-07-22T13:13:29.532Z] INFO  [PushExecutor] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] processPushPending(post-queue): not signed in — keeping 2 entries for later
+[2026-07-22T13:13:29.533Z] INFO  [QueueWorker] [trace=04e4c71b87c23839a4f5e62d7b88ba2a] === Queue worker finished ===
+[2026-07-22T13:13:29.658Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T13:13:29.658Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:13:29.658Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:13:29.681Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:13:29.681Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:13:29.682Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T13:13:31.152Z] INFO  [PrePushHook] [trace=29aafdc1600fe1a1a72cf7460909ba12] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T13:13:31.187Z] INFO  [PushPendingStore] [trace=29aafdc1600fe1a1a72cf7460909ba12] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T13:13:31.188Z] INFO  [PrePushHook] [trace=29aafdc1600fe1a1a72cf7460909ba12] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T13:13:31.188Z] INFO  [PrePushHook] [trace=29aafdc1600fe1a1a72cf7460909ba12] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T13:13:31.188Z] INFO  [StorageFactory] [trace=29aafdc1600fe1a1a72cf7460909ba12] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:13:31.239Z] INFO  [StorageFactory] [trace=29aafdc1600fe1a1a72cf7460909ba12] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:15:28.763Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:15:28.764Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:15:28.767Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:15:28.811Z] INFO  [PlanDiscovery] Plan discovery: archived plan Legado Digital file changed — creating new entry
+[2026-07-22T13:15:28.815Z] INFO  [PlanDiscovery] Plan discovery: upserted 1 slug(s) + 3 external path(s) into plans.json
+[2026-07-22T13:15:28.950Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:15:28.959Z] INFO  [plans] detectPlans found 3 plans (4 in registry)
+[2026-07-22T13:15:28.959Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:15:28.959Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:15:29.164Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=4, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:15:29.458Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:15:29.459Z] INFO  [plans] detectPlans found 3 plans (4 in registry)
+[2026-07-22T13:15:29.459Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:17:21.491Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:17:21.492Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:17:21.495Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:17:21.682Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:17:21.685Z] INFO  [plans] detectPlans found 3 plans (4 in registry)
+[2026-07-22T13:17:21.685Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:17:21.685Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:17:21.892Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=4, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:18:28.789Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:18:28.789Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:18:28.793Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:18:29.000Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:18:29.002Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:18:29.002Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:18:29.003Z] INFO  [plans] detectPlans found 3 plans (4 in registry)
+[2026-07-22T13:18:29.210Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=4, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:22:38.333Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T13:22:38.364Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T13:22:38.671Z] INFO  [PostCommitHook] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Detected operation: commit
+[2026-07-22T13:22:38.724Z] INFO  [PostCommitHook] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Enqueued: type=commit hash=5607211a
+[2026-07-22T13:22:38.724Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Launching background worker
+[2026-07-22T13:22:38.729Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Background worker spawned (PID: 21416)
+[2026-07-22T13:22:38.816Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T13:22:38.820Z] INFO  [StorageFactory] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:22:38.872Z] INFO  [StorageFactory] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:22:38.875Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Processing queue entry: type=commit hash=5607211a
+[2026-07-22T13:22:38.905Z] INFO  [GitOps] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Commit 5607211a: Feat: rate limit middleware centralizado para Legado Digital
+[2026-07-22T13:22:38.905Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Commit: 5607211a - Feat: rate limit middleware centralizado para Legado Digital (29ms)
+[2026-07-22T13:22:38.909Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Discovered 1 Copilot Chat session(s)
+[2026-07-22T13:22:38.917Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Transcript source: session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, lines=668→732, entries=6
+[2026-07-22T13:22:38.981Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Git diff: 3 files changed, +722 -0 (58ms)
+[2026-07-22T13:22:39.048Z] WARN  [ContextRelevance] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] rankContextRelevance failed (No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).) — keeping all items
+[2026-07-22T13:22:39.053Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Prompt blocks: plans=3 notes=0 references=0 (AI soft-excluded 0)
+[2026-07-22T13:22:39.053Z] INFO  [Summarizer] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Generating summary for commit 5607211a
+[2026-07-22T13:22:39.054Z] INFO  [Summarizer] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Context: transcript=6, files=3, lines=722+0
+[2026-07-22T13:22:39.054Z] WARN  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T13:22:41.057Z] INFO  [Summarizer] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Generating summary for commit 5607211a
+[2026-07-22T13:22:41.057Z] INFO  [Summarizer] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Context: transcript=6, files=3, lines=722+0
+[2026-07-22T13:22:41.057Z] ERROR [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:22:41.057Z] WARN  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Saving summary with empty topics + summaryError marker for commit 5607211a
+[2026-07-22T13:22:41.058Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] API summary generated (2.0s)
+[2026-07-22T13:22:41.058Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan registry scan: found 3 uncommitted slug(s) on main: [Legado Digital, Backups, 2026-07-22 - Sprint 0 Legado Digital]
+[2026-07-22T13:22:41.058Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan association: detected 3 slug(s) from transcripts: [Legado Digital, Backups, 2026-07-22 - Sprint 0 Legado Digital]
+[2026-07-22T13:22:41.060Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan association: registry has 4 entries: [Legado Digital(commitHash=null), BACKUP_STRATEGY(commitHash=f843ba241fa3d612968c4d092dfb3840fbe951da), Backups(commitHash=null), 2026-07-22 - Sprint 0 Legado Digital(commitHash=null)]
+[2026-07-22T13:22:41.063Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan archived: Legado Digital → Legado Digital-5607211a (hash=a5aa957a0048)
+[2026-07-22T13:22:41.067Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan archived: Backups → Backups-5607211a (hash=07c0ad7bc8fa)
+[2026-07-22T13:22:41.070Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan archived: 2026-07-22 - Sprint 0 Legado Digital → 2026-07-22 - Sprint 0 Legado Digital-5607211a (hash=5815bfad2ea0)
+[2026-07-22T13:22:41.292Z] INFO  [GitOps] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Updated branch 'jollimemory/summaries/v3': 3 written, 0 deleted (via fast-import)
+[2026-07-22T13:22:41.297Z] INFO  [MetadataManager] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Manifest updated: main/plan--Legado Digital-5607211a.md (plan)
+[2026-07-22T13:22:41.297Z] INFO  [FolderStorage] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan markdown generated: main/plan--Legado Digital-5607211a.md
+[2026-07-22T13:22:41.300Z] INFO  [MetadataManager] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Manifest updated: main/plan--Backups-5607211a.md (plan)
+[2026-07-22T13:22:41.300Z] INFO  [FolderStorage] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan markdown generated: main/plan--Backups-5607211a.md
+[2026-07-22T13:22:41.304Z] INFO  [MetadataManager] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Manifest updated: main/plan--2026-07-22 - Sprint 0 Legado Digital-5607211a.md (plan)
+[2026-07-22T13:22:41.304Z] INFO  [FolderStorage] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan markdown generated: main/plan--2026-07-22 - Sprint 0 Legado Digital-5607211a.md
+[2026-07-22T13:22:41.304Z] INFO  [FolderStorage] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Wrote 3 files, deleted 0 (Archive 3 plan(s) for commit 5607211a)
+[2026-07-22T13:22:41.304Z] INFO  [SummaryStore] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Stored 3 plan file(s)
+[2026-07-22T13:22:41.305Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Associated 3 plan(s) with commit 5607211a
+[2026-07-22T13:22:41.306Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T13:22:41.306Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Note association: detected 0 note(s): []
+[2026-07-22T13:22:41.307Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T13:22:41.307Z] WARN  [PlanProgressEvaluator] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan progress LLM call failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:22:41.307Z] WARN  [PlanProgressEvaluator] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan progress LLM call failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:22:41.307Z] WARN  [PlanProgressEvaluator] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan progress LLM call failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:22:41.307Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Plan progress: evaluated 0/3 plan(s)
+[2026-07-22T13:22:41.307Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Summary built for 5607211a: recap=no, topics=0, plans=3 ref(s): [Legado Digital-5607211a, Backups-5607211a, 2026-07-22 - Sprint 0 Legado Digital-5607211a], notes=absent, references=absent
+[2026-07-22T13:22:41.573Z] INFO  [GitOps] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Updated branch 'jollimemory/summaries/v3': 4 written, 0 deleted (via fast-import)
+[2026-07-22T13:22:41.587Z] INFO  [MetadataManager] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Manifest updated: main/feat-rate-limit-middleware-centralizado-para-legad-5607211a.md (commit)
+[2026-07-22T13:22:41.587Z] INFO  [FolderStorage] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Markdown generated: main/feat-rate-limit-middleware-centralizado-para-legad-5607211a.md
+[2026-07-22T13:22:41.591Z] INFO  [FolderStorage] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Wrote 4 files, deleted 0 (Add summary for 5607211a: Feat: rate limit middleware centralizado para Lega)
+[2026-07-22T13:22:41.591Z] INFO  [SummaryStore] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Summary stored successfully for commit 5607211a
+[2026-07-22T13:22:41.592Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Summary stored successfully for commit 5607211a (285ms, 3 plans, 0 notes, 0 references)
+[2026-07-22T13:22:41.592Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] === Pipeline completed in 2.7s ===
+[2026-07-22T13:22:41.592Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] === Summary content (0 topics) ===
+[2026-07-22T13:22:41.628Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Processed 1 queue entries
+[2026-07-22T13:22:41.631Z] INFO  [SessionTracker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Enqueued queue operation: type=ingest tag=ingest file=1784726561631-00000001-31075103-ingest.json
+[2026-07-22T13:22:41.633Z] INFO  [PushExecutor] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T13:22:41.634Z] INFO  [PushExecutor] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] processPushPending(post-queue): 3 pending entr(ies) (filtered to 1 hash(es))
+[2026-07-22T13:22:41.635Z] INFO  [PushExecutor] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] processPushPending(post-queue): not signed in — keeping 3 entries for later
+[2026-07-22T13:22:41.636Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] === Queue worker finished ===
+[2026-07-22T13:22:41.640Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] Processing queue entry: type=ingest triggeredBy=post-commit
+[2026-07-22T13:22:41.642Z] INFO  [QueueWorker] [trace=994fe8ebe4e969c31e62ec6e21a67b8b] No API key configured — skipping ingest (post-commit)
+[2026-07-22T13:22:41.751Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:22:41.752Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:22:41.752Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:22:41.789Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:22:41.789Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:22:41.789Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:22:42.675Z] INFO  [PrePushHook] [trace=2edd85670f326338a7e9283f0b48a1b8] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T13:22:42.710Z] INFO  [PushPendingStore] [trace=2edd85670f326338a7e9283f0b48a1b8] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T13:22:42.711Z] INFO  [PrePushHook] [trace=2edd85670f326338a7e9283f0b48a1b8] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T13:22:42.711Z] INFO  [PrePushHook] [trace=2edd85670f326338a7e9283f0b48a1b8] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T13:22:42.712Z] INFO  [StorageFactory] [trace=2edd85670f326338a7e9283f0b48a1b8] StorageFactory.create: storageMode=dual-write, projectPath=c:\Users\rafa\legado-digital-
+[2026-07-22T13:22:42.763Z] INFO  [StorageFactory] [trace=2edd85670f326338a7e9283f0b48a1b8] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:25:07.651Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T13:25:07.691Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T13:25:08.030Z] INFO  [PostCommitHook] [trace=75b61d52410230e3e913ded37d196897] Detected operation: commit
+[2026-07-22T13:25:08.082Z] INFO  [PostCommitHook] [trace=75b61d52410230e3e913ded37d196897] Enqueued: type=commit hash=f7496446
+[2026-07-22T13:25:08.082Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Launching background worker
+[2026-07-22T13:25:08.087Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Background worker spawned (PID: 19552)
+[2026-07-22T13:25:08.185Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T13:25:08.189Z] INFO  [StorageFactory] [trace=75b61d52410230e3e913ded37d196897] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:25:08.243Z] INFO  [StorageFactory] [trace=75b61d52410230e3e913ded37d196897] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:25:08.244Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Processing queue entry: type=commit hash=f7496446
+[2026-07-22T13:25:08.275Z] INFO  [GitOps] [trace=75b61d52410230e3e913ded37d196897] Commit f7496446: Docs: atualiza CLAUDE.md com rate limit middleware (2026-07-
+[2026-07-22T13:25:08.275Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Commit: f7496446 - Docs: atualiza CLAUDE.md com rate limit middleware (2026-07-22) (29ms)
+[2026-07-22T13:25:08.279Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Discovered 1 Copilot Chat session(s)
+[2026-07-22T13:25:08.348Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Git diff: 1 files changed, +3 -1 (59ms)
+[2026-07-22T13:25:08.411Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Prompt blocks: plans=0 notes=0 references=0 (AI soft-excluded 0)
+[2026-07-22T13:25:08.411Z] INFO  [Summarizer] [trace=75b61d52410230e3e913ded37d196897] Generating summary for commit f7496446
+[2026-07-22T13:25:08.411Z] INFO  [Summarizer] [trace=75b61d52410230e3e913ded37d196897] Context: transcript=0, files=1, lines=3+1
+[2026-07-22T13:25:08.411Z] WARN  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T13:25:10.421Z] INFO  [Summarizer] [trace=75b61d52410230e3e913ded37d196897] Generating summary for commit f7496446
+[2026-07-22T13:25:10.421Z] INFO  [Summarizer] [trace=75b61d52410230e3e913ded37d196897] Context: transcript=0, files=1, lines=3+1
+[2026-07-22T13:25:10.421Z] ERROR [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:25:10.421Z] WARN  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Saving summary with empty topics + summaryError marker for commit f7496446
+[2026-07-22T13:25:10.421Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] API summary generated (2.0s)
+[2026-07-22T13:25:10.423Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Plan registry scan: found 0 uncommitted slug(s) on main: []
+[2026-07-22T13:25:10.423Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Plan association: detected 0 slug(s) from transcripts: []
+[2026-07-22T13:25:10.423Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T13:25:10.424Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Note association: detected 0 note(s): []
+[2026-07-22T13:25:10.424Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T13:25:10.424Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Summary built for f7496446: recap=no, topics=0, plans=absent, notes=absent, references=absent
+[2026-07-22T13:25:10.712Z] INFO  [GitOps] [trace=75b61d52410230e3e913ded37d196897] Updated branch 'jollimemory/summaries/v3': 3 written, 0 deleted (via fast-import)
+[2026-07-22T13:25:10.733Z] INFO  [MetadataManager] [trace=75b61d52410230e3e913ded37d196897] Manifest updated: main/docs-atualiza-claudemd-com-rate-limit-middleware-2-f7496446.md (commit)
+[2026-07-22T13:25:10.733Z] INFO  [FolderStorage] [trace=75b61d52410230e3e913ded37d196897] Markdown generated: main/docs-atualiza-claudemd-com-rate-limit-middleware-2-f7496446.md
+[2026-07-22T13:25:10.734Z] INFO  [FolderStorage] [trace=75b61d52410230e3e913ded37d196897] Wrote 3 files, deleted 0 (Add summary for f7496446: Docs: atualiza CLAUDE.md com rate limit middleware)
+[2026-07-22T13:25:10.734Z] INFO  [SummaryStore] [trace=75b61d52410230e3e913ded37d196897] Summary stored successfully for commit f7496446
+[2026-07-22T13:25:10.735Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Summary stored successfully for commit f7496446 (311ms, 0 plans, 0 notes, 0 references)
+[2026-07-22T13:25:10.736Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] === Pipeline completed in 2.5s ===
+[2026-07-22T13:25:10.736Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] === Summary content (0 topics) ===
+[2026-07-22T13:25:10.765Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] Processed 1 queue entries
+[2026-07-22T13:25:10.767Z] INFO  [PushExecutor] [trace=75b61d52410230e3e913ded37d196897] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T13:25:10.768Z] INFO  [PushExecutor] [trace=75b61d52410230e3e913ded37d196897] processPushPending(post-queue): 4 pending entr(ies) (filtered to 1 hash(es))
+[2026-07-22T13:25:10.768Z] INFO  [PushExecutor] [trace=75b61d52410230e3e913ded37d196897] processPushPending(post-queue): not signed in — keeping 4 entries for later
+[2026-07-22T13:25:10.769Z] INFO  [QueueWorker] [trace=75b61d52410230e3e913ded37d196897] === Queue worker finished ===
+[2026-07-22T13:25:10.905Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:25:10.906Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:25:10.906Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:25:11.677Z] INFO  [PrePushHook] [trace=d85e617e61eb7d53f27a86d2ff8e20a0] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T13:25:11.711Z] INFO  [PushPendingStore] [trace=d85e617e61eb7d53f27a86d2ff8e20a0] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T13:25:11.712Z] INFO  [PrePushHook] [trace=d85e617e61eb7d53f27a86d2ff8e20a0] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T13:25:11.712Z] INFO  [PrePushHook] [trace=d85e617e61eb7d53f27a86d2ff8e20a0] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T13:25:11.713Z] INFO  [StorageFactory] [trace=d85e617e61eb7d53f27a86d2ff8e20a0] StorageFactory.create: storageMode=dual-write, projectPath=c:\Users\rafa\legado-digital-
+[2026-07-22T13:25:11.766Z] INFO  [StorageFactory] [trace=d85e617e61eb7d53f27a86d2ff8e20a0] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:25:44.917Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:25:44.917Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:25:44.921Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:25:45.100Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:25:45.102Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:25:45.102Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:25:45.102Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:25:45.310Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=6, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:30:33.959Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T13:30:33.998Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T13:30:34.326Z] INFO  [PostCommitHook] [trace=d99102323a62362e5af8f8c8b14e0b49] Detected operation: commit
+[2026-07-22T13:30:34.379Z] INFO  [PostCommitHook] [trace=d99102323a62362e5af8f8c8b14e0b49] Enqueued: type=commit hash=ac3038ca
+[2026-07-22T13:30:34.380Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Launching background worker
+[2026-07-22T13:30:34.384Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Background worker spawned (PID: 15840)
+[2026-07-22T13:30:34.473Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T13:30:34.476Z] INFO  [StorageFactory] [trace=d99102323a62362e5af8f8c8b14e0b49] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:30:34.529Z] INFO  [StorageFactory] [trace=d99102323a62362e5af8f8c8b14e0b49] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:30:34.531Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Processing queue entry: type=commit hash=ac3038ca
+[2026-07-22T13:30:34.561Z] INFO  [GitOps] [trace=d99102323a62362e5af8f8c8b14e0b49] Commit ac3038ca: Feat: CI/CD com GitHub Actions — lint, typecheck, build
+[2026-07-22T13:30:34.561Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Commit: ac3038ca - Feat: CI/CD com GitHub Actions — lint, typecheck, build (29ms)
+[2026-07-22T13:30:34.565Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Discovered 1 Copilot Chat session(s)
+[2026-07-22T13:30:34.571Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Transcript source: session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, lines=732→744, entries=2
+[2026-07-22T13:30:34.639Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Git diff: 3 files changed, +108 -3 (62ms)
+[2026-07-22T13:30:34.711Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Prompt blocks: plans=0 notes=0 references=0 (AI soft-excluded 0)
+[2026-07-22T13:30:34.712Z] INFO  [Summarizer] [trace=d99102323a62362e5af8f8c8b14e0b49] Generating summary for commit ac3038ca
+[2026-07-22T13:30:34.712Z] INFO  [Summarizer] [trace=d99102323a62362e5af8f8c8b14e0b49] Context: transcript=2, files=3, lines=108+3
+[2026-07-22T13:30:34.712Z] WARN  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T13:30:36.723Z] INFO  [Summarizer] [trace=d99102323a62362e5af8f8c8b14e0b49] Generating summary for commit ac3038ca
+[2026-07-22T13:30:36.723Z] INFO  [Summarizer] [trace=d99102323a62362e5af8f8c8b14e0b49] Context: transcript=2, files=3, lines=108+3
+[2026-07-22T13:30:36.723Z] ERROR [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:30:36.723Z] WARN  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Saving summary with empty topics + summaryError marker for commit ac3038ca
+[2026-07-22T13:30:36.724Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] API summary generated (2.0s)
+[2026-07-22T13:30:36.725Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Plan registry scan: found 0 uncommitted slug(s) on main: []
+[2026-07-22T13:30:36.725Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Plan association: detected 0 slug(s) from transcripts: []
+[2026-07-22T13:30:36.725Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T13:30:36.726Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Note association: detected 0 note(s): []
+[2026-07-22T13:30:36.726Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T13:30:36.726Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Summary built for ac3038ca: recap=no, topics=0, plans=absent, notes=absent, references=absent
+[2026-07-22T13:30:37.020Z] INFO  [GitOps] [trace=d99102323a62362e5af8f8c8b14e0b49] Updated branch 'jollimemory/summaries/v3': 4 written, 0 deleted (via fast-import)
+[2026-07-22T13:30:37.033Z] INFO  [MetadataManager] [trace=d99102323a62362e5af8f8c8b14e0b49] Manifest updated: main/feat-cicd-com-github-actions-lint-typecheck-build-ac3038ca.md (commit)
+[2026-07-22T13:30:37.033Z] INFO  [FolderStorage] [trace=d99102323a62362e5af8f8c8b14e0b49] Markdown generated: main/feat-cicd-com-github-actions-lint-typecheck-build-ac3038ca.md
+[2026-07-22T13:30:37.035Z] INFO  [FolderStorage] [trace=d99102323a62362e5af8f8c8b14e0b49] Wrote 4 files, deleted 0 (Add summary for ac3038ca: Feat: CI/CD com GitHub Actions — lint, typecheck, )
+[2026-07-22T13:30:37.035Z] INFO  [SummaryStore] [trace=d99102323a62362e5af8f8c8b14e0b49] Summary stored successfully for commit ac3038ca
+[2026-07-22T13:30:37.036Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Summary stored successfully for commit ac3038ca (310ms, 0 plans, 0 notes, 0 references)
+[2026-07-22T13:30:37.036Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] === Pipeline completed in 2.5s ===
+[2026-07-22T13:30:37.036Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] === Summary content (0 topics) ===
+[2026-07-22T13:30:37.065Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Processed 1 queue entries
+[2026-07-22T13:30:37.068Z] INFO  [SessionTracker] [trace=d99102323a62362e5af8f8c8b14e0b49] Enqueued queue operation: type=ingest tag=ingest file=1784727037067-00000001-ae79c133-ingest.json
+[2026-07-22T13:30:37.069Z] INFO  [PushExecutor] [trace=d99102323a62362e5af8f8c8b14e0b49] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T13:30:37.071Z] INFO  [PushExecutor] [trace=d99102323a62362e5af8f8c8b14e0b49] processPushPending(post-queue): 5 pending entr(ies) (filtered to 1 hash(es))
+[2026-07-22T13:30:37.071Z] INFO  [PushExecutor] [trace=d99102323a62362e5af8f8c8b14e0b49] processPushPending(post-queue): not signed in — keeping 5 entries for later
+[2026-07-22T13:30:37.071Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] === Queue worker finished ===
+[2026-07-22T13:30:37.074Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] Processing queue entry: type=ingest triggeredBy=post-commit
+[2026-07-22T13:30:37.076Z] INFO  [QueueWorker] [trace=d99102323a62362e5af8f8c8b14e0b49] No API key configured — skipping ingest (post-commit)
+[2026-07-22T13:30:37.221Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:30:37.221Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:30:37.221Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:30:39.070Z] INFO  [PrePushHook] [trace=a6e033dd753042e648825b2e4dd090b5] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T13:30:39.111Z] INFO  [PushPendingStore] [trace=a6e033dd753042e648825b2e4dd090b5] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T13:30:39.112Z] INFO  [PrePushHook] [trace=a6e033dd753042e648825b2e4dd090b5] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T13:30:39.112Z] INFO  [PrePushHook] [trace=a6e033dd753042e648825b2e4dd090b5] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T13:30:39.113Z] INFO  [StorageFactory] [trace=a6e033dd753042e648825b2e4dd090b5] StorageFactory.create: storageMode=dual-write, projectPath=c:\Users\rafa\legado-digital-
+[2026-07-22T13:30:39.166Z] INFO  [StorageFactory] [trace=a6e033dd753042e648825b2e4dd090b5] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:31:17.313Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:31:17.313Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:31:17.317Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:31:17.508Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:31:17.510Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:31:17.510Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:31:17.510Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:31:17.720Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=7, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:39:39.437Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T13:39:39.470Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T13:39:39.779Z] INFO  [PostCommitHook] [trace=5ec6e422c047951483e1018fa0fb7e40] Detected operation: commit
+[2026-07-22T13:39:39.830Z] INFO  [PostCommitHook] [trace=5ec6e422c047951483e1018fa0fb7e40] Enqueued: type=commit hash=f118799d
+[2026-07-22T13:39:39.830Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Launching background worker
+[2026-07-22T13:39:39.834Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Background worker spawned (PID: 22000)
+[2026-07-22T13:39:39.922Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T13:39:39.927Z] INFO  [StorageFactory] [trace=5ec6e422c047951483e1018fa0fb7e40] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:39:39.982Z] INFO  [StorageFactory] [trace=5ec6e422c047951483e1018fa0fb7e40] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:39:39.984Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Processing queue entry: type=commit hash=f118799d
+[2026-07-22T13:39:40.016Z] INFO  [GitOps] [trace=5ec6e422c047951483e1018fa0fb7e40] Commit f118799d: Feature: RLS Security Audit Script
+[2026-07-22T13:39:40.016Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Commit: f118799d - Feature: RLS Security Audit Script (30ms)
+[2026-07-22T13:39:40.020Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Discovered 1 Copilot Chat session(s)
+[2026-07-22T13:39:40.027Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Transcript source: session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, lines=744→756, entries=2
+[2026-07-22T13:39:40.095Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Git diff: 4 files changed, +963 -0 (62ms)
+[2026-07-22T13:39:40.169Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Prompt blocks: plans=0 notes=0 references=0 (AI soft-excluded 0)
+[2026-07-22T13:39:40.169Z] INFO  [Summarizer] [trace=5ec6e422c047951483e1018fa0fb7e40] Generating summary for commit f118799d
+[2026-07-22T13:39:40.169Z] INFO  [Summarizer] [trace=5ec6e422c047951483e1018fa0fb7e40] Context: transcript=2, files=4, lines=963+0
+[2026-07-22T13:39:40.170Z] WARN  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T13:39:42.172Z] INFO  [Summarizer] [trace=5ec6e422c047951483e1018fa0fb7e40] Generating summary for commit f118799d
+[2026-07-22T13:39:42.172Z] INFO  [Summarizer] [trace=5ec6e422c047951483e1018fa0fb7e40] Context: transcript=2, files=4, lines=963+0
+[2026-07-22T13:39:42.172Z] ERROR [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:39:42.172Z] WARN  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Saving summary with empty topics + summaryError marker for commit f118799d
+[2026-07-22T13:39:42.172Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] API summary generated (2.0s)
+[2026-07-22T13:39:42.174Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Plan registry scan: found 0 uncommitted slug(s) on main: []
+[2026-07-22T13:39:42.174Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Plan association: detected 0 slug(s) from transcripts: []
+[2026-07-22T13:39:42.174Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T13:39:42.174Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Note association: detected 0 note(s): []
+[2026-07-22T13:39:42.175Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T13:39:42.175Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Summary built for f118799d: recap=no, topics=0, plans=absent, notes=absent, references=absent
+[2026-07-22T13:39:42.476Z] INFO  [GitOps] [trace=5ec6e422c047951483e1018fa0fb7e40] Updated branch 'jollimemory/summaries/v3': 4 written, 0 deleted (via fast-import)
+[2026-07-22T13:39:42.488Z] INFO  [MetadataManager] [trace=5ec6e422c047951483e1018fa0fb7e40] Manifest updated: main/feature-rls-security-audit-script-f118799d.md (commit)
+[2026-07-22T13:39:42.488Z] INFO  [FolderStorage] [trace=5ec6e422c047951483e1018fa0fb7e40] Markdown generated: main/feature-rls-security-audit-script-f118799d.md
+[2026-07-22T13:39:42.491Z] INFO  [FolderStorage] [trace=5ec6e422c047951483e1018fa0fb7e40] Wrote 4 files, deleted 0 (Add summary for f118799d: Feature: RLS Security Audit Script)
+[2026-07-22T13:39:42.491Z] INFO  [SummaryStore] [trace=5ec6e422c047951483e1018fa0fb7e40] Summary stored successfully for commit f118799d
+[2026-07-22T13:39:42.492Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Summary stored successfully for commit f118799d (317ms, 0 plans, 0 notes, 0 references)
+[2026-07-22T13:39:42.492Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] === Pipeline completed in 2.5s ===
+[2026-07-22T13:39:42.492Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] === Summary content (0 topics) ===
+[2026-07-22T13:39:42.521Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Processed 1 queue entries
+[2026-07-22T13:39:42.524Z] INFO  [SessionTracker] [trace=5ec6e422c047951483e1018fa0fb7e40] Enqueued queue operation: type=ingest tag=ingest file=1784727582523-00000001-ecd7a643-ingest.json
+[2026-07-22T13:39:42.526Z] INFO  [PushExecutor] [trace=5ec6e422c047951483e1018fa0fb7e40] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T13:39:42.527Z] INFO  [PushExecutor] [trace=5ec6e422c047951483e1018fa0fb7e40] processPushPending(post-queue): 6 pending entr(ies) (filtered to 1 hash(es))
+[2026-07-22T13:39:42.527Z] INFO  [PushExecutor] [trace=5ec6e422c047951483e1018fa0fb7e40] processPushPending(post-queue): not signed in — keeping 6 entries for later
+[2026-07-22T13:39:42.528Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] === Queue worker finished ===
+[2026-07-22T13:39:42.531Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] Processing queue entry: type=ingest triggeredBy=post-commit
+[2026-07-22T13:39:42.532Z] INFO  [QueueWorker] [trace=5ec6e422c047951483e1018fa0fb7e40] No API key configured — skipping ingest (post-commit)
+[2026-07-22T13:39:42.674Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:39:42.675Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:39:42.675Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:40:04.688Z] INFO  [PrePushHook] [trace=c2f2b93d2f4b4014ae9df0df02f868e0] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T13:40:04.726Z] INFO  [PushPendingStore] [trace=c2f2b93d2f4b4014ae9df0df02f868e0] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T13:40:04.727Z] INFO  [PrePushHook] [trace=c2f2b93d2f4b4014ae9df0df02f868e0] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T13:40:04.727Z] INFO  [PrePushHook] [trace=c2f2b93d2f4b4014ae9df0df02f868e0] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T13:40:04.727Z] INFO  [StorageFactory] [trace=c2f2b93d2f4b4014ae9df0df02f868e0] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:40:04.779Z] INFO  [StorageFactory] [trace=c2f2b93d2f4b4014ae9df0df02f868e0] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:42:07.212Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:42:07.213Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:42:07.216Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:42:07.399Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:42:07.400Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:42:07.401Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:42:07.401Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:42:07.608Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=8, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:51:59.998Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:51:59.999Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:52:00.002Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:52:00.182Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:52:00.184Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:52:00.184Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:52:00.184Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:52:00.393Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=8, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:52:04.069Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:52:04.070Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:52:04.073Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:52:04.263Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:52:04.265Z] INFO  [plans] detectPlans found 0 plans (4 in registry)
+[2026-07-22T13:52:04.266Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:52:04.266Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:52:04.480Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=8, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true

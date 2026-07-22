@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -23,11 +23,7 @@ export default function GavetasLapide3D() {
   const [gavetas, setGavetas] = useState<GavetaInfo[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    load()
-  }, [lapideId])
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     const { data: lapide } = await supabase.from('lapides').select('identificacao').eq('id', lapideId).single()
     setLapideNome(lapide?.identificacao || '')
@@ -47,7 +43,11 @@ export default function GavetasLapide3D() {
     }))
     setGavetas(normalizado)
     setLoading(false)
-  }
+  }, [lapideId])
+
+  useEffect(() => {
+    load()
+  }, [load])
 
   if (loading) return <p className="text-zinc-400">Carregando...</p>
 
