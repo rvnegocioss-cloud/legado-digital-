@@ -1,0 +1,596 @@
+[2026-07-22T10:54:42.182Z] INFO  [DispatchScripts] Wrote resolve-dist-path, run-hook, and run-cli scripts to C:\Users\rafa\.jolli\jollimemory
+[2026-07-22T10:54:42.185Z] INFO  [StorageFactory] StorageFactory.create: storageMode=dual-write, projectPath=c:\Users\rafa\legado-digital-
+[2026-07-22T10:54:42.259Z] INFO  [StorageFactory] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T10:54:42.611Z] INFO  [DistPathWriter] Wrote dist-paths/vscode (version=0.99.8, distDir=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist)
+[2026-07-22T10:54:42.629Z] INFO  [StorageFactory] StorageFactory.create: storageMode=dual-write, projectPath=c:\Users\rafa\legado-digital-
+[2026-07-22T10:54:42.718Z] INFO  [StorageFactory] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T10:54:42.755Z] INFO  [SessionTracker] Config saved to C:\Users\rafa\.jolli\jollimemory
+[2026-07-22T10:54:42.767Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.claude\skills\jolli-recall\SKILL.md
+[2026-07-22T10:54:42.772Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.claude\skills\jolli-search\SKILL.md
+[2026-07-22T10:54:42.774Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.claude\skills\jolli-pr\SKILL.md
+[2026-07-22T10:54:42.776Z] INFO  [SkillInstaller] Wrote SKILL.md (revision -1) to C:\Users\rafa\legado-digital-\.claude\skills\jolli-local-run\SKILL.md
+[2026-07-22T10:54:42.778Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.claude\skills\jolli\SKILL.md
+[2026-07-22T10:54:42.783Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.agents\skills\jolli-recall\SKILL.md
+[2026-07-22T10:54:42.802Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.agents\skills\jolli-search\SKILL.md
+[2026-07-22T10:54:42.804Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.agents\skills\jolli-pr\SKILL.md
+[2026-07-22T10:54:42.806Z] INFO  [SkillInstaller] Wrote SKILL.md (revision -1) to C:\Users\rafa\legado-digital-\.agents\skills\jolli-local-run\SKILL.md
+[2026-07-22T10:54:42.807Z] INFO  [SkillInstaller] Wrote SKILL.md (revision 1) to C:\Users\rafa\legado-digital-\.agents\skills\jolli\SKILL.md
+[2026-07-22T10:54:42.824Z] INFO  [SchemaV5Migration] Storage backend not initialized yet — skipping schema v5 migration (no data to migrate)
+[2026-07-22T10:54:42.824Z] INFO  [activate] Schema v5 migration: alreadyDone=false fresh=true migrated=0 skipped=0
+[2026-07-22T10:54:42.911Z] INFO  [Installer] Status: enabled=false, claude=false, git=false, geminiHook=false, worktreeHooks=false, sessions=0, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=0, opencode=false/undefined, cursor=false/undefined, copilot=false/undefined, copilotChat=true
+[2026-07-22T10:54:42.947Z] INFO  [initialLoad] All panels loaded — updating status bar
+[2026-07-22T10:54:42.947Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T10:54:42.975Z] INFO  [GitExclude] Updated C:\Users\rafa\legado-digital-\.git\info\exclude with 11 Jolli skill exclude paths
+[2026-07-22T10:54:42.985Z] INFO  [McpRegistration] Registered MCP server in C:\Users\rafa\legado-digital-\.mcp.json
+[2026-07-22T10:54:42.989Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T10:54:42.992Z] INFO  [plans] detectPlans found 0 plans (0 in registry)
+[2026-07-22T10:54:42.992Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T10:54:42.992Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T10:54:43.037Z] INFO  [JsonMcpWriter] Registered MCP server in C:\Users\rafa\AppData\Roaming\Code\User\mcp.json
+[2026-07-22T10:54:43.040Z] INFO  [GitHookInstaller] Git post-commit hook installed
+[2026-07-22T10:54:43.043Z] INFO  [GitHookInstaller] Git post-rewrite hook installed
+[2026-07-22T10:54:43.044Z] INFO  [GitHookInstaller] Git prepare-commit-msg hook installed
+[2026-07-22T10:54:43.050Z] INFO  [GitHookInstaller] Git post-merge hook installed
+[2026-07-22T10:54:43.052Z] INFO  [GitHookInstaller] Git pre-push hook installed
+[2026-07-22T10:54:43.055Z] INFO  [SessionTracker] Config saved to C:\Users\rafa\.jolli\jollimemory
+[2026-07-22T10:54:43.055Z] INFO  [Installer] GitHub Copilot detected (CLI=false, Chat=true) — enabled session discovery
+[2026-07-22T10:54:43.055Z] INFO  [Installer] Skipping v5 migration on vscode-extension source — Extension.ts owns it with UI
+[2026-07-22T10:54:43.056Z] INFO  [Installer] Installation complete
+[2026-07-22T10:54:43.056Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T10:54:43.292Z] INFO  [Installer] Status: enabled=false, claude=false, git=false, geminiHook=false, worktreeHooks=false, sessions=0, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T10:54:43.292Z] INFO  [Installer] Status: enabled=false, claude=false, git=false, geminiHook=false, worktreeHooks=false, sessions=0, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T10:54:43.361Z] INFO  [StorageFactory] StorageFactory.create: storageMode=dual-write, projectPath=c:\Users\rafa\legado-digital-
+[2026-07-22T10:54:43.442Z] INFO  [StorageFactory] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T10:54:43.445Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=0, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T10:54:43.452Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T10:54:43.488Z] WARN  [SummaryStore] loadIndex: index.json unreadable from jb (fresh repo or backend read failed)
+[2026-07-22T10:54:43.648Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=0, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T10:54:43.652Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T10:54:43.828Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=0, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T10:55:05.299Z] INFO  [SessionStartHook] SessionStartHook invoked (cwd=c:\Users\rafa\legado-digital-)
+[2026-07-22T10:55:05.339Z] INFO  [SessionStartHook] No briefing generated (skipped or timed out)
+[2026-07-22T10:55:09.616Z] INFO  [UpdateCheck] [trace=daa0b2f57c8f9d83cc1ffeb1e688e778] Spawned detached update-check refresh (PID: 13360)
+[2026-07-22T10:55:09.618Z] INFO  [StorageFactory] [trace=daa0b2f57c8f9d83cc1ffeb1e688e778] StorageFactory.create: storageMode=dual-write, projectPath=c:\Users\rafa\legado-digital-
+[2026-07-22T10:55:09.707Z] INFO  [StorageFactory] [trace=daa0b2f57c8f9d83cc1ffeb1e688e778] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T10:55:09.713Z] INFO  [McpServer] [trace=daa0b2f57c8f9d83cc1ffeb1e688e778] MCP server connected over stdio (cwd=c:\Users\rafa\legado-digital-)
+[2026-07-22T10:58:26.960Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T10:58:26.961Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T10:58:26.965Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T10:58:27.058Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T10:58:27.059Z] INFO  [plans] detectPlans found 0 plans (0 in registry)
+[2026-07-22T10:58:27.059Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T10:58:27.059Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T10:58:27.212Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T10:59:41.454Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T10:59:41.454Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T10:59:41.458Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T10:59:41.541Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T10:59:41.541Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T10:59:41.541Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T10:59:41.541Z] INFO  [plans] detectPlans found 0 plans (0 in registry)
+[2026-07-22T10:59:41.696Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:00:47.105Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:00:47.106Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:00:47.109Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:00:47.200Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:00:47.201Z] INFO  [plans] detectPlans found 0 plans (0 in registry)
+[2026-07-22T11:00:47.201Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:00:47.201Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:00:47.354Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:03:09.509Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:03:09.509Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:03:09.512Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:03:09.606Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:03:09.606Z] INFO  [plans] detectPlans found 0 plans (0 in registry)
+[2026-07-22T11:03:09.606Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:03:09.606Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:03:09.760Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:04:41.998Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:04:41.999Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:04:42.002Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:04:42.081Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:04:42.081Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:04:42.081Z] INFO  [plans] detectPlans found 0 plans (0 in registry)
+[2026-07-22T11:04:42.081Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:04:42.234Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:14:22.154Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:14:22.154Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:14:22.158Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:14:22.198Z] INFO  [PlanDiscovery] Plan discovery: upserted 0 slug(s) + 1 external path(s) into plans.json
+[2026-07-22T11:14:22.349Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:14:22.357Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:14:22.357Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:14:22.357Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:14:22.509Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:14:22.865Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:14:22.866Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:14:22.866Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:14:58.092Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:14:58.092Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:14:58.096Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:14:58.181Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:14:58.182Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:14:58.182Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:14:58.182Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:14:58.334Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:18:06.565Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:18:06.566Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:18:06.569Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:18:06.665Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:18:06.667Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:18:06.667Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:18:06.667Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:18:06.824Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:20:38.431Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:20:38.432Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:20:38.435Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:20:38.526Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:20:38.527Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:20:38.527Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:20:38.528Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:20:38.688Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:20:57.398Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:20:57.398Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:20:57.402Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:20:57.499Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:20:57.500Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:20:57.500Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:20:57.500Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:20:57.659Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:22:02.373Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:22:02.374Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:22:02.378Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:22:02.465Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:22:02.466Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:22:02.466Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:22:02.466Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:22:02.629Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:23:48.058Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:23:48.059Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:23:48.063Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:23:48.156Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:23:48.157Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:23:48.157Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:23:48.157Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:23:48.314Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:26:10.292Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:26:10.293Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:26:10.296Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:26:10.381Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:26:10.382Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:26:10.382Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:26:10.383Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:26:10.540Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:30:22.274Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:30:22.274Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:30:22.278Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:30:22.369Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:30:22.370Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:30:22.370Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:30:22.370Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:30:22.524Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:33:59.456Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:33:59.457Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:33:59.461Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:33:59.550Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:33:59.552Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:33:59.552Z] INFO  [plans] detectPlans found 1 plans (1 in registry)
+[2026-07-22T11:33:59.553Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:33:59.709Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:36:43.029Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T11:36:43.030Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T11:36:43.034Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T11:36:43.074Z] INFO  [PlanDiscovery] Plan discovery: upserted 0 slug(s) + 1 external path(s) into plans.json
+[2026-07-22T11:36:43.223Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T11:36:43.230Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:36:43.231Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T11:36:43.231Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T11:36:43.377Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T11:36:43.728Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T11:36:43.729Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T11:36:43.729Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:05:55.996Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:05:55.996Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:05:56.000Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:05:56.080Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:05:56.081Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:05:56.081Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:05:56.082Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:05:56.241Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:08:15.605Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:08:15.605Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:08:15.609Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:08:15.695Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:08:15.697Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:08:15.697Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:08:15.697Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:08:15.855Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:09:56.526Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:09:56.527Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:09:56.530Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:09:56.612Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:09:56.614Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:09:56.614Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:09:56.614Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:09:56.770Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:12:40.962Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:12:40.962Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:12:40.966Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:12:41.052Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:12:41.053Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:12:41.053Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:12:41.054Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:12:41.214Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:13:11.219Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:13:11.219Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:13:11.223Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:13:11.309Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:13:11.310Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:13:11.310Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:13:11.311Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:13:11.473Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:14:12.197Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:14:12.198Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:14:12.201Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:14:12.362Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:14:12.364Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:14:12.364Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:14:12.364Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:14:12.524Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:15:14.817Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:15:14.818Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:15:14.821Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:15:14.911Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:15:14.912Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:15:14.912Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:15:14.912Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:15:15.075Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:17:54.930Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:17:54.931Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:17:54.935Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:17:55.013Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:17:55.014Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:17:55.014Z] INFO  [plans] detectPlans found 2 plans (2 in registry)
+[2026-07-22T12:17:55.014Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:17:55.172Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=0, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:22:44.610Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: commit) ===
+[2026-07-22T12:22:44.642Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T12:22:44.971Z] INFO  [PostCommitHook] [trace=be96c03adc51a15e1d153c198c61715a] Detected operation: amend
+[2026-07-22T12:22:44.972Z] INFO  [PostCommitHook] [trace=be96c03adc51a15e1d153c198c61715a] Amend detected — skipping (post-rewrite will handle)
+[2026-07-22T12:22:45.228Z] INFO  [PostRewriteHook] [trace=83aeb16de1b0d029114559d9ac9f3394] === Post-rewrite hook started (command: amend) ===
+[2026-07-22T12:22:45.262Z] INFO  [SessionTracker] [trace=83aeb16de1b0d029114559d9ac9f3394] Enqueued queue operation: type=amend tag=12cb3908 file=1784722965261-00000001-304a9992-12cb3908.json
+[2026-07-22T12:22:45.262Z] INFO  [PostRewriteHook] [trace=83aeb16de1b0d029114559d9ac9f3394] Amend enqueued: f01770b4 → 12cb3908
+[2026-07-22T12:22:45.263Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Launching background worker
+[2026-07-22T12:22:45.269Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Background worker spawned (PID: 22312)
+[2026-07-22T12:22:45.269Z] INFO  [PostRewriteHook] [trace=83aeb16de1b0d029114559d9ac9f3394] === Post-rewrite hook finished ===
+[2026-07-22T12:22:45.356Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T12:22:45.360Z] INFO  [StorageFactory] [trace=83aeb16de1b0d029114559d9ac9f3394] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T12:22:45.411Z] INFO  [StorageFactory] [trace=83aeb16de1b0d029114559d9ac9f3394] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T12:22:45.413Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Processing queue entry: type=amend hash=12cb3908
+[2026-07-22T12:22:45.442Z] INFO  [GitOps] [trace=83aeb16de1b0d029114559d9ac9f3394] Commit 12cb3908: Teste: chama de vela com video real (nao CSS desenhada)
+[2026-07-22T12:22:45.443Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Commit: 12cb3908 - Teste: chama de vela com video real (nao CSS desenhada) (28ms)
+[2026-07-22T12:22:45.443Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Amend pipeline: f01770b4 → 12cb3908
+[2026-07-22T12:22:45.493Z] WARN  [SummaryStore] [trace=83aeb16de1b0d029114559d9ac9f3394] loadIndex: index.json unreadable from Hp (fresh repo or backend read failed)
+[2026-07-22T12:22:45.494Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] No old summary found for f01770b4 — will create fresh summary for amended commit
+[2026-07-22T12:22:45.501Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Discovered 1 Copilot Chat session(s)
+[2026-07-22T12:22:45.503Z] INFO  [SessionTracker] [trace=83aeb16de1b0d029114559d9ac9f3394] Config saved to C:\Users\rafa\.jolli\jollimemory
+[2026-07-22T12:22:45.517Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Transcript source: session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, lines=0→429, entries=50
+[2026-07-22T12:22:45.520Z] INFO  [SessionTracker] [trace=83aeb16de1b0d029114559d9ac9f3394] Config saved to C:\Users\rafa\.jolli\jollimemory
+[2026-07-22T12:22:45.589Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Amend delta diff (f01770b4..12cb3908): 12 files changed, +708 -10 (64ms)
+[2026-07-22T12:22:45.703Z] WARN  [ContextRelevance] [trace=83aeb16de1b0d029114559d9ac9f3394] rankContextRelevance failed (No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).) — keeping all items
+[2026-07-22T12:22:45.705Z] INFO  [Summarizer] [trace=83aeb16de1b0d029114559d9ac9f3394] Generating summary for commit 12cb3908
+[2026-07-22T12:22:45.705Z] INFO  [Summarizer] [trace=83aeb16de1b0d029114559d9ac9f3394] Context: transcript=50, files=12, lines=708+10
+[2026-07-22T12:22:45.705Z] WARN  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T12:22:47.710Z] INFO  [Summarizer] [trace=83aeb16de1b0d029114559d9ac9f3394] Generating summary for commit 12cb3908
+[2026-07-22T12:22:47.710Z] INFO  [Summarizer] [trace=83aeb16de1b0d029114559d9ac9f3394] Context: transcript=50, files=12, lines=708+10
+[2026-07-22T12:22:47.710Z] ERROR [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T12:22:47.711Z] WARN  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Persisting amend summary for 12cb3908 with summaryError marker so the commit is not silently dropped
+[2026-07-22T12:22:47.711Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Amend step 1 (delta summary) generated (2.1s)
+[2026-07-22T12:22:47.711Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Plan registry scan: found 2 uncommitted slug(s) on main: [Legado Digital, BACKUP_STRATEGY]
+[2026-07-22T12:22:47.711Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Plan association: detected 2 slug(s) from transcripts: [Legado Digital, BACKUP_STRATEGY]
+[2026-07-22T12:22:47.712Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Plan association: registry has 2 entries: [Legado Digital(commitHash=null), BACKUP_STRATEGY(commitHash=null)]
+[2026-07-22T12:22:47.716Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Plan archived: Legado Digital → Legado Digital-12cb3908 (hash=7f7ff6cd02f1)
+[2026-07-22T12:22:47.719Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Plan archived: BACKUP_STRATEGY → BACKUP_STRATEGY-12cb3908 (hash=387b9f48760e)
+[2026-07-22T12:22:47.767Z] INFO  [GitOps] [trace=83aeb16de1b0d029114559d9ac9f3394] Creating orphan branch 'jollimemory/summaries/v3' using plumbing commands
+[2026-07-22T12:22:47.884Z] INFO  [GitOps] [trace=83aeb16de1b0d029114559d9ac9f3394] Orphan branch 'jollimemory/summaries/v3' created successfully
+[2026-07-22T12:22:48.035Z] INFO  [GitOps] [trace=83aeb16de1b0d029114559d9ac9f3394] Updated branch 'jollimemory/summaries/v3': 2 written, 0 deleted (via fast-import)
+[2026-07-22T12:22:48.038Z] INFO  [MetadataManager] [trace=83aeb16de1b0d029114559d9ac9f3394] Branch mapping created: main → main
+[2026-07-22T12:22:48.041Z] INFO  [MetadataManager] [trace=83aeb16de1b0d029114559d9ac9f3394] Manifest updated: main/plan--Legado Digital-12cb3908.md (plan)
+[2026-07-22T12:22:48.041Z] INFO  [FolderStorage] [trace=83aeb16de1b0d029114559d9ac9f3394] Plan markdown generated: main/plan--Legado Digital-12cb3908.md
+[2026-07-22T12:22:48.044Z] INFO  [MetadataManager] [trace=83aeb16de1b0d029114559d9ac9f3394] Manifest updated: main/plan--BACKUP_STRATEGY-12cb3908.md (plan)
+[2026-07-22T12:22:48.044Z] INFO  [FolderStorage] [trace=83aeb16de1b0d029114559d9ac9f3394] Plan markdown generated: main/plan--BACKUP_STRATEGY-12cb3908.md
+[2026-07-22T12:22:48.044Z] INFO  [FolderStorage] [trace=83aeb16de1b0d029114559d9ac9f3394] Wrote 2 files, deleted 0 (Archive 2 plan(s) for commit 12cb3908)
+[2026-07-22T12:22:48.044Z] INFO  [SummaryStore] [trace=83aeb16de1b0d029114559d9ac9f3394] Stored 2 plan file(s)
+[2026-07-22T12:22:48.045Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Associated 2 plan(s) with commit 12cb3908
+[2026-07-22T12:22:48.046Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T12:22:48.046Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Note association: detected 0 note(s): []
+[2026-07-22T12:22:48.047Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T12:22:48.309Z] INFO  [GitOps] [trace=83aeb16de1b0d029114559d9ac9f3394] Updated branch 'jollimemory/summaries/v3': 4 written, 0 deleted (via fast-import)
+[2026-07-22T12:22:48.359Z] INFO  [MetadataManager] [trace=83aeb16de1b0d029114559d9ac9f3394] Manifest updated: main/teste-chama-de-vela-com-video-real-nao-css-desenha-12cb3908.md (commit)
+[2026-07-22T12:22:48.359Z] INFO  [FolderStorage] [trace=83aeb16de1b0d029114559d9ac9f3394] Markdown generated: main/teste-chama-de-vela-com-video-real-nao-css-desenha-12cb3908.md
+[2026-07-22T12:22:48.363Z] INFO  [FolderStorage] [trace=83aeb16de1b0d029114559d9ac9f3394] Wrote 4 files, deleted 0 (Add summary for 12cb3908: Teste: chama de vela com video real (nao CSS desen)
+[2026-07-22T12:22:48.363Z] INFO  [SummaryStore] [trace=83aeb16de1b0d029114559d9ac9f3394] Summary stored successfully for commit 12cb3908
+[2026-07-22T12:22:48.364Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Amend with no old summary -> stored as fresh leaf for 12cb3908 (2.9s)
+[2026-07-22T12:22:48.390Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Processed 1 queue entries
+[2026-07-22T12:22:48.392Z] INFO  [SessionTracker] [trace=83aeb16de1b0d029114559d9ac9f3394] Enqueued queue operation: type=ingest tag=ingest file=1784722968391-00000001-2623d0f4-ingest.json
+[2026-07-22T12:22:48.393Z] INFO  [PushExecutor] [trace=83aeb16de1b0d029114559d9ac9f3394] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T12:22:48.395Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] === Queue worker finished ===
+[2026-07-22T12:22:48.399Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] Processing queue entry: type=ingest triggeredBy=post-commit
+[2026-07-22T12:22:48.400Z] INFO  [QueueWorker] [trace=83aeb16de1b0d029114559d9ac9f3394] No API key configured — skipping ingest (post-commit)
+[2026-07-22T12:22:48.534Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:22:48.535Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:22:48.535Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:22:48.551Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:22:48.551Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:22:48.551Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:23:03.540Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:23:03.541Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:23:03.544Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:23:03.629Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:23:03.630Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:23:03.630Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:23:03.630Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:23:03.830Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:23:09.779Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:23:09.780Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:23:09.783Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:23:09.863Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:23:09.864Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:23:09.864Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:23:09.864Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:23:10.065Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:25:48.940Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T12:25:49.079Z] INFO  [GitOperationDetector] Reset-squash detected: 1 commits (12cb3e1d..12cb3908)
+[2026-07-22T12:25:49.080Z] INFO  [SessionTracker] Saved squash-pending.json: 1 source hashes, parent 12cb3e1d
+[2026-07-22T12:25:49.081Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T12:25:49.378Z] INFO  [PostCommitHook] [trace=96d189845c852c7097ae7c03c66f887a] Detected operation: squash
+[2026-07-22T12:25:49.459Z] INFO  [PostCommitHook] [trace=96d189845c852c7097ae7c03c66f887a] Squash-pending validated: 1 source hashes
+[2026-07-22T12:25:49.461Z] INFO  [PostCommitHook] [trace=96d189845c852c7097ae7c03c66f887a] Enqueued: type=squash hash=f843ba24
+[2026-07-22T12:25:49.461Z] INFO  [QueueWorker] [trace=96d189845c852c7097ae7c03c66f887a] Launching background worker
+[2026-07-22T12:25:49.466Z] INFO  [QueueWorker] [trace=96d189845c852c7097ae7c03c66f887a] Background worker spawned (PID: 22036)
+[2026-07-22T12:25:49.558Z] INFO  [QueueWorker] [trace=96d189845c852c7097ae7c03c66f887a] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T12:25:49.561Z] INFO  [StorageFactory] [trace=96d189845c852c7097ae7c03c66f887a] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T12:25:49.614Z] INFO  [StorageFactory] [trace=96d189845c852c7097ae7c03c66f887a] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T12:25:49.616Z] INFO  [QueueWorker] [trace=96d189845c852c7097ae7c03c66f887a] Processing queue entry: type=squash hash=f843ba24
+[2026-07-22T12:25:49.673Z] INFO  [GitOps] [trace=96d189845c852c7097ae7c03c66f887a] Commit f843ba24: fix: 6 bugs críticos de segurança (6🔴)
+[2026-07-22T12:25:49.674Z] INFO  [Summarizer] [trace=96d189845c852c7097ae7c03c66f887a] generateSquashConsolidation: all sources have no topics or recap -- returning no-content
+[2026-07-22T12:25:49.674Z] INFO  [QueueWorker] [trace=96d189845c852c7097ae7c03c66f887a] Squash consolidation for f843ba24: sources=1, topics 0 → 0, recap=no, status=mechanical
+[2026-07-22T12:25:49.701Z] INFO  [SummaryStore] [trace=96d189845c852c7097ae7c03c66f887a] Merging 1 summaries into f843ba24
+[2026-07-22T12:25:50.059Z] INFO  [GitOps] [trace=96d189845c852c7097ae7c03c66f887a] Updated branch 'jollimemory/summaries/v3': 3 written, 0 deleted (via fast-import)
+[2026-07-22T12:25:50.080Z] INFO  [MetadataManager] [trace=96d189845c852c7097ae7c03c66f887a] Manifest updated: main/fix-6-bugs-crticos-de-segurana-6-f843ba24.md (commit)
+[2026-07-22T12:25:50.080Z] INFO  [FolderStorage] [trace=96d189845c852c7097ae7c03c66f887a] Markdown generated: main/fix-6-bugs-crticos-de-segurana-6-f843ba24.md
+[2026-07-22T12:25:50.082Z] INFO  [FolderStorage] [trace=96d189845c852c7097ae7c03c66f887a] Cleaned up superseded MD: main/teste-chama-de-vela-com-video-real-nao-css-desenha-12cb3908.md
+[2026-07-22T12:25:50.083Z] INFO  [FolderStorage] [trace=96d189845c852c7097ae7c03c66f887a] Wrote 3 files, deleted 0 (Merge summaries [12cb3908] → f843ba24)
+[2026-07-22T12:25:50.084Z] INFO  [SummaryStore] [trace=96d189845c852c7097ae7c03c66f887a] Summaries merged: [12cb3908] → f843ba24 (1 children, 0 orphaned docs, 1 unresolved orphan hashes)
+[2026-07-22T12:25:50.088Z] INFO  [SessionTracker] [trace=96d189845c852c7097ae7c03c66f887a] associatePlanWithCommit: migrated guard Legado Digital → f843ba24
+[2026-07-22T12:25:50.091Z] INFO  [SessionTracker] [trace=96d189845c852c7097ae7c03c66f887a] associatePlanWithCommit: migrated guard BACKUP_STRATEGY → f843ba24
+[2026-07-22T12:25:50.119Z] INFO  [QueueWorker] [trace=96d189845c852c7097ae7c03c66f887a] Processed 1 queue entries
+[2026-07-22T12:25:50.121Z] INFO  [PushExecutor] [trace=96d189845c852c7097ae7c03c66f887a] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T12:25:50.124Z] INFO  [QueueWorker] [trace=96d189845c852c7097ae7c03c66f887a] === Queue worker finished ===
+[2026-07-22T12:25:50.282Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:25:50.283Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:25:50.283Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:25:50.777Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:25:50.777Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:25:50.777Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:28:16.660Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:28:16.664Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:28:16.664Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:28:16.664Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:28:16.809Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T12:28:16.841Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T12:28:16.881Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:28:17.027Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:28:17.028Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:28:17.028Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:28:17.028Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:28:17.146Z] INFO  [PostCommitHook] [trace=e1141bcd00d40ad7c12077edc252a8fa] Detected operation: rebase
+[2026-07-22T12:28:17.147Z] INFO  [PostCommitHook] [trace=e1141bcd00d40ad7c12077edc252a8fa] Rebase in progress — skipping (post-rewrite will handle)
+[2026-07-22T12:28:17.275Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:28:17.310Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:28:17.314Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:28:17.315Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:28:17.315Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:28:17.479Z] INFO  [PostRewriteHook] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] === Post-rewrite hook started (command: rebase) ===
+[2026-07-22T12:28:17.518Z] INFO  [SessionTracker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Enqueued queue operation: type=rebase-pick tag=9e67e57c file=1784723297517-00000001-17b98fba-9e67e57c.json
+[2026-07-22T12:28:17.518Z] INFO  [PostRewriteHook] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] rebase-pick enqueued: [f843ba24] → 9e67e57c
+[2026-07-22T12:28:17.518Z] INFO  [PostRewriteHook] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Rebase: enqueued 1 group(s) from 1 mapping(s)
+[2026-07-22T12:28:17.518Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Launching background worker
+[2026-07-22T12:28:17.523Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Background worker spawned (PID: 20532)
+[2026-07-22T12:28:17.523Z] INFO  [PostRewriteHook] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] === Post-rewrite hook finished ===
+[2026-07-22T12:28:17.555Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:28:17.617Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T12:28:17.621Z] INFO  [StorageFactory] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T12:28:17.679Z] INFO  [StorageFactory] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T12:28:17.681Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Processing queue entry: type=rebase-pick hash=9e67e57c
+[2026-07-22T12:28:17.737Z] INFO  [GitOps] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Commit 9e67e57c: fix: 6 bugs críticos de segurança (6🔴)
+[2026-07-22T12:28:17.765Z] INFO  [SummaryStore] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Migrating summary 1:1: f843ba24 → 9e67e57c
+[2026-07-22T12:28:18.135Z] INFO  [GitOps] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Updated branch 'jollimemory/summaries/v3': 3 written, 0 deleted (via fast-import)
+[2026-07-22T12:28:18.155Z] INFO  [MetadataManager] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Manifest updated: main/fix-6-bugs-crticos-de-segurana-6-9e67e57c.md (commit)
+[2026-07-22T12:28:18.155Z] INFO  [FolderStorage] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Markdown generated: main/fix-6-bugs-crticos-de-segurana-6-9e67e57c.md
+[2026-07-22T12:28:18.157Z] INFO  [FolderStorage] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Cleaned up superseded MD: main/fix-6-bugs-crticos-de-segurana-6-f843ba24.md
+[2026-07-22T12:28:18.160Z] INFO  [FolderStorage] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Wrote 3 files, deleted 0 (Migrate summary f843ba24 → 9e67e57c)
+[2026-07-22T12:28:18.160Z] INFO  [SummaryStore] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Summary migrated: f843ba24 → 9e67e57c
+[2026-07-22T12:28:18.166Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Rebase-pick: migrated f843ba24 → 9e67e57c
+[2026-07-22T12:28:18.193Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Processed 1 queue entries
+[2026-07-22T12:28:18.197Z] INFO  [SessionTracker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Enqueued queue operation: type=ingest tag=ingest file=1784723298196-00000001-da1b1d23-ingest.json
+[2026-07-22T12:28:18.198Z] INFO  [PushExecutor] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T12:28:18.200Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] === Queue worker finished ===
+[2026-07-22T12:28:18.203Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] Processing queue entry: type=ingest triggeredBy=post-commit
+[2026-07-22T12:28:18.205Z] INFO  [QueueWorker] [trace=b51ef0f9e3dbb1637c278e524e6fcb7b] No API key configured — skipping ingest (post-commit)
+[2026-07-22T12:28:18.342Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:28:18.342Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:28:18.342Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:28:37.612Z] INFO  [PrePushHook] [trace=36a2b18d4728ec3f9c3b26b902013559] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T12:28:37.646Z] INFO  [PushPendingStore] [trace=36a2b18d4728ec3f9c3b26b902013559] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T12:28:37.648Z] INFO  [PrePushHook] [trace=36a2b18d4728ec3f9c3b26b902013559] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T12:28:37.648Z] INFO  [PrePushHook] [trace=36a2b18d4728ec3f9c3b26b902013559] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T12:28:37.648Z] INFO  [StorageFactory] [trace=36a2b18d4728ec3f9c3b26b902013559] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T12:28:37.699Z] INFO  [StorageFactory] [trace=36a2b18d4728ec3f9c3b26b902013559] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T12:28:59.975Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:28:59.976Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:28:59.979Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:29:00.054Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:29:00.055Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:29:00.055Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:29:00.055Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:29:00.263Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:30:46.676Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:30:46.677Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:30:46.680Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:30:46.836Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:30:46.837Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:30:46.837Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:30:46.838Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:30:47.040Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:31:33.514Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:31:33.515Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:31:33.518Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:31:33.669Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:31:33.670Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:31:33.670Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:31:33.670Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:31:33.874Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:32:34.159Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:32:34.160Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:32:34.164Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:32:34.319Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:32:34.321Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:32:34.321Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:32:34.321Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:32:34.531Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:36:53.271Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:36:53.272Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:36:53.275Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:36:53.350Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:36:53.352Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:36:53.352Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:36:53.352Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:36:53.558Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:46:22.383Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:46:22.384Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:46:22.387Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:46:22.462Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:46:22.463Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:46:22.463Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:46:22.464Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:46:22.668Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:47:39.249Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:47:39.250Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:47:39.253Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:47:39.329Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:47:39.331Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:47:39.331Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:47:39.331Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:47:39.534Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:48:54.545Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:48:54.546Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:48:54.549Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:48:54.702Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:48:54.704Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:48:54.704Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:48:54.704Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:48:54.905Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:50:20.857Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:50:20.857Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:50:20.861Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:50:20.936Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:50:20.938Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:50:20.938Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:50:20.938Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:50:21.141Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:51:38.528Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:51:38.529Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:51:38.532Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:51:38.683Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:51:38.684Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:51:38.684Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:51:38.684Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:51:38.889Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:52:33.484Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:52:33.485Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:52:33.488Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:52:33.564Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:52:33.565Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:52:33.566Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:52:33.566Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:52:33.770Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T12:54:10.960Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T12:54:10.961Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T12:54:10.965Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T12:54:11.116Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T12:54:11.118Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T12:54:11.118Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T12:54:11.118Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T12:54:11.320Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:03:56.743Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:03:56.743Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:03:56.747Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:03:56.900Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:03:56.911Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:03:56.911Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:03:56.911Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T13:03:57.160Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:05:20.441Z] INFO  [StopHook] Stop hook triggered (session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7)
+[2026-07-22T13:05:20.442Z] INFO  [StopHook] Hook input — session_id=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, transcript_path=C:\Users\rafa\.claude\projects\c--Users-rafa-legado-digital-\832166a7-f757-4c8b-9fd5-a1a9c9f219e7.jsonl
+[2026-07-22T13:05:20.445Z] INFO  [StopHook] Session saved successfully
+[2026-07-22T13:05:20.599Z] INFO  [Installer] Checking Jolli Memory status
+[2026-07-22T13:05:20.600Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T13:05:20.600Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:05:20.601Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:05:20.827Z] INFO  [Installer] Status: enabled=true, claude=true, git=true, geminiHook=false, worktreeHooks=true, sessions=2, summaries=1, codex=false/undefined, gemini=false/undefined, enabledWorktrees=1, opencode=false/undefined, cursor=false/undefined, copilot=false/true, copilotChat=true
+[2026-07-22T13:09:40.156Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook started (source: message) ===
+[2026-07-22T13:09:40.416Z] INFO  [PrepareMsgHook] === Prepare-commit-msg hook finished ===
+[2026-07-22T13:09:40.851Z] INFO  [PostCommitHook] [trace=6254d62b869eb83585730cedd954a3b6] Detected operation: commit
+[2026-07-22T13:09:40.914Z] INFO  [PostCommitHook] [trace=6254d62b869eb83585730cedd954a3b6] Enqueued: type=commit hash=56312452
+[2026-07-22T13:09:40.914Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Launching background worker
+[2026-07-22T13:09:40.920Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Background worker spawned (PID: 21804)
+[2026-07-22T13:09:41.074Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] === Queue worker started === node=24.18.0 kind=vscode-plugin source=vscode pkgVer=0.99.8 cliVer=0.99.8 dist=c:\Users\rafa\.vscode\extensions\jolli.jollimemory-vscode-0.99.8\dist
+[2026-07-22T13:09:41.078Z] INFO  [StorageFactory] [trace=6254d62b869eb83585730cedd954a3b6] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:09:41.147Z] INFO  [StorageFactory] [trace=6254d62b869eb83585730cedd954a3b6] Storage mode: dual-write (primary=orphan, shadow=folder)
+[2026-07-22T13:09:41.150Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Processing queue entry: type=commit hash=56312452
+[2026-07-22T13:09:41.184Z] INFO  [GitOps] [trace=6254d62b869eb83585730cedd954a3b6] Commit 56312452: fix: backup validation (#9) — size check + SHA-256 hash
+[2026-07-22T13:09:41.184Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Commit: 56312452 - fix: backup validation (#9) — size check + SHA-256 hash (33ms)
+[2026-07-22T13:09:41.188Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Discovered 1 Copilot Chat session(s)
+[2026-07-22T13:09:41.199Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Transcript source: session=832166a7-f757-4c8b-9fd5-a1a9c9f219e7, lines=429→611, entries=34
+[2026-07-22T13:09:41.308Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Git diff: 5 files changed, +1098 -11 (102ms)
+[2026-07-22T13:09:41.411Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Prompt blocks: plans=0 notes=0 references=0 (AI soft-excluded 0)
+[2026-07-22T13:09:41.412Z] INFO  [Summarizer] [trace=6254d62b869eb83585730cedd954a3b6] Generating summary for commit 56312452
+[2026-07-22T13:09:41.412Z] INFO  [Summarizer] [trace=6254d62b869eb83585730cedd954a3b6] Context: transcript=34, files=5, lines=1098+11
+[2026-07-22T13:09:41.412Z] WARN  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] First API attempt failed: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).. Retrying in 2000ms...
+[2026-07-22T13:09:43.423Z] INFO  [Summarizer] [trace=6254d62b869eb83585730cedd954a3b6] Generating summary for commit 56312452
+[2026-07-22T13:09:43.423Z] INFO  [Summarizer] [trace=6254d62b869eb83585730cedd954a3b6] Context: transcript=34, files=5, lines=1098+11
+[2026-07-22T13:09:43.423Z] ERROR [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] API call failed after retry: No LLM provider available. Set an Anthropic API key (ANTHROPIC_API_KEY) or configure a Jolli Space API key (jolliApiKey).
+[2026-07-22T13:09:43.423Z] WARN  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Saving summary with empty topics + summaryError marker for commit 56312452
+[2026-07-22T13:09:43.423Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] API summary generated (2.0s)
+[2026-07-22T13:09:43.425Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Plan registry scan: found 0 uncommitted slug(s) on main: []
+[2026-07-22T13:09:43.425Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Plan association: detected 0 slug(s) from transcripts: []
+[2026-07-22T13:09:43.426Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Note registry scan: found 0 uncommitted note(s) on main: []
+[2026-07-22T13:09:43.426Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Note association: detected 0 note(s): []
+[2026-07-22T13:09:43.426Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Reference association: detected 0 ref(s) for branch main
+[2026-07-22T13:09:43.426Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Summary built for 56312452: recap=no, topics=0, plans=absent, notes=absent, references=absent
+[2026-07-22T13:09:43.814Z] INFO  [GitOps] [trace=6254d62b869eb83585730cedd954a3b6] Updated branch 'jollimemory/summaries/v3': 4 written, 0 deleted (via fast-import)
+[2026-07-22T13:09:43.832Z] INFO  [MetadataManager] [trace=6254d62b869eb83585730cedd954a3b6] Manifest updated: main/fix-backup-validation-9-size-check-sha-256-hash-56312452.md (commit)
+[2026-07-22T13:09:43.832Z] INFO  [FolderStorage] [trace=6254d62b869eb83585730cedd954a3b6] Markdown generated: main/fix-backup-validation-9-size-check-sha-256-hash-56312452.md
+[2026-07-22T13:09:43.836Z] INFO  [FolderStorage] [trace=6254d62b869eb83585730cedd954a3b6] Wrote 4 files, deleted 0 (Add summary for 56312452: fix: backup validation (#9) — size check + SHA-256)
+[2026-07-22T13:09:43.836Z] INFO  [SummaryStore] [trace=6254d62b869eb83585730cedd954a3b6] Summary stored successfully for commit 56312452
+[2026-07-22T13:09:43.837Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Summary stored successfully for commit 56312452 (410ms, 0 plans, 0 notes, 0 references)
+[2026-07-22T13:09:43.837Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] === Pipeline completed in 2.7s ===
+[2026-07-22T13:09:43.837Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] === Summary content (0 topics) ===
+[2026-07-22T13:09:43.873Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Processed 1 queue entries
+[2026-07-22T13:09:43.880Z] INFO  [SessionTracker] [trace=6254d62b869eb83585730cedd954a3b6] Enqueued queue operation: type=ingest tag=ingest file=1784725783879-00000001-dce913b2-ingest.json
+[2026-07-22T13:09:43.882Z] INFO  [PushExecutor] [trace=6254d62b869eb83585730cedd954a3b6] Post-queue push trigger: scheduling drain for 1 newly generated summar(ies)
+[2026-07-22T13:09:43.883Z] INFO  [PushExecutor] [trace=6254d62b869eb83585730cedd954a3b6] processPushPending(post-queue): 1 pending entr(ies) (filtered to 1 hash(es))
+[2026-07-22T13:09:43.884Z] INFO  [PushExecutor] [trace=6254d62b869eb83585730cedd954a3b6] processPushPending(post-queue): not signed in — keeping 1 entries for later
+[2026-07-22T13:09:43.884Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] === Queue worker finished ===
+[2026-07-22T13:09:43.888Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] Processing queue entry: type=ingest triggeredBy=post-commit
+[2026-07-22T13:09:43.890Z] INFO  [QueueWorker] [trace=6254d62b869eb83585730cedd954a3b6] No API key configured — skipping ingest (post-commit)
+[2026-07-22T13:09:44.043Z] INFO  [plans] detectPlans found 0 plans (2 in registry)
+[2026-07-22T13:09:44.043Z] INFO  [notes] detectNotes found 0 notes (0 in registry)
+[2026-07-22T13:09:44.043Z] INFO  [references] detectReferences(*) found 0 (0 in registry)
+[2026-07-22T13:09:45.785Z] INFO  [PrePushHook] [trace=0ebb4bdb73284ea438a44db7bbe09961] pre-push hook: remote=origin budget=3000ms
+[2026-07-22T13:09:45.827Z] INFO  [PushPendingStore] [trace=0ebb4bdb73284ea438a44db7bbe09961] Enqueued 1 new push-pending entries (branch=main)
+[2026-07-22T13:09:45.828Z] INFO  [PrePushHook] [trace=0ebb4bdb73284ea438a44db7bbe09961] pre-push: recorded 1 commit(s) across 1 pushed ref(s)
+[2026-07-22T13:09:45.828Z] INFO  [PrePushHook] [trace=0ebb4bdb73284ea438a44db7bbe09961] Recorded 1 commit(s) for later sync — not signed in to Jolli
+[2026-07-22T13:09:45.829Z] INFO  [StorageFactory] [trace=0ebb4bdb73284ea438a44db7bbe09961] StorageFactory.create: storageMode=dual-write, projectPath=C:\Users\rafa\legado-digital-
+[2026-07-22T13:09:45.887Z] INFO  [StorageFactory] [trace=0ebb4bdb73284ea438a44db7bbe09961] Storage mode: dual-write (primary=orphan, shadow=folder)

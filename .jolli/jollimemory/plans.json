@@ -1,0 +1,25 @@
+{
+	"version": 1,
+	"plans": {
+		"Legado Digital": {
+			"slug": "Legado Digital",
+			"title": "Legado Digital.md",
+			"sourcePath": "C:\\Users\\rafa\\Documents\\claude vault\\claude vault\\Projects\\Legado Digital.md",
+			"addedAt": "2026-07-22T11:14:22.163Z",
+			"updatedAt": "2026-07-22T12:25:50.086Z",
+			"commitHash": "f843ba241fa3d612968c4d092dfb3840fbe951da",
+			"branch": "main",
+			"contentHashAtCommit": "7f7ff6cd02f10251bbda03c6319673196377d0d05523069b5d4d4407e7e2b50f"
+		},
+		"BACKUP_STRATEGY": {
+			"slug": "BACKUP_STRATEGY",
+			"title": "Estratégia de Backup — Legado Digital",
+			"sourcePath": "c:\\Users\\rafa\\legado-digital-\\docs\\BACKUP_STRATEGY.md",
+			"addedAt": "2026-07-22T11:36:43.041Z",
+			"updatedAt": "2026-07-22T12:25:50.090Z",
+			"commitHash": "f843ba241fa3d612968c4d092dfb3840fbe951da",
+			"branch": "main",
+			"contentHashAtCommit": "387b9f48760ed245c966255c28edc3e1485262343b1c7d6577751a45ab5d3ea0"
+		}
+	}
+}
