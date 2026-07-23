@@ -19,14 +19,14 @@ interface Voo {
 }
 
 export function AcenderVela({ slug, velasIniciais }: { slug: string; velasIniciais: number }) {
-  // A vela principal fica SEMPRE acesa (representa a chama coletiva) — não tem
-  // mais estado "apagada"/toggle. Clicar no botão acende uma vela NOVA na
-  // parede (a sua contribuição), nunca apaga a principal.
+  // Vela principal fica APAGADA por padrão. Ao clicar: acende brevemente,
+  // a chama "voa" até a parede e acende a vela de lá, depois a principal
+  // apaga de novo — ela é só o gesto de acender, não fica queimando pra sempre.
   const [contagem, setContagem] = useState(velasIniciais)
   const [paredeAcesas, setParedeAcesas] = useState(() => Math.min(velasIniciais, TAMANHO_PAREDE))
   const [indiceRecemAceso, setIndiceRecemAceso] = useState<number | null>(null)
   const [voo, setVoo] = useState<Voo | null>(null)
-  const [pulsoPrincipal, setPulsoPrincipal] = useState(false)
+  const [principalAcesa, setPrincipalAcesa] = useState(false)
   const [jaAcendi, setJaAcendi] = useState(false)
   const chaveLocal = `vela_${slug}`
 
@@ -34,9 +34,9 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   const chamaPrincipalRef = useRef<HTMLDivElement | null>(null)
   const paredeRefs = useRef<Record<number, HTMLDivElement | null>>({})
 
-  function pulsarPrincipal() {
-    setPulsoPrincipal(true)
-    setTimeout(() => setPulsoPrincipal(false), 500)
+  function acenderEApagarPrincipal(duracaoMs: number) {
+    setPrincipalAcesa(true)
+    setTimeout(() => setPrincipalAcesa(false), duracaoMs)
   }
 
   function iniciarVoo(indiceAlvo: number) {
@@ -44,7 +44,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
     const origem = chamaPrincipalRef.current
     const destino = paredeRefs.current[indiceAlvo]
 
-    pulsarPrincipal()
+    acenderEApagarPrincipal(1300)
 
     if (!secao || !origem || !destino) {
       // Sem medida possível (refs ainda não montaram) — acende direto, sem animação de voo.
@@ -85,8 +85,8 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
 
     if (jaAcendeuAntes) {
       // Já contou antes (regra: contador nunca soma 2x pro mesmo visitante) —
-      // só um aceno visual na chama principal, sem mudar parede/contador.
-      pulsarPrincipal()
+      // só acende e apaga a principal de novo, sem mudar parede/contador.
+      acenderEApagarPrincipal(900)
       return
     }
 
@@ -101,7 +101,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
     if (paredeAcesas < TAMANHO_PAREDE) {
       iniciarVoo(paredeAcesas)
     } else {
-      pulsarPrincipal()
+      acenderEApagarPrincipal(900)
     }
   }
 
@@ -188,24 +188,26 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
         />
       )}
 
-      {/* Vela principal — sempre acesa, representa a chama coletiva. Não é botão:
-          o clique fica só no texto/botão abaixo, igual ao mockup. */}
+      {/* Vela principal — chama em CSS puro (mesma técnica provada das velas da
+          parede, sem risco de borda/artefato que o vídeo com mix-blend-mode tinha). */}
       <div style={{ position: 'relative', width: 60, height: 88, margin: '0 auto' }}>
-        <div
-          className="vela-glow-ambiente"
-          style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: 20,
-            transform: 'translateX(-50%)',
-            width: 70,
-            height: 70,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255,160,70,0.55) 0%, transparent 70%)',
-            filter: 'blur(8px)',
-            pointerEvents: 'none',
-          }}
-        />
+        {principalAcesa && (
+          <div
+            className="vela-glow-ambiente"
+            style={{
+              position: 'absolute',
+              left: '50%',
+              bottom: 20,
+              transform: 'translateX(-50%)',
+              width: 70,
+              height: 70,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255,160,70,0.55) 0%, transparent 70%)',
+              filter: 'blur(8px)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
 
         <div
           style={{
@@ -232,28 +234,29 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
               background: '#2a221a',
             }}
           >
-            {/* Chama real (vídeo de fogo, fundo preto removido via mix-blend-mode screen) —
-                sempre visível, a vela principal nunca apaga. */}
-            <video
-              className={pulsoPrincipal ? 'vela-parede-acender' : undefined}
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{
-                position: 'absolute',
-                bottom: '35%',
-                left: '50%',
-                marginLeft: -22,
-                width: 44,
-                height: 66,
-                objectFit: 'cover',
-                mixBlendMode: 'screen',
-                pointerEvents: 'none',
-              }}
-            >
-              <source src="/videos/vela-chama-teste.mp4" type="video/mp4" />
-            </video>
+            {/* Brasa — visível só quando apagada */}
+            {!principalAcesa && (
+              <div
+                className="vela-brasa"
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  marginLeft: -2,
+                  width: 4,
+                  height: 4,
+                }}
+              />
+            )}
+
+            {/* Chama CSS (transform composto skew+rotate+scale, técnica de
+                components/public/AcenderVela original — sem borda/artefato) —
+                só aparece no gesto de acender, depois apaga de novo. */}
+            {principalAcesa && (
+              <div className="vela-chama-intensidade" style={{ position: 'absolute', bottom: '100%', left: '50%', marginLeft: -14, width: 28, height: 44 }}>
+                <div className="vela-chama" style={{ width: '100%', height: '100%' }} />
+              </div>
+            )}
           </div>
         </div>
       </div>
