@@ -375,6 +375,24 @@ Depois de pesquisa de preço real (Supabase Pro + Vercel Pro): **10 fotos (8MB c
 
 **Solução**: biblioteca curada de ~10-15 faixas **instrumentais royalty-free** (piano/cordas, tom sóbrio, licença de uso comercial explícita), hospedadas no nosso próprio Storage. Família escolhe de uma lista, não faz upload livre. Zero risco jurídico. Ainda não construído — falta: escolher/licenciar as faixas, subir pro bucket, criar o seletor no formulário.
 
+### Índices de banco faltando — RESOLVIDO (2026-07-23)
+Rafael duvidou que o banco tava escalável — verificação real (`pg_indexes`) confirmou: **`homenagens` nunca teve índice em `slug`**, apesar de toda visita pública buscar por ele (`WHERE slug = ...`). `condolencias` e a nova `mural_memorias` também sem índice em `homenagem_id`, apesar de toda página carregar filtrando por isso. Sem índice = busca sequencial na tabela inteira a cada visita, piora conforme cresce. Corrigido: `idx_homenagens_slug`, `idx_condolencias_homenagem_id`, `idx_mural_memorias_homenagem_id` (todos incluem `created_at DESC` onde a query já ordena por data).
+
+### Auditoria Opus — integração página do memorial com Supabase (2026-07-23)
+Depois do achado dos índices, Rafael pediu auditoria completa (Opus Plan + Supabase advisors reais) da integração da página `/homenagem/[slug]` com o banco. Achados corrigidos no mesmo dia:
+
+- **🔴 Reação de coração no Mural quebrada e insegura:** `MuralMemorias.tsx` fazia `UPDATE` direto do client — RLS não libera update público (só `is_legado_staff()`), então o update afetava 0 linhas silenciosamente (coração nunca persistia, sumia ao recarregar). Corrigido com RPC atômica `reagir_memoria(p_id)` (`security definer`, mesmo padrão de `acender_vela`) — resolve o funcional, a race condition (2 pessoas reagindo ao mesmo tempo) e o tamper (impede alguém settar `coracoes` pra qualquer valor via API direta).
+- **🔴 `condolencias`/`mural_memorias` sem limite de tamanho no banco:** `maxLength` dos formulários era só client-side, 100% contornável chamando a REST API do Supabase direto. Adicionado `CHECK` constraint (nome ≤80, mensagem ≤500/600 chars).
+- **🔴 Qualquer visitante anônimo podia criar memorial arbitrário:** policy `"public insert homenagens"` (`WITH CHECK (true)`, sem staff/parceiro) permitia INSERT público na tabela principal — vetor de spam/memorial falso. Removida (fluxo real de criação já é coberto por `homenagens_staff_all`/`homenagens_parceiro_own`, autenticado).
+- **🟡 Policy de leitura duplicada:** `"Leitura pública"` e `"public read homenagens"` eram a mesma regra (SELECT público) duas vezes — Postgres avaliava as duas em toda visita. Removida a duplicata.
+- **🟡 5 queries em série no carregamento da página:** `condolencias`, `mural_memorias` e a RPC `obter_localizacao_memorial` são independentes entre si — paralelizadas com `Promise.all` em vez de `await` sequencial, corta 3 idas de rede em série pra 1.
+- **🟡 `search_path` mutável em `buscar_homenagens_publicas`:** apontado pelo advisor de segurança do Supabase, corrigido (`SET search_path = public`, mesmo padrão das outras funções).
+- **🟢 Teto de 10 fotos reforçado no banco:** `CHECK (array_length(galeria_fotos,1) <= 10)` — antes só era validado (parcialmente) no client.
+
+**Não implementado ainda (estrutural, maior escopo — próxima sessão):** rate-limit de escrita pública (condolências, mural, acender vela, contador de visualização) hoje não passa pelo `middleware.ts` do Next.js porque o client chama a REST/RPC do Supabase **direto do navegador**, sem passar pela minha própria API — ou seja, o rate-limit central do projeto (Sprint 1) não cobre essas escritas. Solução recomendada pelo Opus: mover essas escritas pra Route Handlers Next.js (mesmo padrão das rotas de upload), com rate-limit dedicado, em vez de expor a REST/RPC do Supabase direto ao anônimo.
+
+**Achados não corrigidos, só documentados (baixa prioridade):** `homenagens_busca_publica`/`parceiros_publicos` são views `SECURITY DEFINER` (aceitável mas vale documentar/reconsiderar), `memorial_email_codigos` com RLS ligado sem nenhuma policy (confirmar se acesso é só via service role), FKs sem índice em várias tabelas (`cemiterios.parceiro_id`, `emails_enviados.homenagem_id`, etc. — baixo risco até crescer).
+
 ### Limite de fotos/armazenamento — RESOLVIDO (2026-07-23)
 Confirmado: 10 fotos (8MB cada) + 4 vídeos (100MB cada), quota 500MB/memorial. Ver seção "Especificação de mídia por memorial" acima.
 

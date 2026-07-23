@@ -27,13 +27,17 @@ export function MuralMemorias({ memorialId, memoriasIniciais }: { memorialId: st
   async function reagir(id: string) {
     if (reagidas[id]) return
     setReagidas((r) => ({ ...r, [id]: true }))
-    setMemorias((lista) => lista.map((m) => (m.id === id ? { ...m, coracoes: m.coracoes + 1 } : m)))
 
-    const atual = memorias.find((m) => m.id === id)
-    await supabase
-      .from('mural_memorias')
-      .update({ coracoes: (atual?.coracoes ?? 0) + 1 })
-      .eq('id', id)
+    // RPC atômica no servidor (não é UPDATE direto do client — RLS não libera
+    // update público, e update direto teria race condition + permitiria
+    // qualquer um setar o valor arbitrário via API).
+    const { data, error } = await supabase.rpc('reagir_memoria', { p_id: id })
+    if (error) return
+
+    const novoTotal = typeof data === 'number' ? data : undefined
+    setMemorias((lista) =>
+      lista.map((m) => (m.id === id ? { ...m, coracoes: novoTotal ?? m.coracoes + 1 } : m))
+    )
   }
 
   async function enviar(e: React.FormEvent) {

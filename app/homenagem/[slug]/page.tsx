@@ -132,28 +132,27 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   }
 
   const anos = anosDestaque(m.data_nascimento, m.data_falecimento);
-
-  const { data: condolenciasData } = await supabase
-    .from("condolencias")
-    .select("id, visitor_name, message, created_at")
-    .eq("homenagem_id", m.id)
-    .order("created_at", { ascending: false });
-
-  const condolencias = (condolenciasData || []) as Condolencia[];
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
   const galeria = Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : [];
 
-  const { data: muralData } = await supabase
-    .from("mural_memorias")
-    .select("id, nome, parentesco, texto, foto_url, coracoes, created_at")
-    .eq("homenagem_id", m.id)
-    .order("created_at", { ascending: false });
+  // 3 consultas independentes (dependem só de m.id/slug) — rodam em paralelo
+  // em vez de em série, cortando 3 idas de rede pra 1.
+  const [{ data: condolenciasData }, { data: muralData }, { data: localizacaoData }] = await Promise.all([
+    supabase
+      .from("condolencias")
+      .select("id, visitor_name, message, created_at")
+      .eq("homenagem_id", m.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("mural_memorias")
+      .select("id, nome, parentesco, texto, foto_url, coracoes, created_at")
+      .eq("homenagem_id", m.id)
+      .order("created_at", { ascending: false }),
+    supabase.rpc("obter_localizacao_memorial", { p_slug: slug }).maybeSingle(),
+  ]);
 
+  const condolencias = (condolenciasData || []) as Condolencia[];
   const mural = muralData || [];
-
-  const { data: localizacaoData } = await supabase
-    .rpc("obter_localizacao_memorial", { p_slug: slug })
-    .maybeSingle();
   const localizacao = localizacaoData as {
     cemiterio_nome: string;
     cemiterio_lat: number | null;
@@ -279,7 +278,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
         {timeline.length > 0 && (
           <section style={{ marginTop: 56 }}>
-            <SecaoTitulo texto="Linha do Tempo" />
+            <SecaoTitulo texto="Uma Vida" />
             <div style={estilos.timelineWrap}>
               <div className="mem-timeline-espinha" style={estilos.timelineEspinha} />
               <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
