@@ -86,6 +86,14 @@ html {
 
 /* ===== Página do Memorial (app/homenagem/[slug]) ===== */
 
+/* Biografia + card lateral "Em poucas palavras" — 2 colunas no desktop,
+   empilha em 1 coluna no mobile (grid inline não colapsa sozinho). */
+@media (max-width: 640px) {
+  .mem-bio-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Drop-cap editorial da biografia — só dá pra fazer via ::first-letter em CSS puro */
 .mem-bio::first-letter {
   font-size: 3.2em;

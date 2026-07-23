@@ -4,8 +4,32 @@ import { useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
 
+// Padrão de mosaico assimétrico (alguns itens ocupam 2 colunas/2 linhas) —
+// repete em ciclo se a galeria tiver mais fotos que o padrão.
+const MOSAICO_A = [
+  { col: 2, row: 2 }, { col: 1, row: 1 }, { col: 1, row: 1 }, { col: 1, row: 2 },
+  { col: 1, row: 1 }, { col: 2, row: 1 }, { col: 1, row: 1 }, { col: 1, row: 1 },
+  { col: 1, row: 1 }, { col: 1, row: 2 },
+]
+const MOSAICO_B = [
+  { col: 1, row: 1 }, { col: 2, row: 2 }, { col: 1, row: 1 }, { col: 1, row: 1 },
+  { col: 1, row: 2 }, { col: 1, row: 1 }, { col: 2, row: 1 }, { col: 1, row: 1 },
+  { col: 1, row: 2 }, { col: 1, row: 1 },
+]
+
 export function GaleriaFotos({ fotos }: { fotos: string[] }) {
   const [aberta, setAberta] = useState<number | null>(null)
+  const [variacao, setVariacao] = useState<'a' | 'b'>('a')
+  const [colunas, setColunas] = useState(4)
+
+  useEffect(() => {
+    function ajustarColunas() {
+      setColunas(window.innerWidth < 640 ? 2 : 4)
+    }
+    ajustarColunas()
+    window.addEventListener('resize', ajustarColunas)
+    return () => window.removeEventListener('resize', ajustarColunas)
+  }, [])
 
   useEffect(() => {
     if (aberta === null) return
@@ -18,35 +42,67 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
     return () => window.removeEventListener('keydown', aoTeclar)
   }, [aberta, fotos.length])
 
+  const padrao = variacao === 'a' ? MOSAICO_A : MOSAICO_B
+
   return (
     <>
+      {fotos.length > 3 && (
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginBottom: 12 }}>
+          {(['a', 'b'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setVariacao(v)}
+              style={{
+                background: variacao === v ? CORES.dourado : 'transparent',
+                color: variacao === v ? CORES.fundoBase : CORES.dourado,
+                border: `1px solid ${CORES.dourado}`,
+                borderRadius: 6,
+                padding: '5px 12px',
+                fontSize: 11,
+                letterSpacing: 1,
+                cursor: 'pointer',
+              }}
+            >
+              MOSAICO {v.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-          gap: 10,
+          gridTemplateColumns: `repeat(${colunas}, 1fr)`,
+          gridAutoRows: colunas === 2 ? 90 : 110,
+          gap: 8,
         }}
       >
-        {fotos.map((url, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={i}
-            src={url}
-            alt={`Foto ${i + 1}`}
-            loading="lazy"
-            decoding="async"
-            onClick={() => setAberta(i)}
-            className="mem-galeria-item"
-            style={{
-              width: '100%',
-              aspectRatio: '1/1',
-              objectFit: 'cover',
-              borderRadius: 10,
-              border: `1px solid ${CORES.douradoBorda}`,
-              cursor: 'zoom-in',
-            }}
-          />
-        ))}
+        {fotos.map((url, i) => {
+          const span = padrao[i % padrao.length]
+          const col = Math.min(span.col, colunas)
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              src={url}
+              alt={`Foto ${i + 1}`}
+              loading="lazy"
+              decoding="async"
+              onClick={() => setAberta(i)}
+              className="mem-galeria-item"
+              style={{
+                gridColumn: `span ${col}`,
+                gridRow: `span ${span.row}`,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: 6,
+                border: `1px solid ${CORES.douradoBorda}`,
+                cursor: 'zoom-in',
+              }}
+            />
+          )
+        })}
       </div>
 
       {aberta !== null && (

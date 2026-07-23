@@ -9,6 +9,9 @@ import { FormularioCondolencia } from "@/components/public/FormularioCondolencia
 import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import { SeletorTema } from "@/components/public/SeletorTema";
+import { FaixaPresencaViva } from "@/components/public/FaixaPresencaViva";
+import { ResumoPoucasPalavras } from "@/components/public/ResumoPoucasPalavras";
+import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
 import { VAR_FUNDO_TOPO, VAR_FUNDO_BASE, VAR_DOURADO } from "@/lib/temasMemorial";
 
@@ -140,6 +143,14 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
   const galeria = Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : [];
 
+  const { data: muralData } = await supabase
+    .from("mural_memorias")
+    .select("id, nome, parentesco, texto, foto_url, coracoes, created_at")
+    .eq("homenagem_id", m.id)
+    .order("created_at", { ascending: false });
+
+  const mural = muralData || [];
+
   const { data: localizacaoData } = await supabase
     .rpc("obter_localizacao_memorial", { p_slug: slug })
     .maybeSingle();
@@ -207,13 +218,36 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         </div>
       </header>
 
+      <FaixaPresencaViva
+        velas={m.velas_acesas ?? 0}
+        homenagens={condolencias.length}
+        memorias={mural.length + galeria.length}
+      />
+
       <main style={estilos.main}>
         <section>
           <SecaoTitulo texto="Biografia" />
-          <div style={estilos.card}>
-            <p className="mem-bio" style={estilos.bio}>
-              {m.biografia || "A biografia será adicionada em breve pela família."}
-            </p>
+          <div
+            style={{
+              marginTop: 18,
+              display: "grid",
+              gridTemplateColumns: "2.2fr 1fr",
+              gap: 24,
+              alignItems: "start",
+            }}
+            className="mem-bio-grid"
+          >
+            <div style={{ ...estilos.card, marginTop: 0 }}>
+              <p className="mem-bio" style={estilos.bio}>
+                {m.biografia || "A biografia será adicionada em breve pela família."}
+              </p>
+            </div>
+            <ResumoPoucasPalavras
+              cidade={m.cidade}
+              anos={anos || null}
+              totalTimeline={timeline.length}
+              totalFotos={galeria.length}
+            />
           </div>
         </section>
 
@@ -272,6 +306,13 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
             </div>
           </section>
         )}
+
+        <section style={{ marginTop: 56 }}>
+          <SecaoTitulo texto="Mural de Memórias" />
+          <div style={{ marginTop: 14 }}>
+            <MuralMemorias memorialId={m.id} memoriasIniciais={mural} />
+          </div>
+        </section>
 
         {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
           <section style={{ marginTop: 56 }}>
