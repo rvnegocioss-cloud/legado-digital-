@@ -19,22 +19,32 @@ interface Voo {
 }
 
 export function AcenderVela({ slug, velasIniciais }: { slug: string; velasIniciais: number }) {
-  const [aceso, setAceso] = useState(false)
+  // A vela principal fica SEMPRE acesa (representa a chama coletiva) — não tem
+  // mais estado "apagada"/toggle. Clicar no botão acende uma vela NOVA na
+  // parede (a sua contribuição), nunca apaga a principal.
   const [contagem, setContagem] = useState(velasIniciais)
   const [paredeAcesas, setParedeAcesas] = useState(() => Math.min(velasIniciais, TAMANHO_PAREDE))
   const [indiceRecemAceso, setIndiceRecemAceso] = useState<number | null>(null)
   const [voo, setVoo] = useState<Voo | null>(null)
   const [pulsoPrincipal, setPulsoPrincipal] = useState(false)
+  const [jaAcendi, setJaAcendi] = useState(false)
   const chaveLocal = `vela_${slug}`
 
   const secaoRef = useRef<HTMLDivElement | null>(null)
   const chamaPrincipalRef = useRef<HTMLDivElement | null>(null)
   const paredeRefs = useRef<Record<number, HTMLDivElement | null>>({})
 
+  function pulsarPrincipal() {
+    setPulsoPrincipal(true)
+    setTimeout(() => setPulsoPrincipal(false), 500)
+  }
+
   function iniciarVoo(indiceAlvo: number) {
     const secao = secaoRef.current
     const origem = chamaPrincipalRef.current
     const destino = paredeRefs.current[indiceAlvo]
+
+    pulsarPrincipal()
 
     if (!secao || !origem || !destino) {
       // Sem medida possível (refs ainda não montaram) — acende direto, sem animação de voo.
@@ -47,9 +57,6 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
     const rSecao = secao.getBoundingClientRect()
     const rOrigem = origem.getBoundingClientRect()
     const rDestino = destino.getBoundingClientRect()
-
-    setPulsoPrincipal(true)
-    setTimeout(() => setPulsoPrincipal(false), 500)
 
     setVoo({
       top: rOrigem.top - rSecao.top,
@@ -73,23 +80,29 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
     }, 900)
   }
 
-  async function alternar() {
+  async function acender() {
     const jaAcendeuAntes = typeof window !== 'undefined' && window.localStorage.getItem(chaveLocal)
 
-    if (!aceso && !jaAcendeuAntes) {
-      const { data, error } = await supabase.rpc('acender_vela', { p_slug: slug })
-      if (!error) {
-        window.localStorage.setItem(chaveLocal, '1')
-        const novoTotal = typeof data === 'number' ? data : contagem + 1
-        setContagem(novoTotal)
-
-        if (paredeAcesas < TAMANHO_PAREDE) {
-          iniciarVoo(paredeAcesas)
-        }
-      }
+    if (jaAcendeuAntes) {
+      // Já contou antes (regra: contador nunca soma 2x pro mesmo visitante) —
+      // só um aceno visual na chama principal, sem mudar parede/contador.
+      pulsarPrincipal()
+      return
     }
 
-    setAceso(!aceso)
+    const { data, error } = await supabase.rpc('acender_vela', { p_slug: slug })
+    if (error) return
+
+    window.localStorage.setItem(chaveLocal, '1')
+    setJaAcendi(true)
+    const novoTotal = typeof data === 'number' ? data : contagem + 1
+    setContagem(novoTotal)
+
+    if (paredeAcesas < TAMANHO_PAREDE) {
+      iniciarVoo(paredeAcesas)
+    } else {
+      pulsarPrincipal()
+    }
   }
 
   return (
@@ -175,112 +188,95 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
         />
       )}
 
-      <button
-        onClick={alternar}
-        aria-label={aceso ? 'Apagar a vela' : 'Acender uma vela'}
-        style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 8 }}
-      >
-        {/* Containing block raiz: relative + tamanho explícito. Todo "bottom" dos filhos se refere a este box. */}
-        <div style={{ position: 'relative', width: 60, height: 88, margin: '0 auto' }}>
+      {/* Vela principal — sempre acesa, representa a chama coletiva. Não é botão:
+          o clique fica só no texto/botão abaixo, igual ao mockup. */}
+      <div style={{ position: 'relative', width: 60, height: 88, margin: '0 auto' }}>
+        <div
+          className="vela-glow-ambiente"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            bottom: 20,
+            transform: 'translateX(-50%)',
+            width: 70,
+            height: 70,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,160,70,0.55) 0%, transparent 70%)',
+            filter: 'blur(8px)',
+            pointerEvents: 'none',
+          }}
+        />
 
-          {/* Halo — só anima opacity, então translateX inline aqui é seguro (não colide com keyframe) */}
-          {aceso && (
-            <div
-              className="vela-glow-ambiente"
-              style={{
-                position: 'absolute',
-                left: '50%',
-                bottom: 20,
-                transform: 'translateX(-50%)',
-                width: 70,
-                height: 70,
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255,160,70,0.55) 0%, transparent 70%)',
-                filter: 'blur(8px)',
-                pointerEvents: 'none',
-              }}
-            />
-          )}
-
-          {/* Corpo da vela — altura explícita (40), sem animation, translateX inline seguro. Containing block do pavio. */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            bottom: 0,
+            transform: 'translateX(-50%)',
+            width: 32,
+            height: 40,
+            borderRadius: '4px 10px 2px 2px',
+            background: 'radial-gradient(circle at 30% 0%, #fdfbf3 15%, #e4ddc8 60%, #c9bfa1 100%)',
+            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25)',
+          }}
+        >
           <div
+            ref={chamaPrincipalRef}
             style={{
               position: 'absolute',
+              bottom: '100%',
               left: '50%',
-              bottom: 0,
-              transform: 'translateX(-50%)',
-              width: 32,
-              height: 40,
-              borderRadius: '4px 10px 2px 2px',
-              background: 'radial-gradient(circle at 30% 0%, #fdfbf3 15%, #e4ddc8 60%, #c9bfa1 100%)',
-              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25)',
+              marginLeft: -1,
+              width: 2,
+              height: 10,
+              background: '#2a221a',
             }}
           >
-            {/* Pavio — bottom:100% do corpo (encosta no topo dele). Altura explícita (10). Containing block da brasa/chama. */}
-            <div
-              ref={chamaPrincipalRef}
+            {/* Chama real (vídeo de fogo, fundo preto removido via mix-blend-mode screen) —
+                sempre visível, a vela principal nunca apaga. */}
+            <video
+              className={pulsoPrincipal ? 'vela-parede-acender' : undefined}
+              autoPlay
+              loop
+              muted
+              playsInline
               style={{
                 position: 'absolute',
-                bottom: '100%',
+                bottom: '35%',
                 left: '50%',
-                marginLeft: -1,
-                width: 2,
-                height: 10,
-                background: '#2a221a',
+                marginLeft: -22,
+                width: 44,
+                height: 66,
+                objectFit: 'cover',
+                mixBlendMode: 'screen',
+                pointerEvents: 'none',
               }}
             >
-              {/* Brasa (apagada) — bottom:100% do pavio = na ponta dele */}
-              {!aceso && (
-                <div
-                  className="vela-brasa"
-                  style={{
-                    position: 'absolute',
-                    bottom: '100%',
-                    left: '50%',
-                    marginLeft: -2,
-                    width: 4,
-                    height: 4,
-                  }}
-                />
-              )}
-
-              {/* TESTE — chama real (video de fogo de verdade, fundo preto, mix-blend-mode
-                  "screen" apaga o preto e deixa só a chama) no lugar da chama desenhada
-                  em CSS. bottom:35% do pavio (vídeo tem mais moldura que a chama CSS). */}
-              {aceso && (
-                <video
-                  className={pulsoPrincipal ? 'vela-parede-acender' : 'vela-chama-real'}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  style={{
-                    position: 'absolute',
-                    bottom: '35%',
-                    left: '50%',
-                    marginLeft: -22,
-                    width: 44,
-                    height: 66,
-                    objectFit: 'cover',
-                    mixBlendMode: 'screen',
-                    pointerEvents: 'none',
-                  }}
-                >
-                  <source src="/videos/vela-chama-teste.mp4" type="video/mp4" />
-                </video>
-              )}
-            </div>
+              <source src="/videos/vela-chama-teste.mp4" type="video/mp4" />
+            </video>
           </div>
         </div>
+      </div>
+
+      <button
+        onClick={acender}
+        style={{
+          marginTop: 8,
+          background: 'transparent',
+          border: `1px solid ${CORES.dourado}`,
+          color: CORES.dourado,
+          padding: '10px 24px',
+          fontSize: 13,
+          letterSpacing: 1,
+          borderRadius: 4,
+          cursor: 'pointer',
+        }}
+      >
+        {jaAcendi ? 'VELA ACESA' : 'ACENDER UMA VELA'}
       </button>
 
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 13, color: CORES.textoFraco }}>
-          {aceso ? 'Vela acesa' : 'Acender uma vela'}
-        </div>
-        <div style={{ fontSize: 12, color: CORES.dourado, marginTop: 2 }}>
-          {contagem} {contagem === 1 ? 'vela acesa por quem visitou' : 'velas acesas por quem visitou'}
-        </div>
+      <div style={{ fontSize: 12, color: CORES.dourado, marginTop: 2, textAlign: 'center' }}>
+        {contagem} {contagem === 1 ? 'vela acesa por quem visitou' : 'velas acesas por quem visitou'}
       </div>
     </div>
   )
