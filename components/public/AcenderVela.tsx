@@ -1,19 +1,77 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { CORES } from '@/lib/publicTheme'
+
+const TAMANHO_PAREDE = 45
+
+// Seed determinística por índice (nunca Math.random() no render — evita
+// descompasso entre servidor e cliente na hidratação do componente).
+function seedPorIndice(i: number) {
+  return ((i * 47 + 13) % 100) / 100
+}
+
+interface Voo {
+  top: number
+  left: number
+  fase: 'inicio' | 'fim'
+}
 
 export function AcenderVela({ slug, velasIniciais }: { slug: string; velasIniciais: number }) {
   const [aceso, setAceso] = useState(false)
   const [contagem, setContagem] = useState(velasIniciais)
+  const [paredeAcesas, setParedeAcesas] = useState(() => Math.min(velasIniciais, TAMANHO_PAREDE))
+  const [indiceRecemAceso, setIndiceRecemAceso] = useState<number | null>(null)
+  const [voo, setVoo] = useState<Voo | null>(null)
+  const [pulsoPrincipal, setPulsoPrincipal] = useState(false)
   const chaveLocal = `vela_${slug}`
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.localStorage.getItem(chaveLocal)) {
-      setAceso(true)
+  const secaoRef = useRef<HTMLDivElement | null>(null)
+  const chamaPrincipalRef = useRef<HTMLDivElement | null>(null)
+  const paredeRefs = useRef<Record<number, HTMLDivElement | null>>({})
+
+  function iniciarVoo(indiceAlvo: number) {
+    const secao = secaoRef.current
+    const origem = chamaPrincipalRef.current
+    const destino = paredeRefs.current[indiceAlvo]
+
+    if (!secao || !origem || !destino) {
+      // Sem medida possível (refs ainda não montaram) — acende direto, sem animação de voo.
+      setParedeAcesas((p) => Math.max(p, indiceAlvo + 1))
+      setIndiceRecemAceso(indiceAlvo)
+      setTimeout(() => setIndiceRecemAceso(null), 700)
+      return
     }
-  }, [chaveLocal])
+
+    const rSecao = secao.getBoundingClientRect()
+    const rOrigem = origem.getBoundingClientRect()
+    const rDestino = destino.getBoundingClientRect()
+
+    setPulsoPrincipal(true)
+    setTimeout(() => setPulsoPrincipal(false), 500)
+
+    setVoo({
+      top: rOrigem.top - rSecao.top,
+      left: rOrigem.left - rSecao.left + rOrigem.width / 2,
+      fase: 'inicio',
+    })
+
+    setTimeout(() => {
+      setVoo({
+        top: rDestino.top - rSecao.top,
+        left: rDestino.left - rSecao.left + rDestino.width / 2,
+        fase: 'fim',
+      })
+    }, 20)
+
+    setTimeout(() => {
+      setVoo(null)
+      setParedeAcesas((p) => Math.max(p, indiceAlvo + 1))
+      setIndiceRecemAceso(indiceAlvo)
+      setTimeout(() => setIndiceRecemAceso(null), 700)
+    }, 900)
+  }
 
   async function alternar() {
     const jaAcendeuAntes = typeof window !== 'undefined' && window.localStorage.getItem(chaveLocal)
@@ -22,7 +80,12 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
       const { data, error } = await supabase.rpc('acender_vela', { p_slug: slug })
       if (!error) {
         window.localStorage.setItem(chaveLocal, '1')
-        setContagem(typeof data === 'number' ? data : contagem + 1)
+        const novoTotal = typeof data === 'number' ? data : contagem + 1
+        setContagem(novoTotal)
+
+        if (paredeAcesas < TAMANHO_PAREDE) {
+          iniciarVoo(paredeAcesas)
+        }
       }
     }
 
@@ -30,7 +93,88 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, position: 'relative' }} ref={secaoRef}>
+      {/* Mural de velas votivas — velas já acesas por quem visitou antes */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 420,
+          padding: '18px 10px',
+          borderRadius: 10,
+          background: 'radial-gradient(ellipse at center 35%, rgba(201,164,106,0.09), rgba(201,164,106,0.02) 72%)',
+          border: `1px solid ${CORES.douradoBorda}`,
+          marginBottom: 8,
+        }}
+      >
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px 6px' }}>
+          {Array.from({ length: TAMANHO_PAREDE }, (_, i) => {
+            const estaAcesa = i < paredeAcesas
+            const seed = seedPorIndice(i)
+            const acabouDeAcender = i === indiceRecemAceso
+            return (
+              <div
+                key={i}
+                ref={(el) => {
+                  paredeRefs.current[i] = el
+                }}
+                style={{ position: 'relative', width: 16, height: 26, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+              >
+                {/* Copo/cuia da vela votiva */}
+                <div
+                  style={{
+                    width: 10,
+                    height: 12,
+                    borderRadius: '1px 1px 4px 4px',
+                    background: 'linear-gradient(180deg, rgba(201,164,106,0.15), rgba(160,124,72,0.32))',
+                    border: `1px solid ${CORES.douradoBorda}`,
+                    boxShadow: estaAcesa ? '0 0 8px 1px rgba(255,170,80,0.35)' : 'none',
+                  }}
+                />
+                {estaAcesa && (
+                  <div
+                    className={acabouDeAcender ? 'vela-parede-acender' : undefined}
+                    style={{
+                      position: 'absolute',
+                      bottom: 9,
+                      left: '50%',
+                      transform: 'translateX(-50%) skewX(50deg) rotate(45deg) scale(0.5, 4.5) rotate(15deg) skewX(-50deg)',
+                      transformOrigin: '50% 100%',
+                      width: 5,
+                      height: 5,
+                      borderRadius: '0 1em 1em 1em',
+                      background: 'radial-gradient(circle at 50% 15%, #fff6d0 0%, #ffd35c 30%, #ff9a3c 60%, #e2632f 85%, transparent 100%)',
+                      filter: 'drop-shadow(0 0 4px rgba(255,150,60,0.7))',
+                      animation: `vela-flicker-flame ${(2 + seed * 1.4).toFixed(2)}s ease-in-out ${(-seed * 2).toFixed(2)}s infinite`,
+                    }}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Chama voando da vela principal até a vela da parede recém-acesa */}
+      {voo && (
+        <div
+          className="vela-voo"
+          style={{
+            position: 'absolute',
+            top: voo.top,
+            left: voo.left,
+            width: 12,
+            height: 16,
+            transform: `translate(-50%,-100%) scale(${voo.fase === 'fim' ? 0.35 : 1})`,
+            opacity: voo.fase === 'fim' ? 0.15 : 1,
+            borderRadius: '0 1em 1em 1em',
+            background: 'radial-gradient(circle at 50% 15%, #fff6d0 0%, #ffd35c 30%, #ff9a3c 60%, #e2632f 85%, transparent 100%)',
+            boxShadow: '0 0 14px 4px rgba(255,170,80,0.55)',
+            pointerEvents: 'none',
+            zIndex: 6,
+          }}
+        />
+      )}
+
       <button
         onClick={alternar}
         aria-label={aceso ? 'Apagar a vela' : 'Acender uma vela'}
@@ -74,6 +218,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
           >
             {/* Pavio — bottom:100% do corpo (encosta no topo dele). Altura explícita (10). Containing block da brasa/chama. */}
             <div
+              ref={chamaPrincipalRef}
               style={{
                 position: 'absolute',
                 bottom: '100%',
@@ -104,7 +249,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
                   em CSS. bottom:35% do pavio (vídeo tem mais moldura que a chama CSS). */}
               {aceso && (
                 <video
-                  className="vela-chama-real"
+                  className={pulsoPrincipal ? 'vela-parede-acender' : 'vela-chama-real'}
                   autoPlay
                   loop
                   muted

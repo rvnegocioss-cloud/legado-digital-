@@ -148,8 +148,28 @@ html {
   0%, 100% { opacity: 0.45; }
   50% { opacity: 0.7; }
 }
+
+/* Mural de velas votivas — vela da parede acende com uma "explosão" curta
+   de escala antes de assentar na respiração normal (vela-flicker-flame). */
+@keyframes vela-parede-burst {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+.vela-parede-acender {
+  animation: vela-parede-burst 0.6s ease;
+}
+
+/* Chama voando da vela principal até a vela da parede que acabou de acender.
+   Posição (top/left) e opacidade são calculadas em JS via getBoundingClientRect,
+   só a transição de posição/escala é CSS. */
+.vela-voo {
+  transition: top 0.9s cubic-bezier(.35,.7,.4,1), left 0.9s cubic-bezier(.35,.7,.4,1), transform 0.9s ease, opacity 0.9s ease-in;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .vela-chama-intensidade, .vela-chama, .vela-glow-ambiente {
+  .vela-chama-intensidade, .vela-chama, .vela-glow-ambiente, .vela-parede-acender, .vela-voo {
     animation: none !important;
+    transition: none !important;
   }
 }
