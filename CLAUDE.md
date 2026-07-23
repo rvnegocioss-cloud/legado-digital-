@@ -16,7 +16,7 @@ Rafael pediu trava explícita contra eu apagar/destruir o projeto sem querer —
 
 Motivo concreto (2026-07-15): achado nessa sessão que upload de foto/vídeo/galeria nunca limpa o arquivo antigo do Supabase Storage (todo upload novo cria objeto novo com timestamp, o antigo fica órfão pra sempre) — funciona hoje com poucos memoriais, mas acumula custo de armazenamento sem limite conforme o uso cresce. Corrigido no mesmo dia que descoberto.
 
-**Corrigido (2026-07-22):** Todas as 3 rotas de upload (`POST /api/familia-upload`, `POST /api/admin/upload`, `POST /api/parceiro/upload`) agora têm validações robustas e escaláveis: (1) **tamanho máximo por tipo** — 10MB foto, 50MB vídeo, rejeita com erro claro ao usuário se ultrapassar; (2) **MIME type real via magic bytes** — não confiar em `file.type` do cliente (pode estar falsificado), detecta via assinatura binária (JPEG: `FFD8FF`, PNG: `89504E47`, etc.) e rejeita tipo desconhecido; (3) **rate limit por usuário** — 5 uploads/min (família), 10/min (staff), retorna 429 se exceder; (4) **quota por memorial** — máx 500MB total armazenado, rejeita novo upload se quota seria excedida, com mensagem "remova fotos/vídeos antigos"; (5) **limpeza automática** — ao fazer upload de foto/vídeo principal, apaga o arquivo anterior do Storage (evita acúmulo de órfãos); (6) **rate limit em memória** com autolimpeza de entries antigas. Todas validações ocorrem no servidor (nunca no client), usando `service_role_key` (sem exposição ao navegador).
+**Corrigido (2026-07-22, limites atualizados 2026-07-23):** Todas as 3 rotas de upload (`POST /api/familia-upload`, `POST /api/admin/upload`, `POST /api/parceiro/upload`) agora têm validações robustas e escaláveis: (1) **tamanho máximo por tipo** — 8MB foto, 100MB vídeo (10 fotos + 4 vídeos = 480MB, quota 500MB/memorial — ver "Especificação de mídia por memorial"), rejeita com erro claro ao usuário se ultrapassar; (2) **MIME type real via magic bytes** — não confiar em `file.type` do cliente (pode estar falsificado), detecta via assinatura binária (JPEG: `FFD8FF`, PNG: `89504E47`, etc.) e rejeita tipo desconhecido; (3) **rate limit por usuário** — 5 uploads/min (família), 10/min (staff), retorna 429 se exceder; (4) **quota por memorial** — máx 500MB total armazenado, rejeita novo upload se quota seria excedida, com mensagem "remova fotos/vídeos antigos"; (5) **limpeza automática** — ao fazer upload de foto/vídeo principal, apaga o arquivo anterior do Storage (evita acúmulo de órfãos); (6) **rate limit em memória** com autolimpeza de entries antigas. Todas validações ocorrem no servidor (nunca no client), usando `service_role_key` (sem exposição ao navegador).
 
 Próximo: documentar limites no formulário (`Galeria de fotos (2/4)`) e considerar persistir rate limit em Redis se quota de requisições crescer muito (hoje em memória é OK pra MVP).
 
@@ -348,22 +348,35 @@ Identidade navy `#0B1D2A` + dourado `#C9A46A` mantida, tipografia serif. Plano d
 - **Anti-spam simples:** flag em `localStorage` (`vela_{slug}`) — só conta a primeira vez que aquele navegador acende. Apagar/reacender depois disso só alterna o visual, não soma de novo no contador (contador é cumulativo de "quantas pessoas já acenderam alguma vez", nunca desce — decisão de produto: um contador de carinho não devia parecer "diminuir").
 - Respeita `prefers-reduced-motion` (desliga o tremelique, chama fica estática).
 
+### Mural de velas votivas — implementado (2026-07-23)
+Baseado em mockup gerado no **Claude Design** (`claude.ai/design`, brief criado com Opus). Parede de até 45 velas votivas acima da vela principal (`components/public/AcenderVela.tsx`) — ao clicar "Acender uma vela", a chama **voa** (posição calculada via `getBoundingClientRect`, transição CSS, sem `requestAnimationFrame`) da vela principal até o próximo slot vago da parede. Vela principal mantém o vídeo real já em produção (`mix-blend-mode: screen`); as 45 velas da parede usam a técnica de chama CSS já provada (`vela-chama`/`vela-flame-dance`) — vídeo ×45 simultâneo travaria em celular. Parede trava em 45 velas visíveis (contador real continua subindo além disso, sem crescer DOM infinito). Seeds de animação são determinísticas por índice (nunca `Math.random()` no render, evita descompasso de hidratação servidor/cliente).
+
+### Página do memorial "tipo Facebook" — implementado (2026-07-23)
+Pedro pediu (2026-07-17) que a página ficasse mais rica/social. Decisão confirmada com Rafael: pegar a **experiência** social (gente participando, reagindo, mural cheio) sem copiar o **visual** literal de rede social (sem feed azul, sem like de polegar). Mockup gerado no Claude Design, integrado na página real:
+- **Faixa de presença viva** (`components/public/FaixaPresencaViva.tsx`) — nº velas/homenagens/memórias, logo abaixo do hero, Server Component sem interatividade.
+- **Card lateral "Em poucas palavras"** (`components/public/ResumoPoucasPalavras.tsx`) — ao lado da biografia (2 colunas desktop, 1 coluna mobile via `.mem-bio-grid`), derivado de dado que já existe (cidade, período, contagem de timeline/fotos) — sem precisar de campo novo no formulário de edição.
+- **Galeria com mosaico A/B** — `components/public/GaleriaFotos.tsx` ganhou 2 padrões de mosaico assimétrico (botão pra trocar, só aparece com mais de 3 fotos), mantendo o lightbox que já existia (clique abre foto em tela cheia, setas/teclado navegam).
+- **Mural de Memórias** (`components/public/MuralMemorias.tsx`) — seção nova: família/amigos deixam memória com nome+parentesco+texto, reação de coração (❤, 1 por visitante via estado local). Tabela nova `mural_memorias` (RLS: leitura/inserção pública, staff vê tudo via `is_legado_staff()`).
+- **Seletor de tema** (`components/public/SeletorTema.tsx`, `lib/temasMemorial.ts`) — 3 paletas (Navy+Dourado oficial, Verde+Bronze, Grafite+Dourado-claro), 3 bolinhas de cor no canto da página, troca via CSS custom properties em runtime (`document.documentElement.style.setProperty`) — feature separada, só demo pros sócios comparar, **não salva escolha no banco** (efêmero, some ao recarregar).
+- **Página de custo em escala** (`/admin/mapa/custos`) — relatório de custo de armazenamento Supabase Pro + Vercel Pro projetado até 100 mil memoriais, linkado do `/admin/mapa`.
+
+### Especificação de mídia por memorial — confirmado (2026-07-23)
+Depois de pesquisa de preço real (Supabase Pro + Vercel Pro): **10 fotos (8MB cada) + 4 vídeos (100MB cada) = 480MB usado, quota de 500MB por memorial.** Aplicado nas 3 rotas de upload (`admin/upload`, `familia-upload`, `parceiro/upload`). Custo projetado: $39,70/mês em 1.000 memoriais até $3.930,40/mês em 100.000 (armazenamento + banda estimada) — trivial pra base B2B2C desse tamanho. **Ainda não construído:** suporte a múltiplos vídeos por memorial (hoje só existe `video_url` singular, 1 vídeo só) — precisaria de coluna nova `videos_galeria`, decisão pausada ("calma, não mexe ainda").
+
 ### Ainda não incluído (planejado, não construído)
-- Troca de tema, compartilhar, música de fundo (ilhas client futuras, uma por vez, sem RAF) — vela já foi a primeira das 4 ideias registradas em 2026-07-14 a sair do papel
-- Lightbox da galeria (abrir foto em tela cheia) — fase 2 do redesign, grid já entrega o ganho visual sozinho por ora
+- Troca de tema **persistente** (família escolhe e salva permanentemente — hoje é só demo/preview) — precisa de campo `tema` em `homenagens`
+- Compartilhar, música de fundo (ilhas client futuras, uma por vez, sem RAF)
+- Suporte a múltiplos vídeos por memorial (ver seção acima)
 - Links de Privacidade/Termos no rodapé — aguardando essas páginas existirem
 - QR Code — ver decisão registrada em "Fase Atual".
-
-### Pedido — página estilo rede social (Facebook/Instagram) (2026-07-17, Pedro via Rafael)
-Pedro pediu que a parte de condolências/homenagens da página do memorial fique parecida com rede social (Facebook/Instagram). Rafael reforçou: página hoje "tá muito pobre, sem campos, sem nada" — quer aproveitar melhor o espaço. **Não construído ainda, registrado pra desenvolver depois.** Formulário de condolência básico (nome+mensagem) já existe (`components/public/FormularioCondolencia.tsx`, 2026-07-17) — o pedido aqui é ir além: layout tipo feed, possivelmente reações/curtidas, mais campos de interação, hierarquia visual mais rica. Não decidido o escopo exato, nem se cruza com as 12 ideias já registradas em `docs/PESQUISA_EXPERIENCIA_FAMILIA.md` (mural de recado por voz, capítulos por prompt semanal, etc. já apontam nessa direção "mais social"). Avaliar junto, não construir do zero sem revisitar essa pesquisa.
 
 ### Decisão — Música de fundo (direitos autorais)
 **Família NÃO pode fazer upload de música livre.** Risco jurídico real: tocar música protegida publicamente é "comunicação ao público" pela Lei 9.610/98 (Lei de Direitos Autorais) — pode gerar notificação de remoção, cobrança do ECAD (arrecadação de execução pública no Brasil) ou processo de gravadora/artista.
 
 **Solução**: biblioteca curada de ~10-15 faixas **instrumentais royalty-free** (piano/cordas, tom sóbrio, licença de uso comercial explícita), hospedadas no nosso próprio Storage. Família escolhe de uma lista, não faz upload livre. Zero risco jurídico. Ainda não construído — falta: escolher/licenciar as faixas, subir pro bucket, criar o seletor no formulário.
 
-### Pendente de verificação — limite de fotos/armazenamento
-Quantidade de fotos/vídeo por memorial ainda **não foi definida com número real** — depende do plano contratado no Supabase (armazenamento e banda). Não inventar número sem checar o plano atual primeiro.
+### Limite de fotos/armazenamento — RESOLVIDO (2026-07-23)
+Confirmado: 10 fotos (8MB cada) + 4 vídeos (100MB cada), quota 500MB/memorial. Ver seção "Especificação de mídia por memorial" acima.
 
 ## Convenção de Teste
 **Toda área de cadastro nova vem com 2 registros fictícios** já cadastrados, pra nunca ficar vendo tela vazia ao revisar. (Ex: 2 funerárias, 2 memoriais.)
