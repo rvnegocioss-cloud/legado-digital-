@@ -8,7 +8,13 @@ import { AcenderVela } from "@/components/public/AcenderVela";
 import { FormularioCondolencia } from "@/components/public/FormularioCondolencia";
 import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
+import { SeletorTema } from "@/components/public/SeletorTema";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
+import { VAR_FUNDO_TOPO, VAR_FUNDO_BASE, VAR_DOURADO } from "@/lib/temasMemorial";
+
+// var CSS com fallback pro valor oficial navy+dourado — SeletorTema.tsx sobrescreve
+// em runtime via document.documentElement.style.setProperty(), sem reload.
+const v = (nomeVar: string, valorPadrao: string) => `var(${nomeVar}, ${valorPadrao})`;
 
 export const dynamic = "force-dynamic";
 
@@ -150,6 +156,8 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
   return (
     <div style={estilos.page}>
+      <SeletorTema />
+
       <header style={estilos.hero}>
         <div style={estilos.fotoGlowWrap}>
           <div style={estilos.fotoGlow} />
@@ -328,7 +336,7 @@ function SecaoTitulo({ texto }: { texto: string }) {
 const estilos: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "100vh",
-    background: `linear-gradient(180deg, ${CORES.fundoTopo} 0%, ${CORES.fundoBase} 100%)`,
+    background: `linear-gradient(180deg, ${v(VAR_FUNDO_TOPO, CORES.fundoTopo)} 0%, ${v(VAR_FUNDO_BASE, CORES.fundoBase)} 100%)`,
     color: CORES.textoForte,
     fontFamily: "Georgia, 'Times New Roman', serif",
     lineHeight: 1.6,
@@ -354,28 +362,28 @@ const estilos: Record<string, React.CSSProperties> = {
     height: 188,
     borderRadius: "50%",
     padding: 2,
-    background: CORES.dourado,
+    background: v(VAR_DOURADO, CORES.dourado),
   },
   fotoInner: {
     width: "100%",
     height: "100%",
     borderRadius: "50%",
     overflow: "hidden",
-    background: CORES.fundoTopo,
-    border: `4px solid ${CORES.fundoBase}`,
+    background: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+    border: `4px solid ${v(VAR_FUNDO_BASE, CORES.fundoBase)}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
   foto: { width: "100%", height: "100%", objectFit: "cover" },
-  monograma: { fontSize: 44, color: CORES.dourado, fontFamily: "Georgia, serif" },
+  monograma: { fontSize: 44, color: v(VAR_DOURADO, CORES.dourado), fontFamily: "Georgia, serif" },
   eyebrowLinha: { marginTop: 28, display: "flex", alignItems: "center", gap: 10 },
   hairlineCurta: { width: 24, height: 1, background: CORES.douradoBorda },
   eyebrow: {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 2,
-    color: CORES.dourado,
+    color: v(VAR_DOURADO, CORES.dourado),
     fontWeight: 600,
   },
   nome: {
@@ -385,7 +393,7 @@ const estilos: Record<string, React.CSSProperties> = {
     lineHeight: 1.1,
     letterSpacing: -0.5,
   },
-  anos: { fontSize: 20, color: CORES.dourado, marginBottom: 6 },
+  anos: { fontSize: 20, color: v(VAR_DOURADO, CORES.dourado), marginBottom: 6 },
   cidade: { display: "inline-flex", alignItems: "center", gap: 6, color: CORES.textoFraco, fontSize: 15 },
   fraseWrap: { marginTop: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 },
   frase: {
@@ -401,7 +409,7 @@ const estilos: Record<string, React.CSSProperties> = {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: 2,
-    color: CORES.dourado,
+    color: v(VAR_DOURADO, CORES.dourado),
     fontWeight: 600,
     margin: 0,
   },
@@ -425,7 +433,7 @@ const estilos: Record<string, React.CSSProperties> = {
     boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
   },
   timelineWrap: { marginTop: 18, position: "relative", paddingLeft: 24 },
-  timelineEspinha: { position: "absolute", left: 4, top: 0, bottom: 0, width: 2, background: CORES.dourado },
+  timelineEspinha: { position: "absolute", left: 4, top: 0, bottom: 0, width: 2, background: v(VAR_DOURADO, CORES.dourado) },
   timelineItem: { position: "relative", display: "flex", flexDirection: "column" },
   timelineNo: {
     position: "absolute",
@@ -434,16 +442,16 @@ const estilos: Record<string, React.CSSProperties> = {
     width: 10,
     height: 10,
     borderRadius: "50%",
-    background: CORES.dourado,
-    boxShadow: `0 0 0 3px ${CORES.fundoBase}`,
+    background: v(VAR_DOURADO, CORES.dourado),
+    boxShadow: `0 0 0 3px ${v(VAR_FUNDO_BASE, CORES.fundoBase)}`,
   },
-  timelineAno: { color: CORES.dourado, fontSize: 24, fontFamily: "Georgia, serif", lineHeight: 1 },
+  timelineAno: { color: v(VAR_DOURADO, CORES.dourado), fontSize: 24, fontFamily: "Georgia, serif", lineHeight: 1 },
   timelineTitulo: { fontSize: 17, marginTop: 6, color: CORES.textoForte },
   timelineDesc: { color: CORES.textoFraco, fontSize: 14.5, marginTop: 4, lineHeight: 1.6 },
   condolenciasWrap: { marginTop: 18, display: "flex", flexDirection: "column", gap: 12 },
   condolenciaCard: {
     background: CORES.superficieCard,
-    borderLeft: `2px solid ${CORES.dourado}`,
+    borderLeft: `2px solid ${v(VAR_DOURADO, CORES.dourado)}`,
     border: `1px solid ${CORES.douradoBorda}`,
     borderRadius: 10,
     padding: 16,

@@ -654,6 +654,25 @@ export default function MapaPaginas() {
             </a>
           </div>
         </div>
+
+        <div className="callout">
+          <span className="mark">💰</span>
+          <div className="body">
+            <strong>Custo de armazenamento em escala</strong> — cada memorial vai guardar até
+            10 fotos + 4 vídeos (80MB + 400MB = 480MB, quota proposta de 500MB). Preço real
+            do Supabase Pro + Vercel Pro pesquisado em julho de 2026 e projetado até 100 mil
+            memoriais ativos.
+            <p>
+              Armazenamento sozinho é barato mesmo em escala grande ($1.072,90/mês em 100 mil
+              memoriais). O item que precisa de atenção é <strong>banda de visita</strong> —
+              cresce com quantas pessoas acessam o memorial, não só com quanto foi guardado.
+              Estimativa: ~$3.930/mês total (armazenamento + banda) em 100 mil memoriais.
+            </p>
+            <a href="/admin/mapa/custos" style={{ color: 'var(--gold)', fontSize: '0.85rem', textDecoration: 'underline', display: 'inline-block', marginTop: '0.6rem' }}>
+              Relatório completo — custo de armazenamento por escala →
+            </a>
+          </div>
+        </div>
       </section>
 
       <section className="section">
