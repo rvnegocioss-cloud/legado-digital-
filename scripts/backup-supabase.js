@@ -74,11 +74,14 @@ async function backupViaPgDump() {
 }
 
 async function backupViaApi() {
-  // Fallback: exportar via Supabase REST API com validação real
+  // Fallback: exportar via Supabase REST API (fetch nativo, service role key — bypassa RLS)
   console.log('🔄 Exportando via Supabase REST API (fallback)...');
 
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-    console.error('❌ Faltam env vars: SUPABASE_URL ou SUPABASE_ANON_KEY');
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    console.error('❌ Faltam env vars: NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY');
     return false;
   }
 
@@ -89,23 +92,37 @@ async function backupViaApi() {
     'configuracoes_sistema', 'mapa_sugestoes', 'parceiros_contatos'
   ];
 
-  let totalSize = 0;
   const backupContent = [];
-  backupContent.push(`-- Backup Supabase via REST API (fallback)\n-- ${now.toISOString()}\n-- Método: partial export\n\n`);
+  backupContent.push(`-- Backup Supabase via REST API (fallback)\n-- ${now.toISOString()}\n-- Método: partial export (JSON por tabela, service role key)\n\n`);
+
+  let totalRows = 0;
+  let tablesOk = 0;
+  let tablesFailed = 0;
 
   for (const table of tables) {
     try {
-      const response = await execAsync(
-        `curl -s -H "apikey: ${process.env.SUPABASE_ANON_KEY}" \
-        "${process.env.SUPABASE_URL}/rest/v1/${table}?select=*" | jq -r 'to_entries | map(.value) | @json' 2>/dev/null || echo "{}"`
-      );
+      const res = await fetch(`${supabaseUrl}/rest/v1/${table}?select=*`, {
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+        },
+      });
 
-      if (response.stdout && response.stdout.trim() !== '{}') {
-        backupContent.push(`-- Table: ${table}\n${response.stdout}\n`);
-        totalSize += response.stdout.length;
+      if (!res.ok) {
+        console.warn(`⚠️ ${table}: HTTP ${res.status}`);
+        tablesFailed++;
+        continue;
       }
+
+      const rows = await res.json();
+      const count = Array.isArray(rows) ? rows.length : 0;
+      totalRows += count;
+      tablesOk++;
+
+      backupContent.push(`-- Table: ${table} (${count} linhas)\n${JSON.stringify(rows, null, 2)}\n\n`);
     } catch (e) {
       console.warn(`⚠️ Falha ao exportar ${table}: ${e.message}`);
+      tablesFailed++;
     }
   }
 
@@ -113,16 +130,26 @@ async function backupViaApi() {
   fs.writeFileSync(backupFile, backupText);
 
   const fileSize = fs.statSync(backupFile).size;
-  const MIN_BACKUP_SIZE = 1000000; // 1 MB mínimo
 
-  if (fileSize > MIN_BACKUP_SIZE) {
-    console.log(`✓ Backup via API concluído: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
-    return true;
-  } else {
-    console.error(`❌ Backup via API gerou arquivo muito pequeno: ${fileSize} bytes (esperado > 1MB)`);
+  // Validação por conteúdo real (linha/tabela), não só tamanho em bytes —
+  // projeto novo com poucos registros de teste teria bytes baixos mas ainda válido.
+  if (tablesOk === 0) {
+    console.error(`❌ Backup via API falhou: nenhuma tabela respondeu (${tablesFailed} falharam)`);
     fs.unlinkSync(backupFile);
     return false;
   }
+
+  if (totalRows === 0) {
+    console.error(`❌ Backup via API suspeito: ${tablesOk} tabelas responderam mas 0 linhas no total — checar RLS/chave`);
+    fs.unlinkSync(backupFile);
+    return false;
+  }
+
+  console.log(`✓ Backup via API concluído: ${tablesOk}/${tables.length} tabelas, ${totalRows} linhas totais, ${(fileSize / 1024).toFixed(1)}KB`);
+  if (tablesFailed > 0) {
+    console.warn(`⚠️ ${tablesFailed} tabela(s) falharam ao exportar — ver avisos acima`);
+  }
+  return true;
 }
 
 async function saveMetadata() {

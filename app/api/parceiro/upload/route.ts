@@ -9,8 +9,8 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const rateLimitMap = new Map<string, number[]>()
 
 const LIMITS = {
-  maxFotoSize: 10 * 1024 * 1024, // 10MB
-  maxVideoSize: 50 * 1024 * 1024, // 50MB
+  maxFotoSize: 8 * 1024 * 1024, // 8MB
+  maxVideoSize: 100 * 1024 * 1024, // 100MB
   maxQuotaPerMemorial: 500 * 1024 * 1024, // 500MB total
   maxFilesPerMinute: 5,
 }

@@ -10,8 +10,8 @@ const rateLimitMap = new Map<string, number[]>()
 
 // Limites configuráveis (bytes)
 const LIMITS = {
-  maxFotoSize: 10 * 1024 * 1024, // 10MB
-  maxVideoSize: 50 * 1024 * 1024, // 50MB
+  maxFotoSize: 8 * 1024 * 1024, // 8MB
+  maxVideoSize: 100 * 1024 * 1024, // 100MB
   maxQuotaPerMemorial: 500 * 1024 * 1024, // 500MB total
   maxFilesPerMinute: 10, // Staff pode fazer mais uploads que família
 }
