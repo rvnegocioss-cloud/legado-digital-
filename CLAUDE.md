@@ -128,7 +128,7 @@ Tudo do checklist de Fase 1/2 abaixo está **feito** (schema, auth, CRUDs de Par
 - [ ] Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` ainda não está nas env vars do Vercel (só `.env.local`) — "Convidar contato" só funciona em produção depois disso
 - [ ] Domínio pro Resend: `legadodigital.net` já registrado (Hostinger) — falta decidir rota de ativação do Google Workspace (painel Hostinger vs direto + DNS manual)
-- [ ] **Nova página do memorial** (mockup gerado no Claude Design, mapeado 2026-07-23) — visual mais editorial/minimalista sobre o que já é real (banco/RPC). Ver seção "Página do Memorial" abaixo.
+- [x] **Layout responsivo da página do memorial** (mockup Claude Design, 2026-07-23) — container 520/1100px, hero lado a lado no desktop, seção "Acender uma vela" na posição do mockup (fim da página). Fonte mantida (Georgia) — decisão do Rafael, não trocou pro Playfair/Source Sans do mockup. Spec: `docs/superpowers/specs/2026-07-23-pagina-memorial-redesign-mockup.md`, plano: `docs/superpowers/plans/2026-07-23-pagina-memorial-layout-responsivo.md`.
 
 ## Portal do Parceiro B2B — como funciona
 Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os próprios memoriais.
@@ -187,8 +187,8 @@ Pública, sem login, **componente 100% servidor** (zero JS client contínuo na r
 
 **Não implementado ainda:** troca de tema persistente, compartilhar, música de fundo (biblioteca curada royalty-free planejada, não construída — família NÃO pode fazer upload de música livre, risco de direito autoral/ECAD), múltiplos vídeos por memorial, links de Privacidade/Termos no rodapé, rate-limit de escrita pública via Route Handler (ver Fase Atual).
 
-### Novo visual em avaliação (mockup Claude Design, mapeado 2026-07-23)
-Rafael gerou um mockup no Claude Design (export "Bundled Page" — protótipo `DCLogic`, não é React/Next pronto) e pediu pra trocar a página atual por ele, mantendo TODAS as integrações reais (banco, RPC, RLS). Mockup analisado seção a seção: hero (anel+monograma/foto, glow, nome serif Playfair Display), faixa de presença viva, biografia com drop-cap + card lateral, timeline em espinha, galeria mosaico A/B com lightbox, mural de memórias (masonry), condolências com formulário, acender vela com voo de chama pra parede de 45 velas (técnica quase idêntica à já implementada), rodapé. Fonte Playfair Display + Source Sans 3 embutida via `@font-face`/woff2 no bundle (não é fetch externo). Paleta igual à oficial (`#0B1D2A`/`#C9A46A`). Diferença: mockup não tem o vídeo real da vela principal nem o seletor de tema. **Ainda não implementado** — aguardando confirmação do Rafael pra reconstruir como componente Next.js real plugado no Supabase.
+### Layout responsivo — feito (2026-07-23)
+Mockup gerado no Claude Design (export "Bundled Page") analisado seção a seção — maior parte já batia com a produção (galeria mosaico A/B+lightbox, mural com corações via RPC, timeline em espinha, vela com parede de 45+chama voando). Gap real era só largura/layout: container fixo 720px virou responsivo (520px mobile/1100px desktop, classe `.mem-container`), hero virou linha (foto+texto lado a lado) no desktop em vez de sempre coluna centralizada, seção "Acender uma vela" saiu de dentro do hero e virou seção própria perto do rodapé (posição do mockup). Fonte mantida Georgia — decisão do Rafael, não trocou pro Playfair Display/Source Sans 3 do mockup.
 
 ## Convenção de Teste
 Toda área de cadastro nova vem com 2 registros fictícios já cadastrados.
