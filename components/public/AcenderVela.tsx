@@ -28,15 +28,29 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   const [voo, setVoo] = useState<Voo | null>(null)
   const [principalAcesa, setPrincipalAcesa] = useState(false)
   const [jaAcendi, setJaAcendi] = useState(false)
-  const chaveLocal = `vela_${slug}`
 
   const secaoRef = useRef<HTMLDivElement | null>(null)
   const chamaPrincipalRef = useRef<HTMLDivElement | null>(null)
   const paredeRefs = useRef<Record<number, HTMLDivElement | null>>({})
+  // Próximo slot da parede a "reacender" — depois que os 45 já estão acesos,
+  // continua em loop pelos mesmos índices (a chama sempre voa em algum lugar).
+  const proximoIndiceRef = useRef(Math.min(velasIniciais, TAMANHO_PAREDE) % TAMANHO_PAREDE)
 
   function acenderEApagarPrincipal(duracaoMs: number) {
     setPrincipalAcesa(true)
     setTimeout(() => setPrincipalAcesa(false), duracaoMs)
+  }
+
+  function acenderSlotDaParede(indiceAlvo: number) {
+    setParedeAcesas((p) => Math.max(p, indiceAlvo + 1))
+    setIndiceRecemAceso(indiceAlvo)
+    setTimeout(() => setIndiceRecemAceso(null), 700)
+
+    // Parede completou a volta (acendeu a última) — apaga tudo depois de um
+    // instante e recomeça do zero no próximo clique (pedido do Rafael, 2026-07-24).
+    if (indiceAlvo === TAMANHO_PAREDE - 1) {
+      setTimeout(() => setParedeAcesas(0), 1200)
+    }
   }
 
   function iniciarVoo(indiceAlvo: number) {
@@ -48,9 +62,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
 
     if (!secao || !origem || !destino) {
       // Sem medida possível (refs ainda não montaram) — acende direto, sem animação de voo.
-      setParedeAcesas((p) => Math.max(p, indiceAlvo + 1))
-      setIndiceRecemAceso(indiceAlvo)
-      setTimeout(() => setIndiceRecemAceso(null), 700)
+      acenderSlotDaParede(indiceAlvo)
       return
     }
 
@@ -74,35 +86,23 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
 
     setTimeout(() => {
       setVoo(null)
-      setParedeAcesas((p) => Math.max(p, indiceAlvo + 1))
-      setIndiceRecemAceso(indiceAlvo)
-      setTimeout(() => setIndiceRecemAceso(null), 700)
+      acenderSlotDaParede(indiceAlvo)
     }, 900)
   }
 
   async function acender() {
-    const jaAcendeuAntes = typeof window !== 'undefined' && window.localStorage.getItem(chaveLocal)
-
-    if (jaAcendeuAntes) {
-      // Já contou antes (regra: contador nunca soma 2x pro mesmo visitante) —
-      // só acende e apaga a principal de novo, sem mudar parede/contador.
-      acenderEApagarPrincipal(900)
-      return
-    }
-
+    // Sem limite de 1x por visitante — cada clique conta e voa de novo,
+    // quantas vezes a pessoa quiser (pedido explícito do Rafael, 2026-07-24).
     const { data, error } = await supabase.rpc('acender_vela', { p_slug: slug })
     if (error) return
 
-    window.localStorage.setItem(chaveLocal, '1')
     setJaAcendi(true)
     const novoTotal = typeof data === 'number' ? data : contagem + 1
     setContagem(novoTotal)
 
-    if (paredeAcesas < TAMANHO_PAREDE) {
-      iniciarVoo(paredeAcesas)
-    } else {
-      acenderEApagarPrincipal(900)
-    }
+    const alvo = proximoIndiceRef.current
+    proximoIndiceRef.current = (alvo + 1) % TAMANHO_PAREDE
+    iniciarVoo(alvo)
   }
 
   return (
@@ -130,34 +130,46 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
                 ref={(el) => {
                   paredeRefs.current[i] = el
                 }}
-                style={{ position: 'relative', width: 16, height: 26, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+                style={{ position: 'relative', width: 28, height: 44, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
               >
                 {/* Copo/cuia da vela votiva */}
                 <div
                   style={{
-                    width: 10,
-                    height: 12,
-                    borderRadius: '1px 1px 4px 4px',
+                    width: 15,
+                    height: 18,
+                    borderRadius: '2px 2px 6px 6px',
                     background: 'linear-gradient(180deg, rgba(201,164,106,0.15), rgba(160,124,72,0.32))',
                     border: `1px solid ${CORES.douradoBorda}`,
-                    boxShadow: estaAcesa ? '0 0 8px 1px rgba(255,170,80,0.35)' : 'none',
                   }}
                 />
+                {/* Glow atrás da chama */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 11,
+                    left: '50%',
+                    width: 24,
+                    height: 24,
+                    transform: 'translateX(-50%)',
+                    background: 'radial-gradient(circle, rgba(255,196,120,0.55), transparent 70%)',
+                    opacity: estaAcesa ? 0.85 : 0,
+                    transition: 'opacity 0.6s ease',
+                    pointerEvents: 'none',
+                  }}
+                />
+                {/* Pavio */}
+                <div style={{ position: 'absolute', bottom: 16, left: '50%', width: 2, height: 5, background: '#4a3a28', transform: 'translateX(-50%)' }} />
                 {estaAcesa && (
                   <div
-                    className={acabouDeAcender ? 'vela-parede-acender' : undefined}
+                    className={`vela-flame${acabouDeAcender ? ' vela-parede-acender' : ''}`}
                     style={{
                       position: 'absolute',
-                      bottom: 9,
+                      bottom: 18,
                       left: '50%',
-                      transform: 'translateX(-50%) skewX(50deg) rotate(45deg) scale(0.6, 5) rotate(15deg) skewX(-50deg)',
-                      transformOrigin: '50% 100%',
-                      width: 6,
-                      height: 6,
-                      borderRadius: '0 1em 1em 1em',
-                      background: 'radial-gradient(circle at 50% 15%, #fff6d0 0%, #ffd35c 30%, #ff9a3c 60%, #e2632f 85%, transparent 100%)',
-                      filter: 'drop-shadow(0 0 4px rgba(255,150,60,0.7))',
-                      animation: `vela-flicker-flame ${(2 + seed * 1.4).toFixed(2)}s ease-in-out ${(-seed * 2).toFixed(2)}s infinite`,
+                      width: 7,
+                      height: 11,
+                      animationDuration: `${(2 + seed * 1.4).toFixed(2)}s`,
+                      animationDelay: `${(-seed * 2).toFixed(2)}s`,
                     }}
                   />
                 )}
@@ -170,58 +182,36 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
       {/* Chama voando da vela principal até a vela da parede recém-acesa */}
       {voo && (
         <div
-          className="vela-voo"
+          className="vela-voo vela-flame"
           style={{
             position: 'absolute',
             top: voo.top,
             left: voo.left,
-            width: 12,
-            height: 16,
-            transform: `translate(-50%,-100%) scale(${voo.fase === 'fim' ? 0.35 : 1})`,
+            width: 14,
+            height: 20,
+            animation: 'none',
+            transform: `translate(0,-100%) translateX(-50%) rotate(-45deg) scale(${voo.fase === 'fim' ? 0.4 : 1})`,
             opacity: voo.fase === 'fim' ? 0.15 : 1,
-            borderRadius: '0 1em 1em 1em',
-            background: 'radial-gradient(circle at 50% 15%, #fff6d0 0%, #ffd35c 30%, #ff9a3c 60%, #e2632f 85%, transparent 100%)',
-            boxShadow: '0 0 14px 4px rgba(255,170,80,0.55)',
+            filter: 'drop-shadow(0 0 8px rgba(255,170,80,0.6))',
             pointerEvents: 'none',
             zIndex: 6,
           }}
         />
       )}
 
-      {/* Vela principal — chama em CSS puro (mesma técnica provada das velas da
-          parede, sem risco de borda/artefato que o vídeo com mix-blend-mode tinha). */}
-      <div style={{ position: 'relative', width: 60, height: 88, margin: '0 auto' }}>
-        {principalAcesa && (
-          <div
-            className="vela-glow-ambiente"
-            style={{
-              position: 'absolute',
-              left: '50%',
-              bottom: 20,
-              transform: 'translateX(-50%)',
-              width: 70,
-              height: 70,
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(255,160,70,0.55) 0%, transparent 70%)',
-              filter: 'blur(8px)',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-
+      {/* Vela principal — mesma forma de chama do mockup (border-radius + rotate),
+          fica apagada por padrão, acende só no gesto de clicar (ver acender()/iniciarVoo()). */}
+      <div style={{ position: 'relative', width: 120, height: 100, margin: '0 auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
         <div
           style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: 0,
-            transform: 'translateX(-50%)',
-            width: 32,
-            height: 40,
-            borderRadius: '4px 10px 2px 2px',
-            background: 'radial-gradient(circle at 30% 0%, #fdfbf3 15%, #e4ddc8 60%, #c9bfa1 100%)',
-            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25)',
+            width: 14,
+            height: 60,
+            background: 'linear-gradient(#EAE3D6, #C9A46A)',
+            borderRadius: 2,
+            boxShadow: 'inset 0 0 6px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25)',
           }}
         >
+          {/* Pavio — âncora fixa pro cálculo de voo (getBoundingClientRect), sempre montado */}
           <div
             ref={chamaPrincipalRef}
             style={{
@@ -230,14 +220,13 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
               left: '50%',
               marginLeft: -1,
               width: 2,
-              height: 10,
+              height: 8,
               background: '#2a221a',
             }}
           >
             {/* Brasa — visível só quando apagada */}
             {!principalAcesa && (
               <div
-                className="vela-brasa"
                 style={{
                   position: 'absolute',
                   bottom: '100%',
@@ -245,19 +234,34 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
                   marginLeft: -2,
                   width: 4,
                   height: 4,
+                  borderRadius: '1em',
+                  background: 'radial-gradient(circle at top right, #ffe98a, #ff5a1f)',
                 }}
               />
             )}
-
-            {/* Chama CSS (transform composto skew+rotate+scale, técnica de
-                components/public/AcenderVela original — sem borda/artefato) —
-                só aparece no gesto de acender, depois apaga de novo. */}
-            {principalAcesa && (
-              <div className="vela-chama-intensidade" style={{ position: 'absolute', bottom: '100%', left: '50%', marginLeft: -8, width: 16, height: 10 }}>
-                <div className="vela-chama" style={{ width: '100%', height: '100%' }} />
-              </div>
-            )}
           </div>
+
+          {principalAcesa && (
+            <>
+              <div
+                className="vela-glow"
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  marginLeft: -35,
+                  width: 70,
+                  height: 70,
+                  background: 'radial-gradient(circle, rgba(255,196,120,0.5), transparent 70%)',
+                  pointerEvents: 'none',
+                }}
+              />
+              <div
+                className="vela-flame"
+                style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: '50%', width: 22, height: 30 }}
+              />
+            </>
+          )}
         </div>
       </div>
 

@@ -22,6 +22,7 @@
 16. **Toda feature nova refletida nos lados relevantes** (Central ↔ Portal do Parceiro ↔ Página Pública) — nunca implementar só de um lado.
 17. **Nunca remover/mexer na seção "Como Chegar"** (`GuiaTumulo`/`GuiaTumuloCarregador`, mapa/rota até o cemitério e o túmulo na página do memorial) sem pedido explícito do Rafael. Regra registrada 2026-07-23.
 18. **Não desobedecer instrução explícita do Rafael** — quando ele pede uma ação direta (commitar, subir, corrigir algo específico), executar sem ficar re-explicando/re-verificando em loop nem adicionando passo extra não pedido. Dúvida real de segurança (regra 1) ainda vale, mas fora isso a obediência é direta. Regra registrada 2026-07-24.
+19. **Quando faltar dado pra uma seção aparecer** (ex: memorial de teste sem galeria/timeline), gerar/cadastrar o dado direto (fictício quando for teste, real quando fizer sentido) — não só reportar que falta, resolver. Regra registrada 2026-07-24.
 
 ## Convenções
 - Toda área de cadastro nova vem com 2 registros fictícios já cadastrados (nunca tela vazia ao revisar).

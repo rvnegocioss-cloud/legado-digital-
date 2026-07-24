@@ -154,53 +154,42 @@ html {
   mask-image: linear-gradient(180deg, transparent, #000 24px, #000 calc(100% - 24px), transparent);
 }
 
-/* ===== Vela — chama CSS real (técnica provada: skew+rotate+scale compostos
-   dão o formato de gota/chama, não border-radius simples). Zero JS contínuo,
-   só @keyframes no compositor da GPU. Referência: codepen.io/antoniandre/pen/aRPJoM ===== */
-.vela-chama-intensidade {
-  animation: vela-flicker-flame 2.2s ease-in-out infinite;
-  transform-origin: 50% 100%;
+/* ===== Vela — chama fiel ao mockup Claude Design (2026-07-23): gota simples
+   via border-radius assimétrico + rotate(-45deg), sem skew/scale composto.
+   Zero JS contínuo, só @keyframes no compositor da GPU. ===== */
+.vela-flame {
+  background: linear-gradient(to top, #ff7a3d, #ffce7a 60%, #fff3d6);
+  border-radius: 50% 50% 50% 0;
+  transform: translateX(-50%) rotate(-45deg);
+  transform-origin: bottom center;
+  animation: vela-flicker 2.6s ease-in-out infinite;
 }
-.vela-chama {
-  background: radial-gradient(circle at 50% 15%, #fff6d0 0%, #ffd35c 30%, #ff9a3c 60%, #e2632f 85%, transparent 100%);
-  border-radius: 0 1em 1em 1em;
-  transform: skewX(50deg) rotate(45deg) scale(1, 3.4) rotate(15deg) skewX(-50deg);
-  transform-origin: 50% 100%;
-  animation: vela-flame-dance 2.6s ease-in-out infinite alternate;
-  filter: drop-shadow(0 0 8px rgba(255, 150, 60, 0.75));
+.vela-flame-burst {
+  animation: vela-burst 0.5s ease;
 }
-.vela-brasa {
-  background: radial-gradient(circle at top right, #ffe98a, #ff5a1f);
-  border-radius: 1em;
+@keyframes vela-flicker {
+  0%, 100% { transform: translateX(-50%) scaleY(1) scaleX(1) rotate(-45deg); opacity: 0.95; }
+  25% { transform: translateX(-50%) scaleY(1.08) scaleX(0.96) rotate(-44deg); opacity: 1; }
+  50% { transform: translateX(-50%) scaleY(0.94) scaleX(1.04) rotate(-46deg); opacity: 0.9; }
+  75% { transform: translateX(-50%) scaleY(1.05) scaleX(0.98) rotate(-45deg); opacity: 0.97; }
 }
-.vela-glow-ambiente {
-  animation: vela-glow-respirar 2.4s ease-in-out infinite;
+@keyframes vela-burst {
+  0% { transform: translateX(-50%) rotate(-45deg) scale(1); }
+  30% { transform: translateX(-50%) rotate(-45deg) scale(1.45); }
+  100% { transform: translateX(-50%) rotate(-45deg) scale(1); }
 }
-@keyframes vela-flame-dance {
-  0% { transform: skewX(50deg) rotate(45deg) scale(1, 3.4) rotate(15deg) skewX(-50deg); }
-  50% { transform: skewX(42deg) rotate(45deg) scale(1, 3.4) rotate(15deg) skewX(-50deg); }
-  100% { transform: skewX(46deg) rotate(45deg) scale(1, 3.4) rotate(19deg) skewX(-50deg); }
+.vela-glow {
+  animation: vela-glow-pulse 3.5s ease-in-out infinite;
 }
-@keyframes vela-flicker-flame {
-  0%, 100% { opacity: 1; transform: scale(1, 1); }
-  20% { opacity: 0.85; transform: scale(0.9, 0.85); }
-  45% { opacity: 1; transform: scale(1.06, 0.96); }
-  70% { opacity: 0.9; transform: scale(0.94, 1.03); }
-}
-@keyframes vela-glow-respirar {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.7; }
+@keyframes vela-glow-pulse {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.85; transform: translateX(-50%) scale(1.12); }
 }
 
 /* Mural de velas votivas — vela da parede acende com uma "explosão" curta
-   de escala antes de assentar na respiração normal (vela-flicker-flame). */
-@keyframes vela-parede-burst {
-  0% { transform: scale(1); }
-  35% { transform: scale(1.5); }
-  100% { transform: scale(1); }
-}
+   de escala antes de assentar na respiração normal (vela-flicker). */
 .vela-parede-acender {
-  animation: vela-parede-burst 0.6s ease;
+  animation: vela-burst 0.6s ease;
 }
 
 /* Chama voando da vela principal até a vela da parede que acabou de acender.
