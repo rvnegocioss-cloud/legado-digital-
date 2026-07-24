@@ -23,7 +23,9 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   // a chama "voa" até a parede e acende a vela de lá, depois a principal
   // apaga de novo — ela é só o gesto de acender, não fica queimando pra sempre.
   const [contagem, setContagem] = useState(velasIniciais)
-  const [paredeAcesas, setParedeAcesas] = useState(() => Math.min(velasIniciais, TAMANHO_PAREDE))
+  // Módulo, não Math.min — depois que a parede já deu uma volta completa (mais de
+  // 45 no total), ela reflete só o progresso da volta atual, não fica sempre cheia.
+  const [paredeAcesas, setParedeAcesas] = useState(() => velasIniciais % TAMANHO_PAREDE)
   const [indiceRecemAceso, setIndiceRecemAceso] = useState<number | null>(null)
   const [voo, setVoo] = useState<Voo | null>(null)
   const [principalAcesa, setPrincipalAcesa] = useState(false)
@@ -33,7 +35,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   const paredeRefs = useRef<Record<number, HTMLDivElement | null>>({})
   // Próximo slot da parede a "reacender" — depois que os 45 já estão acesos,
   // continua em loop pelos mesmos índices (a chama sempre voa em algum lugar).
-  const proximoIndiceRef = useRef(Math.min(velasIniciais, TAMANHO_PAREDE) % TAMANHO_PAREDE)
+  const proximoIndiceRef = useRef(velasIniciais % TAMANHO_PAREDE)
 
   function acenderEApagarPrincipal(duracaoMs: number) {
     setPrincipalAcesa(true)
