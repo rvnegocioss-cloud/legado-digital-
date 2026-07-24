@@ -7,43 +7,34 @@ Rafael gerou um mockup no Claude Design (export "Bundled Page", protótipo `DCLo
 - Nenhuma query Supabase, RPC, RLS, rate limit.
 - Nenhum contrato de props dos componentes client (`AcenderVela`, `GaleriaFotos`, `MuralMemorias`, `FormularioCondolencia`, `GateSenhaAcesso`, `SeletorTema`).
 - `lib/publicTheme.ts` (`CORES`) e `lib/temasMemorial.ts` (variáveis CSS do seletor de tema) — paleta já é a mesma do mockup (`#0B1D2A`/`#C9A46A`).
+- **Fonte — decisão do Rafael (2026-07-23):** mantém a fonte atual do projeto (Georgia/Times New Roman serif), não troca pra Playfair Display/Source Sans 3 do mockup. Escopo dessa tarefa é só layout/largura/responsividade.
 
 ## Gap real identificado (comparação página atual vs mockup)
 
 | Aspecto | Hoje (`app/homenagem/[slug]/page.tsx`) | Mockup |
 |---|---|---|
-| Fonte títulos/nome | `"Georgia, serif"` hardcoded | Playfair Display |
-| Fonte corpo | Herda o mesmo Georgia da página inteira | Source Sans 3 |
 | Largura do conteúdo | Fixa em 720px sempre (mobile e desktop) | 520px mobile / 1100px desktop |
 | Hero (foto+texto) | Sempre coluna centralizada | Linha lado a lado no desktop, coluna no mobile |
 | Anel da foto | Fixo 188px | 160px mobile / 220px desktop |
 | Breakpoint mobile | 640px (só na Galeria) | 768px (mockup inteiro) |
+| Fonte | Georgia/Times New Roman (mantém — decisão do Rafael) | Playfair Display + Source Sans 3 (não aplicado) |
 
-`Playfair Display` **já está carregado** em `app/layout.tsx` via `next/font/google` (`variable: "--font-serif"`) — só não é usado na página do memorial ainda. `Source Sans 3` **não está carregado**, precisa ser adicionado.
-
-Componentes que **já batem** com o mockup (sem mudança funcional, só troca de fonte onde usam Georgia hardcoded): `FaixaPresencaViva`, `ResumoPoucasPalavras`, `GaleriaFotos`, `MuralMemorias`, `AcenderVela`.
+Componentes que **já batem** com o mockup, sem nenhuma mudança: `FaixaPresencaViva`, `ResumoPoucasPalavras`, `GaleriaFotos` (mosaico A/B + lightbox), `MuralMemorias` (corações via RPC), `AcenderVela` (parede de 45 velas + chama voando).
 
 ## Mudanças por arquivo
 
-1. **`app/layout.tsx`** — adicionar `Source_Sans_3` do `next/font/google` como variável `--font-body`, ao lado do `Playfair_Display` (`--font-serif`) já existente. Aplicado no `className` do `<html>`, disponível em toda a árvore sem prop-drilling.
-
-2. **`app/homenagem/[slug]/page.tsx`** (maior mudança):
-   - `estilos.page.fontFamily` → `var(--font-body)` (era Georgia hardcoded)
-   - Todo lugar com `"Georgia, serif"` hardcoded (`monograma`, `nome`, `anos`, `frase`, `timelineAno`) → `var(--font-serif)`
-   - `estilos.label` (título de seção, `SecaoTitulo`) → `var(--font-serif)`
+1. **`app/homenagem/[slug]/page.tsx`** (mudança principal, só layout — fonte não muda):
    - Largura do hero/main: trocar `maxWidth: 720` fixo por classe CSS nova (`.mem-container`) com `max-width: 520px` mobile / `1100px` desktop via media query em `globals.css` (mesmo padrão já usado em `.mem-bio-grid`)
    - Hero: nova classe `.mem-hero` — `flex-direction: column` mobile, `row` desktop (≥768px) via media query, texto centralizado mobile / alinhado à esquerda desktop
    - Anel da foto: `.mem-hero-ring` com `width`/`height` via `clamp(160px, 20vw, 220px)` (sem JS, sem listener de resize novo)
 
-3. **`components/public/FaixaPresencaViva.tsx`** — `fontFamily: 'Georgia, serif'` → `var(--font-serif)`; tamanho do número via `clamp(26px, 4vw, 34px)` (mockup: 26px mobile / 34px desktop)
+2. **`components/public/FaixaPresencaViva.tsx`** — tamanho do número via `clamp(26px, 4vw, 34px)` (mockup: 26px mobile / 34px desktop), fonte mantém Georgia
 
-4. **`components/public/ResumoPoucasPalavras.tsx`** — `fontFamily: 'Georgia, serif'` → `var(--font-serif)` no heading "Em poucas palavras"
+3. **`components/public/GaleriaFotos.tsx`** — breakpoint mobile de 640px → 768px (consistência com o resto da página); `gridAutoRows` mobile 90→78, desktop 110→100 (valores exatos do mockup). Resto (mosaico A/B, lightbox) fica igual, já bate.
 
-5. **`components/public/GaleriaFotos.tsx`** — breakpoint mobile de 640px → 768px (consistência com o resto da página); `gridAutoRows` mobile 90→78, desktop 110→100 (valores exatos do mockup). Resto (mosaico A/B, lightbox) fica igual, já bate.
+4. **`app/globals.css`** — novas classes `.mem-container` (largura responsiva) e `.mem-hero` (row/column responsivo), seguindo o padrão que já existe pra `.mem-bio-grid`/`.mem-timeline-espinha`.
 
-6. **`components/public/MuralMemorias.tsx`** e **`components/public/AcenderVela.tsx`** — sem mudança estrutural (já batem com o mockup); só aplicar `var(--font-body)` em texto de corpo onde hoje não define fonte explícita (herda do `<body>`, que passa a ser Source Sans 3 globalmente pela mudança no layout — pode não precisar de edição nenhuma nesses 2 arquivos).
-
-7. **`app/globals.css`** — novas classes `.mem-container` (largura responsiva) e `.mem-hero` (row/column responsivo), seguindo o padrão que já existe pra `.mem-bio-grid`/`.mem-timeline-espinha`.
+**Sem mudança nenhuma:** `ResumoPoucasPalavras.tsx`, `MuralMemorias.tsx`, `AcenderVela.tsx` — já batem com o mockup e a fonte não muda.
 
 ## Testing
 - `npm run build` + `npm run lint` + `npm run typecheck` verdes antes de qualquer commit (regra permanente do projeto).
