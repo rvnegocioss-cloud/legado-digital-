@@ -23,6 +23,7 @@
 17. **Nunca remover/mexer na seção "Como Chegar"** (`GuiaTumulo`/`GuiaTumuloCarregador`, mapa/rota até o cemitério e o túmulo na página do memorial) sem pedido explícito do Rafael. Regra registrada 2026-07-23.
 18. **Não desobedecer instrução explícita do Rafael** — quando ele pede uma ação direta (commitar, subir, corrigir algo específico), executar sem ficar re-explicando/re-verificando em loop nem adicionando passo extra não pedido. Dúvida real de segurança (regra 1) ainda vale, mas fora isso a obediência é direta. Regra registrada 2026-07-24.
 19. **Quando faltar dado pra uma seção aparecer** (ex: memorial de teste sem galeria/timeline), gerar/cadastrar o dado direto (fictício quando for teste, real quando fizer sentido) — não só reportar que falta, resolver. Regra registrada 2026-07-24.
+20. **Nunca mexer na estrutura/posição da vela (`components/public/AcenderVela.tsx`)** sem pedido explícito — corpo da vela, pavio, posição da chama (`bottom: calc(100% + 14px)`, `left: calc(50% + 8px)`, técnica `border-radius: 50% 50% 50% 0` + `rotate(-45deg)`) já estão calibrados certos, deu muito trabalho alinhar. Se qualquer variação nova de layout for criada, essa seção entra **idêntica**, reaproveitando o componente sem alteração. Regra registrada 2026-07-24.
 
 ## Convenções
 - Toda área de cadastro nova vem com 2 registros fictícios já cadastrados (nunca tela vazia ao revisar).
