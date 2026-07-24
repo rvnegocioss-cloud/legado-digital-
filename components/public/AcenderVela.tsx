@@ -253,7 +253,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
                 components/public/AcenderVela original — sem borda/artefato) —
                 só aparece no gesto de acender, depois apaga de novo. */}
             {principalAcesa && (
-              <div className="vela-chama-intensidade" style={{ position: 'absolute', bottom: '100%', left: '50%', marginLeft: -14, width: 28, height: 44 }}>
+              <div className="vela-chama-intensidade" style={{ position: 'absolute', bottom: '100%', left: '50%', marginLeft: -14, width: 28, height: 5 }}>
                 <div className="vela-chama" style={{ width: '100%', height: '100%' }} />
               </div>
             )}
