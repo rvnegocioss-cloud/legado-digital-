@@ -17,9 +17,11 @@
 11. **Toda página de detalhe/edição/login tem link de volta visível** no topo (nunca só o botão voltar do navegador).
 12. **Logo real (`public/logo-legado-digital.svg`) em toda tela de acesso/identificação**, via `next/image`, nunca texto solto. Sempre menor que o container que envolve, com folga — nunca transborda.
 13. **Layout de ficha na Central** — card grande (form/tabela/lista que cresce) ocupa linha cheia ou split 2/3+1/3 com painel de referência curto ao lado (caso "um grande + um de consulta rápida"); cards curtos nunca ficam sozinhos numa coluna larga, vão lado a lado num grid parelho (`lg:grid-cols-2 xl:grid-cols-3`). Central é ferramenta de trabalho densa (tela larga aproveitada), diferente do lado público (mobile-first).
-14. **`docs/LEGADOBOT_PROMPT.md` atualizado junto** com qualquer mudança na Central/Portal do Parceiro.
+14. **`docs/LEGADOBOT_PROMPT.md` atualizado junto** com qualquer mudança na Central/Portal do Parceiro. Gatilho: quando o Rafael disser explicitamente "aprovado"/"tá aprovado" sobre uma correção/feature — não é automático a cada commit, só quando ele confirma.
 15. **Ideia/pergunta sem resposta do Rafael** vai pro `docs/RASCUNHO_IDEIAS.md` — nunca decide/constrói de lá sem confirmação dele primeiro.
 16. **Toda feature nova refletida nos lados relevantes** (Central ↔ Portal do Parceiro ↔ Página Pública) — nunca implementar só de um lado.
+17. **Nunca remover/mexer na seção "Como Chegar"** (`GuiaTumulo`/`GuiaTumuloCarregador`, mapa/rota até o cemitério e o túmulo na página do memorial) sem pedido explícito do Rafael. Regra registrada 2026-07-23.
+18. **Não desobedecer instrução explícita do Rafael** — quando ele pede uma ação direta (commitar, subir, corrigir algo específico), executar sem ficar re-explicando/re-verificando em loop nem adicionando passo extra não pedido. Dúvida real de segurança (regra 1) ainda vale, mas fora isso a obediência é direta. Regra registrada 2026-07-24.
 
 ## Convenções
 - Toda área de cadastro nova vem com 2 registros fictícios já cadastrados (nunca tela vazia ao revisar).

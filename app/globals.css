@@ -164,7 +164,7 @@ html {
 .vela-chama {
   background: radial-gradient(circle at 50% 15%, #fff6d0 0%, #ffd35c 30%, #ff9a3c 60%, #e2632f 85%, transparent 100%);
   border-radius: 0 1em 1em 1em;
-  transform: skewX(50deg) rotate(45deg) scale(0.6, 7) rotate(15deg) skewX(-50deg);
+  transform: skewX(50deg) rotate(45deg) scale(1, 3.4) rotate(15deg) skewX(-50deg);
   transform-origin: 50% 100%;
   animation: vela-flame-dance 2.6s ease-in-out infinite alternate;
   filter: drop-shadow(0 0 8px rgba(255, 150, 60, 0.75));
@@ -177,9 +177,9 @@ html {
   animation: vela-glow-respirar 2.4s ease-in-out infinite;
 }
 @keyframes vela-flame-dance {
-  0% { transform: skewX(50deg) rotate(45deg) scale(0.6, 7) rotate(15deg) skewX(-50deg); }
-  50% { transform: skewX(42deg) rotate(45deg) scale(0.6, 7) rotate(15deg) skewX(-50deg); }
-  100% { transform: skewX(46deg) rotate(45deg) scale(0.6, 7) rotate(19deg) skewX(-50deg); }
+  0% { transform: skewX(50deg) rotate(45deg) scale(1, 3.4) rotate(15deg) skewX(-50deg); }
+  50% { transform: skewX(42deg) rotate(45deg) scale(1, 3.4) rotate(15deg) skewX(-50deg); }
+  100% { transform: skewX(46deg) rotate(45deg) scale(1, 3.4) rotate(19deg) skewX(-50deg); }
 }
 @keyframes vela-flicker-flame {
   0%, 100% { opacity: 1; transform: scale(1, 1); }
