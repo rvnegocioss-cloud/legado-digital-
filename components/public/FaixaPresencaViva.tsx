@@ -25,8 +25,8 @@ export function FaixaPresencaViva({ velas, homenagens, memorias }: Props) {
       }}
     >
       <div
+        className="mem-container"
         style={{
-          maxWidth: 720,
           margin: '0 auto',
           display: 'flex',
           justifyContent: 'space-around',
@@ -37,7 +37,7 @@ export function FaixaPresencaViva({ velas, homenagens, memorias }: Props) {
       >
         {itens.map((item) => (
           <div key={item.label}>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: 26, color: CORES.dourado }}>{item.valor}</div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(26px, 4vw, 34px)', color: CORES.dourado }}>{item.valor}</div>
             <div style={{ fontSize: 12, letterSpacing: 1, color: CORES.textoFraco, marginTop: 2 }}>{item.label}</div>
           </div>
         ))}
