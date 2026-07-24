@@ -27,7 +27,6 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   const [indiceRecemAceso, setIndiceRecemAceso] = useState<number | null>(null)
   const [voo, setVoo] = useState<Voo | null>(null)
   const [principalAcesa, setPrincipalAcesa] = useState(false)
-  const [jaAcendi, setJaAcendi] = useState(false)
 
   const secaoRef = useRef<HTMLDivElement | null>(null)
   const chamaPrincipalRef = useRef<HTMLDivElement | null>(null)
@@ -96,7 +95,6 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
     const { data, error } = await supabase.rpc('acender_vela', { p_slug: slug })
     if (error) return
 
-    setJaAcendi(true)
     const novoTotal = typeof data === 'number' ? data : contagem + 1
     setContagem(novoTotal)
 
@@ -259,7 +257,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
               />
               <div
                 className="vela-flame"
-                style={{ position: 'absolute', bottom: 'calc(100% - 4px)', left: '50%', width: 22, height: 30 }}
+                style={{ position: 'absolute', bottom: 'calc(100% + 4px)', left: 'calc(50% + 8px)', width: 22, height: 30 }}
               />
             </>
           )}
@@ -280,7 +278,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
           cursor: 'pointer',
         }}
       >
-        {jaAcendi ? 'VELA ACESA' : 'ACENDER UMA VELA'}
+        ACENDER UMA VELA
       </button>
 
       <div style={{ fontSize: 12, color: CORES.dourado, marginTop: 2, textAlign: 'center' }}>
