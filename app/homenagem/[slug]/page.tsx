@@ -168,8 +168,8 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
     <div style={estilos.page}>
       <SeletorTema />
 
-      <header style={estilos.hero}>
-        <div style={estilos.fotoGlowWrap}>
+      <header className="mem-hero mem-container" style={estilos.hero}>
+        <div className="mem-hero-ring" style={estilos.fotoGlowWrap}>
           <div style={estilos.fotoGlow} />
           <div style={estilos.fotoRing}>
             <div style={estilos.fotoInner}>
@@ -190,30 +190,28 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
           </div>
         </div>
 
-        <div style={estilos.eyebrowLinha}>
-          <span style={estilos.hairlineCurta} />
-          <span style={estilos.eyebrow}>Em Memória</span>
-          <span style={estilos.hairlineCurta} />
-        </div>
-
-        <h1 style={estilos.nome}>{m.nome_completo}</h1>
-        {anos && <div style={estilos.anos}>{anos}</div>}
-        {m.cidade && (
-          <div style={estilos.cidade}>
-            <MapPin size={14} strokeWidth={1.5} />
-            <span>{m.cidade}</span>
-          </div>
-        )}
-
-        {m.frase_preferida && (
-          <div style={estilos.fraseWrap}>
+        <div className="mem-hero-texto">
+          <div style={estilos.eyebrowLinha}>
             <span style={estilos.hairlineCurta} />
-            <blockquote style={estilos.frase}>&ldquo;{m.frase_preferida}&rdquo;</blockquote>
+            <span style={estilos.eyebrow}>Em Memória</span>
+            <span style={estilos.hairlineCurta} />
           </div>
-        )}
 
-        <div style={{ marginTop: 32 }}>
-          <AcenderVela slug={slug} velasIniciais={m.velas_acesas ?? 0} />
+          <h1 style={estilos.nome}>{m.nome_completo}</h1>
+          {anos && <div style={estilos.anos}>{anos}</div>}
+          {m.cidade && (
+            <div style={estilos.cidade}>
+              <MapPin size={14} strokeWidth={1.5} />
+              <span>{m.cidade}</span>
+            </div>
+          )}
+
+          {m.frase_preferida && (
+            <div style={estilos.fraseWrap}>
+              <span style={estilos.hairlineCurta} />
+              <blockquote style={estilos.frase}>&ldquo;{m.frase_preferida}&rdquo;</blockquote>
+            </div>
+          )}
         </div>
       </header>
 
@@ -223,7 +221,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         memorias={mural.length + galeria.length}
       />
 
-      <main style={estilos.main}>
+      <main className="mem-container" style={estilos.main}>
         <section>
           <SecaoTitulo texto="Biografia" />
           <div
@@ -351,9 +349,17 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
           )}
           <FormularioCondolencia memorialId={m.id} />
         </section>
+
+        <section style={{ marginTop: 56, textAlign: "center" }}>
+          <SecaoTitulo texto="Acender uma vela" />
+          <p style={{ color: CORES.textoFraco, fontSize: 14, marginTop: 10, marginBottom: 24 }}>
+            Em memória de {m.nome_completo}
+          </p>
+          <AcenderVela slug={slug} velasIniciais={m.velas_acesas ?? 0} />
+        </section>
       </main>
 
-      <footer style={estilos.footer}>
+      <footer className="mem-container" style={estilos.footer}>
         <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={160} height={64} style={{ height: 44, width: "auto" }} />
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <a href="/politica-de-privacidade" style={{ color: CORES.textoFraco, fontSize: 12, textDecoration: "none" }}>Privacidade</a>
@@ -382,7 +388,6 @@ const estilos: Record<string, React.CSSProperties> = {
     lineHeight: 1.6,
   },
   hero: {
-    maxWidth: 720,
     margin: "0 auto",
     padding: "64px 20px 40px",
     display: "flex",
@@ -390,7 +395,7 @@ const estilos: Record<string, React.CSSProperties> = {
     alignItems: "center",
     textAlign: "center",
   },
-  fotoGlowWrap: { position: "relative", width: 188, height: 188, display: "flex", alignItems: "center", justifyContent: "center" },
+  fotoGlowWrap: { position: "relative", display: "flex", alignItems: "center", justifyContent: "center" },
   fotoGlow: {
     position: "absolute",
     inset: -30,
@@ -398,8 +403,8 @@ const estilos: Record<string, React.CSSProperties> = {
   },
   fotoRing: {
     position: "relative",
-    width: 188,
-    height: 188,
+    width: "100%",
+    height: "100%",
     borderRadius: "50%",
     padding: 2,
     background: v(VAR_DOURADO, CORES.dourado),
@@ -416,7 +421,7 @@ const estilos: Record<string, React.CSSProperties> = {
     justifyContent: "center",
   },
   foto: { width: "100%", height: "100%", objectFit: "cover" },
-  monograma: { fontSize: 44, color: v(VAR_DOURADO, CORES.dourado), fontFamily: "Georgia, serif" },
+  monograma: { fontSize: "clamp(40px, 6vw, 56px)", color: v(VAR_DOURADO, CORES.dourado), fontFamily: "Georgia, serif" },
   eyebrowLinha: { marginTop: 28, display: "flex", alignItems: "center", gap: 10 },
   hairlineCurta: { width: 24, height: 1, background: CORES.douradoBorda },
   eyebrow: {
@@ -444,7 +449,7 @@ const estilos: Record<string, React.CSSProperties> = {
     maxWidth: 540,
     textAlign: "center",
   },
-  main: { maxWidth: 720, margin: "0 auto", padding: "12px 20px 56px" },
+  main: { margin: "0 auto", padding: "12px 20px 56px" },
   label: {
     fontSize: 11,
     textTransform: "uppercase",
@@ -500,7 +505,6 @@ const estilos: Record<string, React.CSSProperties> = {
   condolenciaData: { fontSize: 12, color: CORES.textoFraco },
   footer: {
     borderTop: `1px solid ${CORES.douradoBorda}`,
-    maxWidth: 720,
     margin: "0 auto",
     padding: "28px 20px",
     display: "flex",
