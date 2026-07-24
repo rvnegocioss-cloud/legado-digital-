@@ -86,6 +86,41 @@ html {
 
 /* ===== Página do Memorial (app/homenagem/[slug]) ===== */
 
+/* Largura do container — 520px mobile / 1100px desktop (bate com o mockup) */
+.mem-container {
+  max-width: 520px;
+}
+@media (min-width: 768px) {
+  .mem-container {
+    max-width: 1100px;
+  }
+}
+
+/* Hero: foto empilhada com texto no mobile (default), lado a lado no desktop */
+.mem-hero-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mem-hero-ring {
+  width: clamp(160px, 20vw, 220px);
+  height: clamp(160px, 20vw, 220px);
+}
+@media (min-width: 768px) {
+  .mem-hero {
+    flex-direction: row !important;
+    text-align: left !important;
+    gap: 64px;
+    padding: 96px 48px 72px !important;
+  }
+  .mem-hero-texto {
+    align-items: flex-start !important;
+  }
+  .mem-hero-ring {
+    flex-shrink: 0;
+  }
+}
+
 /* Biografia + card lateral "Em poucas palavras" — 2 colunas no desktop,
    empilha em 1 coluna no mobile (grid inline não colapsa sozinho). */
 @media (max-width: 640px) {
