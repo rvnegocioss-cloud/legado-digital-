@@ -127,8 +127,9 @@ Tudo do checklist de Fase 1/2 abaixo está **feito** (schema, auth, CRUDs de Par
 - [ ] Suporte a múltiplos vídeos por memorial (`videos_galeria`) — pausado a pedido do Rafael
 - [ ] Troca de tema persistente (hoje é só demo/preview, não salva no banco — precisa campo `tema` em `homenagens`)
 - [ ] **Rate-limit de escrita pública** (condolências/mural/vela/visualização) não passa pelo `middleware.ts` — client chama Supabase REST/RPC direto do navegador. Achado na auditoria Opus 2026-07-23, recomendado mover pra Route Handlers Next.js.
-- [ ] Deck do Pedro: 3 imagens do material de referência ainda não abertas/analisadas (Página Memorial Pública, Aplicações Digitais/Institucionais, Presença Física)
+- [~] Deck do Pedro: 2 das 3 imagens abertas e analisadas 2026-07-24 (Página Memorial Pública, Aplicações Digitais/Institucionais) — gaps reais achados registrados abaixo em "Página do Memorial". Falta só "Presença Física e Comunicação".
 - [ ] Redesenho de Dashboard + Gestão de Memorial em abas pra bater com o mockup do Pedro (escopo grande, não é tarefa de 1 sessão)
+- [ ] **Gaps da página pública vs mockup "Página Memorial Pública" (achados 2026-07-24):** barra de navegação no topo (Sobre/Linha do Tempo/Homenagens/Livro/Fotos e Vídeos/Localização) + botões "Deixar homenagem"/"Assinar livro"/"Compartilhar"; badges de papel/vínculo perto do nome (Esposo/Pai/Avô/Amigo — precisa campo novo, hoje não existe); botão "Compartilhar" real; "Livro de Assinaturas" como seção própria (ver decisão em aberto no `RASCUNHO_IDEIAS.md`); QR Code + link lado a lado com a Localização (hoje ficam em lugares diferentes); selos de confiança no rodapé ("privacidade garantida", "homenagens passam por moderação"). Nenhum construído ainda — nada decidido sobre prioridade.
 - [ ] Razão social/CNPJ da própria Legado Digital (empresa em formalização) — placeholder nos Termos/Privacidade até sair
 - [ ] Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` ainda não está nas env vars do Vercel (só `.env.local`) — "Convidar contato" só funciona em produção depois disso
