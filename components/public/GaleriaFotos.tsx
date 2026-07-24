@@ -24,7 +24,7 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
 
   useEffect(() => {
     function ajustarColunas() {
-      setColunas(window.innerWidth < 640 ? 2 : 4)
+      setColunas(window.innerWidth < 768 ? 2 : 4)
     }
     ajustarColunas()
     window.addEventListener('resize', ajustarColunas)
@@ -73,7 +73,7 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${colunas}, 1fr)`,
-          gridAutoRows: colunas === 2 ? 90 : 110,
+          gridAutoRows: colunas === 2 ? 78 : 100,
           gap: 8,
         }}
       >
