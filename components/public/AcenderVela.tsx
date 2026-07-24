@@ -204,6 +204,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
       <div style={{ position: 'relative', width: 120, height: 100, margin: '0 auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
         <div
           style={{
+            position: 'relative',
             width: 14,
             height: 60,
             background: 'linear-gradient(#EAE3D6, #C9A46A)',
