@@ -258,7 +258,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
               />
               <div
                 className="vela-flame"
-                style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: '50%', width: 22, height: 30 }}
+                style={{ position: 'absolute', bottom: 'calc(100% - 4px)', left: '50%', width: 22, height: 30 }}
               />
             </>
           )}
