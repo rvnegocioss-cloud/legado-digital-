@@ -41,7 +41,6 @@ interface Homenagem {
   galeria_fotos: string[] | null;
   timeline: TimelineEvent[] | null;
   velas_acesas: number | null;
-  qr_code_url: string | null;
 }
 
 interface Condolencia {
@@ -87,7 +86,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   const { data: homenagem } = await supabase
     .from("homenagens")
     .select(
-      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas, qr_code_url"
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas"
     )
     .eq("slug", slug)
     .single();
@@ -332,16 +331,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
           <section id="localizacao" style={{ marginTop: 56 }}>
             <SecaoTitulo texto="Como Chegar" />
-            <div
-              style={{
-                marginTop: 14,
-                display: "grid",
-                gridTemplateColumns: m.qr_code_url ? "2fr 1fr" : "1fr",
-                gap: 16,
-                alignItems: "start",
-              }}
-              className="mem-bio-grid"
-            >
+            <div style={{ marginTop: 14 }}>
               <GuiaTumulo
                 cemiterioNome={localizacao.cemiterio_nome}
                 cemiterioLat={localizacao.cemiterio_lat}
@@ -351,16 +341,6 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
                 quadra={localizacao.quadra}
                 lote={localizacao.lote}
               />
-              {m.qr_code_url && (
-                <div style={estilos.card}>
-                  <div style={{ fontSize: 13, color: CORES.textoForte, marginBottom: 12 }}>Acesse este memorial</div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={m.qr_code_url} alt="QR Code do memorial" style={{ width: "100%", maxWidth: 140, borderRadius: 6 }} />
-                  <p style={{ fontSize: 12, color: CORES.textoFraco, marginTop: 10, wordBreak: "break-all" }}>
-                    Escaneie o QR Code ou acesse o link pra visitar e homenagear.
-                  </p>
-                </div>
-              )}
             </div>
           </section>
         )}
