@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Caveat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -11,6 +11,12 @@ const inter = Inter({
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif",
+});
+
+// Só pra assinatura cursiva do Livro de Assinaturas — não usada em mais nada da página.
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-assinatura",
 });
 
 export const metadata: Metadata = {
@@ -35,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} ${caveat.variable} h-full antialiased`}
     >
       <head>
         <link rel="icon" href="/favicon.ico" />

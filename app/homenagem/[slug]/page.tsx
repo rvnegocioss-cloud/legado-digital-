@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { MapPin, ShieldCheck, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
@@ -12,6 +12,7 @@ import { SeletorTema } from "@/components/public/SeletorTema";
 import { FaixaPresencaViva } from "@/components/public/FaixaPresencaViva";
 import { ResumoPoucasPalavras } from "@/components/public/ResumoPoucasPalavras";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
+import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
 import { VAR_FUNDO_TOPO, VAR_FUNDO_BASE, VAR_DOURADO } from "@/lib/temasMemorial";
 
@@ -40,6 +41,7 @@ interface Homenagem {
   galeria_fotos: string[] | null;
   timeline: TimelineEvent[] | null;
   velas_acesas: number | null;
+  qr_code_url: string | null;
 }
 
 interface Condolencia {
@@ -85,7 +87,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   const { data: homenagem } = await supabase
     .from("homenagens")
     .select(
-      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas"
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas, qr_code_url"
     )
     .eq("slug", slug)
     .single();
@@ -168,6 +170,22 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
     <div style={estilos.page}>
       <SeletorTema />
 
+      <nav className="mem-container" style={estilos.nav}>
+        <div style={estilos.navLinks}>
+          <a href="#biografia" style={estilos.navLink}>Sobre</a>
+          <a href="#timeline" style={estilos.navLink}>Linha do Tempo</a>
+          <a href="#homenagens" style={estilos.navLink}>Homenagens</a>
+          <a href="#livro" style={estilos.navLink}>Livro</a>
+          <a href="#galeria" style={estilos.navLink}>Fotos e Vídeos</a>
+          <a href="#localizacao" style={estilos.navLink}>Localização</a>
+        </div>
+        <div style={estilos.navAcoes}>
+          <a href="#homenagens" style={estilos.navBotaoFantasma}>Deixar homenagem</a>
+          <a href="#livro" style={estilos.navBotaoDourado}>Assinar livro</a>
+          <BotaoCompartilhar nome={m.nome_completo} />
+        </div>
+      </nav>
+
       <header className="mem-hero mem-container" style={estilos.hero}>
         <div className="mem-hero-ring" style={estilos.fotoGlowWrap}>
           <div style={estilos.fotoGlow} />
@@ -222,7 +240,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
       />
 
       <main className="mem-container" style={estilos.main}>
-        <section>
+        <section id="biografia">
           <SecaoTitulo texto="Biografia" />
           <div
             style={{
@@ -275,7 +293,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         )}
 
         {timeline.length > 0 && (
-          <section style={{ marginTop: 56 }}>
+          <section id="timeline" style={{ marginTop: 56 }}>
             <SecaoTitulo texto="Uma Vida" />
             <div style={estilos.timelineWrap}>
               <div className="mem-timeline-espinha" style={estilos.timelineEspinha} />
@@ -296,7 +314,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         )}
 
         {galeria.length > 0 && (
-          <section style={{ marginTop: 56 }}>
+          <section id="galeria" style={{ marginTop: 56 }}>
             <SecaoTitulo texto="Galeria" />
             <div style={{ marginTop: 14 }}>
               <GaleriaFotos fotos={galeria} />
@@ -304,7 +322,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
           </section>
         )}
 
-        <section style={{ marginTop: 56 }}>
+        <section id="homenagens" style={{ marginTop: 56 }}>
           <SecaoTitulo texto="Mural de Memórias" />
           <div style={{ marginTop: 14 }}>
             <MuralMemorias memorialId={m.id} memoriasIniciais={mural} />
@@ -312,9 +330,18 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
         </section>
 
         {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
-          <section style={{ marginTop: 56 }}>
+          <section id="localizacao" style={{ marginTop: 56 }}>
             <SecaoTitulo texto="Como Chegar" />
-            <div style={{ marginTop: 14 }}>
+            <div
+              style={{
+                marginTop: 14,
+                display: "grid",
+                gridTemplateColumns: m.qr_code_url ? "2fr 1fr" : "1fr",
+                gap: 16,
+                alignItems: "start",
+              }}
+              className="mem-bio-grid"
+            >
               <GuiaTumulo
                 cemiterioNome={localizacao.cemiterio_nome}
                 cemiterioLat={localizacao.cemiterio_lat}
@@ -324,25 +351,38 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
                 quadra={localizacao.quadra}
                 lote={localizacao.lote}
               />
+              {m.qr_code_url && (
+                <div style={estilos.card}>
+                  <div style={{ fontSize: 13, color: CORES.textoForte, marginBottom: 12 }}>Acesse este memorial</div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={m.qr_code_url} alt="QR Code do memorial" style={{ width: "100%", maxWidth: 140, borderRadius: 6 }} />
+                  <p style={{ fontSize: 12, color: CORES.textoFraco, marginTop: 10, wordBreak: "break-all" }}>
+                    Escaneie o QR Code ou acesse o link pra visitar e homenagear.
+                  </p>
+                </div>
+              )}
             </div>
           </section>
         )}
 
-        <section style={{ marginTop: 56 }}>
-          <SecaoTitulo texto={`Condolências${condolencias.length > 0 ? ` (${condolencias.length})` : ""}`} />
+        <section id="livro" style={{ marginTop: 56 }}>
+          <SecaoTitulo texto={`Livro de Assinaturas${condolencias.length > 0 ? ` (${condolencias.length})` : ""}`} />
+          <p style={{ color: CORES.textoFraco, fontSize: 14, marginTop: 10 }}>
+            Assine e deixe sua mensagem — um registro permanente de carinho.
+          </p>
           {condolencias.length === 0 ? (
             <p style={{ color: CORES.textoFraco, marginTop: 14, fontStyle: "italic" }}>
-              Ainda não há condolências registradas.
+              Ainda ninguém assinou o livro.
             </p>
           ) : (
-            <div style={estilos.condolenciasWrap}>
+            <div style={{ ...estilos.condolenciasWrap, marginTop: 18 }}>
               {condolencias.map((c) => (
                 <div key={c.id} style={estilos.condolenciaCard}>
-                  <div style={estilos.condolenciaCabecalho}>
-                    <span style={{ fontWeight: 600, color: CORES.textoForte }}>{c.visitor_name}</span>
+                  <p style={{ margin: 0, color: CORES.textoCorpo, fontSize: 15 }}>{c.message}</p>
+                  <div style={estilos.assinaturaLinha}>
+                    <span style={estilos.assinatura}>{c.visitor_name}</span>
                     <span style={estilos.condolenciaData}>{dataPtBr(c.created_at)}</span>
                   </div>
-                  <p style={{ margin: "6px 0 0", color: CORES.textoCorpo, fontSize: 15 }}>{c.message}</p>
                 </div>
               ))}
             </div>
@@ -361,6 +401,16 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
       <footer className="mem-container" style={estilos.footer}>
         <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={160} height={64} style={{ height: 44, width: "auto" }} />
+        <div style={estilos.selosWrap}>
+          <span style={estilos.selo}>
+            <ShieldCheck size={14} strokeWidth={1.5} />
+            Privacidade garantida
+          </span>
+          <span style={estilos.selo}>
+            <Lock size={14} strokeWidth={1.5} />
+            Homenagens passam por moderação
+          </span>
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <a href="/politica-de-privacidade" style={{ color: CORES.textoFraco, fontSize: 12, textDecoration: "none" }}>Privacidade</a>
           <a href="/termos-de-uso" style={{ color: CORES.textoFraco, fontSize: 12, textDecoration: "none" }}>Termos</a>
@@ -386,6 +436,42 @@ const estilos: Record<string, React.CSSProperties> = {
     color: CORES.textoForte,
     fontFamily: "Georgia, 'Times New Roman', serif",
     lineHeight: 1.6,
+  },
+  nav: {
+    margin: "0 auto",
+    padding: "14px 20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 12,
+    borderBottom: `1px solid ${CORES.douradoBorda}`,
+    position: "sticky",
+    top: 0,
+    zIndex: 20,
+    background: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+  },
+  navLinks: { display: "flex", flexWrap: "wrap", gap: 18 },
+  navLink: { color: CORES.textoFraco, fontSize: 12.5, textDecoration: "none", letterSpacing: 0.3 },
+  navAcoes: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" },
+  navBotaoFantasma: {
+    color: CORES.textoFraco,
+    fontSize: 12,
+    textDecoration: "none",
+    border: `1px solid ${CORES.douradoBorda}`,
+    padding: "8px 14px",
+    borderRadius: 4,
+    whiteSpace: "nowrap",
+  },
+  navBotaoDourado: {
+    color: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+    background: v(VAR_DOURADO, CORES.dourado),
+    fontSize: 12,
+    fontWeight: 600,
+    textDecoration: "none",
+    padding: "8px 14px",
+    borderRadius: 4,
+    whiteSpace: "nowrap",
   },
   hero: {
     margin: "0 auto",
@@ -503,6 +589,24 @@ const estilos: Record<string, React.CSSProperties> = {
   },
   condolenciaCabecalho: { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" },
   condolenciaData: { fontSize: 12, color: CORES.textoFraco },
+  assinaturaLinha: {
+    marginTop: 12,
+    paddingTop: 10,
+    borderTop: `1px dashed ${CORES.douradoBorda}`,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  assinatura: {
+    fontFamily: "var(--font-assinatura), cursive",
+    fontSize: 26,
+    color: v(VAR_DOURADO, CORES.dourado),
+    lineHeight: 1,
+  },
+  selosWrap: { display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 18 },
+  selo: { display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: CORES.textoFraco },
   footer: {
     borderTop: `1px solid ${CORES.douradoBorda}`,
     margin: "0 auto",
