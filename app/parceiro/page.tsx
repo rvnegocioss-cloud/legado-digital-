@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ScrollText, ClipboardList, CreditCard } from 'lucide-react'
-import { supabase, getParceiroUser } from '@/lib/auth'
+import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 
 interface ParceiroInfo {
   id: string
@@ -84,7 +84,14 @@ function ParceiroDashboardInner() {
   async function load() {
     setLoading(true)
 
-    let meuParceiroId = parceiroIdParam
+    // ?parceiro_id= na URL só vale se quem está logado é staff de verdade —
+    // mesma regra do /parceiro/memoriais, sem isso um parceiro comum poderia
+    // editar a URL e ver o dashboard de outra empresa.
+    let meuParceiroId: string | null = null
+    if (parceiroIdParam) {
+      const adminUser = await getAdminUser()
+      if (adminUser) meuParceiroId = parceiroIdParam
+    }
     if (!meuParceiroId) {
       const parceiroUser = (await getParceiroUser()) as any
       meuParceiroId = parceiroUser?.parceiros_usuarios?.[0]?.parceiros_b2b?.id || null

@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { supabase, getParceiroUser } from '@/lib/auth'
+import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -123,7 +123,15 @@ function ParceiroMemoriaisInner() {
   async function load() {
     setLoading(true)
 
-    let meuParceiroId = parceiroIdParam
+    // ?parceiro_id= na URL só vale se quem está logado é staff de verdade
+    // (veio do botão "Acessar Plataforma do Parceiro" na Central) — sem essa
+    // checagem, um parceiro comum poderia editar a URL e ver memoriais de
+    // outra empresa, ja que a leitura de homenagens e publica no banco.
+    let meuParceiroId: string | null = null
+    if (parceiroIdParam) {
+      const adminUser = await getAdminUser()
+      if (adminUser) meuParceiroId = parceiroIdParam
+    }
     if (!meuParceiroId) {
       const parceiroUser = (await getParceiroUser()) as any
       meuParceiroId = parceiroUser?.parceiros_usuarios?.[0]?.parceiros_b2b?.id || null
