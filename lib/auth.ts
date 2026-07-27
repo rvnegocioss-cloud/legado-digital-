@@ -26,6 +26,8 @@ export async function getCurrentUser() {
   return user
 }
 
+const PAPEIS_STAFF = ['Admin Legado Digital', 'Operador Legado Digital']
+
 export async function getAdminUser() {
   const user = await getCurrentUser()
   if (!user) return null
@@ -45,6 +47,13 @@ export async function getAdminUser() {
     .single()
 
   if (error || !data || !data.ativo) return null
+
+  // Sem essa checagem, qualquer conta ativa (inclusive Parceiro B2B) passava
+  // como "staff" em todo código que usa getAdminUser() como portão de
+  // permissão — nunca validava o papel de verdade, só existência+ativo.
+  const roles = (data.usuarios_perfis || []).map((up: any) => up.perfis?.nome)
+  if (!roles.some((r: string) => PAPEIS_STAFF.includes(r))) return null
+
   return data
 }
 
