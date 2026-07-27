@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 
 /**
- * Rate limit middleware para Legado Digital
+ * Rate limit — Legado Digital
+ *
+ * IMPORTANTE (2026-07-24): esse arquivo precisa estar na RAIZ do projeto,
+ * chamado proxy.ts, exportando uma função proxy() — não middleware.ts
+ * dentro de app/. O Next.js 16 renomeou a convenção; o arquivo antigo
+ * (app/middleware.ts, função middleware()) nunca rodou em produção porque
+ * não batia com nenhuma das duas convenções (nem a antiga nem a nova).
+ * Confirmado via .next/server/middleware-manifest.json vazio no build.
+ * Auditoria de segurança Opus, 2026-07-24.
  *
  * Política de rate limits:
  * - Login/logout: 3 requisições/minuto
@@ -14,6 +21,12 @@ import { createClient } from '@supabase/supabase-js'
  * - Por usuário (email via Supabase Auth, se autenticado)
  * - Fallback por IP (x-forwarded-for para Vercel)
  * - Chave: ratelimit:{email/ip}:{rota_tipo}
+ *
+ * Limitação conhecida: cache em memória (Map) não é compartilhado entre
+ * instâncias serverless da Vercel — o limite real por identificador é mais
+ * frouxo que o número configurado quando o tráfego cai em instâncias
+ * diferentes. Suficiente pro MVP; migrar pra Redis/Upstash se o abuso for
+ * um problema real medido.
  */
 
 interface RateLimitEntry {
@@ -96,7 +109,7 @@ async function getClientIdentifier(req: NextRequest): Promise<string> {
       if (payload.email) {
         return payload.email // Usar email como ID se autenticado
       }
-    } catch (e) {
+    } catch {
       // Token inválido ou parse falhou, fallback para IP
     }
   }
@@ -230,12 +243,12 @@ async function isStaffUser(req: NextRequest): Promise<boolean> {
     return payload?.app_metadata?.role === 'admin' ||
            payload?.app_metadata?.role === 'operador' ||
            payload?.user_role === 'admin'
-  } catch (e) {
+  } catch {
     return false
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Não aplicar rate limit em:
@@ -260,6 +273,8 @@ export async function middleware(request: NextRequest) {
   if (!shouldRateLimit) {
     return NextResponse.next()
   }
+
+  const isLoginRoute = getRateLimitType(pathname) === 'login'
 
   try {
     const identifier = await getClientIdentifier(request)
@@ -309,9 +324,18 @@ export async function middleware(request: NextRequest) {
 
     return res
   } catch (error) {
-    // Se algo der errado no middleware, deixar passar (fail-open)
-    // mas logar o erro para debug
-    console.error('[MIDDLEWARE_ERROR]', error)
+    console.error('[PROXY_ERROR]', error)
+
+    // Fail-closed em rotas de login (senha/força bruta) — sem rate limit
+    // funcionando corretamente, é mais seguro bloquear que deixar passar.
+    // Fail-open no resto — não travar o site inteiro por um bug aqui.
+    if (isLoginRoute) {
+      return NextResponse.json(
+        { error: 'Serviço temporariamente indisponível, tente novamente.' },
+        { status: 503 }
+      )
+    }
+
     const res = NextResponse.next()
     setCacheHeaders(res, pathname)
     return res
@@ -319,7 +343,7 @@ export async function middleware(request: NextRequest) {
 }
 
 /**
- * Configurar quais rotas passam pelo middleware
+ * Configurar quais rotas passam pelo proxy
  * Matcher simplificado: qualquer coisa em /api/, /admin/, /parceiro/, /familia/
  */
 export const config = {
