@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { enviarEmailConviteParceiro } from '@/lib/enviarEmailConviteParceiro'
 
 const TEMP_PASSWORD = '123456'
 
@@ -93,6 +94,18 @@ export async function POST(req: NextRequest) {
     await admin.from('parceiros_contatos').update({ usuario_id: userId }).eq('id', contatoId)
   }
 
-  // TODO: enviar via Resend quando RESEND_API_KEY configurado
-  return NextResponse.json({ success: true, message: 'Usuário criado. Senha enviada por e-mail (quando domínio for configurado)' })
+  const resultadoEmail = await enviarEmailConviteParceiro({
+    destinatario: email,
+    nome: nome || '',
+    senhaTemporaria: TEMP_PASSWORD,
+  })
+
+  return NextResponse.json({
+    success: true,
+    message: resultadoEmail.enviado
+      ? 'Usuário criado. Senha enviada por e-mail.'
+      : 'Usuário criado, mas o e-mail não pôde ser enviado agora — repasse a senha temporária manualmente.',
+    emailEnviado: resultadoEmail.enviado,
+    senhaTemporaria: resultadoEmail.enviado ? undefined : TEMP_PASSWORD,
+  })
 }
