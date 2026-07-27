@@ -133,7 +133,8 @@ export default function PoliticaPrivacidadePage() {
         <Secao titulo="8. Contato">
           <p>
             Dúvidas sobre esta política ou sobre o tratamento dos seus dados podem ser encaminhadas ao
-            parceiro responsável pelo memorial ou à equipe do Legado Digital.
+            parceiro responsável pelo memorial ou à equipe do Legado Digital, pelo e-mail{" "}
+            <a href="mailto:contato@legadodigital.net" className="underline">contato@legadodigital.net</a>.
           </p>
         </Secao>
       </div>

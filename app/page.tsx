@@ -349,11 +349,12 @@ export default function Home() {
             <div>
               <h4 className="text-white font-semibold mb-4">Empresa</h4>
               <div className="space-y-2 text-sm">
-                {['Sobre', 'Contato'].map((link) => (
-                  <div key={link} className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
-                    {link}
-                  </div>
-                ))}
+                <div className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
+                  Sobre
+                </div>
+                <a href="mailto:contato@legadodigital.net" className="block text-white/40 hover:text-[#C9A46A] transition-colors">
+                  contato@legadodigital.net
+                </a>
                 <Link href="/politica-de-privacidade" className="block text-white/40 hover:text-[#C9A46A] transition-colors">
                   Privacidade
                 </Link>
