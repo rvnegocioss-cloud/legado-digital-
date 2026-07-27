@@ -24,6 +24,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   const [email, setEmail] = useState<string | null>(null)
   const [nomeParceiro, setNomeParceiro] = useState('Parceiro')
   const [modoStaff, setModoStaff] = useState(false)
+  const [semVinculo, setSemVinculo] = useState(false)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
@@ -57,6 +58,15 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
 
         if (parceiroUser) {
           const parceiros = parceiroUser.parceiros_usuarios.map((pu) => pu.parceiros_b2b).filter(Boolean)
+          if (parceiros.length === 0) {
+            // Papel "Parceiro B2B" atribuído mas sem vínculo em parceiros_usuarios
+            // (ex: convite nunca concluído) — nunca deixa passar pras páginas
+            // filhas, que assumiriam esse parceiro_id e rodariam consulta sem filtro.
+            setEmail(parceiroUser.email)
+            setSemVinculo(true)
+            setLoading(false)
+            return
+          }
           setNomeParceiro(parceiros[0]?.nome_fantasia || parceiros[0]?.razao_social || 'Parceiro')
           setEmail(parceiroUser.email)
           setModoStaff(false)
@@ -87,6 +97,26 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   }
 
   if (!email) return null
+
+  if (semVinculo) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
+        <div className="max-w-md text-center space-y-4">
+          <p className="text-white text-lg font-medium">Sua conta ainda não está vinculada a nenhum parceiro.</p>
+          <p className="text-zinc-400 text-sm">
+            O login <strong>{email}</strong> existe, mas nenhuma funerária/cemitério foi associado a ele ainda.
+            Fale com a equipe Legado Digital pra concluir o vínculo.
+          </p>
+          <button
+            onClick={async () => { await signOut(); router.push('/parceiro/login') }}
+            className="text-sm text-blue-400 hover:underline"
+          >
+            Sair e tentar outro login
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   async function handleLogout() {
     if (modoStaff) {

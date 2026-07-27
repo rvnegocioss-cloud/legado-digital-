@@ -203,29 +203,67 @@ export default function DetalheParceiro() {
     )
   }
 
+  async function enviarConvite(parceiroId: string, contato: { id: string; email: string; nome: string }) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/convidar-parceiro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ parceiroId, email: contato.email, nome: contato.nome, contatoId: contato.id }),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || 'Erro ao conceder acesso')
+    return { email: json.email as string, tempPassword: json.tempPassword as string }
+  }
+
   async function adicionarContato(e: React.FormEvent) {
     e.preventDefault()
     if (!parceiro) return
     setSalvandoContato(true)
     setContatoErro('')
 
-    const { error } = await supabase.from('parceiros_contatos').insert({
-      parceiro_id: parceiro.id,
-      nome: novoContatoNome,
-      email: novoContatoEmail || null,
-      telefone: novoContatoTelefone || null,
-      perfis: novoContatoPerfis,
-    })
+    const { data: novoContato, error } = await supabase
+      .from('parceiros_contatos')
+      .insert({
+        parceiro_id: parceiro.id,
+        nome: novoContatoNome,
+        email: novoContatoEmail || null,
+        telefone: novoContatoTelefone || null,
+        perfis: novoContatoPerfis,
+      })
+      .select()
+      .single()
 
     if (error) {
       setContatoErro(error.message)
-    } else {
-      setNovoContatoNome('')
-      setNovoContatoEmail('')
-      setNovoContatoTelefone('')
-      setNovoContatoPerfis([])
-      await load(parceiro.id)
+      setSalvandoContato(false)
+      return
     }
+
+    setNovoContatoNome('')
+    setNovoContatoEmail('')
+    setNovoContatoTelefone('')
+    setNovoContatoPerfis([])
+    await load(parceiro.id)
+
+    // Contato com e-mail já sai com acesso ao Portal do Parceiro concedido e o
+    // e-mail de convite disparado — sem isso, cadastrar o contato "parecia"
+    // automático mas exigia um segundo clique em "Conceder acesso" que passava
+    // despercebido.
+    if (novoContato?.email) {
+      try {
+        const resultado = await enviarConvite(parceiro.id, {
+          id: novoContato.id,
+          email: novoContato.email,
+          nome: novoContato.nome,
+        })
+        setAcessoConcedido({ contatoId: novoContato.id, ...resultado })
+        await load(parceiro.id)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'erro desconhecido'
+        setContatoErro(`Contato salvo, mas o convite falhou: ${msg}`)
+      }
+    }
+
     setSalvandoContato(false)
   }
 
@@ -240,19 +278,12 @@ export default function DetalheParceiro() {
     setConcedendoAcessoId(contato.id)
     setContatoErro('')
 
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/admin/convidar-parceiro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ parceiroId: parceiro.id, email: contato.email, nome: contato.nome, contatoId: contato.id }),
-    })
-    const json = await res.json()
-
-    if (!res.ok) {
-      setContatoErro(json.error || 'Erro ao conceder acesso')
-    } else {
-      setAcessoConcedido({ contatoId: contato.id, email: json.email, tempPassword: json.tempPassword })
+    try {
+      const resultado = await enviarConvite(parceiro.id, { id: contato.id, email: contato.email, nome: contato.nome })
+      setAcessoConcedido({ contatoId: contato.id, ...resultado })
       await load(parceiro.id)
+    } catch (err) {
+      setContatoErro(err instanceof Error ? err.message : 'erro desconhecido')
     }
     setConcedendoAcessoId(null)
   }
@@ -376,6 +407,11 @@ export default function DetalheParceiro() {
 
         <div className="lg:col-span-2 xl:col-span-3 rounded-xl bg-zinc-900 border border-zinc-800 p-5 space-y-5">
             <SecaoRetratil titulo={`Contatos da empresa ${contatos.length > 0 ? `(${contatos.length})` : ''}`} abertoPorPadrao>
+              <p className="text-zinc-500 text-xs mb-4">
+                Contato cadastrado com e-mail já recebe o acesso ao Portal do Parceiro automaticamente,
+                com senha temporária por e-mail. Deixe o e-mail em branco se for só um contato de referência,
+                sem login.
+              </p>
               <div className="grid md:grid-cols-2 gap-6 items-start">
               {contatos.length > 0 && (
                 <ul className="space-y-2">

@@ -130,18 +130,23 @@ function ParceiroMemoriaisInner() {
     }
     setParceiroId(meuParceiroId)
 
-    let query = supabase
+    if (!meuParceiroId) {
+      // Sem parceiro vinculado: nunca roda a consulta sem filtro (RLS de leitura
+      // pública em homenagens é aberta pra página do memorial funcionar, então
+      // sem esse corte a consulta abaixo devolveria memoriais de todo mundo).
+      setMemoriais([])
+      setLoading(false)
+      return
+    }
+
+    const { data } = await supabase
       .from('homenagens')
       .select(
         'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, created_at'
       )
+      .eq('parceiro_id', meuParceiroId)
       .order('created_at', { ascending: false })
 
-    if (meuParceiroId) {
-      query = query.eq('parceiro_id', meuParceiroId)
-    }
-
-    const { data } = await query
     setMemoriais(data || [])
     setLoading(false)
   }
