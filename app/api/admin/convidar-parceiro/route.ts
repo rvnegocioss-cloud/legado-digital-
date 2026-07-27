@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { enviarEmailConviteParceiro } from '@/lib/enviarEmailConviteParceiro'
+import { registrarEmail } from '@/lib/emailLog'
 
 const TEMP_PASSWORD = '123456'
 
@@ -98,6 +99,14 @@ export async function POST(req: NextRequest) {
     destinatario: email,
     nome: nome || '',
     senhaTemporaria: TEMP_PASSWORD,
+  })
+
+  await registrarEmail(admin, {
+    tipo: 'convite_parceiro',
+    destinatario: email,
+    assunto: 'Acesso ao Portal do Parceiro — Legado Digital',
+    status: resultadoEmail.enviado ? 'enviado' : 'erro',
+    erroMsg: resultadoEmail.enviado ? null : resultadoEmail.erro,
   })
 
   return NextResponse.json({

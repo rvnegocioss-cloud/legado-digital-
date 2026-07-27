@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto'
 
-export type TipoEmail = 'senha_familia' | 'confirmacao_placa' | 'envio_fornecedor'
+export type TipoEmail = 'senha_familia' | 'confirmacao_placa' | 'envio_fornecedor' | 'convite_parceiro'
 
 export function gerarTokenConfirmacao() {
   return randomBytes(24).toString('hex')
@@ -9,7 +9,7 @@ export function gerarTokenConfirmacao() {
 export async function registrarEmail(
   supabaseAdmin: any,
   dados: {
-    homenagemId: string
+    homenagemId?: string | null
     tipo: TipoEmail
     destinatario: string
     assunto: string
@@ -19,7 +19,7 @@ export async function registrarEmail(
   }
 ) {
   await supabaseAdmin.from('emails_enviados').insert({
-    homenagem_id: dados.homenagemId,
+    homenagem_id: dados.homenagemId || null,
     tipo: dados.tipo,
     destinatario: dados.destinatario,
     assunto: dados.assunto,

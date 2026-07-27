@@ -45,6 +45,7 @@ const TIPO_LABEL: Record<string, string> = {
   senha_familia: 'Senha da família',
   confirmacao_placa: 'Confirmação de placa',
   envio_fornecedor: 'Envio ao fornecedor',
+  convite_parceiro: 'Convite de acesso (parceiro)',
 }
 
 const STATUS_STYLE: Record<string, string> = {
@@ -174,8 +175,24 @@ export default function AdminComunicacoes() {
       <h2 className="text-lg font-medium text-white mb-1">Histórico de e-mails automáticos</h2>
       <p className="text-zinc-400 text-sm mb-4">
         Todo e-mail que o sistema disparou — senha da família, confirmação de placa, envio ao
-        fornecedor.
+        fornecedor, convite de acesso ao parceiro.
       </p>
+
+      {emails[0] && (
+        <div
+          className={`flex items-center justify-between rounded-lg px-4 py-3 mb-4 text-sm ${
+            emails[0].status === 'erro' ? 'bg-red-900/30 border border-red-800' : 'bg-green-900/30 border border-green-800'
+          }`}
+        >
+          <span className={emails[0].status === 'erro' ? 'text-red-300' : 'text-green-300'}>
+            {emails[0].status === 'erro' ? '✕ Último e-mail falhou' : '✓ Último e-mail enviado com sucesso'} —{' '}
+            {TIPO_LABEL[emails[0].tipo] || emails[0].tipo} pra {emails[0].destinatario}
+          </span>
+          <span className="text-zinc-400 text-xs whitespace-nowrap ml-4">
+            {new Date(emails[0].created_at).toLocaleString('pt-BR')}
+          </span>
+        </div>
+      )}
 
       {emails.length === 0 ? (
         <p className="text-zinc-400">Nenhum e-mail disparado ainda.</p>

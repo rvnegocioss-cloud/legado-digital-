@@ -19,6 +19,7 @@ const TIPO_LABEL: Record<string, string> = {
   senha_familia: 'Senha da família',
   confirmacao_placa: 'Confirmação de placa',
   envio_fornecedor: 'Envio ao fornecedor',
+  convite_parceiro: 'Convite de acesso (parceiro)',
 }
 
 const STATUS_STYLE: Record<string, string> = {
