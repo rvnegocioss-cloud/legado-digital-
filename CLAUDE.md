@@ -133,7 +133,7 @@ Tudo do checklist de Fase 1/2 abaixo está **feito** (schema, auth, CRUDs de Par
 - [ ] Razão social/CNPJ da própria Legado Digital (empresa em formalização) — placeholder nos Termos/Privacidade até sair
 - [ ] Módulo financeiro completo (`contratos`, `planos`, `aquisicoes`, `fechamento_mensal`) — Fase 4
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` ainda não está nas env vars do Vercel (só `.env.local`) — "Convidar contato" só funciona em produção depois disso
-- [ ] Domínio pro Resend: `legadodigital.net` já registrado (Hostinger) — falta decidir rota de ativação do Google Workspace (painel Hostinger vs direto + DNS manual)
+- [x] **E-mail automático** (feito 2026-07-24) — trocado de Resend pra SMTP do Google Workspace (`lib/emailTransport.ts`, nodemailer). `contato@legadodigital.net` é um Grupo (sem senha própria); autenticação real via usuário técnico `sistema@legadodigital.net` com "Enviar como" `contato@` configurado. Variáveis já na Vercel. **Falta só**: DKIM do domínio ainda propagando (registro TXT no Hostinger, aguardando o sócio) — sem isso, e-mail pode cair em spam às vezes.
 - [x] **Layout responsivo da página do memorial** (mockup Claude Design, 2026-07-23) — container 520/1100px, hero lado a lado no desktop, seção "Acender uma vela" na posição do mockup (fim da página). Fonte mantida (Georgia) — decisão do Rafael, não trocou pro Playfair/Source Sans do mockup. Spec: `docs/superpowers/specs/2026-07-23-pagina-memorial-redesign-mockup.md`, plano: `docs/superpowers/plans/2026-07-23-pagina-memorial-layout-responsivo.md`.
 
 ## Portal do Parceiro B2B — como funciona
@@ -160,11 +160,11 @@ Definir/trocar/remover senha: campo "Senha de acesso" no formulário (Central `/
 ## Portal da Família — como funciona
 **1 e-mail de contato por memorial, sem conta** (modelo simplificado — antigo responsável+código pra até 3 parentes foi removido):
 1. Central/Parceiro cadastra e-mail da família na ficha → `POST /api/admin/cadastrar-email-familia`
-2. Sistema gera senha simples (8 caracteres hex), hasheia em `homenagens_seguranca.senha_familia_hash`, manda por e-mail (Resend)
+2. Sistema gera senha simples (8 caracteres hex), hasheia em `homenagens_seguranca.senha_familia_hash`, manda por e-mail (SMTP Google Workspace)
 3. Família busca pelo nome do homenageado em `/familia/login` (nunca por slug) + senha via `POST /api/familia-login`, cookie HMAC de 12h
 4. Dentro de `/familia/[slug]`, edita os mesmos campos do admin/parceiro (foto, vídeo, galeria, timeline, bio, frase) — grava direto em `homenagens`
 
-Sem Resend configurado, a API retorna a senha na resposta pro staff/parceiro repassar manualmente.
+Se o SMTP falhar (ex: DKIM não propagado ainda), a API retorna a senha na resposta pro staff/parceiro repassar manualmente.
 
 **Ainda falta:** "esqueci a senha" da família (hoje só reemissão manual).
 
