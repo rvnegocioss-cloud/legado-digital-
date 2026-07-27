@@ -128,7 +128,10 @@ export default function AdminParceiros() {
     setConsultandoCnpj(true)
     setErro('')
 
-    const res = await fetch(`/api/admin/consultar-cnpj?cnpj=${digits}`)
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch(`/api/admin/consultar-cnpj?cnpj=${digits}`, {
+      headers: { Authorization: `Bearer ${session?.access_token}` },
+    })
     const json = await res.json()
 
     if (!res.ok) {

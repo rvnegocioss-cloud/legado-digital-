@@ -6,6 +6,15 @@ const PROMPT_PATH = path.join(process.cwd(), 'docs', 'LEGADOBOT_PROMPT_PUBLICO.m
 const MAX_MENSAGEM = 500
 
 export async function POST(req: NextRequest) {
+  // Endpoint público sem login — só aceita requisição vinda do próprio site
+  // (defesa simples contra script externo bater direto na API; não é à prova
+  // de bala, curl não manda Origin, mas barra abuso via navegador de fora).
+  const origin = req.headers.get('origin')
+  const host = req.headers.get('host')
+  if (origin && host && !origin.includes(host)) {
+    return NextResponse.json({ error: 'Origem não permitida' }, { status: 403 })
+  }
+
   const { mensagens: mensagensCompletas } = await req.json()
   if (!Array.isArray(mensagensCompletas) || mensagensCompletas.length === 0) {
     return NextResponse.json({ error: 'mensagens obrigatório' }, { status: 400 })
@@ -45,16 +54,15 @@ export async function POST(req: NextRequest) {
 
     if (!upstream.ok) {
       const texto = await upstream.text()
-      return NextResponse.json(
-        { error: `LLM respondeu erro ${upstream.status}. Detalhe: ${texto.slice(0, 300)}` },
-        { status: 502 }
-      )
+      console.error(`[LEGADOBOT_PUBLICO] LLM respondeu ${upstream.status}: ${texto.slice(0, 300)}`)
+      return NextResponse.json({ error: 'Não consegui responder agora, tenta de novo em instantes.' }, { status: 502 })
     }
 
     const json = await upstream.json()
     resposta = json.choices?.[0]?.message?.content || ''
-  } catch (e: any) {
-    return NextResponse.json({ error: `Não consegui conectar no LLM. Erro: ${e.message}` }, { status: 502 })
+  } catch (e) {
+    console.error('[LEGADOBOT_PUBLICO] Erro de conexão com o LLM:', e)
+    return NextResponse.json({ error: 'Não consegui responder agora, tenta de novo em instantes.' }, { status: 502 })
   }
 
   let acao: string | null = null
