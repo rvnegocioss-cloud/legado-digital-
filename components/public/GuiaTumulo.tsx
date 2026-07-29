@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Map, { Marker, Popup, Source, Layer, NavigationControl, type MapRef } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Navigation, ChevronDown, ChevronRight, MapPin } from 'lucide-react'
+import { Navigation, ChevronDown, ChevronRight, MapPin, Cross } from 'lucide-react'
+import { CORES } from '@/lib/publicTheme'
 
 // Camada raster de satelite (Esri, gratis, sem chave) - mesma fonte que
 // ja era usada no Leaflet, so descrita no formato de estilo do MapLibre.
@@ -181,18 +182,61 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
                     closeOnClick={false}
                     className="guia-tumulo-popup"
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 2, minWidth: 140 }}>
-                      {fotoUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={fotoUrl}
-                          alt=""
-                          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                        />
-                      )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 160 }}>
+                      <div
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: '50%',
+                          padding: 2,
+                          flexShrink: 0,
+                          background: `conic-gradient(from 0deg, ${CORES.dourado}, ${CORES.douradoClaro}, ${CORES.douradoEscuro}, ${CORES.dourado})`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '50%',
+                            overflow: 'hidden',
+                            background: CORES.fundoTopo,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {fotoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={fotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <Cross size={18} strokeWidth={1.5} style={{ color: CORES.dourado }} />
+                          )}
+                        </div>
+                      </div>
                       <div>
-                        <p style={{ fontSize: 11, opacity: 0.6, margin: 0, color: '#0B1D2A' }}>Aqui está</p>
-                        <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#0B1D2A' }}>{nomeCompleto}</p>
+                        <p
+                          style={{
+                            fontSize: 10,
+                            textTransform: 'uppercase',
+                            letterSpacing: 1.5,
+                            fontWeight: 600,
+                            margin: 0,
+                            color: CORES.dourado,
+                            fontFamily: 'Georgia, serif',
+                          }}
+                        >
+                          Homenageado(a)
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 14,
+                            margin: '2px 0 0',
+                            color: CORES.textoForte,
+                            fontFamily: 'Georgia, serif',
+                          }}
+                        >
+                          {nomeCompleto}
+                        </p>
                       </div>
                     </div>
                   </Popup>

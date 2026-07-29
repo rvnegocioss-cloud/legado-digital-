@@ -205,3 +205,20 @@ html {
     transition: none !important;
   }
 }
+
+/* Popup do pino do túmulo no mapa "Como Chegar" — sobrescreve o card branco
+   padrão do MapLibre pra seguir o tema navy+dourado do resto da página. */
+.guia-tumulo-popup .maplibregl-popup-content {
+  background: #0f2436;
+  border: 1px solid rgba(201,164,106,0.3);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 12px 14px;
+}
+.guia-tumulo-popup .maplibregl-popup-tip {
+  border-top-color: #0f2436 !important;
+  border-bottom-color: #0f2436 !important;
+}
+.guia-tumulo-popup .maplibregl-popup-close-button {
+  color: #C9A46A;
+}
