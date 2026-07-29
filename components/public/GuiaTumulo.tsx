@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Map, { Marker, Source, Layer, NavigationControl, type MapRef } from 'react-map-gl/maplibre'
+import Map, { Marker, Popup, Source, Layer, NavigationControl, type MapRef } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Navigation, ChevronDown, ChevronRight, MapPin } from 'lucide-react'
 
@@ -29,6 +29,8 @@ interface Props {
   lapideLng: number | null
   quadra: string | null
   lote: string | null
+  nomeCompleto?: string
+  fotoUrl?: string | null
 }
 
 function distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -46,11 +48,12 @@ function linkRotaCarro(lat: number, lng: number) {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`
 }
 
-export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, lapideLat, lapideLng, quadra, lote }: Props) {
+export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, lapideLat, lapideLng, quadra, lote, nomeCompleto, fotoUrl }: Props) {
   const [aberto, setAberto] = useState(false)
   const [minhaPos, setMinhaPos] = useState<{ lat: number; lng: number } | null>(null)
   const [erroGps, setErroGps] = useState('')
   const [navegando, setNavegando] = useState(false)
+  const [mostrarCard, setMostrarCard] = useState(false)
   const watchId = useRef<number | null>(null)
   const mapRef = useRef<MapRef | null>(null)
 
@@ -155,8 +158,45 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
                 )}
 
                 <Marker longitude={lapideLng!} latitude={lapideLat!} anchor="bottom">
-                  <MapPin size={30} strokeWidth={2} fill="#C9A46A" style={{ color: '#0B1D2A' }} />
+                  <div
+                    onMouseEnter={() => setMostrarCard(true)}
+                    onMouseLeave={() => setMostrarCard(false)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMostrarCard((v) => !v)
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <MapPin size={30} strokeWidth={2} fill="#C9A46A" style={{ color: '#0B1D2A' }} />
+                  </div>
                 </Marker>
+
+                {mostrarCard && nomeCompleto && (
+                  <Popup
+                    longitude={lapideLng!}
+                    latitude={lapideLat!}
+                    anchor="bottom"
+                    offset={36}
+                    closeButton={false}
+                    closeOnClick={false}
+                    className="guia-tumulo-popup"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 2, minWidth: 140 }}>
+                      {fotoUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={fotoUrl}
+                          alt=""
+                          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                        />
+                      )}
+                      <div>
+                        <p style={{ fontSize: 11, opacity: 0.6, margin: 0, color: '#0B1D2A' }}>Aqui está</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#0B1D2A' }}>{nomeCompleto}</p>
+                      </div>
+                    </div>
+                  </Popup>
+                )}
 
                 {minhaPos && (
                   <Marker longitude={minhaPos.lng} latitude={minhaPos.lat} anchor="center">
@@ -198,6 +238,13 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
                   </div>
                 )}
                 {erroGps && <p className="text-xs text-red-400 mt-2">{erroGps}</p>}
+
+                <p
+                  className="text-center mt-3 pt-3"
+                  style={{ fontSize: 10, color: '#F5F2EB', opacity: 0.4, borderTop: '1px solid rgba(201,164,106,0.15)' }}
+                >
+                  Imagem de satélite hoje — em breve substituída por ortomosaico de drone com a localização exata do túmulo
+                </p>
               </div>
             </div>
           )}

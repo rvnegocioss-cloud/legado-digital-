@@ -340,6 +340,8 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
                 lapideLng={localizacao.lapide_lng}
                 quadra={localizacao.quadra}
                 lote={localizacao.lote}
+                nomeCompleto={m.nome_completo}
+                fotoUrl={m.foto_url}
               />
             </div>
           </section>
