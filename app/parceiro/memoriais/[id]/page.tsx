@@ -3,12 +3,28 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import {
+  ArrowLeft,
+  ExternalLink,
+  User,
+  FileText,
+  Images,
+  Milestone,
+  UserCog,
+  Mail,
+  Lock,
+  QrCode,
+  Signpost,
+  MessageSquare,
+} from 'lucide-react'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
-import SecaoRetratil from '@/components/admin/SecaoRetratil'
+import { CampoFicha } from '@/components/admin/CampoFicha'
+import { SecaoFicha } from '@/components/admin/SecaoFicha'
+import { StatusFicha } from '@/components/admin/StatusFicha'
 
 interface Memorial {
   id: string
@@ -26,6 +42,8 @@ interface Memorial {
   qr_code_url: string | null
   mensagem_placa: string | null
   familia_email: string | null
+  familia_nome_responsavel: string | null
+  familia_telefone: string | null
   preenchido_por: 'funeraria' | 'familia' | null
   created_at: string
   updated_at: string
@@ -92,6 +110,8 @@ function FichaMemorialParceiroInner() {
   const [senhaMsg, setSenhaMsg] = useState('')
   const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
   const [familiaEmail, setFamiliaEmail] = useState('')
+  const [familiaNomeResponsavel, setFamiliaNomeResponsavel] = useState('')
+  const [familiaTelefone, setFamiliaTelefone] = useState('')
   const [cadastrandoFamiliaEmail, setCadastrandoFamiliaEmail] = useState(false)
   const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia'>('familia')
@@ -129,7 +149,7 @@ function FichaMemorialParceiroInner() {
     const { data: m } = await supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, preenchido_por, parceiro_id, created_at, updated_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, parceiro_id, created_at, updated_at'
       )
       .eq('id', id)
       .maybeSingle()
@@ -162,6 +182,8 @@ function FichaMemorialParceiroInner() {
     setQrCodeUrl(m.qr_code_url || '')
     setMensagemPlaca(m.mensagem_placa || '')
     setFamiliaEmail(m.familia_email || '')
+    setFamiliaNomeResponsavel(m.familia_nome_responsavel || '')
+    setFamiliaTelefone(m.familia_telefone || '')
     setPreenchidoPor(m.preenchido_por || 'familia')
 
     const { data: seguranca } = await supabase
@@ -237,7 +259,12 @@ function FichaMemorialParceiroInner() {
     const res = await fetch('/api/admin/cadastrar-email-familia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: memorial.id, email: familiaEmail }),
+      body: JSON.stringify({
+        memorialId: memorial.id,
+        email: familiaEmail,
+        nome: familiaNomeResponsavel,
+        telefone: familiaTelefone,
+      }),
     })
     const json = await res.json()
 
@@ -415,151 +442,169 @@ function FichaMemorialParceiroInner() {
   if (loading) return <p className="text-zinc-400">Carregando...</p>
   if (!memorial) return <p className="text-zinc-400">Memorial não encontrado.</p>
 
-  const conteudoFechadoPorPadrao = preenchidoPor === 'familia'
+  const conteudoPreenchidoPelaFamilia = preenchidoPor === 'familia'
+
+  const chipsStatus: { label: string; tom: 'neutro' | 'verde' | 'amarelo' }[] = [
+    { label: temSenha ? 'Com senha' : 'Público', tom: temSenha ? 'amarelo' : 'verde' },
+    { label: temSenhaFamilia ? 'Acesso da família enviado' : 'Acesso da família pendente', tom: temSenhaFamilia ? 'verde' : 'neutro' },
+    { label: `Conteúdo: ${preenchidoPor === 'familia' ? 'Família' : 'Funerária'}`, tom: 'neutro' },
+    {
+      label: !mensagemPlaca.trim() ? 'Placa: sem mensagem' : mensagemPlacaConfirmada ? 'Placa confirmada' : 'Placa: aguardando',
+      tom: !mensagemPlaca.trim() ? 'neutro' : mensagemPlacaConfirmada ? 'verde' : 'amarelo',
+    },
+    { label: `Galeria ${galeria.length}/${LIMITE_FOTOS}`, tom: 'neutro' },
+    { label: `${usoStorageMB}MB / 500MB`, tom: usoStorageMB >= 400 ? 'amarelo' : 'neutro' },
+  ]
 
   return (
     <div>
-      <Link href={`/parceiro/memoriais${suffix}`} className="text-sm text-zinc-400 hover:text-white">
-        ← Voltar pra Meus Memoriais
+      <Link href={`/parceiro/memoriais${suffix}`} className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white">
+        <ArrowLeft size={14} strokeWidth={1.5} />
+        Voltar pra Meus Memoriais
       </Link>
 
-      <div className="flex items-start justify-between mt-4 mb-8">
+      <div className="flex items-start justify-between mt-4 mb-2 gap-4">
         <h1 className="text-2xl font-bold text-white">{memorial.nome_completo}</h1>
         {memorial.slug && (
           <a
             href={`/homenagem/${memorial.slug}`}
-            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap shrink-0"
           >
             Ver página do memorial
+            <ExternalLink size={14} strokeWidth={1.5} />
           </a>
         )}
       </div>
+      <StatusFicha chips={chipsStatus} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-6">
+        <div className="lg:col-span-8">
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-            <h2 className="text-sm font-medium text-zinc-400 mb-4">Dados do memorial</h2>
-            <form onSubmit={salvar} className="space-y-4">
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
-                <Input
-                  required
-                  value={form.nome_completo}
-                  onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Data de nascimento</label>
-                  <Input
-                    placeholder="DD/MM/AAAA"
-                    value={form.data_nascimento}
-                    onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Data de falecimento</label>
-                  <Input
-                    placeholder="DD/MM/AAAA"
-                    value={form.data_falecimento}
-                    onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
-                  <Input
-                    value={form.cidade}
-                    onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>
-                  <Input
-                    value={form.frase_preferida}
-                    onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">Biografia</label>
-                <textarea
-                  rows={6}
-                  value={form.biografia}
-                  onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
-                />
-              </div>
-
-              {conteudoFechadoPorPadrao && (
-                <p className="text-xs text-yellow-400 bg-yellow-900/20 border border-yellow-900/40 rounded-lg px-3 py-2">
-                  A família optou por preencher — evite sobrescrever o que ela já colocou. Mudar isso no card &quot;Família e acesso&quot;.
-                </p>
-              )}
-
-              <SecaoRetratil titulo="Mídia (foto, vídeo, galeria)" abertoPorPadrao={!conteudoFechadoPorPadrao}>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
-                    {fotoUrl && (
-                      <div className="flex items-center gap-3 mb-2">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={fotoUrl} alt="" className="w-20 h-20 rounded-full object-cover" />
-                        <button type="button" onClick={removerFotoPrincipal} className="text-xs text-zinc-500 hover:text-red-400">
-                          Remover foto
-                        </button>
+            <form onSubmit={salvar}>
+              <SecaoFicha titulo="Identificação" icon={User} primeira>
+                <div className="flex flex-wrap items-start gap-4">
+                  <div className="shrink-0">
+                    <label className="block text-xs text-zinc-400 mb-1.5">Foto (máx 10MB)</label>
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-16 rounded-full bg-zinc-800 overflow-hidden shrink-0">
+                        {fotoUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={fotoUrl} alt="" className="w-full h-full object-cover" />
+                        )}
                       </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFotoChange}
-                      disabled={enviandoFoto}
-                      className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-                    />
-                    {enviandoFoto && <p className="text-xs text-zinc-500 mt-1">Enviando foto...</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 100MB)</label>
-                    {videoUrl && (
-                      <div className="mb-2">
-                        <video src={videoUrl} controls className="w-full rounded-md max-h-40 bg-black" />
-                        <button type="button" onClick={removerVideo} className="text-xs text-zinc-500 hover:text-red-400 mt-1">
-                          Remover vídeo
-                        </button>
+                      <div className="flex flex-col gap-1">
+                        <label
+                          htmlFor="input-foto-perfil"
+                          className="text-[11px] text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 rounded-md px-2 py-1 cursor-pointer text-center"
+                        >
+                          {enviandoFoto ? 'Enviando...' : 'Enviar'}
+                        </label>
+                        <input
+                          id="input-foto-perfil"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFotoChange}
+                          disabled={enviandoFoto}
+                          className="hidden"
+                        />
+                        {fotoUrl && (
+                          <button type="button" onClick={removerFotoPrincipal} className="text-[11px] text-zinc-500 hover:text-red-400">
+                            Remover
+                          </button>
+                        )}
                       </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleVideoChange}
-                      disabled={enviandoVideo}
-                      className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-                    />
-                    {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
+                    </div>
                   </div>
+                  <CampoFicha label="Nome completo" className="flex-1 min-w-[220px]">
+                    <Input
+                      required
+                      value={form.nome_completo}
+                      onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
+                      className="bg-zinc-800 border-zinc-700 text-white"
+                    />
+                  </CampoFicha>
+                  <CampoFicha label="Nascimento" className="w-36">
+                    <Input
+                      placeholder="DD/MM/AAAA"
+                      value={form.data_nascimento}
+                      onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
+                      className="bg-zinc-800 border-zinc-700 text-white"
+                    />
+                  </CampoFicha>
+                  <CampoFicha label="Falecimento" className="w-36">
+                    <Input
+                      placeholder="DD/MM/AAAA"
+                      value={form.data_falecimento}
+                      onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
+                      className="bg-zinc-800 border-zinc-700 text-white"
+                    />
+                  </CampoFicha>
+                  <CampoFicha label="Cidade" className="w-44">
+                    <Input
+                      value={form.cidade}
+                      onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                      className="bg-zinc-800 border-zinc-700 text-white"
+                    />
+                  </CampoFicha>
+                </div>
+              </SecaoFicha>
 
-                  <div>
-                    <label className="block text-xs text-zinc-500 mb-1">
-                      Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
-                    </label>
+              <SecaoFicha titulo="História" icon={FileText}>
+                {conteudoPreenchidoPelaFamilia && (
+                  <p className="text-xs text-yellow-400 bg-yellow-900/20 border border-yellow-900/40 rounded-lg px-3 py-2 mb-3">
+                    A família optou por preencher o conteúdo — evite sobrescrever o que ela já colocou. Isso é definido no card &quot;Quem preenche o conteúdo&quot;, ao lado.
+                  </p>
+                )}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <CampoFicha label="Biografia" className="lg:col-span-2">
+                    <textarea
+                      rows={10}
+                      value={form.biografia}
+                      onChange={(e) => setForm({ ...form, biografia: e.target.value })}
+                      className="flex w-full max-w-[72ch] rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                    />
+                  </CampoFicha>
+                  <CampoFicha label="Frase preferida">
+                    <textarea
+                      rows={3}
+                      value={form.frase_preferida}
+                      onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
+                      className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                    />
+                  </CampoFicha>
+                </div>
+              </SecaoFicha>
+
+              <SecaoFicha
+                titulo="Galeria e vídeo"
+                icon={Images}
+                acao={
+                  <div className="flex items-center gap-2 w-32">
+                    <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-colors ${
+                          usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-zinc-400 whitespace-nowrap">{usoStorageMB}MB/500MB</span>
+                  </div>
+                }
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <CampoFicha label={`Galeria de fotos (${galeria.length}/${LIMITE_FOTOS})`} className="lg:col-span-2">
                     {galeria.length > 0 && (
-                      <div className="grid grid-cols-4 gap-2 mb-2">
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2">
                         {galeria.map((url) => (
-                          <div key={url} className="relative group">
+                          <div key={url} className="relative group aspect-square">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                            <img src={url} alt="" className="w-full h-full object-cover rounded" />
                             <button
                               type="button"
                               onClick={() => removerFoto(url)}
-                              className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                              aria-label="Remover foto"
+                              className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
                             >
                               ×
                             </button>
@@ -575,188 +620,213 @@ function FichaMemorialParceiroInner() {
                       disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
                       className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
                     />
-                    {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
-                  </div>
+                    {enviandoGaleria && <p className="text-[11px] text-zinc-500 mt-1">Enviando fotos...</p>}
+                  </CampoFicha>
+                  <CampoFicha label="Vídeo (máx 100MB)">
+                    {videoUrl && (
+                      <div className="mb-2">
+                        <video src={videoUrl} controls className="w-full rounded-md max-h-40 bg-black" />
+                        <button type="button" onClick={removerVideo} className="text-[11px] text-zinc-500 hover:text-red-400 mt-1">
+                          Remover vídeo
+                        </button>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoChange}
+                      disabled={enviandoVideo}
+                      className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+                    />
+                    {enviandoVideo && <p className="text-[11px] text-zinc-500 mt-1">Enviando vídeo...</p>}
+                  </CampoFicha>
                 </div>
-              </SecaoRetratil>
+              </SecaoFicha>
 
-              <SecaoRetratil titulo="Linha do tempo" abertoPorPadrao={!conteudoFechadoPorPadrao}>
+              <SecaoFicha titulo="Linha do tempo" icon={Milestone}>
                 <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
-              </SecaoRetratil>
+              </SecaoFicha>
 
-              {erro && <p className="text-red-400 text-sm">{erro}</p>}
-              {salvo && <p className="text-green-400 text-sm">Salvo.</p>}
-
-              <Button type="submit" disabled={salvando}>
-                {salvando ? 'Salvando...' : 'Salvar'}
-              </Button>
+              <div className="flex items-center gap-4 mt-6 pt-4 border-t border-zinc-800">
+                <Button type="submit" disabled={salvando}>
+                  {salvando ? 'Salvando...' : 'Salvar memorial'}
+                </Button>
+                {erro && <p className="text-red-400 text-sm">{erro}</p>}
+                {salvo && <p className="text-green-400 text-sm">Memorial salvo.</p>}
+              </div>
             </form>
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="lg:col-span-4">
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">Família e acesso</h2>
-            <div className="mb-4">
-              <label className="block text-xs text-zinc-500 mb-2">Quem preenche o conteúdo?</label>
-              <div className="flex flex-col gap-2">
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
-                  <input
-                    type="radio"
-                    checked={preenchidoPor === 'familia'}
-                    onChange={() => salvarPreenchidoPor('familia')}
-                    disabled={salvandoPreenchidoPor}
-                  />
-                  A família preenche
-                </label>
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
-                  <input
-                    type="radio"
-                    checked={preenchidoPor === 'funeraria'}
-                    onChange={() => salvarPreenchidoPor('funeraria')}
-                    disabled={salvandoPreenchidoPor}
-                  />
-                  Nós (a funerária) preenchemos
-                </label>
-              </div>
-            </div>
-            <form onSubmit={cadastrarEmailFamilia} className="space-y-2 pt-4 border-t border-zinc-800">
-              <label className="block text-xs text-zinc-500 mb-1">E-mail da família</label>
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  placeholder="email@familia.com"
-                  required
-                  value={familiaEmail}
-                  onChange={(e) => setFamiliaEmail(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white flex-1"
-                />
-                <Button type="submit" disabled={cadastrandoFamiliaEmail}>
-                  {cadastrandoFamiliaEmail ? '...' : temSenhaFamilia ? 'Reenviar' : 'Cadastrar'}
-                </Button>
-              </div>
-              {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
-            </form>
-          </div>
-
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">
-              Moderação do mural {mural.length > 0 ? `(${mural.length})` : ''}
-            </h2>
-            {mural.length === 0 ? (
-              <p className="text-zinc-500 text-xs">Nenhuma memória deixada ainda.</p>
-            ) : (
-              <ul className="space-y-2 max-h-64 overflow-y-auto">
-                {mural.map((m) => (
-                  <li key={m.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-white text-sm">
-                        {m.nome} {m.parentesco && <span className="text-zinc-500 text-xs">· {m.parentesco}</span>}
-                      </p>
-                      <p className="text-zinc-400 text-xs mt-0.5 break-words">{m.texto}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removerMemoria(m.id)}
-                      disabled={removendoMuralId === m.id}
-                      className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
-                    >
-                      {removendoMuralId === m.id ? '...' : 'Remover'}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">Armazenamento</h2>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-colors ${
-                    usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
-                  }`}
-                  style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
-                />
-              </div>
-              <span className="text-xs text-zinc-400 whitespace-nowrap">{usoStorageMB}MB / 500MB</span>
-            </div>
-          </div>
-
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">QR Code e placa</h2>
-            <div className="flex items-center gap-3 mb-3">
-              {qrCodeUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={qrCodeUrl} alt="" className="w-16 h-16 rounded bg-white p-1" />
-              ) : (
-                <div className="w-16 h-16 rounded bg-zinc-800" />
-              )}
-              <div className="flex flex-col gap-1">
-                {qrCodeUrl && (
-                  <a href={qrCodeUrl} download={`qrcode-${memorial.slug}.png`} className="text-blue-400 hover:underline text-xs">
-                    Baixar QR Code
-                  </a>
-                )}
+            <SecaoFicha titulo="Quem preenche o conteúdo" icon={UserCog} primeira>
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={gerarQrCode}
-                  disabled={gerandoQrCode}
-                  className="text-zinc-400 hover:text-white text-xs text-left"
+                  onClick={() => salvarPreenchidoPor('familia')}
+                  disabled={salvandoPreenchidoPor}
+                  className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                    preenchidoPor === 'familia'
+                      ? 'border-blue-500/60 bg-blue-500/10 text-blue-300'
+                      : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200'
+                  }`}
                 >
-                  {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar QR Code' : 'Gerar QR Code'}
+                  A família preenche
+                </button>
+                <button
+                  type="button"
+                  onClick={() => salvarPreenchidoPor('funeraria')}
+                  disabled={salvandoPreenchidoPor}
+                  className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                    preenchidoPor === 'funeraria'
+                      ? 'border-blue-500/60 bg-blue-500/10 text-blue-300'
+                      : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  Nós preenchemos
                 </button>
               </div>
-            </div>
+              {salvandoPreenchidoPor && <p className="text-[11px] text-zinc-500 mt-1.5">Salvando...</p>}
+            </SecaoFicha>
 
-            <form onSubmit={salvarMensagemPlaca} className="pt-3 border-t border-zinc-800">
-              <label className="block text-xs text-zinc-500 mb-1">Mensagem da placa</label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Em memória eterna de..."
-                value={mensagemPlaca}
-                onChange={(e) => setMensagemPlaca(e.target.value)}
-                className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
-              />
+            <SecaoFicha titulo="Acesso da família" icon={Mail}>
+              <form onSubmit={cadastrarEmailFamilia} className="space-y-3">
+                <CampoFicha label="Nome do responsável">
+                  <Input
+                    value={familiaNomeResponsavel}
+                    onChange={(e) => setFamiliaNomeResponsavel(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </CampoFicha>
+                <CampoFicha label="E-mail">
+                  <Input
+                    type="email"
+                    placeholder="email@familia.com"
+                    required
+                    value={familiaEmail}
+                    onChange={(e) => setFamiliaEmail(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </CampoFicha>
+                <CampoFicha label="Telefone">
+                  <Input
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    value={familiaTelefone}
+                    onChange={(e) => setFamiliaTelefone(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </CampoFicha>
+                <Button type="submit" disabled={cadastrandoFamiliaEmail} className="w-full">
+                  {cadastrandoFamiliaEmail ? 'Enviando...' : temSenhaFamilia ? 'Reenviar acesso' : 'Enviar acesso'}
+                </Button>
+                {familiaEmailMsg && <p className="text-[11px] text-zinc-400">{familiaEmailMsg}</p>}
+              </form>
+            </SecaoFicha>
+
+            <SecaoFicha titulo="Senha da página pública" icon={Lock}>
+              <form onSubmit={salvarSenha} className="space-y-2">
+                <CampoFicha
+                  label="Senha de acesso"
+                  hint={temSenha ? 'Deixe em branco e salve pra tornar público de novo.' : 'Deixe em branco pra manter público.'}
+                >
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Deixe em branco pra público"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                    />
+                    <Button type="submit" disabled={salvandoSenha}>
+                      {salvandoSenha ? '...' : temSenha ? 'Atualizar' : 'Definir'}
+                    </Button>
+                  </div>
+                </CampoFicha>
+                {senhaMsg && <p className="text-[11px] text-zinc-400">{senhaMsg}</p>}
+              </form>
+            </SecaoFicha>
+
+            <SecaoFicha titulo="QR Code" icon={QrCode}>
               <div className="flex items-center gap-3">
-                <Button type="submit" disabled={salvandoMensagemPlaca}>
-                  {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
-                </Button>
-                {mensagemPlaca.trim() && (
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      mensagemPlacaConfirmada ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'
-                    }`}
-                  >
-                    {mensagemPlacaConfirmada ? 'Confirmado pela família' : 'Aguardando confirmação'}
-                  </span>
+                {qrCodeUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={qrCodeUrl} alt="" className="w-16 h-16 rounded bg-white p-1" />
+                ) : (
+                  <div className="w-16 h-16 rounded bg-zinc-800" />
                 )}
+                <div className="flex flex-col gap-1">
+                  {qrCodeUrl && (
+                    <a href={qrCodeUrl} download={`qrcode-${memorial.slug}.png`} className="text-blue-400 hover:underline text-xs">
+                      Baixar
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={gerarQrCode}
+                    disabled={gerandoQrCode}
+                    className="text-zinc-400 hover:text-white text-xs text-left"
+                  >
+                    {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar' : 'Gerar'}
+                  </button>
+                </div>
               </div>
-              {mensagemPlacaMsg && <p className="text-xs text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
-            </form>
-          </div>
+            </SecaoFicha>
 
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-            <h2 className="text-sm font-medium text-zinc-400 mb-3">Senha de acesso do memorial</h2>
-            <form onSubmit={salvarSenha} className="space-y-2">
-              <label className="block text-xs text-zinc-500 mb-1">
-                {temSenha ? 'Nova senha (ou deixe em branco pra tornar público)' : 'Senha de acesso (deixe em branco pra público)'}
-              </label>
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  placeholder="Deixe em branco pra público"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white flex-1"
+            <SecaoFicha titulo="Mensagem da placa" icon={Signpost}>
+              <form onSubmit={salvarMensagemPlaca}>
+                <textarea
+                  rows={3}
+                  placeholder="Ex: Em memória eterna de..."
+                  value={mensagemPlaca}
+                  onChange={(e) => setMensagemPlaca(e.target.value)}
+                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
                 />
-                <Button type="submit" disabled={salvandoSenha}>
-                  {salvandoSenha ? '...' : 'Salvar'}
-                </Button>
-              </div>
-              {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
-            </form>
+                <div className="flex items-center gap-3">
+                  <Button type="submit" disabled={salvandoMensagemPlaca}>
+                    {salvandoMensagemPlaca ? 'Salvando...' : 'Salvar mensagem'}
+                  </Button>
+                  {mensagemPlaca.trim() && (
+                    <span
+                      className={`text-[11px] px-2 py-1 rounded ${
+                        mensagemPlacaConfirmada ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'
+                      }`}
+                    >
+                      {mensagemPlacaConfirmada ? 'Confirmado pela família' : 'Aguardando confirmação'}
+                    </span>
+                  )}
+                </div>
+                {mensagemPlacaMsg && <p className="text-[11px] text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
+              </form>
+            </SecaoFicha>
+
+            <SecaoFicha titulo={`Mural de memórias ${mural.length > 0 ? `(${mural.length})` : ''}`} icon={MessageSquare}>
+              {mural.length === 0 ? (
+                <p className="text-zinc-500 text-xs">Nenhuma memória deixada ainda.</p>
+              ) : (
+                <ul className="space-y-2 max-h-72 overflow-y-auto">
+                  {mural.map((m) => (
+                    <li key={m.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-white text-sm">
+                          {m.nome} {m.parentesco && <span className="text-zinc-500 text-xs">· {m.parentesco}</span>}
+                        </p>
+                        <p className="text-zinc-400 text-xs mt-0.5 break-words">{m.texto}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removerMemoria(m.id)}
+                        disabled={removendoMuralId === m.id}
+                        className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                      >
+                        {removendoMuralId === m.id ? '...' : 'Remover'}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </SecaoFicha>
           </div>
         </div>
       </div>

@@ -27,6 +27,8 @@ interface Memorial {
   qr_code_url: string | null
   mensagem_placa: string | null
   familia_email: string | null
+  familia_nome_responsavel: string | null
+  familia_telefone: string | null
   lapide_id: string | null
   preenchido_por: 'funeraria' | 'familia' | null
   created_at: string
@@ -112,6 +114,7 @@ export default function DetalheMemorial() {
   const [removendoMuralId, setRemovendoMuralId] = useState<string | null>(null)
   const [familiaCpf, setFamiliaCpf] = useState('')
   const [familiaNome, setFamiliaNome] = useState('')
+  const [familiaTelefone, setFamiliaTelefone] = useState('')
   const [consultandoCpf, setConsultandoCpf] = useState(false)
   const [cpfMsg, setCpfMsg] = useState('')
   const [cpfModoTeste, setCpfModoTeste] = useState(false)
@@ -173,6 +176,8 @@ export default function DetalheMemorial() {
       setGaleria(m.galeria_fotos || [])
       setMensagemPlaca(m.mensagem_placa || '')
       setFamiliaEmail(m.familia_email || '')
+      setFamiliaNome(m.familia_nome_responsavel || '')
+      setFamiliaTelefone(m.familia_telefone || '')
       setPreenchidoPor(m.preenchido_por || 'familia')
       setTimelineEventos(
         (m.timeline || []).map((ev: { year?: string; title?: string; description?: string }) => ({
@@ -333,7 +338,12 @@ export default function DetalheMemorial() {
     const res = await fetch('/api/admin/cadastrar-email-familia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: memorial.id, email: familiaEmail }),
+      body: JSON.stringify({
+        memorialId: memorial.id,
+        email: familiaEmail,
+        nome: familiaNome,
+        telefone: familiaTelefone,
+      }),
     })
     const json = await res.json()
 
@@ -858,15 +868,30 @@ export default function DetalheMemorial() {
               </div>
             </div>
 
-            <form onSubmit={cadastrarEmailFamilia} className="flex gap-3">
-              <Input
-                type="email"
-                placeholder="email@familia.com"
-                required
-                value={familiaEmail}
-                onChange={(e) => setFamiliaEmail(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-white flex-1"
-              />
+            <form onSubmit={cadastrarEmailFamilia} className="space-y-3">
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-zinc-500 mb-1">E-mail da família</label>
+                  <Input
+                    type="email"
+                    placeholder="email@familia.com"
+                    required
+                    value={familiaEmail}
+                    onChange={(e) => setFamiliaEmail(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+                <div className="w-44">
+                  <label className="block text-xs text-zinc-500 mb-1">Telefone</label>
+                  <Input
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    value={familiaTelefone}
+                    onChange={(e) => setFamiliaTelefone(e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
               <Button type="submit" disabled={cadastrandoFamiliaEmail} className="whitespace-nowrap">
                 {cadastrandoFamiliaEmail ? 'Cadastrando...' : temSenhaFamilia ? 'Gerar nova senha' : 'Cadastrar'}
               </Button>

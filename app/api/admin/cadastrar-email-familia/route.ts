@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  const { memorialId, email } = await req.json()
+  const { memorialId, email, nome, telefone } = await req.json()
   if (!memorialId || !email) {
     return NextResponse.json({ error: 'memorialId e email obrigatórios' }, { status: 400 })
   }
@@ -71,7 +71,11 @@ export async function POST(req: NextRequest) {
 
   const { error: updateError } = await supabaseAdmin
     .from('homenagens')
-    .update({ familia_email: email })
+    .update({
+      familia_email: email,
+      familia_nome_responsavel: nome || null,
+      familia_telefone: telefone || null,
+    })
     .eq('id', memorialId)
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
