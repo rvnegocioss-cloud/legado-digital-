@@ -48,23 +48,35 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { slug, ...campos } = body
+  const { slug, updatedAtEsperado, ...campos } = body
   if (!slug) return NextResponse.json({ error: 'slug obrigatório' }, { status: 400 })
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
   const resultado = await buscarMemorialEValidar(supabaseAdmin, slug, req)
   if ('erro' in resultado) return NextResponse.json({ error: resultado.erro }, { status: resultado.status })
 
+  // Checa se a Central ou o Parceiro mexeu nesse memorial desde que a família
+  // abriu a tela — sem isso, o salvar da família sobrescreve silenciosamente
+  // qualquer alteração feita em paralelo do outro lado.
+  if (updatedAtEsperado && resultado.homenagem.updated_at !== updatedAtEsperado) {
+    return NextResponse.json(
+      { error: 'Esse memorial foi alterado por outra pessoa (funerária ou equipe) enquanto você editava. Recarregue a página antes de salvar, pra não sobrescrever a mudança dela.' },
+      { status: 409 }
+    )
+  }
+
   const payload: Record<string, unknown> = {}
   for (const campo of CAMPOS_EDITAVEIS) {
     if (campo in campos) payload[campo] = campos[campo]
   }
 
-  const { error } = await supabaseAdmin
+  const { data: atualizado, error } = await supabaseAdmin
     .from('homenagens')
     .update(payload)
     .eq('id', resultado.homenagem.id)
+    .select('updated_at')
+    .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, updatedAt: atualizado?.updated_at })
 }

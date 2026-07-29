@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Heart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { CORES, dataPtBr } from '@/lib/publicTheme'
@@ -18,6 +18,16 @@ interface MemoriaMural {
 export function MuralMemorias({ memorialId, memoriasIniciais }: { memorialId: string; memoriasIniciais: MemoriaMural[] }) {
   const [memorias, setMemorias] = useState(memoriasIniciais)
   const [reagidas, setReagidas] = useState<Record<string, boolean>>({})
+
+  // Carrega depois do primeiro render (client-only) pra não dar mismatch de
+  // hidratação — sem isso, F5 esquecia quem já reagiu e deixava inflar o
+  // contador só recarregando a página.
+  useEffect(() => {
+    try {
+      const salvo = localStorage.getItem(`mem_reagidas_${memorialId}`)
+      if (salvo) setReagidas(JSON.parse(salvo))
+    } catch {}
+  }, [memorialId])
   const [nome, setNome] = useState('')
   const [parentesco, setParentesco] = useState('')
   const [texto, setTexto] = useState('')
@@ -26,7 +36,11 @@ export function MuralMemorias({ memorialId, memoriasIniciais }: { memorialId: st
 
   async function reagir(id: string) {
     if (reagidas[id]) return
-    setReagidas((r) => ({ ...r, [id]: true }))
+    const novasReagidas = { ...reagidas, [id]: true }
+    setReagidas(novasReagidas)
+    try {
+      localStorage.setItem(`mem_reagidas_${memorialId}`, JSON.stringify(novasReagidas))
+    } catch {}
 
     // RPC atômica no servidor (não é UPDATE direto do client — RLS não libera
     // update público, e update direto teria race condition + permitiria

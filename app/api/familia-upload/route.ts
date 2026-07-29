@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { verificarTokenFamilia } from '@/lib/familiaSessao'
+import { getMemorialStorageUsage } from '@/lib/storageUsage'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -73,44 +74,6 @@ function checkRateLimit(token: string): boolean {
   timestamps.push(now)
   rateLimitMap.set(token, timestamps)
   return true // OK
-}
-
-/**
- * Calcula uso de quota do memorial (soma de todos os objetos no Storage)
- */
-async function getMemorialStorageUsage(
-  supabase: ReturnType<typeof createClient>,
-  homenagemId: string
-): Promise<number> {
-  const { data: arquivos, error } = await supabase.storage
-    .from('memoriais')
-    .list(homenagemId, { limit: 10000 })
-
-  if (error || !arquivos) return 0
-
-  // Recursivamente listar todas as subpastas
-  let totalBytes = 0
-  const queue = arquivos.slice()
-
-  for (const item of queue) {
-    if (item.id && item.id.endsWith('/')) {
-      // É uma pasta, listar conteúdo
-      const { data: subItems } = await supabase.storage
-        .from('memoriais')
-        .list(`${homenagemId}/${item.name}`, { limit: 10000 })
-      if (subItems) queue.push(...subItems)
-    } else if (item.id && !item.id.endsWith('/')) {
-      // É um arquivo, somar tamanho (metadata não vem direto, usar 0 como estimativa)
-      // Alternativa: fazer HEAD request por arquivo (custoso)
-      // Por ora: rejeitar se número de arquivos for alto
-      totalBytes += item.metadata?.size || 0
-    }
-  }
-
-  // Se não conseguir calcular com metadata, contar arquivos
-  // Supabase Storage não expõe bytes direto na API — usar heurística:
-  // cada foto ~2MB, cada vídeo ~20MB (cliente deve validar antes de enviar)
-  return totalBytes
 }
 
 /**

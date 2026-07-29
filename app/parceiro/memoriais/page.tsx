@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
+import { gerarSlugUnico } from '@/lib/gerarSlug'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -33,15 +34,7 @@ interface Memorial {
   mensagem_placa: string | null
   familia_email: string | null
   created_at: string
-}
-
-function gerarSlug(nome: string) {
-  return nome
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g'), '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
+  updated_at: string
 }
 
 const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
@@ -99,6 +92,7 @@ function ParceiroMemoriaisInner() {
   const [enviandoVideo, setEnviandoVideo] = useState(false)
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [erro, setErro] = useState('')
+  const [usoStorageMB, setUsoStorageMB] = useState(0)
   const [rascunhoId, setRascunhoId] = useState('')
   const [foiSalvo, setFoiSalvo] = useState(false)
   const [senha, setSenha] = useState('')
@@ -147,10 +141,22 @@ function ParceiroMemoriaisInner() {
       return
     }
 
+    // Limpa rascunhos abandonados (aba fechada sem passar pelo fecharDialog)
+    // com mais de 2h — esses ficam públicos pra sempre (leitura pública é
+    // aberta) se ninguém limpar. Só apaga rascunho de verdade (slug nunca
+    // muda de "rascunho-" até o primeiro Salvar bem-sucedido).
+    const duasHorasAtras = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    await supabase
+      .from('homenagens')
+      .delete()
+      .eq('parceiro_id', meuParceiroId)
+      .like('slug', 'rascunho-%')
+      .lt('created_at', duasHorasAtras)
+
     const { data } = await supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, created_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, biografia, frase_preferida, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, created_at, updated_at'
       )
       .eq('parceiro_id', meuParceiroId)
       .order('created_at', { ascending: false })
@@ -161,6 +167,7 @@ function ParceiroMemoriaisInner() {
 
   async function abrirNovo() {
     setForm(FORM_INICIAL)
+    setUsoStorageMB(0)
     setFotoUrl('')
     setSenha('')
     setTemSenha(false)
@@ -239,6 +246,12 @@ function ParceiroMemoriaisInner() {
     setTemSenha(!!seguranca?.senha_acesso_hash)
     setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
     setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
+
+    setUsoStorageMB(0)
+    fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
+      .then((r) => r.json())
+      .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
+      .catch(() => {})
   }
 
   async function salvarSenha(e: React.FormEvent) {
@@ -414,11 +427,27 @@ function ParceiroMemoriaisInner() {
     setSalvando(true)
     setErro('')
 
+    // Checa se alguém (família, ou a Central) mexeu nesse memorial desde que
+    // essa tela abriu — sem isso, salvar aqui sobrescreve silenciosamente
+    // qualquer alteração feita em paralelo, sem avisar nenhum dos dois lados.
+    if (editando?.updated_at) {
+      const { data: atual } = await supabase
+        .from('homenagens')
+        .select('updated_at')
+        .eq('id', idParaUpload)
+        .single()
+      if (atual && atual.updated_at !== editando.updated_at) {
+        setErro('Esse memorial foi alterado por outra pessoa (família ou a Central) desde que essa tela abriu. Feche e abra de novo antes de salvar, pra não sobrescrever a mudança dela.')
+        setSalvando(false)
+        return
+      }
+    }
+
     // Slug só é gerado na primeira vez de verdade — depois disso fica fixo,
     // senão editar o nome troca a URL pública e quebra link/QR já compartilhado.
     const slugAtual = editando?.slug && !editando.slug.startsWith('rascunho-')
       ? editando.slug
-      : gerarSlug(form.nome_completo)
+      : await gerarSlugUnico(supabase, form.nome_completo, idParaUpload)
 
     const payload = {
       ...form,
@@ -539,8 +568,18 @@ function ParceiroMemoriaisInner() {
                 />
               </div>
 
-              <div>
-                <p className="text-xs text-zinc-500 mb-3 pb-3 border-b border-zinc-800">Armazenamento: 250MB / 500MB</p>
+              <div className="pb-3 border-b border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-colors ${
+                        usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-zinc-400 whitespace-nowrap">{usoStorageMB}MB / 500MB</span>
+                </div>
               </div>
 
               <div>

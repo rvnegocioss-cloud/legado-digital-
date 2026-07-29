@@ -18,6 +18,7 @@ interface Memorial {
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   slug: string | null
+  updated_at: string
 }
 
 const LIMITE_FOTOS = 4
@@ -58,6 +59,8 @@ export default function FamiliaEdicaoPage() {
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   const [enviandoVideo, setEnviandoVideo] = useState(false)
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
+  const [updatedAtCarregado, setUpdatedAtCarregado] = useState('')
+  const [usoStorageMB, setUsoStorageMB] = useState(0)
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -76,6 +79,11 @@ export default function FamiliaEdicaoPage() {
     }
 
     const m = json.memorial as Memorial
+    setUpdatedAtCarregado(m.updated_at)
+    fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
+      .then((r) => r.json())
+      .then((j) => setUsoStorageMB(Math.round((j.usageBytes || 0) / 1024 / 1024)))
+      .catch(() => {})
     setForm({
       nome_completo: m.nome_completo || '',
       data_nascimento: m.data_nascimento || '',
@@ -108,6 +116,7 @@ export default function FamiliaEdicaoPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         slug: params.slug,
+        updatedAtEsperado: updatedAtCarregado,
         ...form,
         foto_url: fotoUrl || null,
         video_url: videoUrl || null,
@@ -116,14 +125,16 @@ export default function FamiliaEdicaoPage() {
       }),
     })
 
+    const json = await res.json()
+
     if (!res.ok) {
-      const json = await res.json()
       if (res.status === 401) setSessaoInvalida(true)
       setErro(json.error || 'Erro ao salvar')
       setSalvando(false)
       return
     }
 
+    if (json.updatedAt) setUpdatedAtCarregado(json.updatedAt)
     setSalvando(false)
     setSalvo(true)
   }
@@ -289,14 +300,14 @@ export default function FamiliaEdicaoPage() {
             </div>
 
             <div className="pb-4 border-b border-zinc-800 mb-4">
-              <p className="text-xs text-zinc-500">Armazenamento: 250MB / 500MB</p>
+              <p className="text-xs text-zinc-500">Armazenamento: {usoStorageMB}MB / 500MB</p>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                   <div
                     className={`h-full ${
-                      250 < 250 ? 'bg-green-500' : 250 < 400 ? 'bg-yellow-500' : 'bg-red-500'
+                      usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
                     }`}
-                    style={{ width: `${(250 / 500) * 100}%` }}
+                    style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
                   />
                 </div>
               </div>

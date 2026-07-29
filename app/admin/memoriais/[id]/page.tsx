@@ -29,6 +29,7 @@ interface Memorial {
   familia_email: string | null
   lapide_id: string | null
   created_at: string
+  updated_at: string
 }
 
 interface Cemiterio {
@@ -95,6 +96,7 @@ export default function DetalheMemorial() {
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [erro, setErro] = useState('')
   const [salvo, setSalvo] = useState(false)
+  const [usoStorageMB, setUsoStorageMB] = useState(0)
   const [senha, setSenha] = useState('')
   const [temSenha, setTemSenha] = useState(false)
   const [salvandoSenha, setSalvandoSenha] = useState(false)
@@ -129,6 +131,11 @@ export default function DetalheMemorial() {
     setLoading(true)
     const { data: m } = await supabase.from('homenagens').select('*').eq('id', id).single()
     setMemorial(m)
+
+    fetch(`/api/memorial-storage-usage?memorialId=${id}`)
+      .then((r) => r.json())
+      .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
+      .catch(() => {})
 
     const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome').order('nome')
     setCemiterios(cemiteriosData || [])
@@ -349,6 +356,22 @@ export default function DetalheMemorial() {
     setErro('')
     setSalvo(false)
 
+    // Checa se alguém (família, no outro portal) mexeu nesse memorial desde
+    // que essa tela carregou — sem isso, salvar aqui sobrescreve silenciosamente
+    // qualquer alteração feita em paralelo, sem avisar nenhum dos dois lados.
+    if (memorial?.updated_at) {
+      const { data: atual } = await supabase
+        .from('homenagens')
+        .select('updated_at')
+        .eq('id', params.id)
+        .single()
+      if (atual && atual.updated_at !== memorial.updated_at) {
+        setErro('Esse memorial foi alterado por outra pessoa (família ou outro operador) desde que essa tela abriu. Recarregue a página antes de salvar, pra não sobrescrever a mudança dela.')
+        setSalvando(false)
+        return
+      }
+    }
+
     const payload = {
       ...form,
       lapide_id: form.lapide_id || null,
@@ -357,7 +380,12 @@ export default function DetalheMemorial() {
       galeria_fotos: galeria,
       timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
     }
-    const { error } = await supabase.from('homenagens').update(payload).eq('id', params.id)
+    const { data: atualizado, error } = await supabase
+      .from('homenagens')
+      .update(payload)
+      .eq('id', params.id)
+      .select('updated_at')
+      .single()
 
     if (error) {
       setErro(error.message)
@@ -376,7 +404,16 @@ export default function DetalheMemorial() {
 
     setSalvando(false)
     setSalvo(true)
-    if (memorial) setMemorial({ ...memorial, ...form, foto_url: fotoUrl || null, video_url: videoUrl || null, galeria_fotos: galeria })
+    if (memorial) {
+      setMemorial({
+        ...memorial,
+        ...form,
+        foto_url: fotoUrl || null,
+        video_url: videoUrl || null,
+        galeria_fotos: galeria,
+        updated_at: atualizado?.updated_at || memorial.updated_at,
+      })
+    }
   }
 
   function removerFotoPrincipal() {
@@ -509,12 +546,12 @@ export default function DetalheMemorial() {
                 <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-colors ${
-                      250 < 250 ? 'bg-green-500' : 250 < 400 ? 'bg-yellow-500' : 'bg-red-500'
+                      usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
                     }`}
-                    style={{ width: `${(250 / 500) * 100}%` }}
+                    style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
                   />
                 </div>
-                <span className="text-xs text-zinc-400 whitespace-nowrap">250MB / 500MB</span>
+                <span className="text-xs text-zinc-400 whitespace-nowrap">{usoStorageMB}MB / 500MB</span>
               </div>
             </div>
 

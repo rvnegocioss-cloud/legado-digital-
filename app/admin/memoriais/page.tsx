@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
+import { gerarSlugUnico } from '@/lib/gerarSlug'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -23,15 +24,6 @@ interface Memorial {
   cidade: string | null
   slug: string | null
   created_at: string
-}
-
-function gerarSlug(nome: string) {
-  return nome
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g'), '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
 }
 
 const FORM_INICIAL = {
@@ -76,7 +68,7 @@ export default function AdminMemoriais() {
     setSalvando(true)
     setErro('')
 
-    const slug = gerarSlug(form.nome_completo)
+    const slug = await gerarSlugUnico(supabase, form.nome_completo)
     const { data, error } = await supabase
       .from('homenagens')
       .insert({ ...form, slug, memorial_slug: slug })
