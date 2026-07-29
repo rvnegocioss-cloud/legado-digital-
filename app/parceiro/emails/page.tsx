@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/auth'
+import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 
 interface EmailEnviado {
   id: string
@@ -44,14 +44,36 @@ function ParceiroEmailsInner() {
 
   useEffect(() => {
     load()
-  }, [])
+  }, [parceiroIdParam])
 
   async function load() {
     setLoading(true)
-    // RLS já restringe aos memoriais do próprio parceiro
+
+    // Mesma checagem do resto do Portal do Parceiro: ?parceiro_id= só vale
+    // se quem está logado é staff de verdade. Sem isso, staff testando "como"
+    // parceiro (modo Central) via is_legado_staff() enxergava e-mail de
+    // TODAS as empresas aqui, e até tipos que não são de nenhum memorial
+    // (ex: convite de acesso ao parceiro) — nunca era filtrado por empresa.
+    let meuParceiroId: string | null = null
+    if (parceiroIdParam) {
+      const adminUser = await getAdminUser()
+      if (adminUser) meuParceiroId = parceiroIdParam
+    }
+    if (!meuParceiroId) {
+      const parceiroUser = (await getParceiroUser()) as any
+      meuParceiroId = parceiroUser?.parceiros_usuarios?.[0]?.parceiros_b2b?.id || null
+    }
+
+    if (!meuParceiroId) {
+      setEmails([])
+      setLoading(false)
+      return
+    }
+
     const { data } = await supabase
       .from('emails_enviados')
-      .select('*, homenagens(nome_completo)')
+      .select('*, homenagens!inner(nome_completo, parceiro_id)')
+      .eq('homenagens.parceiro_id', meuParceiroId)
       .order('created_at', { ascending: false })
       .limit(100)
     setEmails((data as any) || [])
