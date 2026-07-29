@@ -129,6 +129,15 @@ export default function AdminCemiterios() {
 
   return (
     <div>
+      <div className="rounded-lg border border-amber-900/40 bg-amber-950/20 px-4 py-3 mb-6">
+        <p className="text-xs font-medium text-amber-400 mb-1">Observação — integração planejada (Fase 5)</p>
+        <p className="text-xs text-zinc-400">
+          Cemitério → <strong className="text-zinc-300">Mapa do Cemitério</strong> (satélite/3D, todos os
+          homenageados plotados) → clicar numa lápide abre a visualização <strong className="text-zinc-300">Gavetas 3D</strong> que
+          já existe hoje. Projeto futuro, ver <code className="text-zinc-300">docs/RASCUNHO_IDEIAS.md</code>.
+        </p>
+      </div>
+
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-white">Cemitérios</h1>
         <div className="flex items-center gap-3">
