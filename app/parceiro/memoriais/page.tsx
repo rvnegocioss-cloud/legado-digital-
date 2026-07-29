@@ -3,18 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
-import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
-import { gerarSlugUnico } from '@/lib/gerarSlug'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 
 interface Memorial {
   id: string
@@ -24,13 +13,6 @@ interface Memorial {
   qr_code_url: string | null
   preenchido_por: 'funeraria' | 'familia' | null
   created_at: string
-}
-
-const FORM_INICIAL = {
-  nome_completo: '',
-  data_falecimento: '',
-  familia_email: '',
-  preenchido_por: 'familia' as 'familia' | 'funeraria',
 }
 
 const PREENCHIDO_POR_LABEL: Record<string, string> = {
@@ -55,9 +37,7 @@ function ParceiroMemoriaisInner() {
   const [memoriais, setMemoriais] = useState<Memorial[]>([])
   const [parceiroId, setParceiroId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [dialogAberto, setDialogAberto] = useState(false)
-  const [form, setForm] = useState(FORM_INICIAL)
-  const [salvando, setSalvando] = useState(false)
+  const [criando, setCriando] = useState(false)
   const [erro, setErro] = useState('')
 
   useEffect(() => {
@@ -111,60 +91,31 @@ function ParceiroMemoriaisInner() {
     setLoading(false)
   }
 
-  function abrirCadastro() {
-    setForm(FORM_INICIAL)
-    setErro('')
-    setDialogAberto(true)
-  }
-
-  async function salvarCadastro(e: React.FormEvent) {
-    e.preventDefault()
+  // "+ Novo Memorial" cria o rascunho na hora (id previsível, nome placeholder)
+  // e já leva direto pra ficha completa — nada de tela intermediária. Rascunho
+  // abandonado sem chegar a ser preenchido é limpo pelo load() acima (+2h).
+  async function novoMemorial() {
     if (!parceiroId) return
-    setSalvando(true)
+    setCriando(true)
     setErro('')
 
-    const slug = await gerarSlugUnico(supabase, form.nome_completo)
-    const { data: novo, error } = await supabase
-      .from('homenagens')
-      .insert({
-        nome_completo: form.nome_completo,
-        data_falecimento: form.data_falecimento || null,
-        slug,
-        memorial_slug: slug,
-        parceiro_id: parceiroId,
-        preenchido_por: form.preenchido_por,
-      })
-      .select('id')
-      .single()
-
-    if (error || !novo) {
-      setErro(error?.message || 'Erro ao cadastrar memorial')
-      setSalvando(false)
-      return
-    }
-
-    const { data: { session } } = await supabase.auth.getSession()
-    const resEmail = await fetch('/api/admin/cadastrar-email-familia', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ memorialId: novo.id, email: form.familia_email }),
+    const id = crypto.randomUUID()
+    const slug = `rascunho-${id.slice(0, 8)}`
+    const { error } = await supabase.from('homenagens').insert({
+      id,
+      nome_completo: 'Novo memorial',
+      slug,
+      memorial_slug: slug,
+      parceiro_id: parceiroId,
     })
-    const jsonEmail = await resEmail.json()
 
-    gerarQrCodeCliente(novo.id)
-
-    setSalvando(false)
-    setDialogAberto(false)
-
-    if (form.preenchido_por === 'funeraria') {
-      router.push(`/parceiro/memoriais/${novo.id}${suffix}`)
+    if (error) {
+      setErro(error.message)
+      setCriando(false)
       return
     }
 
-    if (!resEmail.ok) {
-      setErro(`Memorial cadastrado, mas o e-mail da família falhou: ${jsonEmail.error || 'erro desconhecido'}`)
-    }
-    load()
+    router.push(`/parceiro/memoriais/${id}${suffix}`)
   }
 
   if (loading) return <p className="text-zinc-400">Carregando...</p>
@@ -173,84 +124,12 @@ function ParceiroMemoriaisInner() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-white">Meus Memoriais</h1>
-        <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-          <DialogTrigger render={<Button onClick={abrirCadastro}>+ Novo Memorial</Button>} />
-          <DialogContent className="bg-zinc-900 text-white ring-zinc-800 sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-white">Cadastrar Memorial</DialogTitle>
-            </DialogHeader>
-
-            <form onSubmit={salvarCadastro} className="space-y-3">
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
-                <Input
-                  placeholder="Nome completo do falecido"
-                  required
-                  value={form.nome_completo}
-                  onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">Data de falecimento</label>
-                <Input
-                  placeholder="DD/MM/AAAA"
-                  value={form.data_falecimento}
-                  onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-zinc-500 mb-1">E-mail da família</label>
-                <p className="text-xs text-zinc-400 mb-2">
-                  Recebe agora mesmo a senha de acesso pra entrar em /familia/login e cuidar do memorial.
-                </p>
-                <Input
-                  type="email"
-                  placeholder="email@familia.com"
-                  required
-                  value={form.familia_email}
-                  onChange={(e) => setForm({ ...form, familia_email: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-zinc-500 mb-2">Quem vai preencher o conteúdo?</label>
-                <div className="flex flex-col gap-2">
-                  <label className="flex items-center gap-2 text-sm text-zinc-300">
-                    <input
-                      type="radio"
-                      name="preenchido_por"
-                      checked={form.preenchido_por === 'familia'}
-                      onChange={() => setForm({ ...form, preenchido_por: 'familia' })}
-                    />
-                    A família vai preencher (fotos, história, etc.)
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-zinc-300">
-                    <input
-                      type="radio"
-                      name="preenchido_por"
-                      checked={form.preenchido_por === 'funeraria'}
-                      onChange={() => setForm({ ...form, preenchido_por: 'funeraria' })}
-                    />
-                    Nós (a funerária) vamos preencher agora
-                  </label>
-                </div>
-              </div>
-
-              {erro && <p className="text-red-400 text-sm">{erro}</p>}
-
-              <DialogFooter className="bg-transparent border-zinc-800 mt-4">
-                <Button type="submit" disabled={salvando}>
-                  {salvando ? 'Cadastrando...' : 'Cadastrar'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={novoMemorial} disabled={criando}>
+          {criando ? 'Criando...' : '+ Novo Memorial'}
+        </Button>
       </div>
 
-      {erro && !dialogAberto && <p className="text-red-400 text-sm mb-4">{erro}</p>}
+      {erro && <p className="text-red-400 text-sm mb-4">{erro}</p>}
 
       {memoriais.length === 0 ? (
         <div className="text-center py-12">
