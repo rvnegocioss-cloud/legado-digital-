@@ -432,7 +432,12 @@ function FichaMemorialParceiroInner() {
     const galeriaAntiga = memorial.galeria_fotos || []
     galeriaAntiga.filter((u) => !galeria.includes(u)).forEach(removerArquivoStorage)
 
-    gerarQrCodeCliente(memorial.id).then((url) => { if (url) setQrCodeUrl(url) })
+    // Só gera QR (e dispara e-mail pro fornecedor da placa) no primeiro save
+    // real — se já existe, um "Salvar" de rotina (corrigir texto, nova foto)
+    // não pode reenviar pedido de placa física pro fornecedor de novo.
+    if (!memorial.qr_code_url) {
+      gerarQrCodeCliente(memorial.id).then((url) => { if (url) setQrCodeUrl(url) })
+    }
 
     setSalvando(false)
     setSalvo(true)
