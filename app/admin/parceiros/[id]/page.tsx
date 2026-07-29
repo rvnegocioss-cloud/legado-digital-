@@ -165,7 +165,7 @@ export default function DetalheParceiro() {
     if (!res.ok) {
       setConviteErro(json.error || 'Erro ao convidar contato')
     } else {
-      setConviteSucesso({ email: json.email, tempPassword: json.tempPassword })
+      setConviteSucesso({ email: json.email, tempPassword: json.senhaTemporaria })
       setConviteEmail('')
       setConviteNome('')
     }
@@ -212,7 +212,7 @@ export default function DetalheParceiro() {
     })
     const json = await res.json()
     if (!res.ok) throw new Error(json.error || 'Erro ao conceder acesso')
-    return { email: json.email as string, tempPassword: json.tempPassword as string }
+    return { email: json.email as string, tempPassword: json.senhaTemporaria as string }
   }
 
   async function adicionarContato(e: React.FormEvent) {

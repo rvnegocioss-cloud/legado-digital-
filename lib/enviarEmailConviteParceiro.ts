@@ -21,7 +21,8 @@ export async function enviarEmailConviteParceiro(dados: {
         </p>
         <p>
           Acesse <a href="https://legado-digital-two.vercel.app/parceiro/login">o Portal do Parceiro</a>
-          com esses dados. Recomendamos trocar a senha assim que entrar.
+          com esses dados. No primeiro acesso o sistema vai pedir que você crie uma senha nova —
+          a temporária acima deixa de valer depois disso.
         </p>
       `,
     })

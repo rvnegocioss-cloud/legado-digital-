@@ -5,10 +5,12 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getParceiroUser, getAdminUser, signOut, supabase } from '@/lib/auth'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
+import TrocarSenhaObrigatoria from '@/components/TrocarSenhaObrigatoria'
 import { MessageCircle } from 'lucide-react'
 
 type ParceiroUser = {
   email: string
+  senha_temporaria: boolean
   parceiros_usuarios: { parceiros_b2b: { id: string; nome_fantasia: string | null; razao_social: string } | null }[]
 }
 
@@ -25,6 +27,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   const [nomeParceiro, setNomeParceiro] = useState('Parceiro')
   const [modoStaff, setModoStaff] = useState(false)
   const [semVinculo, setSemVinculo] = useState(false)
+  const [precisaTrocarSenha, setPrecisaTrocarSenha] = useState(false)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const pathname = usePathname()
@@ -70,6 +73,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
           setNomeParceiro(parceiros[0]?.nome_fantasia || parceiros[0]?.razao_social || 'Parceiro')
           setEmail(parceiroUser.email)
           setModoStaff(false)
+          setPrecisaTrocarSenha(!!parceiroUser.senha_temporaria)
           setLoading(false)
           return
         }
@@ -116,6 +120,10 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     )
+  }
+
+  if (precisaTrocarSenha) {
+    return <TrocarSenhaObrigatoria onConcluido={() => setPrecisaTrocarSenha(false)} />
   }
 
   async function handleLogout() {

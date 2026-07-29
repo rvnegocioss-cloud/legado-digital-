@@ -46,6 +46,18 @@ export default function RedefinirSenhaPage() {
       setErro(error.message)
       return
     }
+
+    // Se essa conta tinha senha temporária pendente de troca (parceiro
+    // recém-convidado que perdeu o e-mail e recuperou por aqui), desmarca —
+    // senão ela cairia direto na tela de troca obrigatória de novo.
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      fetch('/api/parceiro/concluir-troca-senha', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => {})
+    }
+
     setSalvo(true)
   }
 

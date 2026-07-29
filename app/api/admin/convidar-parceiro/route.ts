@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { enviarEmailConviteParceiro } from '@/lib/enviarEmailConviteParceiro'
 import { registrarEmail } from '@/lib/emailLog'
-
-const TEMP_PASSWORD = '123456'
+import { gerarSenhaTemporaria } from '@/lib/gerarSenhaTemporaria'
 
 export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -61,13 +60,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Papel "Parceiro B2B" não encontrado' }, { status: 500 })
   }
 
+  const { data: parceiro } = await admin
+    .from('parceiros_b2b')
+    .select('nome_fantasia, razao_social')
+    .eq('id', parceiroId)
+    .single()
+
+  const senhaTemporaria = gerarSenhaTemporaria(parceiro?.nome_fantasia || parceiro?.razao_social || nome || 'xy')
+
   const { data: existingUsers } = await admin.auth.admin.listUsers({ perPage: 200 })
   const existing = existingUsers?.users.find((u) => u.email === email)
 
   let userId: string
   if (existing) {
     const { data, error } = await admin.auth.admin.updateUserById(existing.id, {
-      password: TEMP_PASSWORD,
+      password: senhaTemporaria,
       email_confirm: true,
     })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -75,7 +82,7 @@ export async function POST(req: NextRequest) {
   } else {
     const { data, error } = await admin.auth.admin.createUser({
       email,
-      password: TEMP_PASSWORD,
+      password: senhaTemporaria,
       email_confirm: true,
       user_metadata: { nome: nome || email },
     })
@@ -91,6 +98,8 @@ export async function POST(req: NextRequest) {
     .from('parceiros_usuarios')
     .upsert({ usuario_id: userId, parceiro_id: parceiroId }, { onConflict: 'usuario_id,parceiro_id' })
 
+  await admin.from('usuarios').update({ senha_temporaria: true }).eq('id', userId)
+
   if (contatoId) {
     await admin.from('parceiros_contatos').update({ usuario_id: userId }).eq('id', contatoId)
   }
@@ -98,7 +107,7 @@ export async function POST(req: NextRequest) {
   const resultadoEmail = await enviarEmailConviteParceiro({
     destinatario: email,
     nome: nome || '',
-    senhaTemporaria: TEMP_PASSWORD,
+    senhaTemporaria,
   })
 
   await registrarEmail(admin, {
@@ -114,7 +123,8 @@ export async function POST(req: NextRequest) {
     message: resultadoEmail.enviado
       ? 'Usuário criado. Senha enviada por e-mail.'
       : 'Usuário criado, mas o e-mail não pôde ser enviado agora — repasse a senha temporária manualmente.',
+    email,
     emailEnviado: resultadoEmail.enviado,
-    senhaTemporaria: resultadoEmail.enviado ? undefined : TEMP_PASSWORD,
+    senhaTemporaria,
   })
 }
