@@ -51,6 +51,7 @@ const RATE_LIMIT_CONFIG: Record<string, RateLimitConfig> = {
       '/api/admin/login', // se existir
       '/api/parceiro/login', // se existir
       '/api/familia-esqueci-senha',
+      '/api/memorial-acesso', // verifica senha de acesso do memorial - alvo de força bruta
     ],
   },
   upload: {

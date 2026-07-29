@@ -169,8 +169,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Erro ao fazer upload do arquivo' }, { status: 500 })
   }
 
-  // 8. Remover arquivo antigo se foi passado
-  if (caminhoAntigoParaApagar) {
+  // 8. Remover arquivo antigo se foi passado — só se o caminho realmente
+  // pertence a ESSE memorial, defesa em profundidade contra caminho arbitrário.
+  if (caminhoAntigoParaApagar?.startsWith(`${homenagemId}/`)) {
     await supabaseAdmin.storage
       .from('memoriais')
       .remove([caminhoAntigoParaApagar])
