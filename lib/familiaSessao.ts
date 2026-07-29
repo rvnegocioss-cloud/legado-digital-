@@ -1,6 +1,12 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
-const SEGREDO = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Segredo próprio pra assinatura de sessão — antes reaproveitava a
+// SUPABASE_SERVICE_ROLE_KEY, o que juntava dois domínios diferentes (a
+// credencial de admin do banco e a assinatura de sessão da família) e
+// significava que rotacionar a chave do Supabase por qualquer motivo
+// derrubava toda sessão de família ativa de uma vez, sem forma de revogar
+// uma sessão individual.
+const SEGREDO = process.env.SESSION_HMAC_SECRET!
 const DURACAO_MS = 1000 * 60 * 60 * 12 // 12h
 
 function assinar(payload: string) {

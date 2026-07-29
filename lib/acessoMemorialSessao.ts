@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
-const SEGREDO = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Mesmo motivo do lib/familiaSessao.ts: segredo próprio em vez de
+// reaproveitar a SUPABASE_SERVICE_ROLE_KEY (dois domínios diferentes).
+const SEGREDO = process.env.SESSION_HMAC_SECRET!
 const DURACAO_MS = 1000 * 60 * 60 * 24 * 30 // 30 dias
 
 function assinar(payload: string) {
