@@ -108,6 +108,8 @@ export default function DetalheMemorial() {
   const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia'>('familia')
   const [salvandoPreenchidoPor, setSalvandoPreenchidoPor] = useState(false)
+  const [mural, setMural] = useState<{ id: string; nome: string; parentesco: string | null; texto: string; created_at: string }[]>([])
+  const [removendoMuralId, setRemovendoMuralId] = useState<string | null>(null)
   const [familiaCpf, setFamiliaCpf] = useState('')
   const [familiaNome, setFamiliaNome] = useState('')
   const [consultandoCpf, setConsultandoCpf] = useState(false)
@@ -139,6 +141,13 @@ export default function DetalheMemorial() {
       .then((r) => r.json())
       .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
       .catch(() => {})
+
+    const { data: muralData } = await supabase
+      .from('mural_memorias')
+      .select('id, nome, parentesco, texto, created_at')
+      .eq('homenagem_id', id)
+      .order('created_at', { ascending: false })
+    setMural(muralData || [])
 
     const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome').order('nome')
     setCemiterios(cemiteriosData || [])
@@ -305,6 +314,13 @@ export default function DetalheMemorial() {
     setSalvandoPreenchidoPor(true)
     await supabase.from('homenagens').update({ preenchido_por: valor }).eq('id', memorial.id)
     setSalvandoPreenchidoPor(false)
+  }
+
+  async function removerMemoria(id: string) {
+    setRemovendoMuralId(id)
+    await supabase.from('mural_memorias').delete().eq('id', id)
+    setMural((atual) => atual.filter((m) => m.id !== id))
+    setRemovendoMuralId(null)
   }
 
   async function cadastrarEmailFamilia(e: React.FormEvent) {
@@ -856,6 +872,33 @@ export default function DetalheMemorial() {
               </Button>
             </form>
             {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
+          </SecaoRetratil>
+
+          <SecaoRetratil titulo={`Moderação do mural de memórias ${mural.length > 0 ? `(${mural.length})` : ''}`}>
+            {mural.length === 0 ? (
+              <p className="text-zinc-500 text-xs">Nenhuma memória deixada ainda.</p>
+            ) : (
+              <ul className="space-y-2">
+                {mural.map((m) => (
+                  <li key={m.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-white text-sm">
+                        {m.nome} {m.parentesco && <span className="text-zinc-500 text-xs">· {m.parentesco}</span>}
+                      </p>
+                      <p className="text-zinc-400 text-xs mt-0.5 break-words">{m.texto}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removerMemoria(m.id)}
+                      disabled={removendoMuralId === m.id}
+                      className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                    >
+                      {removendoMuralId === m.id ? '...' : 'Remover'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </SecaoRetratil>
         </div>
 

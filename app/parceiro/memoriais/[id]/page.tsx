@@ -96,6 +96,8 @@ function FichaMemorialParceiroInner() {
   const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia'>('familia')
   const [salvandoPreenchidoPor, setSalvandoPreenchidoPor] = useState(false)
+  const [mural, setMural] = useState<{ id: string; nome: string; parentesco: string | null; texto: string; created_at: string }[]>([])
+  const [removendoMuralId, setRemovendoMuralId] = useState<string | null>(null)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
   const [mensagemPlaca, setMensagemPlaca] = useState('')
@@ -176,7 +178,21 @@ function FichaMemorialParceiroInner() {
       .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
       .catch(() => {})
 
+    const { data: muralData } = await supabase
+      .from('mural_memorias')
+      .select('id, nome, parentesco, texto, created_at')
+      .eq('homenagem_id', m.id)
+      .order('created_at', { ascending: false })
+    setMural(muralData || [])
+
     setLoading(false)
+  }
+
+  async function removerMemoria(id: string) {
+    setRemovendoMuralId(id)
+    await supabase.from('mural_memorias').delete().eq('id', id)
+    setMural((atual) => atual.filter((mem) => mem.id !== id))
+    setRemovendoMuralId(null)
   }
 
   async function salvarPreenchidoPor(valor: 'funeraria' | 'familia') {
@@ -621,6 +637,36 @@ function FichaMemorialParceiroInner() {
               </div>
               {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
             </form>
+          </div>
+
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+            <h2 className="text-sm font-medium text-zinc-400 mb-3">
+              Moderação do mural {mural.length > 0 ? `(${mural.length})` : ''}
+            </h2>
+            {mural.length === 0 ? (
+              <p className="text-zinc-500 text-xs">Nenhuma memória deixada ainda.</p>
+            ) : (
+              <ul className="space-y-2 max-h-64 overflow-y-auto">
+                {mural.map((m) => (
+                  <li key={m.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-white text-sm">
+                        {m.nome} {m.parentesco && <span className="text-zinc-500 text-xs">· {m.parentesco}</span>}
+                      </p>
+                      <p className="text-zinc-400 text-xs mt-0.5 break-words">{m.texto}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removerMemoria(m.id)}
+                      disabled={removendoMuralId === m.id}
+                      className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                    >
+                      {removendoMuralId === m.id ? '...' : 'Remover'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
