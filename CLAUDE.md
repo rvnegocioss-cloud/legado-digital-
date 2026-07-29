@@ -145,8 +145,8 @@ Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os pró
 2. RLS em `homenagens`: `homenagens_parceiro_own` restringe ao próprio `parceiro_id` via `is_own_parceiro()`; `homenagens_staff_all` mantém acesso total pra Admin/Operador
 3. `/parceiro/login` + `/parceiro/layout.tsx` — protegido, papel Parceiro B2B
 4. `/parceiro` — dashboard (total de memoriais, plano contratado, status de pagamento)
-5. `/parceiro/memoriais` — CRUD restrito ao próprio parceiro, link "Ver página" pra `/homenagem/[slug]`
-6. Botão "Convidar contato" em `/admin/parceiros/[id]` → `POST /api/admin/convidar-parceiro` (service role, server-side) — cria usuário com senha temporária `123456`, vincula papel+parceiro
+5. `/parceiro/memoriais` — cadastro curto (nome, data falecimento, e-mail da família, "quem preenche o conteúdo": família ou funerária) já dispara o e-mail de acesso pra família no mesmo passo. Ficha completa (fotos/vídeo/timeline/senha/QR/placa) mora em `/parceiro/memoriais/[id]`, layout grid 2/3+1/3 igual à Central (2026-07-29, separado do cadastro pra não ficar um formulário gigante). Link "Ver página" pra `/homenagem/[slug]`
+6. Botão "Convidar contato" em `/admin/parceiros/[id]` → `POST /api/admin/convidar-parceiro` (service role, server-side) — cria usuário com senha gerada por parceiro (`lib/gerarSenhaTemporaria.ts`, não mais fixa), vincula papel+parceiro, exige troca de senha no 1º login (`usuarios.senha_temporaria`)
 7. **Acesso direto da Central**: botão "Acessar Plataforma do Parceiro" na ficha leva a equipe interna pro Portal do Parceiro daquele parceiro (`/parceiro?parceiro_id=X`) sem logar de novo — aviso "Visualizando como: X — modo Central"
 
 ## Busca pública e privacidade por senha — como funciona

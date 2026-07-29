@@ -28,6 +28,7 @@ interface Memorial {
   mensagem_placa: string | null
   familia_email: string | null
   lapide_id: string | null
+  preenchido_por: 'funeraria' | 'familia' | null
   created_at: string
   updated_at: string
 }
@@ -105,6 +106,8 @@ export default function DetalheMemorial() {
   const [familiaEmail, setFamiliaEmail] = useState('')
   const [cadastrandoFamiliaEmail, setCadastrandoFamiliaEmail] = useState(false)
   const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
+  const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia'>('familia')
+  const [salvandoPreenchidoPor, setSalvandoPreenchidoPor] = useState(false)
   const [familiaCpf, setFamiliaCpf] = useState('')
   const [familiaNome, setFamiliaNome] = useState('')
   const [consultandoCpf, setConsultandoCpf] = useState(false)
@@ -161,6 +164,7 @@ export default function DetalheMemorial() {
       setGaleria(m.galeria_fotos || [])
       setMensagemPlaca(m.mensagem_placa || '')
       setFamiliaEmail(m.familia_email || '')
+      setPreenchidoPor(m.preenchido_por || 'familia')
       setTimelineEventos(
         (m.timeline || []).map((ev: { year?: string; title?: string; description?: string }) => ({
           year: ev.year || '',
@@ -293,6 +297,14 @@ export default function DetalheMemorial() {
       setCpfMsg(json.modoTeste ? 'Preenchido — dado fictício (modo teste, sem token de produção).' : 'Preenchido.')
     }
     setConsultandoCpf(false)
+  }
+
+  async function salvarPreenchidoPor(valor: 'funeraria' | 'familia') {
+    if (!memorial) return
+    setPreenchidoPor(valor)
+    setSalvandoPreenchidoPor(true)
+    await supabase.from('homenagens').update({ preenchido_por: valor }).eq('id', memorial.id)
+    setSalvandoPreenchidoPor(false)
   }
 
   async function cadastrarEmailFamilia(e: React.FormEvent) {
@@ -804,6 +816,30 @@ export default function DetalheMemorial() {
                 onChange={(e) => setFamiliaNome(e.target.value)}
                 className="bg-zinc-800 border-zinc-700 text-white"
               />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs text-zinc-500 mb-2">Quem preenche o conteúdo?</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                  <input
+                    type="radio"
+                    checked={preenchidoPor === 'familia'}
+                    onChange={() => salvarPreenchidoPor('familia')}
+                    disabled={salvandoPreenchidoPor}
+                  />
+                  A família preenche
+                </label>
+                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                  <input
+                    type="radio"
+                    checked={preenchidoPor === 'funeraria'}
+                    onChange={() => salvarPreenchidoPor('funeraria')}
+                    disabled={salvandoPreenchidoPor}
+                  />
+                  A funerária/Central preenche
+                </label>
+              </div>
             </div>
 
             <form onSubmit={cadastrarEmailFamilia} className="flex gap-3">

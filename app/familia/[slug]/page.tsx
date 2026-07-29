@@ -18,6 +18,7 @@ interface Memorial {
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   slug: string | null
+  preenchido_por: 'funeraria' | 'familia' | null
   updated_at: string
 }
 
@@ -61,6 +62,7 @@ export default function FamiliaEdicaoPage() {
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [updatedAtCarregado, setUpdatedAtCarregado] = useState('')
   const [usoStorageMB, setUsoStorageMB] = useState(0)
+  const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia' | null>(null)
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -80,6 +82,7 @@ export default function FamiliaEdicaoPage() {
 
     const m = json.memorial as Memorial
     setUpdatedAtCarregado(m.updated_at)
+    setPreenchidoPor(m.preenchido_por)
     fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
       .then((r) => r.json())
       .then((j) => setUsoStorageMB(Math.round((j.usageBytes || 0) / 1024 / 1024)))
@@ -236,6 +239,13 @@ export default function FamiliaEdicaoPage() {
             Ver página →
           </a>
         </div>
+
+        {preenchidoPor === 'funeraria' && (
+          <p className="text-xs text-blue-300 bg-blue-900/20 border border-blue-900/40 rounded-lg px-3 py-2 mb-4">
+            A funerária está preenchendo esse memorial por você. Você ainda pode editar aqui a
+            qualquer momento se preferir.
+          </p>
+        )}
 
         <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
           <form onSubmit={salvar} className="space-y-3">
