@@ -137,8 +137,14 @@ export async function POST(req: NextRequest) {
   }
 
   // 2. Validar sessão de família
+  const { data: seguranca } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .select('senha_familia_hash')
+    .eq('homenagem_id', homenagem.id)
+    .maybeSingle()
+
   const token = req.cookies.get(`familia_${homenagem.id}`)?.value
-  if (!verificarTokenFamilia(token, homenagem.id)) {
+  if (!verificarTokenFamilia(token, homenagem.id, seguranca?.senha_familia_hash)) {
     return NextResponse.json({ error: 'Sessão de família inválida ou expirada' }, { status: 401 })
   }
 

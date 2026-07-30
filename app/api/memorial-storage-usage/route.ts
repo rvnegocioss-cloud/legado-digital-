@@ -26,8 +26,14 @@ export async function GET(req: NextRequest) {
 
   // Família autenticada pelo próprio cookie de sessão do memorial (mesmo
   // padrão de app/api/familia-memorial/route.ts) — sem sessão Supabase Auth.
+  const { data: seguranca } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .select('senha_familia_hash')
+    .eq('homenagem_id', homenagem.id)
+    .maybeSingle()
+
   const tokenFamilia = req.cookies.get(`familia_${homenagem.id}`)?.value
-  if (verificarTokenFamilia(tokenFamilia, homenagem.id)) {
+  if (verificarTokenFamilia(tokenFamilia, homenagem.id, seguranca?.senha_familia_hash)) {
     const usageBytes = await getMemorialStorageUsage(supabaseAdmin, memorialId)
     return NextResponse.json({ usageBytes })
   }

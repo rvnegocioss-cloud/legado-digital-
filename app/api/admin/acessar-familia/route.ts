@@ -54,7 +54,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
   }
 
-  const token = criarTokenFamilia(homenagem.id)
+  const { data: seguranca } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .select('senha_familia_hash')
+    .eq('homenagem_id', homenagem.id)
+    .maybeSingle()
+
+  const token = criarTokenFamilia(homenagem.id, seguranca?.senha_familia_hash)
   const res = NextResponse.json({ ok: true, slug: homenagem.slug })
   res.cookies.set(`familia_${homenagem.id}`, token, {
     httpOnly: true,

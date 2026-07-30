@@ -18,17 +18,43 @@ const CAMPOS_EDITAVEIS = [
   'timeline',
 ] as const
 
+// Campos que o Portal da Família de fato usa (edita + updated_at/preenchido_por
+// de contexto) — select('*') devolvia também parceiro_id, mensagem_placa,
+// familia_email/telefone etc, sem necessidade nenhuma pro browser da família.
+const CAMPOS_LEITURA = [
+  'id',
+  'nome_completo',
+  'data_nascimento',
+  'data_falecimento',
+  'cidade',
+  'frase_preferida',
+  'biografia',
+  'foto_url',
+  'video_url',
+  'galeria_fotos',
+  'timeline',
+  'slug',
+  'preenchido_por',
+  'updated_at',
+].join(', ')
+
 async function buscarMemorialEValidar(supabaseAdmin: any, slug: string, req: NextRequest) {
   const { data: homenagem } = await supabaseAdmin
     .from('homenagens')
-    .select('*')
+    .select(CAMPOS_LEITURA)
     .eq('slug', slug)
     .single()
 
   if (!homenagem) return { erro: 'Memorial não encontrado', status: 404 } as const
 
+  const { data: seguranca } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .select('senha_familia_hash')
+    .eq('homenagem_id', homenagem.id)
+    .maybeSingle()
+
   const token = req.cookies.get(`familia_${homenagem.id}`)?.value
-  if (!verificarTokenFamilia(token, homenagem.id)) {
+  if (!verificarTokenFamilia(token, homenagem.id, seguranca?.senha_familia_hash)) {
     return { erro: 'Sessão de família inválida ou expirada — faça login de novo', status: 401 } as const
   }
 
