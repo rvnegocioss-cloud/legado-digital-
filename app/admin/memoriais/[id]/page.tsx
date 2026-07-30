@@ -244,6 +244,10 @@ export default function DetalheMemorial() {
       setQrCodeMsg('Preenche o nome antes — esse QR dispara pedido pro fornecedor da placa física, precisa saber de quem é.')
       return
     }
+    if (!form.data_falecimento.trim()) {
+      setQrCodeMsg('Preenche a data de falecimento antes — vai junto no pedido pro fornecedor da placa física.')
+      return
+    }
     setQrCodeMsg('')
     setGerandoQrCode(true)
     const { qrCodeUrl, updatedAt } = await gerarQrCodeCliente(memorial.id)
@@ -366,6 +370,10 @@ export default function DetalheMemorial() {
   async function cadastrarEmailFamilia(e: React.FormEvent) {
     e.preventDefault()
     if (!memorial) return
+    if (!form.nome_completo.trim()) {
+      setFamiliaEmailMsg('Preenche o nome do homenageado antes de enviar acesso — o e-mail pra família cita esse nome.')
+      return
+    }
     setCadastrandoFamiliaEmail(true)
     setFamiliaEmailMsg('')
 

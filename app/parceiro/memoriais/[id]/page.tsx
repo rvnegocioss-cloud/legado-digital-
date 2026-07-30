@@ -283,6 +283,11 @@ function FichaMemorialParceiroInner() {
   async function cadastrarEmailFamilia(e: React.FormEvent) {
     e.preventDefault()
     if (!memorial) return
+    const nomeMemorial = form.nome_completo.trim()
+    if (!nomeMemorial || nomeMemorial === 'Novo memorial') {
+      setFamiliaEmailMsg('Preenche o nome do homenageado antes de enviar acesso — o e-mail pra família cita esse nome.')
+      return
+    }
     setCadastrandoFamiliaEmail(true)
     setFamiliaEmailMsg('')
 
@@ -351,6 +356,10 @@ function FichaMemorialParceiroInner() {
     const nome = form.nome_completo.trim()
     if (!nome || nome === 'Novo memorial') {
       setQrCodeMsg('Preenche o nome de verdade antes — esse QR dispara pedido pro fornecedor da placa física, precisa saber de quem é.')
+      return
+    }
+    if (!form.data_falecimento.trim()) {
+      setQrCodeMsg('Preenche a data de falecimento antes — vai junto no pedido pro fornecedor da placa física.')
       return
     }
     setQrCodeMsg('')
@@ -500,12 +509,17 @@ function FichaMemorialParceiroInner() {
     galeriaAntiga.filter((u) => !galeria.includes(u)).forEach(removerArquivoStorage)
 
     // Só gera QR (e dispara e-mail pro fornecedor da placa) no primeiro save
-    // real, com nome de verdade — se já existe QR, um "Salvar" de rotina
-    // (corrigir texto, nova foto) não pode reenviar pedido de placa física
-    // de novo; e sem nome ainda (placeholder "Novo memorial"), o fornecedor
-    // não tem quem colocar na placa, então nem dispara.
+    // real, com nome de verdade e data de falecimento preenchida — se já
+    // existe QR, um "Salvar" de rotina (corrigir texto, nova foto) não pode
+    // reenviar pedido de placa física de novo; sem nome/data, o fornecedor
+    // não tem o mínimo pra colocar na placa, então nem dispara.
     const nomeRealParaQr = form.nome_completo.trim()
-    if (!memorial.qr_code_url && nomeRealParaQr && nomeRealParaQr !== 'Novo memorial') {
+    if (
+      !memorial.qr_code_url &&
+      nomeRealParaQr &&
+      nomeRealParaQr !== 'Novo memorial' &&
+      form.data_falecimento.trim()
+    ) {
       gerarQrCodeCliente(memorial.id).then(({ qrCodeUrl, updatedAt }) => {
         if (qrCodeUrl) setQrCodeUrl(qrCodeUrl)
         if (updatedAt) setMemorial((atual) => (atual ? { ...atual, updated_at: updatedAt } : atual))
