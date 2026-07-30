@@ -63,6 +63,14 @@ export async function POST(req: NextRequest) {
     promptBase = 'Você é o LegadoBot, assistente do Legado Digital. Responda em português.'
   }
 
+  // Corte estrutural, não só instrução: um Parceiro B2B nunca recebe o texto
+  // sobre a Central no próprio contexto — o bloco nem existe na conversa do
+  // modelo com ele, em vez de depender só de "não conte" (regra de escopo
+  // reforçada na auditoria de segurança de 2026-07-29).
+  if (!ehStaff) {
+    promptBase = promptBase.replace(/<!-- SOMENTE-STAFF-INICIO -->[\s\S]*?<!-- SOMENTE-STAFF-FIM -->\n?/, '')
+  }
+
   const contexto = ehStaff
     ? `\n\n## Contexto desta conversa\nUsuário logado: ${nomeUsuario} (${userData.user.email}). Papel: staff da Central (acesso total, pode responder sobre qualquer parceiro/memorial). Cumprimente pelo nome na primeira mensagem da conversa.`
     : `\n\n## Contexto desta conversa\nUsuário logado: ${nomeUsuario} (${userData.user.email}). Papel: Parceiro B2B da empresa "${nomeParceiro}" (parceiro_id: ${parceiroId}). Responda SÓ sobre esse parceiro — nunca revele dado de outro parceiro nem informação interna da Central fora do que existe no Portal do Parceiro. Cumprimente pelo nome na primeira mensagem da conversa.`
