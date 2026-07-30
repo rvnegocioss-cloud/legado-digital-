@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import LegadoBotPublicoWidget from '@/components/LegadoBotPublicoWidget'
+import { BuscaMemorial } from '@/components/public/BuscaMemorial'
 import { QrCode, Lock, Sparkles, BookOpen, Users, LayoutDashboard, Eye, Building2, MessageCircle } from 'lucide-react'
 
 const HeroBackground = dynamic(() => import('@/components/Hero3D'), { ssr: false })
@@ -66,14 +67,18 @@ export default function Home() {
             <Button size="lg" className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold text-base px-8 h-14">
               Começar Agora
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/20 text-white hover:bg-white/5 text-base px-8 h-14"
-              asChild
-            >
-              <Link href="/busca">Buscar um Memorial</Link>
-            </Button>
+          </motion.div>
+
+          {/* Busca embutida — antes era só um botão que levava pra /busca */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.05 }}
+            className="mt-8 flex justify-center"
+          >
+            <div className="w-full max-w-[480px]">
+              <BuscaMemorial />
+            </div>
           </motion.div>
 
           {/* Stats */}

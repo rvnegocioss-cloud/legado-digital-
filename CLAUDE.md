@@ -119,11 +119,11 @@ Organograma dos 6 ambientes + fluxo de dados dos memoriais (`parceiro_id`): mant
 Tudo do checklist de Fase 1/2 abaixo está **feito** (schema, auth, CRUDs de Parceiros/Cemitérios/Memoriais, Portal do Parceiro, Portal da Família, busca pública, senha de acesso/edição, timeline, QR Code automático + e-mail pro fornecedor, Central de Comunicações, lápide/gaveta + visualização 3D, rate limit middleware, política de privacidade/termos, landing no padrão visual, LegadoBot Fase 1 teste) — detalhe item-a-item de cada um no vault (`Projects/Legado Digital - Historico Detalhado.md`).
 
 **Pendente (backlog ativo):**
-- [ ] Busca embutida direto na landing (hoje é botão que leva pra `/busca`)
+- [x] **Busca embutida direto na landing** (2026-07-30) — botão "Buscar um Memorial" que levava pra `/busca` virou `BuscaMemorial` (mesmo componente da página de busca) embutido direto no hero da landing.
 - [ ] Modos de privacidade completos (falta "privado por e-mail/cadastro" e "oculto")
 - [ ] Website institucional finalizado
 - [ ] Contatos da empresa (`parceiros_contatos`) ligados ao fluxo de convite existente
-- [ ] Privacidade em 3 toggles levada pro `/parceiro/memoriais` (hoje só `/admin/memoriais/[id]`)
+- [x] **Privacidade em 3 toggles levada pro `/parceiro/memoriais`** (2026-07-30) — antes só existia em `/admin/memoriais/[id]`; API `/api/memorial-privacidade` já aceitava parceiro dono (auditoria anterior), faltava só a UI/estado no lado do Parceiro — copiado igual ao de Central (busca/link/QR, todos ligados por padrão).
 - [x] "Esqueci a senha" da família — self-service já existe (botão na tela `/familia/login` → `/api/familia-esqueci-senha`, resposta genérica anti-enumeração, senha nova por e-mail). Item estava desatualizado na lista, corrigido 2026-07-30 (regra 4).
 - [ ] Suporte a múltiplos vídeos por memorial (`videos_galeria`) — pausado a pedido do Rafael
 - [ ] Troca de tema persistente (hoje é só demo/preview, não salva no banco — precisa campo `tema` em `homenagens`)
