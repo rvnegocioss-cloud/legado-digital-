@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
+import { VinculosEditor } from '@/components/admin/VinculosEditor'
 
 interface Memorial {
   id: string
@@ -17,6 +18,7 @@ interface Memorial {
   video_url: string | null
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
+  vinculos: string[] | null
   slug: string | null
   preenchido_por: 'funeraria' | 'familia' | null
   updated_at: string
@@ -53,6 +55,7 @@ export default function FamiliaEdicaoPage() {
   const [videoUrl, setVideoUrl] = useState('')
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
+  const [vinculos, setVinculos] = useState<string[]>([])
 
   const [salvando, setSalvando] = useState(false)
   const [salvo, setSalvo] = useState(false)
@@ -98,6 +101,7 @@ export default function FamiliaEdicaoPage() {
     setFotoUrl(m.foto_url || '')
     setVideoUrl(m.video_url || '')
     setGaleria(m.galeria_fotos || [])
+    setVinculos(m.vinculos || [])
     setTimelineEventos(
       (m.timeline || []).map((ev) => ({
         year: ev.year || '',
@@ -125,6 +129,7 @@ export default function FamiliaEdicaoPage() {
         video_url: videoUrl || null,
         galeria_fotos: galeria,
         timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
+        vinculos: vinculos.length > 0 ? vinculos : null,
       }),
     })
 
@@ -280,6 +285,10 @@ export default function FamiliaEdicaoPage() {
                   className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
                 />
               </div>
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1">Vínculo/papel (ex: Pai, Avó — aparece perto do nome na página)</label>
+              <VinculosEditor value={vinculos} onChange={setVinculos} />
             </div>
             <div>
               <label className="block text-xs text-zinc-500 mb-1">Cidade</label>

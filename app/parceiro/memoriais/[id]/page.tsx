@@ -27,6 +27,7 @@ import { TimelineEditor, type TimelineEvento } from '@/components/admin/Timeline
 import { CampoFicha } from '@/components/admin/CampoFicha'
 import { SecaoFicha } from '@/components/admin/SecaoFicha'
 import { StatusFicha } from '@/components/admin/StatusFicha'
+import { VinculosEditor } from '@/components/admin/VinculosEditor'
 
 interface Memorial {
   id: string
@@ -48,6 +49,7 @@ interface Memorial {
   familia_telefone: string | null
   preenchido_por: 'funeraria' | 'familia' | null
   lapide_id: string | null
+  vinculos: string[] | null
   created_at: string
   updated_at: string
 }
@@ -107,6 +109,7 @@ function FichaMemorialParceiroInner() {
     biografia: '',
     lapide_id: '',
   })
+  const [vinculos, setVinculos] = useState<string[]>([])
   const [cemiterios, setCemiterios] = useState<Cemiterio[]>([])
   const [lapides, setLapides] = useState<Lapide[]>([])
   const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
@@ -175,7 +178,7 @@ function FichaMemorialParceiroInner() {
     const { data: m } = await supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, lapide_id, parceiro_id, created_at, updated_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, lapide_id, vinculos, parceiro_id, created_at, updated_at'
       )
       .eq('id', id)
       .maybeSingle()
@@ -205,6 +208,7 @@ function FichaMemorialParceiroInner() {
       biografia: m.biografia || '',
       lapide_id: m.lapide_id || '',
     })
+    setVinculos(m.vinculos || [])
     setFotoUrl(m.foto_url || '')
     setVideoUrl(m.video_url || '')
     setGaleria(m.galeria_fotos || [])
@@ -541,6 +545,7 @@ function FichaMemorialParceiroInner() {
     const payload: Record<string, unknown> = {
       ...form,
       lapide_id: form.lapide_id || null,
+      vinculos: vinculos.length > 0 ? vinculos : null,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
       galeria_fotos: galeria,
@@ -757,6 +762,9 @@ function FichaMemorialParceiroInner() {
                     </select>
                   </CampoFicha>
                 </div>
+                <CampoFicha label="Vínculo/papel (aparece perto do nome na página)" className="mt-4">
+                  <VinculosEditor value={vinculos} onChange={setVinculos} />
+                </CampoFicha>
               </SecaoFicha>
 
               <SecaoFicha titulo="História" icon={FileText}>

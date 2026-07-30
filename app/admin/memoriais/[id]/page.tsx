@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import SecaoRetratil from '@/components/admin/SecaoRetratil'
+import { VinculosEditor } from '@/components/admin/VinculosEditor'
 
 interface Memorial {
   id: string
@@ -30,6 +31,7 @@ interface Memorial {
   familia_nome_responsavel: string | null
   familia_telefone: string | null
   lapide_id: string | null
+  vinculos: string[] | null
   preenchido_por: 'funeraria' | 'familia' | null
   created_at: string
   updated_at: string
@@ -88,6 +90,7 @@ export default function DetalheMemorial() {
   const [cemiterios, setCemiterios] = useState<Cemiterio[]>([])
   const [lapides, setLapides] = useState<Lapide[]>([])
   const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
+  const [vinculos, setVinculos] = useState<string[]>([])
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [galeria, setGaleria] = useState<string[]>([])
@@ -186,6 +189,7 @@ export default function DetalheMemorial() {
         const lapideAtual = (lapidesData || []).find((l) => l.id === m.lapide_id)
         if (lapideAtual) setCemiterioSelecionadoId(lapideAtual.cemiterio_id)
       }
+      setVinculos(m.vinculos || [])
       setFotoUrl(m.foto_url || '')
       setVideoUrl(m.video_url || '')
       setGaleria(m.galeria_fotos || [])
@@ -485,6 +489,7 @@ export default function DetalheMemorial() {
     const payload = {
       ...form,
       lapide_id: form.lapide_id || null,
+      vinculos: vinculos.length > 0 ? vinculos : null,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
       galeria_fotos: galeria,
@@ -807,6 +812,10 @@ export default function DetalheMemorial() {
                   ))}
               </select>
             </div>
+          </div>
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Vínculo/papel (aparece perto do nome na página)</label>
+            <VinculosEditor value={vinculos} onChange={setVinculos} />
           </div>
           <div>
             <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>

@@ -41,6 +41,7 @@ interface Homenagem {
   galeria_fotos: string[] | null;
   timeline: TimelineEvent[] | null;
   velas_acesas: number | null;
+  vinculos: string[] | null;
 }
 
 interface Condolencia {
@@ -86,7 +87,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   const { data: homenagem } = await supabase
     .from("homenagens_publica")
     .select(
-      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas"
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas, vinculos"
     )
     .eq("slug", slug)
     .single();
@@ -217,6 +218,13 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
           </div>
 
           <h1 style={estilos.nome}>{m.nome_completo}</h1>
+          {Array.isArray(m.vinculos) && m.vinculos.length > 0 && (
+            <div style={estilos.vinculosWrap}>
+              {m.vinculos.map((v) => (
+                <span key={v} style={estilos.vinculoBadge}>{v}</span>
+              ))}
+            </div>
+          )}
           {anos && <div style={estilos.anos}>{anos}</div>}
           {m.cidade && (
             <div style={estilos.cidade}>
@@ -507,6 +515,16 @@ const estilos: Record<string, React.CSSProperties> = {
     margin: "10px 0 10px",
     lineHeight: 1.1,
     letterSpacing: -0.5,
+  },
+  vinculosWrap: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 },
+  vinculoBadge: {
+    fontSize: 12,
+    letterSpacing: 0.5,
+    textTransform: "uppercase" as const,
+    color: v(VAR_DOURADO, CORES.dourado),
+    border: `1px solid ${CORES.douradoBorda}`,
+    borderRadius: 999,
+    padding: "3px 12px",
   },
   anos: { fontSize: 20, color: v(VAR_DOURADO, CORES.dourado), marginBottom: 6 },
   cidade: { display: "inline-flex", alignItems: "center", gap: 6, color: CORES.textoFraco, fontSize: 15 },
