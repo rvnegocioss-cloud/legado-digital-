@@ -228,7 +228,10 @@ export default function DetalheMemorial() {
       if (m.qr_code_url) {
         setQrCodeUrl(m.qr_code_url)
       } else if (m.slug) {
-        gerarQrCodeCliente(m.id).then((url) => { if (url) setQrCodeUrl(url) })
+        gerarQrCodeCliente(m.id).then(({ qrCodeUrl, updatedAt }) => {
+          if (qrCodeUrl) setQrCodeUrl(qrCodeUrl)
+          if (updatedAt) setMemorial((atual) => (atual ? { ...atual, updated_at: updatedAt } : atual))
+        })
       }
     }
     setLoading(false)
@@ -243,8 +246,9 @@ export default function DetalheMemorial() {
     }
     setQrCodeMsg('')
     setGerandoQrCode(true)
-    const url = await gerarQrCodeCliente(memorial.id)
-    if (url) setQrCodeUrl(url)
+    const { qrCodeUrl, updatedAt } = await gerarQrCodeCliente(memorial.id)
+    if (qrCodeUrl) setQrCodeUrl(qrCodeUrl)
+    if (updatedAt) setMemorial((atual) => (atual ? { ...atual, updated_at: updatedAt } : atual))
     setGerandoQrCode(false)
   }
 
@@ -340,7 +344,15 @@ export default function DetalheMemorial() {
     if (!memorial) return
     setPreenchidoPor(valor)
     setSalvandoPreenchidoPor(true)
-    await supabase.from('homenagens').update({ preenchido_por: valor }).eq('id', memorial.id)
+    const { data: atualizado } = await supabase
+      .from('homenagens')
+      .update({ preenchido_por: valor })
+      .eq('id', memorial.id)
+      .select('updated_at')
+      .single()
+    if (atualizado?.updated_at) {
+      setMemorial((atual) => (atual ? { ...atual, updated_at: atualizado.updated_at } : atual))
+    }
     setSalvandoPreenchidoPor(false)
   }
 
@@ -379,6 +391,9 @@ export default function DetalheMemorial() {
       setFamiliaEmailMsg(`Cadastrado, mas o e-mail não saiu (Resend não configurado). Senha gerada: ${json.senha} — repasse manualmente.`)
       setTemSenhaFamilia(true)
     }
+    if (json.updatedAt) {
+      setMemorial((atual) => (atual ? { ...atual, updated_at: json.updatedAt } : atual))
+    }
     setCadastrandoFamiliaEmail(false)
   }
 
@@ -407,6 +422,9 @@ export default function DetalheMemorial() {
       setMensagemPlacaMsg('Salvo, mas o e-mail de confirmação não saiu (Resend não configurado).')
     } else {
       setMensagemPlacaMsg('Salvo — sem mensagem, o QR Code segue direto pro fornecedor.')
+    }
+    if (json.updatedAt) {
+      setMemorial((atual) => (atual ? { ...atual, updated_at: json.updatedAt } : atual))
     }
     setSalvandoMensagemPlaca(false)
   }

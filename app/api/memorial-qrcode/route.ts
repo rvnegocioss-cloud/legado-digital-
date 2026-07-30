@@ -67,10 +67,12 @@ export async function POST(req: NextRequest) {
   const { data: publicUrlData } = supabaseAdmin.storage.from('memoriais').getPublicUrl(caminho)
   const qrCodeUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`
 
-  const { error: updateError } = await supabaseAdmin
+  const { data: atualizado, error: updateError } = await supabaseAdmin
     .from('homenagens')
     .update({ qr_code_url: qrCodeUrl })
     .eq('id', memorialId)
+    .select('updated_at')
+    .single()
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
@@ -78,5 +80,12 @@ export async function POST(req: NextRequest) {
 
   const resultado = await dispararEmailFornecedor(supabaseAdmin, memorialId, req.nextUrl.origin)
 
-  return NextResponse.json({ ok: true, qrCodeUrl, url, emailEnviado: resultado.enviado, motivo: resultado.motivo })
+  return NextResponse.json({
+    ok: true,
+    qrCodeUrl,
+    url,
+    emailEnviado: resultado.enviado,
+    motivo: resultado.motivo,
+    updatedAt: atualizado?.updated_at,
+  })
 }

@@ -244,7 +244,15 @@ function FichaMemorialParceiroInner() {
     if (!memorial) return
     setPreenchidoPor(valor)
     setSalvandoPreenchidoPor(true)
-    await supabase.from('homenagens').update({ preenchido_por: valor }).eq('id', memorial.id)
+    const { data: atualizado } = await supabase
+      .from('homenagens')
+      .update({ preenchido_por: valor })
+      .eq('id', memorial.id)
+      .select('updated_at')
+      .single()
+    if (atualizado?.updated_at) {
+      setMemorial((atual) => (atual ? { ...atual, updated_at: atualizado.updated_at } : atual))
+    }
     setSalvandoPreenchidoPor(false)
   }
 
@@ -300,6 +308,9 @@ function FichaMemorialParceiroInner() {
       setFamiliaEmailMsg(`Cadastrado, mas o e-mail não saiu. Senha gerada: ${json.senha} — repasse manualmente.`)
       setTemSenhaFamilia(true)
     }
+    if (json.updatedAt) {
+      setMemorial((atual) => (atual ? { ...atual, updated_at: json.updatedAt } : atual))
+    }
     setCadastrandoFamiliaEmail(false)
   }
 
@@ -329,6 +340,9 @@ function FichaMemorialParceiroInner() {
     } else {
       setMensagemPlacaMsg('Salvo — sem mensagem, o QR Code segue direto pro fornecedor.')
     }
+    if (json.updatedAt) {
+      setMemorial((atual) => (atual ? { ...atual, updated_at: json.updatedAt } : atual))
+    }
     setSalvandoMensagemPlaca(false)
   }
 
@@ -341,8 +355,9 @@ function FichaMemorialParceiroInner() {
     }
     setQrCodeMsg('')
     setGerandoQrCode(true)
-    const url = await gerarQrCodeCliente(memorial.id)
-    if (url) setQrCodeUrl(url)
+    const { qrCodeUrl, updatedAt } = await gerarQrCodeCliente(memorial.id)
+    if (qrCodeUrl) setQrCodeUrl(qrCodeUrl)
+    if (updatedAt) setMemorial((atual) => (atual ? { ...atual, updated_at: updatedAt } : atual))
     setGerandoQrCode(false)
   }
 
@@ -491,7 +506,10 @@ function FichaMemorialParceiroInner() {
     // não tem quem colocar na placa, então nem dispara.
     const nomeRealParaQr = form.nome_completo.trim()
     if (!memorial.qr_code_url && nomeRealParaQr && nomeRealParaQr !== 'Novo memorial') {
-      gerarQrCodeCliente(memorial.id).then((url) => { if (url) setQrCodeUrl(url) })
+      gerarQrCodeCliente(memorial.id).then(({ qrCodeUrl, updatedAt }) => {
+        if (qrCodeUrl) setQrCodeUrl(qrCodeUrl)
+        if (updatedAt) setMemorial((atual) => (atual ? { ...atual, updated_at: updatedAt } : atual))
+      })
     }
 
     setSalvando(false)

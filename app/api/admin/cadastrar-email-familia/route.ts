@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     )
   if (upsertError) return NextResponse.json({ error: upsertError.message }, { status: 500 })
 
-  const { error: updateError } = await supabaseAdmin
+  const { data: atualizado, error: updateError } = await supabaseAdmin
     .from('homenagens')
     .update({
       familia_email: email,
@@ -77,6 +77,8 @@ export async function POST(req: NextRequest) {
       familia_telefone: telefone || null,
     })
     .eq('id', memorialId)
+    .select('updated_at')
+    .single()
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
   const url = `${req.nextUrl.origin}/familia/login`
@@ -97,5 +99,5 @@ export async function POST(req: NextRequest) {
     erroMsg: resultado.enviado ? null : resultado.erro,
   })
 
-  return NextResponse.json({ ok: true, emailEnviado: resultado.enviado, senha })
+  return NextResponse.json({ ok: true, emailEnviado: resultado.enviado, senha, updatedAt: atualizado?.updated_at })
 }

@@ -54,11 +54,14 @@ export async function POST(req: NextRequest) {
 
   const texto = (mensagem || '').trim()
 
-  const { error: updateError } = await supabaseAdmin
+  const { data: atualizado, error: updateError } = await supabaseAdmin
     .from('homenagens')
     .update({ mensagem_placa: texto || null })
     .eq('id', memorialId)
+    .select('updated_at')
+    .single()
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+  const updatedAt = atualizado?.updated_at
 
   const { error: segurancaError } = await supabaseAdmin
     .from('homenagens_seguranca')
@@ -74,7 +77,7 @@ export async function POST(req: NextRequest) {
   if (segurancaError) return NextResponse.json({ error: segurancaError.message }, { status: 500 })
 
   if (!texto) {
-    return NextResponse.json({ ok: true, emailConfirmacaoEnviado: false })
+    return NextResponse.json({ ok: true, emailConfirmacaoEnviado: false, updatedAt })
   }
 
   if (!homenagem.familia_email) {
@@ -82,6 +85,7 @@ export async function POST(req: NextRequest) {
       ok: true,
       emailConfirmacaoEnviado: false,
       aviso: 'Cadastre o e-mail da família antes pra poder confirmar a mensagem da placa.',
+      updatedAt,
     })
   }
 
@@ -105,5 +109,5 @@ export async function POST(req: NextRequest) {
     erroMsg: resultado.enviado ? null : resultado.erro,
   })
 
-  return NextResponse.json({ ok: true, emailConfirmacaoEnviado: resultado.enviado })
+  return NextResponse.json({ ok: true, emailConfirmacaoEnviado: resultado.enviado, updatedAt })
 }
