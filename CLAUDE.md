@@ -124,7 +124,7 @@ Tudo do checklist de Fase 1/2 abaixo está **feito** (schema, auth, CRUDs de Par
 - [ ] Website institucional finalizado
 - [ ] Contatos da empresa (`parceiros_contatos`) ligados ao fluxo de convite existente
 - [ ] Privacidade em 3 toggles levada pro `/parceiro/memoriais` (hoje só `/admin/memoriais/[id]`)
-- [ ] "Esqueci a senha" da família (hoje só reemissão manual pela Central/Parceiro)
+- [x] "Esqueci a senha" da família — self-service já existe (botão na tela `/familia/login` → `/api/familia-esqueci-senha`, resposta genérica anti-enumeração, senha nova por e-mail). Item estava desatualizado na lista, corrigido 2026-07-30 (regra 4).
 - [ ] Suporte a múltiplos vídeos por memorial (`videos_galeria`) — pausado a pedido do Rafael
 - [ ] Troca de tema persistente (hoje é só demo/preview, não salva no banco — precisa campo `tema` em `homenagens`)
 - [ ] **Rate-limit de escrita pública** (condolências/mural/vela/visualização) ainda não passa por rate limit nenhum — client chama Supabase REST/RPC direto do navegador, nunca passa pela nossa própria API (então nem o `proxy.ts`, já corrigido, alcança). Achado na auditoria Opus 2026-07-23, recomendado mover pra Route Handlers Next.js.
