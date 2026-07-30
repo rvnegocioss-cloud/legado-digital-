@@ -163,10 +163,10 @@ function ParceiroDashboardInner() {
     setPaginaErro('')
     setPaginaSalva(false)
 
-    const { error } = await supabase
-      .from('parceiros_b2b')
-      .update({ logo_url: logoUrl || null, descricao_publica: descricaoPublica || null })
-      .eq('id', parceiro.id)
+    const { error } = await supabase.rpc('atualizar_pagina_publica_parceiro', {
+      p_logo_url: logoUrl || null,
+      p_descricao_publica: descricaoPublica || null,
+    })
 
     if (error) {
       setPaginaErro(error.message)
