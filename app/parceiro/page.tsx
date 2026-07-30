@@ -50,6 +50,12 @@ const PAGAMENTO_LABEL: Record<string, { label: string; className: string }> = {
   inadimplente: { label: 'Inadimplente', className: 'bg-red-900/50 text-red-400' },
 }
 
+// Nenhuma tela do sistema ainda escreve status_pagamento (modulo financeiro
+// é Fase 4) — cair no rotulo verde "Em dia" por padrão pra valor
+// desconhecido/nulo dava a entender que alguém confirmou o pagamento,
+// quando na verdade nunca foi configurado. Neutro é o estado honesto.
+const PAGAMENTO_NAO_CONFIGURADO = { label: 'Não configurado', className: 'bg-zinc-800 text-zinc-400' }
+
 export default function ParceiroDashboard() {
   return (
     <Suspense fallback={<p className="text-zinc-400">Carregando...</p>}>
@@ -181,7 +187,7 @@ function ParceiroDashboardInner() {
   if (loading) return <p className="text-zinc-400">Carregando...</p>
   if (!parceiro) return <p className="text-zinc-400">Parceiro não encontrado.</p>
 
-  const pagamento = PAGAMENTO_LABEL[parceiro.status_pagamento] || PAGAMENTO_LABEL.em_dia
+  const pagamento = PAGAMENTO_LABEL[parceiro.status_pagamento] || PAGAMENTO_NAO_CONFIGURADO
   const memoriaisHref = parceiroIdParam
     ? `/parceiro/memoriais?parceiro_id=${parceiroIdParam}`
     : '/parceiro/memoriais'

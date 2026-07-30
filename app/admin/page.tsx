@@ -51,54 +51,23 @@ export default function AdminDashboard() {
   }, [])
 
   async function loadMetricas() {
-    const { data: homenagensData } = await supabase
-      .from('homenagens')
-      .select('visualizacoes, created_at, parceiro_id, lapide_id')
-
-    const { data: lapidesData } = await supabase.from('lapides').select('id, cemiterio_id')
-    const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome')
-    const { data: parceirosData } = await supabase.from('parceiros_b2b').select('id, nome_fantasia, razao_social')
-
-    const homs = homenagensData || []
-    setTotalVisualizacoes(homs.reduce((soma, h) => soma + (h.visualizacoes || 0), 0))
+    // Agregação inteira no Postgres (RPC) — antes baixava homenagens+lapides+
+    // parceiros_b2b inteiras pro navegador só pra somar em JS. Funcionava
+    // com poucos registros, virava payload de megabytes em escala.
+    const { data: metricas } = await supabase.rpc('admin_dashboard_metricas')
+    if (metricas) {
+      setTotalVisualizacoes(metricas.totalVisualizacoes || 0)
+      setNovosMemoriais(metricas.novosMemoriais || 0)
+      setTopCemiterios(metricas.topCemiterios || [])
+      setTopParceiros(metricas.topParceiros || [])
+    }
 
     const seteDiasAtras = Date.now() - 7 * 86400000
-    setNovosMemoriais(homs.filter((h) => new Date(h.created_at).getTime() > seteDiasAtras).length)
-
     const { count: condolenciasRecentes } = await supabase
       .from('condolencias')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', new Date(seteDiasAtras).toISOString())
     setHomenagensRecentes(condolenciasRecentes || 0)
-
-    const lapideParaCemiterio = new Map((lapidesData || []).map((l) => [l.id, l.cemiterio_id]))
-    const visPorCemiterio = new Map<string, number>()
-    for (const h of homs) {
-      if (!h.lapide_id) continue
-      const cemiterioId = lapideParaCemiterio.get(h.lapide_id)
-      if (!cemiterioId) continue
-      visPorCemiterio.set(cemiterioId, (visPorCemiterio.get(cemiterioId) || 0) + (h.visualizacoes || 0))
-    }
-    const nomeCemiterio = new Map((cemiteriosData || []).map((c) => [c.id, c.nome]))
-    setTopCemiterios(
-      [...visPorCemiterio.entries()]
-        .map(([id, visualizacoes]) => ({ nome: nomeCemiterio.get(id) || 'Sem nome', visualizacoes }))
-        .sort((a, b) => b.visualizacoes - a.visualizacoes)
-        .slice(0, 5)
-    )
-
-    const visPorParceiro = new Map<string, number>()
-    for (const h of homs) {
-      if (!h.parceiro_id) continue
-      visPorParceiro.set(h.parceiro_id, (visPorParceiro.get(h.parceiro_id) || 0) + (h.visualizacoes || 0))
-    }
-    const nomeParceiro = new Map((parceirosData || []).map((p) => [p.id, p.nome_fantasia || p.razao_social]))
-    setTopParceiros(
-      [...visPorParceiro.entries()]
-        .map(([id, visualizacoes]) => ({ nome: nomeParceiro.get(id) || 'Sem nome', visualizacoes }))
-        .sort((a, b) => b.visualizacoes - a.visualizacoes)
-        .slice(0, 5)
-    )
   }
 
   async function loadStats() {

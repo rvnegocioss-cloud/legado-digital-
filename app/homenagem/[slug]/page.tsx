@@ -104,8 +104,6 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
   const m = homenagem as Homenagem;
 
-  supabase.rpc("incrementar_visualizacao", { p_slug: slug }).then(() => {});
-
   const { data: seguranca } = await supabase
     .from("homenagens_busca_publica")
     .select("tem_senha, link_habilitado, qrcode_habilitado")
@@ -131,6 +129,10 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
       return <GateSenhaAcesso memorialId={m.id} nomeCompleto={m.nome_completo} />;
     }
   }
+
+  // Só conta visita depois dos 2 bloqueios acima — antes contava até quem
+  // nunca chegou a ver a página (link/QR desativado, ou senha não digitada).
+  supabase.rpc("incrementar_visualizacao", { p_slug: slug }).then(() => {});
 
   const anos = anosDestaque(m.data_nascimento, m.data_falecimento);
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
