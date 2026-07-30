@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Heart } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
 import { CORES, dataPtBr } from '@/lib/publicTheme'
 
 interface MemoriaMural {
@@ -42,13 +41,18 @@ export function MuralMemorias({ memorialId, memoriasIniciais }: { memorialId: st
       localStorage.setItem(`mem_reagidas_${memorialId}`, JSON.stringify(novasReagidas))
     } catch {}
 
-    // RPC atômica no servidor (não é UPDATE direto do client — RLS não libera
-    // update público, e update direto teria race condition + permitiria
-    // qualquer um setar o valor arbitrário via API).
-    const { data, error } = await supabase.rpc('reagir_memoria', { p_id: id })
-    if (error) return
+    // Rota própria (Route Handler) chama a RPC atômica com service role —
+    // client não tem mais grant direto na RPC nem na tabela, passa sempre
+    // pelo rate limit da nossa API.
+    const res = await fetch('/api/memorial-mural-reagir', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    if (!res.ok) return
+    const json = await res.json()
 
-    const novoTotal = typeof data === 'number' ? data : undefined
+    const novoTotal = typeof json.coracoes === 'number' ? json.coracoes : undefined
     setMemorias((lista) =>
       lista.map((m) => (m.id === id ? { ...m, coracoes: novoTotal ?? m.coracoes + 1 } : m))
     )
@@ -60,24 +64,26 @@ export function MuralMemorias({ memorialId, memoriasIniciais }: { memorialId: st
     setEnviando(true)
     setErro('')
 
-    const { data, error } = await supabase
-      .from('mural_memorias')
-      .insert({
-        homenagem_id: memorialId,
+    const res = await fetch('/api/memorial-mural', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        memorialId,
         nome: nome.trim(),
         parentesco: parentesco.trim() || null,
         texto: texto.trim(),
-      })
-      .select()
-      .single()
+      }),
+    })
 
-    if (error || !data) {
-      setErro('Não foi possível enviar agora. Tenta de novo em instantes.')
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      setErro(json.error || 'Não foi possível enviar agora. Tenta de novo em instantes.')
       setEnviando(false)
       return
     }
 
-    setMemorias((lista) => [data as MemoriaMural, ...lista])
+    const { memoria } = await res.json()
+    setMemorias((lista) => [memoria as MemoriaMural, ...lista])
     setNome('')
     setParentesco('')
     setTexto('')

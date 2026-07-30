@@ -265,8 +265,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Rate limit só em /api/*, /admin/*, /parceiro/*, /familia/*
-  const protectedPaths = ['/api/', '/admin/', '/parceiro/', '/familia/']
+  // Rate limit só em /api/*, /admin/*, /parceiro/*, /familia/*, /homenagem/*
+  // (homenagem entrou pra cobrir a contagem de visualização, que roda dentro
+  // do próprio SSR da página — sem isso ela nunca passava por rate limit
+  // nenhum, já que só /api/* era coberto e a página em si não é uma API)
+  const protectedPaths = ['/api/', '/admin/', '/parceiro/', '/familia/', '/homenagem/']
   const shouldRateLimit = protectedPaths.some((p) => pathname.startsWith(p))
 
   if (!shouldRateLimit) {

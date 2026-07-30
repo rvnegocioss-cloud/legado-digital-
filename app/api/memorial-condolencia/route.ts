@@ -1,0 +1,52 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { checkResourceRateLimit } from '@/lib/rateLimitUtil'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for')
+  if (forwarded) return forwarded.split(',')[0].trim()
+  return req.headers.get('x-real-ip') || 'unknown'
+}
+
+export async function POST(req: NextRequest) {
+  const { memorialId, nome, mensagem } = await req.json()
+  if (!memorialId || !nome?.trim() || !mensagem?.trim()) {
+    return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
+  }
+
+  // Escrita pública sem trava nenhuma antes disso — client chamava o Supabase
+  // REST direto do navegador, então nem o rate limit do proxy.ts alcançava.
+  // Limite por memorial (não só por IP) segura contra spam distribuído no
+  // mesmo memorial mesmo com IPs diferentes.
+  const limite = checkResourceRateLimit(`condolencia:${memorialId}`, {
+    max: 50,
+    windowMs: 3600000,
+    description: 'homenagens neste memorial',
+  })
+  if (!limite.allowed) {
+    return NextResponse.json({ error: limite.message }, { status: 429 })
+  }
+
+  const limiteIp = checkResourceRateLimit(`condolencia:ip:${getClientIp(req)}`, {
+    max: 20,
+    windowMs: 3600000,
+    description: 'homenagens enviadas',
+  })
+  if (!limiteIp.allowed) {
+    return NextResponse.json({ error: limiteIp.message }, { status: 429 })
+  }
+
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+  const { error } = await supabaseAdmin
+    .from('condolencias')
+    .insert({ homenagem_id: memorialId, visitor_name: nome.trim(), message: mensagem.trim() })
+
+  if (error) {
+    return NextResponse.json({ error: 'Não foi possível enviar agora' }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}

@@ -1,7 +1,6 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { CORES } from '@/lib/publicTheme'
 
 const TAMANHO_PAREDE = 45
@@ -94,10 +93,15 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   async function acender() {
     // Sem limite de 1x por visitante — cada clique conta e voa de novo,
     // quantas vezes a pessoa quiser (pedido explícito do Rafael, 2026-07-24).
-    const { data, error } = await supabase.rpc('acender_vela', { p_slug: slug })
-    if (error) return
+    const res = await fetch('/api/memorial-vela', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug }),
+    })
+    if (!res.ok) return
+    const json = await res.json()
 
-    const novoTotal = typeof data === 'number' ? data : contagem + 1
+    const novoTotal = typeof json.total === 'number' ? json.total : contagem + 1
     setContagem(novoTotal)
 
     const alvo = proximoIndiceRef.current

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { CORES } from '@/lib/publicTheme'
 
 export function FormularioCondolencia({ memorialId }: { memorialId: string }) {
@@ -17,12 +16,15 @@ export function FormularioCondolencia({ memorialId }: { memorialId: string }) {
     setEnviando(true)
     setErro('')
 
-    const { error } = await supabase
-      .from('condolencias')
-      .insert({ homenagem_id: memorialId, visitor_name: nome.trim(), message: mensagem.trim() })
+    const res = await fetch('/api/memorial-condolencia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memorialId, nome: nome.trim(), mensagem: mensagem.trim() }),
+    })
 
-    if (error) {
-      setErro('Não foi possível enviar agora. Tenta de novo em instantes.')
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      setErro(json.error || 'Não foi possível enviar agora. Tenta de novo em instantes.')
       setEnviando(false)
       return
     }
