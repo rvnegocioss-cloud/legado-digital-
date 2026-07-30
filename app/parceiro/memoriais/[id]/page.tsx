@@ -514,7 +514,7 @@ function FichaMemorialParceiroInner() {
       <StatusFicha chips={chipsStatus} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-6">
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-8 @container">
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
             <form onSubmit={salvar}>
               <SecaoFicha titulo="Identificação" icon={User} primeira>
@@ -591,8 +591,8 @@ function FichaMemorialParceiroInner() {
                     A família optou por preencher o conteúdo — evite sobrescrever o que ela já colocou. Isso é definido no card &quot;Quem preenche o conteúdo&quot;, ao lado.
                   </p>
                 )}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <CampoFicha label="Biografia" className="lg:col-span-2">
+                <div className="grid grid-cols-1 @lg:grid-cols-3 gap-4">
+                  <CampoFicha label="Biografia" className="@lg:col-span-2">
                     <textarea
                       rows={10}
                       value={form.biografia}
@@ -628,8 +628,8 @@ function FichaMemorialParceiroInner() {
                   </div>
                 }
               >
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <CampoFicha label={`Galeria de fotos (${galeria.length}/${LIMITE_FOTOS})`} className="lg:col-span-2">
+                <div className="grid grid-cols-1 @lg:grid-cols-3 gap-4">
+                  <CampoFicha label={`Galeria de fotos (${galeria.length}/${LIMITE_FOTOS})`} className="@lg:col-span-2">
                     {galeria.length > 0 && (
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2">
                         {galeria.map((url) => (
