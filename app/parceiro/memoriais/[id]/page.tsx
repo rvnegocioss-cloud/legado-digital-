@@ -45,8 +45,20 @@ interface Memorial {
   familia_nome_responsavel: string | null
   familia_telefone: string | null
   preenchido_por: 'funeraria' | 'familia' | null
+  lapide_id: string | null
   created_at: string
   updated_at: string
+}
+
+interface Cemiterio {
+  id: string
+  nome: string
+}
+
+interface Lapide {
+  id: string
+  identificacao: string
+  cemiterio_id: string
 }
 
 const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
@@ -91,7 +103,11 @@ function FichaMemorialParceiroInner() {
     cidade: '',
     frase_preferida: '',
     biografia: '',
+    lapide_id: '',
   })
+  const [cemiterios, setCemiterios] = useState<Cemiterio[]>([])
+  const [lapides, setLapides] = useState<Lapide[]>([])
+  const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [galeria, setGaleria] = useState<string[]>([])
@@ -155,7 +171,7 @@ function FichaMemorialParceiroInner() {
     const { data: m } = await supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, parceiro_id, created_at, updated_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, lapide_id, parceiro_id, created_at, updated_at'
       )
       .eq('id', id)
       .maybeSingle()
@@ -166,6 +182,15 @@ function FichaMemorialParceiroInner() {
       return
     }
 
+    const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome').order('nome')
+    setCemiterios(cemiteriosData || [])
+    const { data: lapidesData } = await supabase.from('lapides').select('id, identificacao, cemiterio_id')
+    setLapides(lapidesData || [])
+    if (m.lapide_id) {
+      const lapideAtual = (lapidesData || []).find((l) => l.id === m.lapide_id)
+      if (lapideAtual) setCemiterioSelecionadoId(lapideAtual.cemiterio_id)
+    }
+
     setMemorial(m)
     setForm({
       nome_completo: m.nome_completo,
@@ -174,6 +199,7 @@ function FichaMemorialParceiroInner() {
       cidade: m.cidade || '',
       frase_preferida: m.frase_preferida || '',
       biografia: m.biografia || '',
+      lapide_id: m.lapide_id || '',
     })
     setFotoUrl(m.foto_url || '')
     setVideoUrl(m.video_url || '')
@@ -483,6 +509,7 @@ function FichaMemorialParceiroInner() {
 
     const payload = {
       ...form,
+      lapide_id: form.lapide_id || null,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
       galeria_fotos: galeria,
@@ -560,6 +587,7 @@ function FichaMemorialParceiroInner() {
     { label: temSenha ? 'Com senha' : 'Público', tom: temSenha ? 'amarelo' : 'verde' },
     { label: temSenhaFamilia ? 'Acesso da família enviado' : 'Acesso da família pendente', tom: temSenhaFamilia ? 'verde' : 'neutro' },
     { label: `Conteúdo: ${preenchidoPor === 'familia' ? 'Família' : 'Funerária'}`, tom: 'neutro' },
+    { label: form.lapide_id ? 'Localização vinculada' : 'Sem localização (sem "Como Chegar")', tom: form.lapide_id ? 'verde' : 'amarelo' },
     placaChip,
     { label: `Galeria ${galeria.length}/${LIMITE_FOTOS}`, tom: 'neutro' },
     { label: `${usoStorageMB}MB / 500MB`, tom: usoStorageMB >= 400 ? 'amarelo' : 'neutro' },
@@ -654,6 +682,36 @@ function FichaMemorialParceiroInner() {
                       onChange={(e) => setForm({ ...form, cidade: e.target.value })}
                       className="bg-zinc-800 border-zinc-700 text-white"
                     />
+                  </CampoFicha>
+                  <CampoFicha label="Cemitério" className="w-48" hint="Sem isso, 'Como Chegar' não aparece na página.">
+                    <select
+                      value={cemiterioSelecionadoId}
+                      onChange={(e) => {
+                        setCemiterioSelecionadoId(e.target.value)
+                        setForm({ ...form, lapide_id: '' })
+                      }}
+                      className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white"
+                    >
+                      <option value="">Sem cemitério vinculado</option>
+                      {cemiterios.map((c) => (
+                        <option key={c.id} value={c.id}>{c.nome}</option>
+                      ))}
+                    </select>
+                  </CampoFicha>
+                  <CampoFicha label="Lápide" className="w-48">
+                    <select
+                      value={form.lapide_id}
+                      onChange={(e) => setForm({ ...form, lapide_id: e.target.value })}
+                      disabled={!cemiterioSelecionadoId}
+                      className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                    >
+                      <option value="">Sem lápide vinculada</option>
+                      {lapides
+                        .filter((l) => l.cemiterio_id === cemiterioSelecionadoId)
+                        .map((l) => (
+                          <option key={l.id} value={l.id}>{l.identificacao}</option>
+                        ))}
+                    </select>
                   </CampoFicha>
                 </div>
               </SecaoFicha>
