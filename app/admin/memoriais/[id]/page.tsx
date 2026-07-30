@@ -140,10 +140,14 @@ export default function DetalheMemorial() {
     const { data: m } = await supabase.from('homenagens').select('*').eq('id', id).single()
     setMemorial(m)
 
-    fetch(`/api/memorial-storage-usage?memorialId=${id}`)
-      .then((r) => r.json())
-      .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
-      .catch(() => {})
+    supabase.auth.getSession().then(({ data: { session } }) =>
+      fetch(`/api/memorial-storage-usage?memorialId=${id}`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      })
+        .then((r) => r.json())
+        .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
+        .catch(() => {})
+    )
 
     const { data: muralData } = await supabase
       .from('mural_memorias')

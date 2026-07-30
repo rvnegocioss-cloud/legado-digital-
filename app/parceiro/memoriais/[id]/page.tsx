@@ -195,10 +195,14 @@ function FichaMemorialParceiroInner() {
     setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
     setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
 
-    fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
-      .then((r) => r.json())
-      .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
-      .catch(() => {})
+    supabase.auth.getSession().then(({ data: { session } }) =>
+      fetch(`/api/memorial-storage-usage?memorialId=${m.id}`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      })
+        .then((r) => r.json())
+        .then((json) => setUsoStorageMB(Math.round((json.usageBytes || 0) / 1024 / 1024)))
+        .catch(() => {})
+    )
 
     const { data: muralData } = await supabase
       .from('mural_memorias')

@@ -58,8 +58,6 @@ const RATE_LIMIT_CONFIG: Record<string, RateLimitConfig> = {
     limit: 10, // será 5 para família, 10 para staff (decidido na rota)
     routePatterns: [
       '/api/familia-upload',
-      '/api/admin/upload',
-      '/api/parceiro/upload',
     ],
   },
   api: {
