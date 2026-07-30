@@ -62,7 +62,7 @@ function isYoutube(url: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { data } = await supabase
-    .from("homenagens")
+    .from("homenagens_publica")
     .select("nome_completo, foto_url, data_nascimento, data_falecimento")
     .eq("slug", slug)
     .maybeSingle();
@@ -84,7 +84,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   const { slug } = await params;
 
   const { data: homenagem } = await supabase
-    .from("homenagens")
+    .from("homenagens_publica")
     .select(
       "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas"
     )
