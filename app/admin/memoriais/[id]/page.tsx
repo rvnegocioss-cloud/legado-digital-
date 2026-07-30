@@ -225,9 +225,15 @@ export default function DetalheMemorial() {
       setLinkHabilitado(seguranca?.link_habilitado ?? true)
       setQrcodeHabilitado(seguranca?.qrcode_habilitado ?? true)
 
+      const nomeDoBanco = (m.nome_completo || '').trim()
+      const nomeValido = nomeDoBanco && nomeDoBanco !== 'Novo memorial'
       if (m.qr_code_url) {
         setQrCodeUrl(m.qr_code_url)
-      } else if (m.slug) {
+      } else if (m.slug && nomeValido && (m.data_falecimento || '').trim()) {
+        // Auto-gera só se faltava (self-heal de uma falha anterior) — nunca
+        // na primeira vez que a Central abre um rascunho do Parceiro ainda
+        // sem nome/data reais, senão dispara pedido em branco pro fornecedor
+        // só de abrir a ficha, sem clicar em nada.
         gerarQrCodeCliente(m.id).then(({ qrCodeUrl, updatedAt }) => {
           if (qrCodeUrl) setQrCodeUrl(qrCodeUrl)
           if (updatedAt) setMemorial((atual) => (atual ? { ...atual, updated_at: updatedAt } : atual))
@@ -240,7 +246,7 @@ export default function DetalheMemorial() {
   async function gerarQrCode() {
     if (!memorial) return
     const nome = form.nome_completo.trim()
-    if (!nome) {
+    if (!nome || nome === 'Novo memorial') {
       setQrCodeMsg('Preenche o nome antes — esse QR dispara pedido pro fornecedor da placa física, precisa saber de quem é.')
       return
     }
@@ -370,7 +376,8 @@ export default function DetalheMemorial() {
   async function cadastrarEmailFamilia(e: React.FormEvent) {
     e.preventDefault()
     if (!memorial) return
-    if (!form.nome_completo.trim()) {
+    const nomeFamilia = form.nome_completo.trim()
+    if (!nomeFamilia || nomeFamilia === 'Novo memorial') {
       setFamiliaEmailMsg('Preenche o nome do homenageado antes de enviar acesso — o e-mail pra família cita esse nome.')
       return
     }

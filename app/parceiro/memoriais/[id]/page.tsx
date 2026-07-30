@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
+import { gerarSlugUnico } from '@/lib/gerarSlug'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
@@ -507,13 +508,30 @@ function FichaMemorialParceiroInner() {
       return
     }
 
-    const payload = {
+    // Rascunho nasce com slug "rascunho-<id8>" (pra poder criar a linha na
+    // hora, sem pedir nome antes) e nunca virava definitivo em lugar nenhum
+    // — o mesmo slug provisório ficava pra sempre, inclusive depois de
+    // preencher o nome real. Troca aqui, no primeiro save com nome de
+    // verdade: se já tiver QR gerado nesse ponto (não deveria, já que QR só
+    // sai depois do nome real também), o slug do QR fica desatualizado —
+    // aceitável hoje porque as duas travas nascem juntas a partir de agora.
+    let slugDefinitivo: string | null = null
+    const nomeParaSlug = form.nome_completo.trim()
+    if (memorial.slug?.startsWith('rascunho-') && nomeParaSlug && nomeParaSlug !== 'Novo memorial') {
+      slugDefinitivo = await gerarSlugUnico(supabase, nomeParaSlug, memorial.id)
+    }
+
+    const payload: Record<string, unknown> = {
       ...form,
       lapide_id: form.lapide_id || null,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
       galeria_fotos: galeria,
       timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
+    }
+    if (slugDefinitivo) {
+      payload.slug = slugDefinitivo
+      payload.memorial_slug = slugDefinitivo
     }
     const { data: atualizado, error } = await supabase
       .from('homenagens')
@@ -555,7 +573,15 @@ function FichaMemorialParceiroInner() {
 
     setSalvando(false)
     setSalvo(true)
-    setMemorial({ ...memorial, ...form, foto_url: fotoUrl || null, video_url: videoUrl || null, galeria_fotos: galeria, updated_at: atualizado?.updated_at || memorial.updated_at })
+    setMemorial({
+      ...memorial,
+      ...form,
+      slug: slugDefinitivo || memorial.slug,
+      foto_url: fotoUrl || null,
+      video_url: videoUrl || null,
+      galeria_fotos: galeria,
+      updated_at: atualizado?.updated_at || memorial.updated_at,
+    })
   }
 
   if (loading) return <p className="text-zinc-400">Carregando...</p>
