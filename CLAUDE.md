@@ -182,7 +182,7 @@ Se o SMTP falhar (ex: DKIM não propagado ainda), a API retorna a senha na respo
 
 **Ainda falta:** "esqueci a senha" da família (hoje só reemissão manual).
 
-**Cadastro do responsável por CPF (modo teste apenas)** — campo CPF + "Consultar CPF" (`POST /api/admin/consultar-cpf`, provedor `cpfcnpj.com.br`, token de teste) preenche Nome automaticamente; CPF nunca é persistido. **Não é produção ainda** — falta token de produção e resolver IP fixo exigido pelo provedor vs IP de egress dinâmico da Vercel (bloqueio técnico sem solução ainda). Plano com decisões em `docs/RASCUNHO_IDEIAS.md`.
+**Cadastro do responsável por CPF (modo teste apenas)** — campo CPF + "Consultar CPF" (`POST /api/admin/consultar-cpf`, provedor `cpfcnpj.com.br`, token de teste) preenche Nome automaticamente; CPF nunca é persistido. **Existe na Central e no Portal do Parceiro** (2026-07-29 — Rafael notou que faltava no Portal do Parceiro, adicionado igual à Central; rota liberada pra parceiro dono do memorial também, antes era staff-only). **Não é produção ainda** — falta token de produção e resolver IP fixo exigido pelo provedor vs IP de egress dinâmico da Vercel (bloqueio técnico sem solução ainda). Plano com decisões em `docs/RASCUNHO_IDEIAS.md`.
 
 ## Página do Memorial (`/homenagem/[slug]`) — como funciona
 Pública, sem login, **componente 100% servidor** (zero JS client contínuo na rota — interatividade nova sempre vira ilha `'use client'` isolada, sem `requestAnimationFrame`).

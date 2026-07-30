@@ -303,7 +303,7 @@ export default function DetalheMemorial() {
     const res = await fetch('/api/admin/consultar-cpf', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({ cpf: familiaCpf }),
+      body: JSON.stringify({ cpf: familiaCpf, memorialId: memorial?.id }),
     })
     const json = await res.json()
 

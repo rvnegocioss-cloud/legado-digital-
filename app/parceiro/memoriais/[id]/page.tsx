@@ -112,6 +112,10 @@ function FichaMemorialParceiroInner() {
   const [familiaEmail, setFamiliaEmail] = useState('')
   const [familiaNomeResponsavel, setFamiliaNomeResponsavel] = useState('')
   const [familiaTelefone, setFamiliaTelefone] = useState('')
+  const [familiaCpf, setFamiliaCpf] = useState('')
+  const [consultandoCpf, setConsultandoCpf] = useState(false)
+  const [cpfMsg, setCpfMsg] = useState('')
+  const [cpfModoTeste, setCpfModoTeste] = useState(false)
   const [cadastrandoFamiliaEmail, setCadastrandoFamiliaEmail] = useState(false)
   const [familiaEmailMsg, setFamiliaEmailMsg] = useState('')
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia'>('familia')
@@ -319,6 +323,29 @@ function FichaMemorialParceiroInner() {
     const url = await gerarQrCodeCliente(memorial.id)
     if (url) setQrCodeUrl(url)
     setGerandoQrCode(false)
+  }
+
+  async function consultarCpf() {
+    if (!memorial) return
+    setConsultandoCpf(true)
+    setCpfMsg('')
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/admin/consultar-cpf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+      body: JSON.stringify({ cpf: familiaCpf, memorialId: memorial.id }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setCpfMsg(json.error || 'Erro ao consultar CPF')
+    } else {
+      setFamiliaNomeResponsavel(json.nome || '')
+      setCpfModoTeste(!!json.modoTeste)
+      setCpfMsg(json.modoTeste ? 'Preenchido — dado fictício (modo teste, sem token de produção).' : 'Preenchido.')
+    }
+    setConsultandoCpf(false)
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -701,6 +728,22 @@ function FichaMemorialParceiroInner() {
 
             <SecaoFicha titulo="Acesso da família" icon={Mail}>
               <form onSubmit={cadastrarEmailFamilia} className="space-y-3">
+                <CampoFicha label="CPF do responsável (opcional, preenche o nome)">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="000.000.000-00"
+                      value={familiaCpf}
+                      onChange={(e) => setFamiliaCpf(e.target.value)}
+                      className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                    />
+                    <Button type="button" onClick={consultarCpf} disabled={consultandoCpf} className="whitespace-nowrap">
+                      {consultandoCpf ? '...' : 'Consultar'}
+                    </Button>
+                  </div>
+                  {cpfMsg && (
+                    <p className={`text-[11px] mt-1 ${cpfModoTeste ? 'text-yellow-400' : 'text-zinc-400'}`}>{cpfMsg}</p>
+                  )}
+                </CampoFicha>
                 <CampoFicha label="Nome do responsável">
                   <Input
                     value={familiaNomeResponsavel}
