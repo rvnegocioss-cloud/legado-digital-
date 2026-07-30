@@ -1,12 +1,13 @@
 interface StatusChip {
   label: string
-  tom?: 'neutro' | 'verde' | 'amarelo'
+  tom?: 'neutro' | 'verde' | 'amarelo' | 'vermelho'
 }
 
 const COR_PONTO: Record<NonNullable<StatusChip['tom']>, string> = {
   neutro: 'bg-zinc-600',
   verde: 'bg-green-500',
   amarelo: 'bg-yellow-500',
+  vermelho: 'bg-red-500',
 }
 
 // Faixa de status somente-leitura no topo da ficha — resume em ícones o que

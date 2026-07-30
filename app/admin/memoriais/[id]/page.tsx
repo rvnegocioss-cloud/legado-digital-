@@ -124,6 +124,7 @@ export default function DetalheMemorial() {
   const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
   const [mensagemPlacaConfirmada, setMensagemPlacaConfirmada] = useState(false)
+  const [envioFornecedorStatus, setEnvioFornecedorStatus] = useState<'enviado' | 'erro' | null>(null)
   const [buscaHabilitada, setBuscaHabilitada] = useState(true)
   const [linkHabilitado, setLinkHabilitado] = useState(true)
   const [qrcodeHabilitado, setQrcodeHabilitado] = useState(true)
@@ -208,6 +209,17 @@ export default function DetalheMemorial() {
       setTemSenha(!!seguranca?.senha_acesso_hash)
       setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
       setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
+
+      const { data: envioFornecedorData } = await supabase
+        .from('emails_enviados')
+        .select('status')
+        .eq('homenagem_id', m.id)
+        .eq('tipo', 'envio_fornecedor')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      setEnvioFornecedorStatus((envioFornecedorData?.status as 'enviado' | 'erro' | undefined) ?? null)
+
       setBuscaHabilitada(seguranca?.busca_habilitada ?? true)
       setLinkHabilitado(seguranca?.link_habilitado ?? true)
       setQrcodeHabilitado(seguranca?.qrcode_habilitado ?? true)
@@ -993,10 +1005,20 @@ export default function DetalheMemorial() {
             {mensagemPlaca.trim() && (
               <span
                 className={`text-xs px-2 py-1 rounded ${
-                  mensagemPlacaConfirmada ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'
+                  envioFornecedorStatus === 'erro'
+                    ? 'bg-red-900/50 text-red-400'
+                    : !mensagemPlacaConfirmada
+                    ? 'bg-yellow-900/50 text-yellow-400'
+                    : 'bg-green-900/50 text-green-400'
                 }`}
               >
-                {mensagemPlacaConfirmada ? 'Confirmado pela família' : 'Aguardando confirmação'}
+                {envioFornecedorStatus === 'erro'
+                  ? 'Erro ao enviar pro fornecedor'
+                  : !mensagemPlacaConfirmada
+                  ? 'Aguardando confirmação da família'
+                  : envioFornecedorStatus === 'enviado'
+                  ? 'Confirmado e enviado ao fornecedor'
+                  : 'Confirmado pela família'}
               </span>
             )}
           </div>

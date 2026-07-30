@@ -128,6 +128,7 @@ function FichaMemorialParceiroInner() {
   const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
   const [mensagemPlacaConfirmada, setMensagemPlacaConfirmada] = useState(false)
+  const [envioFornecedorStatus, setEnvioFornecedorStatus] = useState<'enviado' | 'erro' | null>(null)
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -198,6 +199,19 @@ function FichaMemorialParceiroInner() {
     setTemSenha(!!seguranca?.senha_acesso_hash)
     setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
     setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
+
+    // Fase real do envio pro fornecedor da placa — sem isso a Central/Parceiro
+    // não tem como saber se o e-mail com o QR realmente saiu ou travou (ex:
+    // e-mail do fornecedor sem cadastrar, erro de SMTP).
+    const { data: envioFornecedorData } = await supabase
+      .from('emails_enviados')
+      .select('status')
+      .eq('homenagem_id', m.id)
+      .eq('tipo', 'envio_fornecedor')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    setEnvioFornecedorStatus((envioFornecedorData?.status as 'enviado' | 'erro' | undefined) ?? null)
 
     supabase.auth.getSession().then(({ data: { session } }) =>
       fetch(`/api/memorial-storage-usage?memorialId=${m.id}`, {
@@ -480,14 +494,31 @@ function FichaMemorialParceiroInner() {
 
   const conteudoPreenchidoPelaFamilia = preenchidoPor === 'familia'
 
-  const chipsStatus: { label: string; tom: 'neutro' | 'verde' | 'amarelo' }[] = [
+  // Fase real do envio pro fornecedor — raciocínio: sem mensagem, o QR já vai
+  // sozinho assim que gerado; com mensagem, só vai depois da família confirmar.
+  // "erro" cobre tanto falha de SMTP quanto e-mail do fornecedor não cadastrado.
+  const placaChip = (() => {
+    if (envioFornecedorStatus === 'erro') {
+      return { label: 'Placa: erro no envio ao fornecedor', tom: 'vermelho' as const }
+    }
+    if (!mensagemPlaca.trim()) {
+      return envioFornecedorStatus === 'enviado'
+        ? { label: 'Placa: sem mensagem, enviada', tom: 'verde' as const }
+        : { label: 'Placa: sem mensagem', tom: 'neutro' as const }
+    }
+    if (!mensagemPlacaConfirmada) {
+      return { label: 'Placa: aguardando família confirmar', tom: 'amarelo' as const }
+    }
+    return envioFornecedorStatus === 'enviado'
+      ? { label: 'Placa: confirmada, enviada ao fornecedor', tom: 'verde' as const }
+      : { label: 'Placa: confirmada, enviando...', tom: 'amarelo' as const }
+  })()
+
+  const chipsStatus: { label: string; tom: 'neutro' | 'verde' | 'amarelo' | 'vermelho' }[] = [
     { label: temSenha ? 'Com senha' : 'Público', tom: temSenha ? 'amarelo' : 'verde' },
     { label: temSenhaFamilia ? 'Acesso da família enviado' : 'Acesso da família pendente', tom: temSenhaFamilia ? 'verde' : 'neutro' },
     { label: `Conteúdo: ${preenchidoPor === 'familia' ? 'Família' : 'Funerária'}`, tom: 'neutro' },
-    {
-      label: !mensagemPlaca.trim() ? 'Placa: sem mensagem' : mensagemPlacaConfirmada ? 'Placa confirmada' : 'Placa: aguardando',
-      tom: !mensagemPlaca.trim() ? 'neutro' : mensagemPlacaConfirmada ? 'verde' : 'amarelo',
-    },
+    placaChip,
     { label: `Galeria ${galeria.length}/${LIMITE_FOTOS}`, tom: 'neutro' },
     { label: `${usoStorageMB}MB / 500MB`, tom: usoStorageMB >= 400 ? 'amarelo' : 'neutro' },
   ]
@@ -842,10 +873,20 @@ function FichaMemorialParceiroInner() {
                   {mensagemPlaca.trim() && (
                     <span
                       className={`text-[11px] px-2 py-1 rounded ${
-                        mensagemPlacaConfirmada ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-400'
+                        envioFornecedorStatus === 'erro'
+                          ? 'bg-red-900/50 text-red-400'
+                          : !mensagemPlacaConfirmada
+                          ? 'bg-yellow-900/50 text-yellow-400'
+                          : 'bg-green-900/50 text-green-400'
                       }`}
                     >
-                      {mensagemPlacaConfirmada ? 'Confirmado pela família' : 'Aguardando confirmação'}
+                      {envioFornecedorStatus === 'erro'
+                        ? 'Erro ao enviar pro fornecedor'
+                        : !mensagemPlacaConfirmada
+                        ? 'Aguardando confirmação da família'
+                        : envioFornecedorStatus === 'enviado'
+                        ? 'Confirmado e enviado ao fornecedor'
+                        : 'Confirmado pela família'}
                     </span>
                   )}
                 </div>
