@@ -17,12 +17,16 @@ export async function getMemorialStorageUsage(
   const queue = arquivos.slice()
 
   for (const item of queue) {
-    if (item.id && item.id.endsWith('/')) {
+    // Supabase Storage: entrada de PASTA sempre volta com id null (nunca
+    // "termina com /" como o código antigo assumia) — por isso a soma
+    // sempre dava 0, nenhum item caía em nenhum dos dois ramos e a
+    // recursão nunca entrava nas subpastas foto/video/galeria.
+    if (!item.id) {
       const { data: subItems } = await supabase.storage
         .from('memoriais')
         .list(`${homenagemId}/${item.name}`, { limit: 10000 })
       if (subItems) queue.push(...subItems)
-    } else if (item.id && !item.id.endsWith('/')) {
+    } else {
       totalBytes += item.metadata?.size || 0
     }
   }

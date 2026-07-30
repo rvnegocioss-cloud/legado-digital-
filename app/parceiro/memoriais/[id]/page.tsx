@@ -16,6 +16,7 @@ import {
   QrCode,
   Signpost,
   MessageSquare,
+  BookOpen,
 } from 'lucide-react'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
@@ -139,6 +140,8 @@ function FichaMemorialParceiroInner() {
   const [salvandoPreenchidoPor, setSalvandoPreenchidoPor] = useState(false)
   const [mural, setMural] = useState<{ id: string; nome: string; parentesco: string | null; texto: string; created_at: string }[]>([])
   const [removendoMuralId, setRemovendoMuralId] = useState<string | null>(null)
+  const [condolencias, setCondolencias] = useState<{ id: string; visitor_name: string; message: string; created_at: string }[]>([])
+  const [removendoCondolenciaId, setRemovendoCondolenciaId] = useState<string | null>(null)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
   const [qrCodeMsg, setQrCodeMsg] = useState('')
@@ -257,6 +260,13 @@ function FichaMemorialParceiroInner() {
       .order('created_at', { ascending: false })
     setMural(muralData || [])
 
+    const { data: condolenciasData } = await supabase
+      .from('condolencias')
+      .select('id, visitor_name, message, created_at')
+      .eq('homenagem_id', m.id)
+      .order('created_at', { ascending: false })
+    setCondolencias(condolenciasData || [])
+
     setLoading(false)
   }
 
@@ -265,6 +275,13 @@ function FichaMemorialParceiroInner() {
     await supabase.from('mural_memorias').delete().eq('id', id)
     setMural((atual) => atual.filter((mem) => mem.id !== id))
     setRemovendoMuralId(null)
+  }
+
+  async function removerCondolencia(id: string) {
+    setRemovendoCondolenciaId(id)
+    await supabase.from('condolencias').delete().eq('id', id)
+    setCondolencias((atual) => atual.filter((c) => c.id !== id))
+    setRemovendoCondolenciaId(null)
   }
 
   async function salvarPreenchidoPor(valor: 'funeraria' | 'familia') {
@@ -1041,6 +1058,31 @@ function FichaMemorialParceiroInner() {
                         className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
                       >
                         {removendoMuralId === m.id ? '...' : 'Remover'}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </SecaoFicha>
+
+            <SecaoFicha titulo={`Livro de Assinaturas ${condolencias.length > 0 ? `(${condolencias.length})` : ''}`} icon={BookOpen}>
+              {condolencias.length === 0 ? (
+                <p className="text-zinc-500 text-xs">Ninguém assinou o livro ainda.</p>
+              ) : (
+                <ul className="space-y-2 max-h-72 overflow-y-auto">
+                  {condolencias.map((c) => (
+                    <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-white text-sm">{c.visitor_name}</p>
+                        <p className="text-zinc-400 text-xs mt-0.5 break-words">{c.message}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removerCondolencia(c.id)}
+                        disabled={removendoCondolenciaId === c.id}
+                        className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                      >
+                        {removendoCondolenciaId === c.id ? '...' : 'Remover'}
                       </button>
                     </li>
                   ))}
