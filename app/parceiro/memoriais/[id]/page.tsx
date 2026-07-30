@@ -124,6 +124,7 @@ function FichaMemorialParceiroInner() {
   const [removendoMuralId, setRemovendoMuralId] = useState<string | null>(null)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
+  const [qrCodeMsg, setQrCodeMsg] = useState('')
   const [mensagemPlaca, setMensagemPlaca] = useState('')
   const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
@@ -333,6 +334,12 @@ function FichaMemorialParceiroInner() {
 
   async function gerarQrCode() {
     if (!memorial) return
+    const nome = form.nome_completo.trim()
+    if (!nome || nome === 'Novo memorial') {
+      setQrCodeMsg('Preenche o nome de verdade antes — esse QR dispara pedido pro fornecedor da placa física, precisa saber de quem é.')
+      return
+    }
+    setQrCodeMsg('')
     setGerandoQrCode(true)
     const url = await gerarQrCodeCliente(memorial.id)
     if (url) setQrCodeUrl(url)
@@ -478,9 +485,12 @@ function FichaMemorialParceiroInner() {
     galeriaAntiga.filter((u) => !galeria.includes(u)).forEach(removerArquivoStorage)
 
     // Só gera QR (e dispara e-mail pro fornecedor da placa) no primeiro save
-    // real — se já existe, um "Salvar" de rotina (corrigir texto, nova foto)
-    // não pode reenviar pedido de placa física pro fornecedor de novo.
-    if (!memorial.qr_code_url) {
+    // real, com nome de verdade — se já existe QR, um "Salvar" de rotina
+    // (corrigir texto, nova foto) não pode reenviar pedido de placa física
+    // de novo; e sem nome ainda (placeholder "Novo memorial"), o fornecedor
+    // não tem quem colocar na placa, então nem dispara.
+    const nomeRealParaQr = form.nome_completo.trim()
+    if (!memorial.qr_code_url && nomeRealParaQr && nomeRealParaQr !== 'Novo memorial') {
       gerarQrCodeCliente(memorial.id).then((url) => { if (url) setQrCodeUrl(url) })
     }
 
@@ -855,6 +865,7 @@ function FichaMemorialParceiroInner() {
                   </button>
                 </div>
               </div>
+              {qrCodeMsg && <p className="text-[11px] text-yellow-400 mt-2">{qrCodeMsg}</p>}
             </SecaoFicha>
 
             <SecaoFicha titulo="Mensagem da placa" icon={Signpost}>

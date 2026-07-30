@@ -120,6 +120,7 @@ export default function DetalheMemorial() {
   const [cpfModoTeste, setCpfModoTeste] = useState(false)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [gerandoQrCode, setGerandoQrCode] = useState(false)
+  const [qrCodeMsg, setQrCodeMsg] = useState('')
   const [mensagemPlaca, setMensagemPlaca] = useState('')
   const [salvandoMensagemPlaca, setSalvandoMensagemPlaca] = useState(false)
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
@@ -235,6 +236,12 @@ export default function DetalheMemorial() {
 
   async function gerarQrCode() {
     if (!memorial) return
+    const nome = form.nome_completo.trim()
+    if (!nome) {
+      setQrCodeMsg('Preenche o nome antes — esse QR dispara pedido pro fornecedor da placa física, precisa saber de quem é.')
+      return
+    }
+    setQrCodeMsg('')
     setGerandoQrCode(true)
     const url = await gerarQrCodeCliente(memorial.id)
     if (url) setQrCodeUrl(url)
@@ -984,6 +991,7 @@ export default function DetalheMemorial() {
             </button>
           </div>
         </div>
+        {qrCodeMsg && <p className="text-xs text-yellow-400 mt-2">{qrCodeMsg}</p>}
 
         <form onSubmit={salvarMensagemPlaca} className="mt-5 pt-4 border-t border-zinc-800">
           <label className="block text-xs text-zinc-500 mb-1">Mensagem da placa</label>
