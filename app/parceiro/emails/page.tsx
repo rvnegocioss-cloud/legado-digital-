@@ -2,7 +2,9 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { MessageCircle } from 'lucide-react'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
+import { linkWhatsApp } from '@/lib/linkWhatsApp'
 
 interface EmailEnviado {
   id: string
@@ -13,6 +15,13 @@ interface EmailEnviado {
   confirmado_em: string | null
   created_at: string
   homenagens: { nome_completo: string } | null
+}
+
+interface FamiliaContato {
+  id: string
+  nome_completo: string
+  familia_email: string | null
+  familia_telefone: string | null
 }
 
 const TIPO_LABEL: Record<string, string> = {
@@ -40,6 +49,7 @@ function ParceiroEmailsInner() {
   const searchParams = useSearchParams()
   const parceiroIdParam = searchParams.get('parceiro_id')
   const [emails, setEmails] = useState<EmailEnviado[]>([])
+  const [familias, setFamilias] = useState<FamiliaContato[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -77,6 +87,14 @@ function ParceiroEmailsInner() {
       .order('created_at', { ascending: false })
       .limit(100)
     setEmails((data as any) || [])
+
+    const { data: familiasData } = await supabase
+      .from('homenagens')
+      .select('id, nome_completo, familia_email, familia_telefone')
+      .eq('parceiro_id', meuParceiroId)
+      .order('nome_completo')
+    setFamilias(familiasData || [])
+
     setLoading(false)
   }
 
@@ -89,6 +107,54 @@ function ParceiroEmailsInner() {
         E-mails disparados pros seus memoriais — confirme aqui se a família já aprovou a mensagem
         da placa, sem precisar abrir e-mail nenhum.
       </p>
+
+      <h2 className="text-lg font-medium text-white mb-1">Contato das famílias</h2>
+      <p className="text-zinc-400 text-sm mb-4">
+        Clica no WhatsApp pra abrir a conversa direto — não traz mensagem recebida pra cá, só facilita chamar.
+      </p>
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-10 overflow-x-auto">
+        {familias.length === 0 ? (
+          <p className="text-zinc-500 text-sm">Nenhum memorial cadastrado ainda.</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-zinc-500 text-xs">
+                <th className="text-left py-2 px-2">Memorial</th>
+                <th className="text-left py-2 px-2">E-mail</th>
+                <th className="text-left py-2 px-2">WhatsApp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {familias.map((f) => (
+                <tr key={f.id} className="border-t border-zinc-800/50">
+                  <td className="py-2 px-2 text-white">{f.nome_completo}</td>
+                  <td className="py-2 px-2 text-zinc-300">
+                    {f.familia_email || <span className="text-zinc-600">sem e-mail cadastrado</span>}
+                  </td>
+                  <td className="py-2 px-2">
+                    {linkWhatsApp(f.familia_telefone) ? (
+                      <a
+                        href={linkWhatsApp(f.familia_telefone)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-green-400 hover:text-green-300"
+                      >
+                        <MessageCircle size={12} strokeWidth={1.5} />
+                        {f.familia_telefone}
+                      </a>
+                    ) : (
+                      <span className="text-zinc-600">sem número</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <h2 className="text-lg font-medium text-white mb-1">Histórico de e-mails automáticos</h2>
+      <p className="text-zinc-400 text-sm mb-4">Todo e-mail que o sistema disparou pros seus memoriais.</p>
 
       {emails.length === 0 ? (
         <p className="text-zinc-400">Nenhum e-mail disparado ainda.</p>

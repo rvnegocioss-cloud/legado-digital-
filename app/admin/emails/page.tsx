@@ -1,7 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/auth'
+import { linkWhatsApp } from '@/lib/linkWhatsApp'
 
 interface EmailEnviado {
   id: string
@@ -20,6 +22,7 @@ interface MemorialContato {
   id: string
   nome_completo: string
   familia_email: string | null
+  familia_telefone: string | null
 }
 
 interface ParceiroContato {
@@ -77,7 +80,7 @@ export default function AdminComunicacoes() {
 
     const { data: memoriaisData } = await supabase
       .from('homenagens')
-      .select('id, nome_completo, familia_email, parceiro_id')
+      .select('id, nome_completo, familia_email, familia_telefone, parceiro_id')
 
     let ultimaAtividadePorParceiro: Record<string, string | null> = {}
     const { data: { session } } = await supabase.auth.getSession()
@@ -132,8 +135,22 @@ export default function AdminComunicacoes() {
                       {p.nome_fantasia || p.razao_social}{' '}
                       <span className="text-zinc-500 text-xs font-normal">· {textoAtividade(p.ultimaAtividade)}</span>
                     </p>
-                    <p className="text-zinc-400 text-xs mt-1">
-                      {p.email || 'sem e-mail cadastrado'} · WhatsApp: {p.telefone || 'sem número cadastrado'}
+                    <p className="text-zinc-400 text-xs mt-1 flex items-center gap-2">
+                      <span>{p.email || 'sem e-mail cadastrado'}</span>
+                      {linkWhatsApp(p.telefone) ? (
+                        <a
+                          href={linkWhatsApp(p.telefone)!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-green-400 hover:text-green-300"
+                        >
+                          <MessageCircle size={12} strokeWidth={1.5} />
+                          {p.telefone}
+                        </a>
+                      ) : (
+                        <span>· WhatsApp: sem número cadastrado</span>
+                      )}
                     </p>
                   </div>
                   <span className="text-zinc-500 text-xs">
@@ -150,6 +167,7 @@ export default function AdminComunicacoes() {
                           <tr className="text-zinc-500 text-xs">
                             <th className="text-left py-2 px-2">Memorial</th>
                             <th className="text-left py-2 px-2">Contato oficial da família</th>
+                            <th className="text-left py-2 px-2">WhatsApp</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -158,6 +176,21 @@ export default function AdminComunicacoes() {
                               <td className="py-2 px-2 text-white">{m.nome_completo}</td>
                               <td className="py-2 px-2 text-zinc-300">
                                 {m.familia_email || <span className="text-zinc-600">sem e-mail cadastrado</span>}
+                              </td>
+                              <td className="py-2 px-2">
+                                {linkWhatsApp(m.familia_telefone) ? (
+                                  <a
+                                    href={linkWhatsApp(m.familia_telefone)!}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-green-400 hover:text-green-300"
+                                  >
+                                    <MessageCircle size={12} strokeWidth={1.5} />
+                                    {m.familia_telefone}
+                                  </a>
+                                ) : (
+                                  <span className="text-zinc-600">sem número</span>
+                                )}
                               </td>
                             </tr>
                           ))}
