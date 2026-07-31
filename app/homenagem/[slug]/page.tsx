@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { MapPin, ShieldCheck, Lock } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
 import { GateSenhaAcesso } from "@/components/public/GateSenhaAcesso";
@@ -64,11 +64,27 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const { data } = await supabase
     .from("homenagens_publica")
-    .select("nome_completo, foto_url, data_nascimento, data_falecimento")
+    .select("id, nome_completo, foto_url, data_nascimento, data_falecimento")
     .eq("slug", slug)
     .maybeSingle();
 
   if (!data) return { title: "Memorial não encontrado — Legado Digital" };
+
+  // Metadata roda antes do gate de senha (Next.js gera <title>/OpenGraph
+  // separado do corpo da página) — sem essa checagem aqui, nome/foto do
+  // memorial vazavam pro <title> e pro preview de link mesmo com senha.
+  const { data: seguranca } = await supabase
+    .from("homenagens_seguranca")
+    .select("senha_acesso_hash")
+    .eq("homenagem_id", data.id)
+    .maybeSingle();
+
+  if (seguranca?.senha_acesso_hash) {
+    return {
+      title: "Memorial privado — Legado Digital",
+      description: "Esse memorial exige senha de acesso.",
+    };
+  }
 
   const periodo = anosDestaque(data.data_nascimento, data.data_falecimento);
   return {
