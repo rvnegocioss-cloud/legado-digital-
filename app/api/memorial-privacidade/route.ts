@@ -10,9 +10,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  const { memorialId, buscaHabilitada, linkHabilitado, qrcodeHabilitado } = await req.json()
+  const { memorialId, buscaHabilitada, linkHabilitado, qrcodeHabilitado, modoGate } = await req.json()
   if (!memorialId) {
     return NextResponse.json({ error: 'memorialId obrigatório' }, { status: 400 })
+  }
+
+  const MODOS_VALIDOS = ['aberto', 'senha', 'cadastro', 'email', 'oculto']
+  if (modoGate !== undefined && !MODOS_VALIDOS.includes(modoGate)) {
+    return NextResponse.json({ error: 'modoGate inválido' }, { status: 400 })
   }
 
   const supabaseAuth = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
@@ -50,18 +55,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Sem permissão' }, { status: 403 })
   }
 
+  const { data: segurancaAtual } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .select('gate_versao')
+    .eq('homenagem_id', memorialId)
+    .maybeSingle()
+
+  // Oculto vence os 3 canais -- não dá pra deixar busca/link/QR ligados e o
+  // memorial "oculto" ao mesmo tempo (regra 2 do resolver de gate).
+  const forcandoOculto = modoGate === 'oculto'
+
+  const payload: Record<string, unknown> = {
+    homenagem_id: memorialId,
+    busca_habilitada: forcandoOculto ? false : buscaHabilitada,
+    link_habilitado: forcandoOculto ? false : linkHabilitado,
+    qrcode_habilitado: forcandoOculto ? false : qrcodeHabilitado,
+    updated_at: new Date().toISOString(),
+    // Bump sempre que a privacidade muda -- derruba na hora qualquer
+    // cookie de acesso emitido antes, mesmo dentro da validade dele.
+    gate_versao: (segurancaAtual?.gate_versao ?? 1) + 1,
+  }
+  if (modoGate !== undefined) payload.modo_gate = modoGate
+
   const { error } = await supabaseAdmin
     .from('homenagens_seguranca')
-    .upsert(
-      {
-        homenagem_id: memorialId,
-        busca_habilitada: buscaHabilitada,
-        link_habilitado: linkHabilitado,
-        qrcode_habilitado: qrcodeHabilitado,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'homenagem_id', ignoreDuplicates: false }
-    )
+    .upsert(payload, { onConflict: 'homenagem_id', ignoreDuplicates: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

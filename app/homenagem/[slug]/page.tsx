@@ -3,7 +3,11 @@ import { MapPin, ShieldCheck, Lock } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
+import { resolverAcesso, type ModoGate } from "@/lib/modosPrivacidade";
 import { GateSenhaAcesso } from "@/components/public/GateSenhaAcesso";
+import { GateNaoEncontrado } from "@/components/public/GateNaoEncontrado";
+import { GateCadastro } from "@/components/public/GateCadastro";
+import { GateEmailAutorizado } from "@/components/public/GateEmailAutorizado";
 import { AcenderVela } from "@/components/public/AcenderVela";
 import { FormularioCondolencia } from "@/components/public/FormularioCondolencia";
 import { GaleriaFotos } from "@/components/public/GaleriaFotos";
@@ -70,19 +74,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!data) return { title: "Memorial não encontrado — Legado Digital" };
 
-  // Metadata roda antes do gate de senha (Next.js gera <title>/OpenGraph
-  // separado do corpo da página) — sem essa checagem aqui, nome/foto do
-  // memorial vazavam pro <title> e pro preview de link mesmo com senha.
+  // Metadata roda antes do gate (Next.js gera <title>/OpenGraph separado do
+  // corpo da página) — sem essa checagem aqui, nome/foto do memorial
+  // vazavam pro <title> e pro preview de link mesmo com senha/oculto/etc.
   const { data: seguranca } = await supabase
     .from("homenagens_seguranca")
-    .select("senha_acesso_hash")
+    .select("modo_gate, link_habilitado, qrcode_habilitado")
     .eq("homenagem_id", data.id)
     .maybeSingle();
 
-  if (seguranca?.senha_acesso_hash) {
+  const modo = (seguranca?.modo_gate ?? "aberto") as ModoGate;
+  const canalFechado = seguranca && !seguranca.link_habilitado && !seguranca.qrcode_habilitado;
+
+  if (modo === "oculto" || canalFechado) {
+    return { title: "Memorial não encontrado — Legado Digital" };
+  }
+  if (modo !== "aberto") {
     return {
       title: "Memorial privado — Legado Digital",
-      description: "Esse memorial exige senha de acesso.",
+      description: "Esse memorial exige verificação antes de mostrar o conteúdo.",
     };
   }
 
@@ -109,42 +119,44 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
     .single();
 
   if (!homenagem) {
-    return (
-      <div style={estilos.vazioWrap}>
-        <div style={estilos.vazioCard}>
-          <p style={{ fontSize: 18, color: CORES.dourado, margin: 0 }}>Memorial não encontrado.</p>
-          <p style={{ color: CORES.textoFraco, marginTop: 8 }}>Confira o endereço e tente novamente.</p>
-        </div>
-      </div>
-    );
+    return <GateNaoEncontrado />;
   }
 
   const m = homenagem as Homenagem;
 
   const { data: seguranca } = await supabase
     .from("homenagens_busca_publica")
-    .select("tem_senha, link_habilitado, qrcode_habilitado")
+    .select("link_habilitado, qrcode_habilitado, modo_gate, gate_versao")
     .eq("slug", slug)
     .maybeSingle();
 
-  if (seguranca && !seguranca.link_habilitado && !seguranca.qrcode_habilitado) {
-    return (
-      <div style={estilos.vazioWrap}>
-        <div style={estilos.vazioCard}>
-          <p style={{ fontSize: 18, color: CORES.dourado, margin: 0 }}>Acesso direto desativado.</p>
-          <p style={{ color: CORES.textoFraco, marginTop: 8 }}>A família restringiu o acesso por link e QR Code deste memorial.</p>
-        </div>
-      </div>
-    );
-  }
+  const modoGate = (seguranca?.modo_gate ?? "aberto") as ModoGate;
+  const gateVersao = seguranca?.gate_versao ?? 1;
 
-  if (seguranca?.tem_senha) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(`mem_acesso_${slug}`)?.value;
-    const acessoValido = verificarTokenAcessoMemorial(token, m.id);
-    if (!acessoValido) {
-      return <GateSenhaAcesso memorialId={m.id} nomeCompleto={m.nome_completo} />;
-    }
+  const cookieStore = await cookies();
+  const token = cookieStore.get(`mem_acesso_${slug}`)?.value;
+  const cookieValido = verificarTokenAcessoMemorial(token, m.id, modoGate, gateVersao);
+
+  // Canal por onde chegou: sem QR assinado ainda, link e QR direto ficam
+  // combinados (mesma aproximação que já existia antes) — só a busca é
+  // distinguível, e essa página nunca é alcançada pelo canal "busca" em si
+  // (a busca filtra na própria RPC, ver buscar_homenagens_publicas).
+  const resultado = resolverAcesso({
+    modoGate,
+    buscaHabilitada: seguranca?.link_habilitado ?? true,
+    linkHabilitado: seguranca?.link_habilitado ?? true,
+    qrcodeHabilitado: seguranca?.qrcode_habilitado ?? true,
+    canal: "link",
+    cookieValido,
+  });
+
+  if (resultado.tipo === "nao_encontrado") {
+    return <GateNaoEncontrado />;
+  }
+  if (resultado.tipo === "portao") {
+    if (resultado.modo === "senha") return <GateSenhaAcesso memorialId={m.id} nomeCompleto={m.nome_completo} />;
+    if (resultado.modo === "cadastro") return <GateCadastro memorialId={m.id} nomeCompleto={m.nome_completo} />;
+    return <GateEmailAutorizado memorialId={m.id} nomeCompleto={m.nome_completo} />;
   }
 
   // Só conta visita depois dos 2 bloqueios acima — antes contava até quem

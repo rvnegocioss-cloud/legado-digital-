@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   const { data: seguranca } = await supabaseAdmin
     .from('homenagens_seguranca')
-    .select('senha_acesso_hash')
+    .select('senha_acesso_hash, modo_gate, gate_versao')
     .eq('homenagem_id', memorialId)
     .single()
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
   const res = NextResponse.json({ ok: true, slug: homenagem?.slug })
   if (homenagem?.slug) {
-    const token = criarTokenAcessoMemorial(memorialId)
+    const token = criarTokenAcessoMemorial(memorialId, seguranca.modo_gate ?? 'senha', seguranca.gate_versao ?? 1)
     res.cookies.set(`mem_acesso_${homenagem.slug}`, token, {
       httpOnly: true,
       secure: true,

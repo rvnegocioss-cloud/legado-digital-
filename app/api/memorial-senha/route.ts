@@ -55,12 +55,31 @@ export async function POST(req: NextRequest) {
 
   const valor = senha ? hashSenhaMemorial(memorialId, senha) : null
 
+  const { data: segurancaAtual } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .select('modo_gate, gate_versao')
+    .eq('homenagem_id', memorialId)
+    .maybeSingle()
+
+  const payload: Record<string, unknown> = {
+    homenagem_id: memorialId,
+    [coluna]: valor,
+    updated_at: new Date().toISOString(),
+  }
+
+  // Senha "de acesso" (não a da família) é o único caso onde essa rota
+  // decide o modo sozinha — nunca pisa em cadastro/email/oculto, só
+  // transita entre aberto<->senha, e sempre derruba cookie emitido antes.
+  if (coluna === 'senha_acesso_hash') {
+    const modoAtual = segurancaAtual?.modo_gate ?? 'aberto'
+    if (valor && modoAtual === 'aberto') payload.modo_gate = 'senha'
+    if (!valor && modoAtual === 'senha') payload.modo_gate = 'aberto'
+    payload.gate_versao = (segurancaAtual?.gate_versao ?? 1) + 1
+  }
+
   const { error } = await supabaseAdmin
     .from('homenagens_seguranca')
-    .upsert(
-      { homenagem_id: memorialId, [coluna]: valor, updated_at: new Date().toISOString() },
-      { onConflict: 'homenagem_id', ignoreDuplicates: false }
-    )
+    .upsert(payload, { onConflict: 'homenagem_id', ignoreDuplicates: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true, temSenha: !!valor })

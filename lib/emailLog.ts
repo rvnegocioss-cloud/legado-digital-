@@ -1,6 +1,11 @@
 import { randomBytes } from 'crypto'
 
-export type TipoEmail = 'senha_familia' | 'confirmacao_placa' | 'envio_fornecedor' | 'convite_parceiro'
+export type TipoEmail =
+  | 'senha_familia'
+  | 'confirmacao_placa'
+  | 'envio_fornecedor'
+  | 'convite_parceiro'
+  | 'codigo_acesso_memorial'
 
 export function gerarTokenConfirmacao() {
   return randomBytes(24).toString('hex')

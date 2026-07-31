@@ -26,6 +26,7 @@ import { Input } from '@/components/ui/input'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import { CampoFicha } from '@/components/admin/CampoFicha'
 import { SecaoFicha } from '@/components/admin/SecaoFicha'
+import { PrivacidadeMemorial } from '@/components/admin/PrivacidadeMemorial'
 import { StatusFicha } from '@/components/admin/StatusFicha'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 
@@ -129,11 +130,6 @@ function FichaMemorialParceiroInner() {
   const [temSenha, setTemSenha] = useState(false)
   const [salvandoSenha, setSalvandoSenha] = useState(false)
   const [senhaMsg, setSenhaMsg] = useState('')
-  const [buscaHabilitada, setBuscaHabilitada] = useState(true)
-  const [linkHabilitado, setLinkHabilitado] = useState(true)
-  const [qrcodeHabilitado, setQrcodeHabilitado] = useState(true)
-  const [salvandoPrivacidade, setSalvandoPrivacidade] = useState(false)
-  const [privacidadeMsg, setPrivacidadeMsg] = useState('')
   const [temSenhaFamilia, setTemSenhaFamilia] = useState(false)
   const [familiaEmail, setFamiliaEmail] = useState('')
   const [familiaNomeResponsavel, setFamiliaNomeResponsavel] = useState('')
@@ -233,15 +229,12 @@ function FichaMemorialParceiroInner() {
 
     const { data: seguranca } = await supabase
       .from('homenagens_seguranca')
-      .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada, busca_habilitada, link_habilitado, qrcode_habilitado')
+      .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada')
       .eq('homenagem_id', m.id)
       .maybeSingle()
     setTemSenha(!!seguranca?.senha_acesso_hash)
     setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
     setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
-    setBuscaHabilitada(seguranca?.busca_habilitada ?? true)
-    setLinkHabilitado(seguranca?.link_habilitado ?? true)
-    setQrcodeHabilitado(seguranca?.qrcode_habilitado ?? true)
 
     // Fase real do envio pro fornecedor da placa — sem isso a Central/Parceiro
     // não tem como saber se o e-mail com o QR realmente saiu ou travou (ex:
@@ -334,28 +327,6 @@ function FichaMemorialParceiroInner() {
       setSenhaMsg(json.temSenha ? 'Senha definida.' : 'Senha removida — memorial público de novo.')
     }
     setSalvandoSenha(false)
-  }
-
-  async function salvarPrivacidade() {
-    if (!memorial) return
-    setSalvandoPrivacidade(true)
-    setPrivacidadeMsg('')
-
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch('/api/memorial-privacidade', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-      body: JSON.stringify({
-        memorialId: memorial.id,
-        buscaHabilitada,
-        linkHabilitado,
-        qrcodeHabilitado,
-      }),
-    })
-    const json = await res.json()
-
-    setPrivacidadeMsg(res.ok ? 'Salvo.' : json.error || 'Erro ao salvar')
-    setSalvandoPrivacidade(false)
   }
 
   async function cadastrarEmailFamilia(e: React.FormEvent) {
@@ -1013,28 +984,7 @@ function FichaMemorialParceiroInner() {
             </SecaoFicha>
 
             <SecaoFicha titulo="Privacidade — modos de acesso" icon={Lock}>
-              <p className="text-zinc-500 text-xs mb-3">
-                Os 3 caminhos começam ligados. Desative o que a família não quiser permitir — a senha
-                acima continua valendo em cima de qualquer um que fique ativo.
-              </p>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
-                  <input type="checkbox" checked={buscaHabilitada} onChange={(e) => setBuscaHabilitada(e.target.checked)} />
-                  Público — aparece na busca por nome
-                </label>
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
-                  <input type="checkbox" checked={linkHabilitado} onChange={(e) => setLinkHabilitado(e.target.checked)} />
-                  Acesso por link direto
-                </label>
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
-                  <input type="checkbox" checked={qrcodeHabilitado} onChange={(e) => setQrcodeHabilitado(e.target.checked)} />
-                  Acesso por QR Code
-                </label>
-              </div>
-              <Button type="button" onClick={salvarPrivacidade} disabled={salvandoPrivacidade} className="mt-3">
-                {salvandoPrivacidade ? 'Salvando...' : 'Salvar privacidade'}
-              </Button>
-              {privacidadeMsg && <p className="text-[11px] text-zinc-400 mt-2">{privacidadeMsg}</p>}
+              {memorial && <PrivacidadeMemorial memorialId={memorial.id} />}
             </SecaoFicha>
 
             <SecaoFicha titulo="QR Code" icon={QrCode}>
