@@ -71,7 +71,24 @@ export async function GET(req: NextRequest) {
   const resultado = await buscarMemorialEValidar(supabaseAdmin, slug, req)
   if ('erro' in resultado) return NextResponse.json({ error: resultado.erro }, { status: resultado.status })
 
-  return NextResponse.json({ memorial: resultado.homenagem })
+  // Família não tem acesso direto a homenagens_seguranca (RLS é só
+  // staff/parceiro) — expõe aqui só o necessário pra tela mostrar o modo
+  // de privacidade atual, sem vazar hash de senha nenhum.
+  const { data: seguranca } = await supabaseAdmin
+    .from('homenagens_seguranca')
+    .select('modo_gate, busca_habilitada, link_habilitado, qrcode_habilitado')
+    .eq('homenagem_id', resultado.homenagem.id)
+    .maybeSingle()
+
+  return NextResponse.json({
+    memorial: resultado.homenagem,
+    privacidade: {
+      modoGate: seguranca?.modo_gate ?? 'aberto',
+      buscaHabilitada: seguranca?.busca_habilitada ?? true,
+      linkHabilitado: seguranca?.link_habilitado ?? true,
+      qrcodeHabilitado: seguranca?.qrcode_habilitado ?? true,
+    },
+  })
 }
 
 export async function POST(req: NextRequest) {

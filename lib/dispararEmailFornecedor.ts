@@ -1,6 +1,7 @@
 import { gerarQrCodePng } from '@/lib/qrcode'
 import { enviarEmailQrCode } from '@/lib/enviarEmailQrCode'
 import { registrarEmail } from '@/lib/emailLog'
+import { criarTokenQr } from '@/lib/acessoMemorialSessao'
 
 export async function dispararEmailFornecedor(supabaseAdmin: any, memorialId: string, origin: string) {
   const { data: homenagem } = await supabaseAdmin
@@ -44,7 +45,7 @@ export async function dispararEmailFornecedor(supabaseAdmin: any, memorialId: st
     return { enviado: false, motivo: 'aguardando_confirmacao' as const }
   }
 
-  const url = `${origin}/homenagem/${homenagem.slug}`
+  const url = `${origin}/homenagem/${homenagem.slug}?qr=${criarTokenQr(memorialId)}`
   const png = await gerarQrCodePng(url)
 
   const resultado = await enviarEmailQrCode({

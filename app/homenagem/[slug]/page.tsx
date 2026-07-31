@@ -2,7 +2,7 @@ import Image from "next/image";
 import { MapPin, ShieldCheck, Lock } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import { cookies } from "next/headers";
-import { verificarTokenAcessoMemorial } from "@/lib/acessoMemorialSessao";
+import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
 import { resolverAcesso, type ModoGate } from "@/lib/modosPrivacidade";
 import { GateSenhaAcesso } from "@/components/public/GateSenhaAcesso";
 import { GateNaoEncontrado } from "@/components/public/GateNaoEncontrado";
@@ -107,8 +107,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function HomenagemPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function HomenagemPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ qr?: string }>;
+}) {
   const { slug } = await params;
+  const { qr } = await searchParams;
 
   const { data: homenagem } = await supabase
     .from("homenagens_publica")
@@ -126,7 +133,7 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
 
   const { data: seguranca } = await supabase
     .from("homenagens_busca_publica")
-    .select("link_habilitado, qrcode_habilitado, modo_gate, gate_versao")
+    .select("busca_habilitada, link_habilitado, qrcode_habilitado, modo_gate, gate_versao")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -137,16 +144,19 @@ export default async function HomenagemPage({ params }: { params: Promise<{ slug
   const token = cookieStore.get(`mem_acesso_${slug}`)?.value;
   const cookieValido = verificarTokenAcessoMemorial(token, m.id, modoGate, gateVersao);
 
-  // Canal por onde chegou: sem QR assinado ainda, link e QR direto ficam
-  // combinados (mesma aproximação que já existia antes) — só a busca é
-  // distinguível, e essa página nunca é alcançada pelo canal "busca" em si
-  // (a busca filtra na própria RPC, ver buscar_homenagens_publicas).
+  // Canal por onde chegou: QR gerado antes desse token existir continua
+  // funcionando (cai em "link", nunca quebra placa já impressa) — só o QR
+  // regenerado depois carrega ?qr= assinado e é reconhecido como tal.
+  // Essa página nunca é alcançada pelo canal "busca" em si (a busca filtra
+  // na própria RPC, ver buscar_homenagens_publicas).
+  const canal = qr && verificarTokenQr(qr, m.id) ? "qr" : "link";
+
   const resultado = resolverAcesso({
     modoGate,
-    buscaHabilitada: seguranca?.link_habilitado ?? true,
+    buscaHabilitada: seguranca?.busca_habilitada ?? true,
     linkHabilitado: seguranca?.link_habilitado ?? true,
     qrcodeHabilitado: seguranca?.qrcode_habilitado ?? true,
-    canal: "link",
+    canal,
     cookieValido,
   });
 

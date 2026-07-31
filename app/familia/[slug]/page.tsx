@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
+import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
+import type { ModoGate } from '@/lib/modosPrivacidade'
 
 interface Memorial {
   id: string
@@ -66,6 +68,8 @@ export default function FamiliaEdicaoPage() {
   const [updatedAtCarregado, setUpdatedAtCarregado] = useState('')
   const [usoStorageMB, setUsoStorageMB] = useState(0)
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia' | null>(null)
+  const [memorialId, setMemorialId] = useState('')
+  const [modoGate, setModoGate] = useState<ModoGate>('aberto')
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -86,6 +90,8 @@ export default function FamiliaEdicaoPage() {
     const m = json.memorial as Memorial
     setUpdatedAtCarregado(m.updated_at)
     setPreenchidoPor(m.preenchido_por)
+    setMemorialId(m.id)
+    setModoGate((json.privacidade?.modoGate ?? 'aberto') as ModoGate)
     fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
       .then((r) => r.json())
       .then((j) => setUsoStorageMB(Math.round((j.usageBytes || 0) / 1024 / 1024)))
@@ -250,6 +256,13 @@ export default function FamiliaEdicaoPage() {
             A funerária está preenchendo esse memorial por você. Você ainda pode editar aqui a
             qualquer momento se preferir.
           </p>
+        )}
+
+        {memorialId && (
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-4">
+            <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
+            <PrivacidadeFamilia memorialId={memorialId} modoGate={modoGate} />
+          </div>
         )}
 
         <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">

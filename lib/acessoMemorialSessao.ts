@@ -59,3 +59,24 @@ export function verificarTokenAcessoMemorial(
     return false
   }
 }
+
+// Token do QR Code: determinístico (mesmo QR pra sempre, sem rotação —
+// senão toda placa física já impressa quebraria a cada regeneração) e sem
+// expiração própria. Só prova "isso veio de um QR de verdade", não prova
+// identidade nem substitui os gates de senha/cadastro/email.
+function assinarQr(memorialId: string) {
+  return createHmac('sha256', SEGREDO).update(`qr:${memorialId}`).digest('hex').slice(0, 16)
+}
+
+export function criarTokenQr(memorialId: string) {
+  return assinarQr(memorialId)
+}
+
+export function verificarTokenQr(token: string | undefined | null, memorialId: string) {
+  if (!token) return false
+  const esperado = assinarQr(memorialId)
+  const a = Buffer.from(token)
+  const b = Buffer.from(esperado)
+  if (a.length !== b.length) return false
+  return timingSafeEqual(a, b)
+}
