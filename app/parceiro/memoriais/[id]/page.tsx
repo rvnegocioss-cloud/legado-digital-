@@ -29,6 +29,7 @@ import { SecaoFicha } from '@/components/admin/SecaoFicha'
 import { PrivacidadeMemorial } from '@/components/admin/PrivacidadeMemorial'
 import { StatusFicha } from '@/components/admin/StatusFicha'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
+import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 
 interface Memorial {
   id: string
@@ -50,6 +51,7 @@ interface Memorial {
   familia_nome_responsavel: string | null
   familia_telefone: string | null
   preenchido_por: 'funeraria' | 'familia' | null
+  tema: string
   lapide_id: string | null
   vinculos: string[] | null
   created_at: string
@@ -119,6 +121,7 @@ function FichaMemorialParceiroInner() {
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [videosGaleria, setVideosGaleria] = useState<string[]>([])
+  const [tema, setTema] = useState('navy')
   const [enviandoVideosGaleria, setEnviandoVideosGaleria] = useState(false)
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
@@ -183,7 +186,7 @@ function FichaMemorialParceiroInner() {
     const { data: m } = await supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, videos_galeria, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, lapide_id, vinculos, parceiro_id, created_at, updated_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, videos_galeria, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, tema, lapide_id, vinculos, parceiro_id, created_at, updated_at'
       )
       .eq('id', id)
       .maybeSingle()
@@ -218,6 +221,7 @@ function FichaMemorialParceiroInner() {
     setVideoUrl(m.video_url || '')
     setVideosGaleria(m.videos_galeria || [])
     setGaleria(m.galeria_fotos || [])
+    setTema(m.tema || 'navy')
     setTimelineEventos(
       (m.timeline || []).map((ev: { year?: string; title?: string; description?: string }) => ({
         year: ev.year || '',
@@ -587,6 +591,7 @@ function FichaMemorialParceiroInner() {
       video_url: videoUrl || null,
       videos_galeria: videosGaleria,
       galeria_fotos: galeria,
+      tema,
       timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
     }
     if (slugDefinitivo) {
@@ -643,6 +648,7 @@ function FichaMemorialParceiroInner() {
       video_url: videoUrl || null,
       videos_galeria: videosGaleria,
       galeria_fotos: galeria,
+      tema,
       updated_at: atualizado?.updated_at || memorial.updated_at,
     })
   }
@@ -925,6 +931,20 @@ function FichaMemorialParceiroInner() {
                       className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
                     />
                     {enviandoVideosGaleria && <p className="text-[11px] text-zinc-500 mt-1">Enviando vídeos...</p>}
+                  </CampoFicha>
+                  <CampoFicha label="Tema da página pública" hint="Cor de fundo e detalhes dourados da página do memorial">
+                    <div className="flex gap-2">
+                      {PALETAS_MEMORIAL.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setTema(p.id)}
+                          title={p.nome}
+                          className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
+                          style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
+                        />
+                      ))}
+                    </div>
                   </CampoFicha>
                 </div>
               </SecaoFicha>

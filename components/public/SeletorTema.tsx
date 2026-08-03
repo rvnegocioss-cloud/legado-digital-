@@ -11,11 +11,12 @@ import {
   VAR_DOURADO_ESCURO,
 } from '@/lib/temasMemorial'
 
-// Seletor de tema (demo pros sócios) — troca só a cor de fundo/acento na hora,
-// via CSS custom properties no <html>. Não salva escolha nenhuma (efêmero,
-// some ao recarregar a página). Estrutura da página não muda, só a cor.
-export function SeletorTema() {
-  const [ativo, setAtivo] = useState('navy')
+// Preview ao vivo (não salva nada, some ao recarregar) — quem escolhe o
+// tema de verdade é a família/funerária no formulário de edição
+// (persistido em homenagens.tema); esse seletor só deixa o visitante
+// experimentar outras cores sem afetar o que os outros veem.
+export function SeletorTema({ temaInicial }: { temaInicial?: string }) {
+  const [ativo, setAtivo] = useState(temaInicial || 'navy')
 
   function aplicar(paletaId: string) {
     const paleta = PALETAS_MEMORIAL.find((p) => p.id === paletaId)

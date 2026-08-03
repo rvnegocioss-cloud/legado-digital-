@@ -18,7 +18,15 @@ import { ResumoPoucasPalavras } from "@/components/public/ResumoPoucasPalavras";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
-import { VAR_FUNDO_TOPO, VAR_FUNDO_BASE, VAR_DOURADO } from "@/lib/temasMemorial";
+import {
+  PALETAS_MEMORIAL,
+  VAR_FUNDO_TOPO,
+  VAR_FUNDO_BASE,
+  VAR_FUNDO_PROFUNDO,
+  VAR_DOURADO,
+  VAR_DOURADO_CLARO,
+  VAR_DOURADO_ESCURO,
+} from "@/lib/temasMemorial";
 
 // var CSS com fallback pro valor oficial navy+dourado — SeletorTema.tsx sobrescreve
 // em runtime via document.documentElement.style.setProperty(), sem reload.
@@ -44,6 +52,7 @@ interface Homenagem {
   video_url: string | null;
   videos_galeria: string[] | null;
   galeria_fotos: string[] | null;
+  tema: string;
   timeline: TimelineEvent[] | null;
   velas_acesas: number | null;
   vinculos: string[] | null;
@@ -121,7 +130,7 @@ export default async function HomenagemPage({
   const { data: homenagem } = await supabase
     .from("homenagens_publica")
     .select(
-      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, videos_galeria, galeria_fotos, timeline, velas_acesas, vinculos"
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, videos_galeria, galeria_fotos, timeline, velas_acesas, vinculos, tema"
     )
     .eq("slug", slug)
     .single();
@@ -178,6 +187,7 @@ export default async function HomenagemPage({
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
   const galeria = Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : [];
   const videosGaleria = Array.isArray(m.videos_galeria) ? m.videos_galeria.filter(Boolean) : [];
+  const paleta = PALETAS_MEMORIAL.find((p) => p.id === m.tema) ?? PALETAS_MEMORIAL[0];
 
   // 3 consultas independentes (dependem só de m.id/slug) — rodam em paralelo
   // em vez de em série, cortando 3 idas de rede pra 1.
@@ -209,8 +219,20 @@ export default async function HomenagemPage({
   } | null;
 
   return (
-    <div style={estilos.page}>
-      <SeletorTema />
+    <div
+      style={
+        {
+          ...estilos.page,
+          [VAR_FUNDO_TOPO]: paleta.fundoTopo,
+          [VAR_FUNDO_BASE]: paleta.fundoBase,
+          [VAR_FUNDO_PROFUNDO]: paleta.fundoProfundo,
+          [VAR_DOURADO]: paleta.dourado,
+          [VAR_DOURADO_CLARO]: paleta.douradoClaro,
+          [VAR_DOURADO_ESCURO]: paleta.douradoEscuro,
+        } as React.CSSProperties
+      }
+    >
+      <SeletorTema temaInicial={m.tema} />
 
       <nav className="mem-container" style={estilos.nav}>
         <div style={estilos.navLinks}>

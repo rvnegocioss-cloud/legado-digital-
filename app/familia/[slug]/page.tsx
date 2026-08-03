@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
+import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 import type { ModoGate } from '@/lib/modosPrivacidade'
 
 interface Memorial {
@@ -20,6 +21,7 @@ interface Memorial {
   video_url: string | null
   videos_galeria: string[] | null
   galeria_fotos: string[] | null
+  tema: string
   timeline: { year?: string; title?: string; description?: string }[] | null
   vinculos: string[] | null
   slug: string | null
@@ -58,6 +60,7 @@ export default function FamiliaEdicaoPage() {
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [videosGaleria, setVideosGaleria] = useState<string[]>([])
+  const [tema, setTema] = useState('navy')
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
   const [vinculos, setVinculos] = useState<string[]>([])
@@ -118,6 +121,7 @@ export default function FamiliaEdicaoPage() {
     setVideoUrl(m.video_url || '')
     setGaleria(m.galeria_fotos || [])
     setVideosGaleria(m.videos_galeria || [])
+    setTema(m.tema || 'navy')
     setVinculos(m.vinculos || [])
     setTimelineEventos(
       (m.timeline || []).map((ev) => ({
@@ -146,6 +150,7 @@ export default function FamiliaEdicaoPage() {
         video_url: videoUrl || null,
         videos_galeria: videosGaleria,
         galeria_fotos: galeria,
+        tema,
         timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
         vinculos: vinculos.length > 0 ? vinculos : null,
       }),
@@ -450,6 +455,23 @@ export default function FamiliaEdicaoPage() {
                 className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
               />
               {enviandoVideosGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando vídeos...</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1">Tema da página pública</label>
+              <p className="text-xs text-zinc-400 mb-2">Cor de fundo e detalhes dourados da página do memorial</p>
+              <div className="flex gap-2">
+                {PALETAS_MEMORIAL.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setTema(p.id)}
+                    title={p.nome}
+                    className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
+                    style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
+                  />
+                ))}
+              </div>
             </div>
 
             <div>

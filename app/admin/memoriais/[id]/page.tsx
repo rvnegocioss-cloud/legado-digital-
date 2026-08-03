@@ -11,6 +11,7 @@ import { TimelineEditor, type TimelineEvento } from '@/components/admin/Timeline
 import SecaoRetratil from '@/components/admin/SecaoRetratil'
 import { PrivacidadeMemorial } from '@/components/admin/PrivacidadeMemorial'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
+import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 
 interface Memorial {
   id: string
@@ -35,6 +36,7 @@ interface Memorial {
   lapide_id: string | null
   vinculos: string[] | null
   preenchido_por: 'funeraria' | 'familia' | null
+  tema: string
   created_at: string
   updated_at: string
 }
@@ -97,6 +99,7 @@ export default function DetalheMemorial() {
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
   const [videosGaleria, setVideosGaleria] = useState<string[]>([])
+  const [tema, setTema] = useState('navy')
   const [enviandoVideosGaleria, setEnviandoVideosGaleria] = useState(false)
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
@@ -194,6 +197,7 @@ export default function DetalheMemorial() {
       setVideoUrl(m.video_url || '')
       setVideosGaleria(m.videos_galeria || [])
       setGaleria(m.galeria_fotos || [])
+      setTema(m.tema || 'navy')
       setMensagemPlaca(m.mensagem_placa || '')
       setFamiliaEmail(m.familia_email || '')
       setFamiliaNome(m.familia_nome_responsavel || '')
@@ -469,6 +473,7 @@ export default function DetalheMemorial() {
       video_url: videoUrl || null,
       videos_galeria: videosGaleria,
       galeria_fotos: galeria,
+      tema,
       timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
     }
     const { data: atualizado, error } = await supabase
@@ -505,6 +510,7 @@ export default function DetalheMemorial() {
         video_url: videoUrl || null,
         videos_galeria: videosGaleria,
         galeria_fotos: galeria,
+        tema,
         updated_at: atualizado?.updated_at || memorial.updated_at,
       })
     }
@@ -786,6 +792,23 @@ export default function DetalheMemorial() {
               className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
             />
             {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Tema da página pública</label>
+            <p className="text-xs text-zinc-400 mb-2">Cor de fundo e detalhes dourados da página do memorial</p>
+            <div className="flex gap-2">
+              {PALETAS_MEMORIAL.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setTema(p.id)}
+                  title={p.nome}
+                  className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
+                  style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
+                />
+              ))}
+            </div>
           </div>
           </div>
           </SecaoRetratil>
