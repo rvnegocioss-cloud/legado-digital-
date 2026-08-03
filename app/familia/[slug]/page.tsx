@@ -70,6 +70,9 @@ export default function FamiliaEdicaoPage() {
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia' | null>(null)
   const [memorialId, setMemorialId] = useState('')
   const [modoGate, setModoGate] = useState<ModoGate>('aberto')
+  const [buscaHabilitada, setBuscaHabilitada] = useState(true)
+  const [linkHabilitado, setLinkHabilitado] = useState(true)
+  const [qrcodeHabilitado, setQrcodeHabilitado] = useState(true)
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -92,6 +95,9 @@ export default function FamiliaEdicaoPage() {
     setPreenchidoPor(m.preenchido_por)
     setMemorialId(m.id)
     setModoGate((json.privacidade?.modoGate ?? 'aberto') as ModoGate)
+    setBuscaHabilitada(json.privacidade?.buscaHabilitada ?? true)
+    setLinkHabilitado(json.privacidade?.linkHabilitado ?? true)
+    setQrcodeHabilitado(json.privacidade?.qrcodeHabilitado ?? true)
     fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
       .then((r) => r.json())
       .then((j) => setUsoStorageMB(Math.round((j.usageBytes || 0) / 1024 / 1024)))
@@ -261,7 +267,13 @@ export default function FamiliaEdicaoPage() {
         {memorialId && (
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-4">
             <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
-            <PrivacidadeFamilia memorialId={memorialId} modoGate={modoGate} />
+            <PrivacidadeFamilia
+              memorialId={memorialId}
+              modoGateInicial={modoGate}
+              buscaHabilitadaInicial={buscaHabilitada}
+              linkHabilitadoInicial={linkHabilitado}
+              qrcodeHabilitadoInicial={qrcodeHabilitado}
+            />
           </div>
         )}
 

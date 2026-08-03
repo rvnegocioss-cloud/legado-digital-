@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { ROTULOS_MODO, type ModoGate } from '@/lib/modosPrivacidade'
 
+const MODOS_ORDEM: ModoGate[] = ['aberto', 'senha', 'cadastro', 'email', 'oculto']
+
 interface EmailAutorizado {
   id: string
   email: string
@@ -17,23 +19,42 @@ interface Visitante {
   criado_em: string
 }
 
-// Somente-leitura pra maioria dos modos (quem decide é Central/Parceiro) —
-// exceção: modo "email" a família gerencia a própria allowlist (só ela
-// sabe quem são os parentes autorizados), e modo "cadastro" ela vê quem
-// se identificou. As 2 rotas usadas aqui autenticam pelo cookie de sessão
-// da família automaticamente (mesmo tripé de /api/memorial-storage-usage),
-// sem precisar de token nenhum.
-export function PrivacidadeFamilia({ memorialId, modoGate }: { memorialId: string; modoGate: ModoGate }) {
-  const [emails, setEmails] = useState<EmailAutorizado[]>([])
-  const [novoEmail, setNovoEmail] = useState('')
+// A família decide se o próprio memorial fica aberto ou travado (pedido do
+// Rafael, 2026-07-31) — mesmas opções que Central/Parceiro têm em
+// components/admin/PrivacidadeMemorial.tsx, só que aqui autentica pelo
+// cookie de sessão da família (as rotas chamadas aceitam os 3 papéis:
+// staff, parceiro dono e família — mesmo tripé de /api/memorial-storage-usage).
+export function PrivacidadeFamilia({
+  memorialId,
+  modoGateInicial,
+  buscaHabilitadaInicial,
+  linkHabilitadoInicial,
+  qrcodeHabilitadoInicial,
+}: {
+  memorialId: string
+  modoGateInicial: ModoGate
+  buscaHabilitadaInicial: boolean
+  linkHabilitadoInicial: boolean
+  qrcodeHabilitadoInicial: boolean
+}) {
+  const [modoGate, setModoGate] = useState(modoGateInicial)
+  const [buscaHabilitada, setBuscaHabilitada] = useState(buscaHabilitadaInicial)
+  const [linkHabilitado, setLinkHabilitado] = useState(linkHabilitadoInicial)
+  const [qrcodeHabilitado, setQrcodeHabilitado] = useState(qrcodeHabilitadoInicial)
   const [salvando, setSalvando] = useState(false)
   const [msg, setMsg] = useState('')
+
+  const [emails, setEmails] = useState<EmailAutorizado[]>([])
+  const [novoEmail, setNovoEmail] = useState('')
+  const [salvandoEmail, setSalvandoEmail] = useState(false)
+  const [emailMsg, setEmailMsg] = useState('')
+
   const [visitantes, setVisitantes] = useState<Visitante[]>([])
 
   useEffect(() => {
-    if (modoGate === 'email') carregarEmails()
-    if (modoGate === 'cadastro') carregarVisitantes()
-  }, [modoGate, memorialId])
+    if (modoGateInicial === 'email') carregarEmails()
+    if (modoGateInicial === 'cadastro') carregarVisitantes()
+  }, [memorialId])
 
   async function carregarEmails() {
     const res = await fetch(`/api/memorial-emails-autorizados?memorialId=${memorialId}`)
@@ -45,11 +66,33 @@ export function PrivacidadeFamilia({ memorialId, modoGate }: { memorialId: strin
     if (res.ok) setVisitantes((await res.json()).visitantes || [])
   }
 
+  async function salvar() {
+    setSalvando(true)
+    setMsg('')
+    const res = await fetch('/api/memorial-privacidade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memorialId, buscaHabilitada, linkHabilitado, qrcodeHabilitado, modoGate }),
+    })
+    const json = await res.json()
+    setMsg(res.ok ? 'Salvo.' : json.error || 'Erro ao salvar')
+    setSalvando(false)
+    if (res.ok) {
+      if (modoGate === 'oculto') {
+        setBuscaHabilitada(false)
+        setLinkHabilitado(false)
+        setQrcodeHabilitado(false)
+      }
+      if (modoGate === 'email') carregarEmails()
+      if (modoGate === 'cadastro') carregarVisitantes()
+    }
+  }
+
   async function adicionarEmail(e: React.FormEvent) {
     e.preventDefault()
     if (!novoEmail.trim()) return
-    setSalvando(true)
-    setMsg('')
+    setSalvandoEmail(true)
+    setEmailMsg('')
     const res = await fetch('/api/memorial-emails-autorizados', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,12 +100,12 @@ export function PrivacidadeFamilia({ memorialId, modoGate }: { memorialId: strin
     })
     const json = await res.json()
     if (!res.ok) {
-      setMsg(json.error || 'Erro ao adicionar')
+      setEmailMsg(json.error || 'Erro ao adicionar')
     } else {
       setNovoEmail('')
       await carregarEmails()
     }
-    setSalvando(false)
+    setSalvandoEmail(false)
   }
 
   async function removerEmail(id: string) {
@@ -70,21 +113,62 @@ export function PrivacidadeFamilia({ memorialId, modoGate }: { memorialId: strin
     await carregarEmails()
   }
 
+  const oculto = modoGate === 'oculto'
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium text-white">{ROTULOS_MODO[modoGate].titulo}</p>
-        <p className="text-xs text-zinc-400 mt-1">{ROTULOS_MODO[modoGate].descricao}</p>
-        {modoGate !== 'email' && modoGate !== 'cadastro' && (
-          <p className="text-xs text-zinc-500 mt-2">Pra mudar, fale com a funerária responsável.</p>
-        )}
+        <p className="text-xs font-medium text-zinc-400 mb-2">Por onde as pessoas chegam</p>
+        <div className={`space-y-2 ${oculto ? 'opacity-40 pointer-events-none' : ''}`}>
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input type="checkbox" checked={buscaHabilitada} onChange={(e) => setBuscaHabilitada(e.target.checked)} disabled={oculto} />
+            Público — aparece na busca por nome
+          </label>
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input type="checkbox" checked={linkHabilitado} onChange={(e) => setLinkHabilitado(e.target.checked)} disabled={oculto} />
+            Acesso por link direto
+          </label>
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input type="checkbox" checked={qrcodeHabilitado} onChange={(e) => setQrcodeHabilitado(e.target.checked)} disabled={oculto} />
+            Acesso por QR Code
+          </label>
+        </div>
       </div>
+
+      <div>
+        <p className="text-xs font-medium text-zinc-400 mb-2">O que a pessoa precisa fazer pra ver</p>
+        <div className="space-y-2">
+          {MODOS_ORDEM.map((modo) => (
+            <label key={modo} className="flex items-start gap-2 text-sm text-zinc-300">
+              <input
+                type="radio"
+                name={`modo-gate-familia-${memorialId}`}
+                checked={modoGate === modo}
+                onChange={() => setModoGate(modo)}
+                className="mt-0.5"
+              />
+              <span>
+                {ROTULOS_MODO[modo].titulo}
+                <span className="block text-[11px] text-zinc-500">{ROTULOS_MODO[modo].descricao}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={salvar}
+        disabled={salvando}
+        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium disabled:opacity-50"
+      >
+        {salvando ? 'Salvando...' : 'Salvar privacidade'}
+      </button>
+      {msg && <p className="text-[11px] text-zinc-400">{msg}</p>}
 
       {modoGate === 'email' && (
         <div className="pt-2 border-t border-zinc-800">
-          <label className="text-xs font-medium text-zinc-400 block mb-1">
-            E-mails autorizados a ver o memorial ({emails.length})
-          </label>
+          <p className="text-xs font-medium text-zinc-400 mb-2">E-mails autorizados a ver o memorial ({emails.length})</p>
           <form onSubmit={adicionarEmail} className="flex gap-2 mb-2">
             <input
               type="email"
@@ -93,12 +177,12 @@ export function PrivacidadeFamilia({ memorialId, modoGate }: { memorialId: strin
               placeholder="email@exemplo.com"
               className="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white"
             />
-            <button type="submit" disabled={salvando} className="px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white text-sm">
+            <button type="submit" disabled={salvandoEmail} className="px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white text-sm">
               Adicionar
             </button>
           </form>
-          {msg && <p className="text-xs text-red-400 mb-2">{msg}</p>}
-          <ul className="space-y-1">
+          {emailMsg && <p className="text-[11px] text-red-400 mb-2">{emailMsg}</p>}
+          <ul className="space-y-1 max-h-48 overflow-y-auto">
             {emails.map((e) => (
               <li key={e.id} className="flex items-center justify-between text-sm text-zinc-300 bg-zinc-900/60 rounded px-2 py-1">
                 <span>{e.email}</span>
@@ -114,10 +198,8 @@ export function PrivacidadeFamilia({ memorialId, modoGate }: { memorialId: strin
 
       {modoGate === 'cadastro' && (
         <div className="pt-2 border-t border-zinc-800">
-          <label className="text-xs font-medium text-zinc-400 block mb-1">
-            Visitantes identificados ({visitantes.length})
-          </label>
-          <ul className="space-y-1">
+          <p className="text-xs font-medium text-zinc-400 mb-2">Visitantes identificados ({visitantes.length})</p>
+          <ul className="space-y-1 max-h-48 overflow-y-auto">
             {visitantes.map((v) => (
               <li key={v.id} className="text-sm text-zinc-300 bg-zinc-900/60 rounded px-2 py-1">
                 <span className="font-medium">{v.nome}</span> <span className="text-zinc-500">{v.email}</span>
