@@ -42,6 +42,7 @@ interface Homenagem {
   biografia: string | null;
   foto_url: string | null;
   video_url: string | null;
+  videos_galeria: string[] | null;
   galeria_fotos: string[] | null;
   timeline: TimelineEvent[] | null;
   velas_acesas: number | null;
@@ -120,7 +121,7 @@ export default async function HomenagemPage({
   const { data: homenagem } = await supabase
     .from("homenagens_publica")
     .select(
-      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, galeria_fotos, timeline, velas_acesas, vinculos"
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, videos_galeria, galeria_fotos, timeline, velas_acesas, vinculos"
     )
     .eq("slug", slug)
     .single();
@@ -176,6 +177,7 @@ export default async function HomenagemPage({
   const anos = anosDestaque(m.data_nascimento, m.data_falecimento);
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
   const galeria = Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : [];
+  const videosGaleria = Array.isArray(m.videos_galeria) ? m.videos_galeria.filter(Boolean) : [];
 
   // 3 consultas independentes (dependem só de m.id/slug) — rodam em paralelo
   // em vez de em série, cortando 3 idas de rede pra 1.
@@ -335,6 +337,32 @@ export default async function HomenagemPage({
                   style={{ width: "100%", height: "100%", background: "#000" }}
                 />
               )}
+            </div>
+          </section>
+        )}
+
+        {videosGaleria.length > 0 && (
+          <section style={{ marginTop: 56 }}>
+            <SecaoTitulo texto="Mais vídeos" />
+            <div
+              style={{
+                marginTop: 18,
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                gap: 16,
+              }}
+            >
+              {videosGaleria.map((url) => (
+                <div key={url} style={{ ...estilos.videoFrame, marginTop: 0 }}>
+                  {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                  <video
+                    src={url}
+                    controls
+                    preload="metadata"
+                    style={{ width: "100%", height: "100%", background: "#000" }}
+                  />
+                </div>
+              ))}
             </div>
           </section>
         )}

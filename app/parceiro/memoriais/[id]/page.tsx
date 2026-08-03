@@ -41,6 +41,7 @@ interface Memorial {
   slug: string | null
   foto_url: string | null
   video_url: string | null
+  videos_galeria: string[] | null
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   qr_code_url: string | null
@@ -67,8 +68,9 @@ interface Lapide {
 }
 
 const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
+const LIMITE_VIDEOS = 4 // mesma conta do CHECK videos_galeria_max_4 no banco
 
-async function subirArquivo(memorialId: string, pasta: 'foto' | 'video' | 'galeria', file: File) {
+async function subirArquivo(memorialId: string, pasta: 'foto' | 'video' | 'galeria' | 'videos_galeria', file: File) {
   const caminho = `${memorialId}/${pasta}/${Date.now()}-${file.name}`
   const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
   if (error) throw error
@@ -116,6 +118,8 @@ function FichaMemorialParceiroInner() {
   const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [videosGaleria, setVideosGaleria] = useState<string[]>([])
+  const [enviandoVideosGaleria, setEnviandoVideosGaleria] = useState(false)
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
   const [loading, setLoading] = useState(true)
@@ -179,7 +183,7 @@ function FichaMemorialParceiroInner() {
     const { data: m } = await supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, lapide_id, vinculos, parceiro_id, created_at, updated_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, videos_galeria, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, lapide_id, vinculos, parceiro_id, created_at, updated_at'
       )
       .eq('id', id)
       .maybeSingle()
@@ -212,6 +216,7 @@ function FichaMemorialParceiroInner() {
     setVinculos(m.vinculos || [])
     setFotoUrl(m.foto_url || '')
     setVideoUrl(m.video_url || '')
+    setVideosGaleria(m.videos_galeria || [])
     setGaleria(m.galeria_fotos || [])
     setTimelineEventos(
       (m.timeline || []).map((ev: { year?: string; title?: string; description?: string }) => ({
@@ -470,6 +475,37 @@ function FichaMemorialParceiroInner() {
     setEnviandoVideo(false)
   }
 
+  async function handleVideosGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0 || !memorial) return
+
+    const vagas = LIMITE_VIDEOS - videosGaleria.length
+    if (vagas <= 0) {
+      setErro(`Limite de ${LIMITE_VIDEOS} vídeos por memorial atingido.`)
+      e.target.value = ''
+      return
+    }
+
+    const selecionados = files.slice(0, vagas)
+    setEnviandoVideosGaleria(true)
+    setErro('')
+    try {
+      const urls = await Promise.all(selecionados.map((f) => subirArquivo(memorial.id, 'videos_galeria', f)))
+      setVideosGaleria((atual) => [...atual, ...urls])
+      if (files.length > selecionados.length) {
+        setErro(`Só cabiam mais ${vagas} vídeo(s) — limite de ${LIMITE_VIDEOS} por memorial.`)
+      }
+    } catch (err: any) {
+      setErro(err.message || 'Erro ao enviar vídeos')
+    }
+    setEnviandoVideosGaleria(false)
+    e.target.value = ''
+  }
+
+  function removerVideoGaleria(url: string) {
+    setVideosGaleria((atual) => atual.filter((u) => u !== url))
+  }
+
   async function handleGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || [])
     if (files.length === 0 || !memorial) return
@@ -549,6 +585,7 @@ function FichaMemorialParceiroInner() {
       vinculos: vinculos.length > 0 ? vinculos : null,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
+      videos_galeria: videosGaleria,
       galeria_fotos: galeria,
       timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
     }
@@ -575,6 +612,8 @@ function FichaMemorialParceiroInner() {
     if (videoAntigo && videoAntigo !== videoUrl) removerArquivoStorage(videoAntigo)
     const galeriaAntiga = memorial.galeria_fotos || []
     galeriaAntiga.filter((u) => !galeria.includes(u)).forEach(removerArquivoStorage)
+    const videosGaleriaAntiga = memorial.videos_galeria || []
+    videosGaleriaAntiga.filter((u) => !videosGaleria.includes(u)).forEach(removerArquivoStorage)
 
     // Só gera QR (e dispara e-mail pro fornecedor da placa) no primeiro save
     // real, com nome de verdade e data de falecimento preenchida — se já
@@ -602,6 +641,7 @@ function FichaMemorialParceiroInner() {
       slug: slugDefinitivo || memorial.slug,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
+      videos_galeria: videosGaleria,
       galeria_fotos: galeria,
       updated_at: atualizado?.updated_at || memorial.updated_at,
     })
@@ -858,6 +898,33 @@ function FichaMemorialParceiroInner() {
                       className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
                     />
                     {enviandoVideo && <p className="text-[11px] text-zinc-500 mt-1">Enviando vídeo...</p>}
+                  </CampoFicha>
+                  <CampoFicha label={`Galeria de vídeos (${videosGaleria.length}/${LIMITE_VIDEOS})`} className="@lg:col-span-2">
+                    {videosGaleria.length > 0 && (
+                      <div className="grid grid-cols-2 @lg:grid-cols-4 gap-2 mb-2">
+                        {videosGaleria.map((url) => (
+                          <div key={url} className="relative group">
+                            <video src={url} controls className="w-full h-20 object-cover rounded bg-black" />
+                            <button
+                              type="button"
+                              onClick={() => removerVideoGaleria(url)}
+                              className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      onChange={handleVideosGaleriaChange}
+                      disabled={enviandoVideosGaleria || videosGaleria.length >= LIMITE_VIDEOS}
+                      className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+                    />
+                    {enviandoVideosGaleria && <p className="text-[11px] text-zinc-500 mt-1">Enviando vídeos...</p>}
                   </CampoFicha>
                 </div>
               </SecaoFicha>

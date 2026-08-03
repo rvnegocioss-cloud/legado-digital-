@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
   if (!slug || !pasta || !file) {
     return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
   }
-  if (!['foto', 'video', 'galeria'].includes(pasta)) {
+  if (!['foto', 'video', 'galeria', 'videos_galeria'].includes(pasta)) {
     return NextResponse.json({ error: 'Pasta inválida' }, { status: 400 })
   }
 

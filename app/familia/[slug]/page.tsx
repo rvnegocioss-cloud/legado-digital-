@@ -18,6 +18,7 @@ interface Memorial {
   biografia: string | null
   foto_url: string | null
   video_url: string | null
+  videos_galeria: string[] | null
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   vinculos: string[] | null
@@ -27,8 +28,9 @@ interface Memorial {
 }
 
 const LIMITE_FOTOS = 4
+const LIMITE_VIDEOS = 4
 
-async function subirArquivoFamilia(slug: string, pasta: 'foto' | 'video' | 'galeria', file: File) {
+async function subirArquivoFamilia(slug: string, pasta: 'foto' | 'video' | 'galeria' | 'videos_galeria', file: File) {
   const formData = new FormData()
   formData.append('slug', slug)
   formData.append('pasta', pasta)
@@ -55,6 +57,7 @@ export default function FamiliaEdicaoPage() {
   })
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [videosGaleria, setVideosGaleria] = useState<string[]>([])
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
   const [vinculos, setVinculos] = useState<string[]>([])
@@ -64,6 +67,7 @@ export default function FamiliaEdicaoPage() {
   const [erro, setErro] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   const [enviandoVideo, setEnviandoVideo] = useState(false)
+  const [enviandoVideosGaleria, setEnviandoVideosGaleria] = useState(false)
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [updatedAtCarregado, setUpdatedAtCarregado] = useState('')
   const [usoStorageMB, setUsoStorageMB] = useState(0)
@@ -113,6 +117,7 @@ export default function FamiliaEdicaoPage() {
     setFotoUrl(m.foto_url || '')
     setVideoUrl(m.video_url || '')
     setGaleria(m.galeria_fotos || [])
+    setVideosGaleria(m.videos_galeria || [])
     setVinculos(m.vinculos || [])
     setTimelineEventos(
       (m.timeline || []).map((ev) => ({
@@ -139,6 +144,7 @@ export default function FamiliaEdicaoPage() {
         ...form,
         foto_url: fotoUrl || null,
         video_url: videoUrl || null,
+        videos_galeria: videosGaleria,
         galeria_fotos: galeria,
         timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
         vinculos: vinculos.length > 0 ? vinculos : null,
@@ -183,6 +189,32 @@ export default function FamiliaEdicaoPage() {
       setErro(err.message)
     }
     setEnviandoVideo(false)
+  }
+
+  async function handleVideosGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+    const vagas = LIMITE_VIDEOS - videosGaleria.length
+    if (vagas <= 0) {
+      setErro(`Limite de ${LIMITE_VIDEOS} vídeos por memorial atingido.`)
+      e.target.value = ''
+      return
+    }
+    const selecionados = files.slice(0, vagas)
+    setEnviandoVideosGaleria(true)
+    setErro('')
+    try {
+      const urls = await Promise.all(selecionados.map((f) => subirArquivoFamilia(params.slug, 'videos_galeria', f)))
+      setVideosGaleria((atual) => [...atual, ...urls])
+    } catch (err: any) {
+      setErro(err.message)
+    }
+    setEnviandoVideosGaleria(false)
+    e.target.value = ''
+  }
+
+  function removerVideoGaleria(url: string) {
+    setVideosGaleria((atual) => atual.filter((u) => u !== url))
   }
 
   async function handleGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -386,6 +418,38 @@ export default function FamiliaEdicaoPage() {
                 className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
               />
               {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1">
+                Galeria de vídeos ({videosGaleria.length}/{LIMITE_VIDEOS})
+              </label>
+              <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_VIDEOS} vídeos além do vídeo principal, máx 100MB cada</p>
+              {videosGaleria.length > 0 && (
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  {videosGaleria.map((url) => (
+                    <div key={url} className="relative group">
+                      <video src={url} controls className="w-full h-24 object-cover rounded bg-black" />
+                      <button
+                        type="button"
+                        onClick={() => removerVideoGaleria(url)}
+                        className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <input
+                type="file"
+                accept="video/*"
+                multiple
+                onChange={handleVideosGaleriaChange}
+                disabled={enviandoVideosGaleria || videosGaleria.length >= LIMITE_VIDEOS}
+                className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+              />
+              {enviandoVideosGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando vídeos...</p>}
             </div>
 
             <div>

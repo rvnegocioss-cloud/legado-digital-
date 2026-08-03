@@ -24,6 +24,7 @@ interface Memorial {
   parceiro_id: string | null
   foto_url: string | null
   video_url: string | null
+  videos_galeria: string[] | null
   galeria_fotos: string[] | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   qr_code_url: string | null
@@ -50,8 +51,9 @@ interface Lapide {
 }
 
 const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
+const LIMITE_VIDEOS = 4 // mesma conta do CHECK videos_galeria_max_4 no banco
 
-async function subirArquivo(memorialId: string, pasta: 'foto' | 'video' | 'galeria', file: File) {
+async function subirArquivo(memorialId: string, pasta: 'foto' | 'video' | 'galeria' | 'videos_galeria', file: File) {
   const caminho = `${memorialId}/${pasta}/${Date.now()}-${file.name}`
   const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
   if (error) throw error
@@ -94,6 +96,8 @@ export default function DetalheMemorial() {
   const [vinculos, setVinculos] = useState<string[]>([])
   const [fotoUrl, setFotoUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [videosGaleria, setVideosGaleria] = useState<string[]>([])
+  const [enviandoVideosGaleria, setEnviandoVideosGaleria] = useState(false)
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
   const [loading, setLoading] = useState(true)
@@ -188,6 +192,7 @@ export default function DetalheMemorial() {
       setVinculos(m.vinculos || [])
       setFotoUrl(m.foto_url || '')
       setVideoUrl(m.video_url || '')
+      setVideosGaleria(m.videos_galeria || [])
       setGaleria(m.galeria_fotos || [])
       setMensagemPlaca(m.mensagem_placa || '')
       setFamiliaEmail(m.familia_email || '')
@@ -462,6 +467,7 @@ export default function DetalheMemorial() {
       vinculos: vinculos.length > 0 ? vinculos : null,
       foto_url: fotoUrl || null,
       video_url: videoUrl || null,
+      videos_galeria: videosGaleria,
       galeria_fotos: galeria,
       timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
     }
@@ -486,6 +492,8 @@ export default function DetalheMemorial() {
     if (videoAntigo && videoAntigo !== videoUrl) removerArquivoStorage(videoAntigo)
     const galeriaAntiga = memorial?.galeria_fotos || []
     galeriaAntiga.filter((u) => !galeria.includes(u)).forEach(removerArquivoStorage)
+    const videosGaleriaAntiga = memorial?.videos_galeria || []
+    videosGaleriaAntiga.filter((u) => !videosGaleria.includes(u)).forEach(removerArquivoStorage)
 
     setSalvando(false)
     setSalvo(true)
@@ -495,6 +503,7 @@ export default function DetalheMemorial() {
         ...form,
         foto_url: fotoUrl || null,
         video_url: videoUrl || null,
+        videos_galeria: videosGaleria,
         galeria_fotos: galeria,
         updated_at: atualizado?.updated_at || memorial.updated_at,
       })
@@ -535,6 +544,37 @@ export default function DetalheMemorial() {
       setErro(err.message || 'Erro ao enviar vídeo')
     }
     setEnviandoVideo(false)
+  }
+
+  async function handleVideosGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0 || !memorial) return
+
+    const vagas = LIMITE_VIDEOS - videosGaleria.length
+    if (vagas <= 0) {
+      setErro(`Limite de ${LIMITE_VIDEOS} vídeos por memorial atingido.`)
+      e.target.value = ''
+      return
+    }
+
+    const selecionados = files.slice(0, vagas)
+    setEnviandoVideosGaleria(true)
+    setErro('')
+    try {
+      const urls = await Promise.all(selecionados.map((f) => subirArquivo(memorial.id, 'videos_galeria', f)))
+      setVideosGaleria((atual) => [...atual, ...urls])
+      if (files.length > selecionados.length) {
+        setErro(`Só cabiam mais ${vagas} vídeo(s) — limite de ${LIMITE_VIDEOS} por memorial.`)
+      }
+    } catch (err: any) {
+      setErro(err.message || 'Erro ao enviar vídeos')
+    }
+    setEnviandoVideosGaleria(false)
+    e.target.value = ''
+  }
+
+  function removerVideoGaleria(url: string) {
+    setVideosGaleria((atual) => atual.filter((u) => u !== url))
   }
 
   async function handleGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -681,6 +721,38 @@ export default function DetalheMemorial() {
               className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
             />
             {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">
+              Galeria de vídeos ({videosGaleria.length}/{LIMITE_VIDEOS})
+            </label>
+            <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_VIDEOS} vídeos além do vídeo principal, máx 100MB cada</p>
+            {videosGaleria.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {videosGaleria.map((url) => (
+                  <div key={url} className="relative group">
+                    <video src={url} controls className="w-full h-24 object-cover rounded bg-black" />
+                    <button
+                      type="button"
+                      onClick={() => removerVideoGaleria(url)}
+                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              type="file"
+              accept="video/*"
+              multiple
+              onChange={handleVideosGaleriaChange}
+              disabled={enviandoVideosGaleria || videosGaleria.length >= LIMITE_VIDEOS}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+            />
+            {enviandoVideosGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando vídeos...</p>}
           </div>
 
           <div>
