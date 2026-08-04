@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import MapGL, { Source, Layer, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
+import MapGL, { Source, Layer, Marker, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Cross, MapPin, Crosshair, X } from 'lucide-react'
+import { Cross, Flag, MapPin, Crosshair, X } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
@@ -34,6 +34,8 @@ interface Cemiterio {
   ortomosaico_minzoom: number | null
   ortomosaico_maxzoom: number | null
   ortomosaico_bounds: number[] | null
+  entrada_latitude: number | null
+  entrada_longitude: number | null
 }
 
 interface Lapide {
@@ -68,8 +70,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [lapides, setLapides] = useState<Lapide[]>([])
   const [homenagens, setHomenagens] = useState<Homenagem[]>([])
   const [lapideSelecionada, setLapideSelecionada] = useState<Lapide | null>(null)
+  const [lapideHover, setLapideHover] = useState<Lapide | null>(null)
   const [modoMarcar, setModoMarcar] = useState(false)
   const [lapideParaMarcar, setLapideParaMarcar] = useState<Lapide | null>(null)
+  const [modoMarcarEntrada, setModoMarcarEntrada] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [msg, setMsg] = useState('')
   const mapRef = useRef<MapRef | null>(null)
@@ -83,7 +87,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const [{ data: c }, { data: l }, { data: h }] = await Promise.all([
       supabase
         .from('cemiterios')
-        .select('id, nome, latitude, longitude, ortomosaico_url, ortomosaico_minzoom, ortomosaico_maxzoom, ortomosaico_bounds')
+        .select('id, nome, latitude, longitude, ortomosaico_url, ortomosaico_minzoom, ortomosaico_maxzoom, ortomosaico_bounds, entrada_latitude, entrada_longitude')
         .eq('id', cemiterioId)
         .single(),
       supabase
@@ -165,6 +169,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   }
 
   async function aoClicarMapa(e: MapLayerMouseEvent) {
+    if (modoMarcarEntrada) {
+      await salvarEntrada(e.lngLat.lat, e.lngLat.lng)
+      return
+    }
+
     if (modoMarcar && lapideParaMarcar) {
       await salvarCoordenada(lapideParaMarcar.id, e.lngLat.lat, e.lngLat.lng)
       return
@@ -177,6 +186,43 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     } else {
       setLapideSelecionada(null)
     }
+  }
+
+  function aoMoverMouseMapa(e: MapLayerMouseEvent) {
+    const feature = e.features?.[0]
+    if (feature?.properties?.lapideId) {
+      const lapide = lapides.find((l) => l.id === feature.properties!.lapideId)
+      setLapideHover(lapide && homenagemPorLapide.get(lapide.id) ? lapide : null)
+    } else {
+      setLapideHover(null)
+    }
+  }
+
+  async function salvarEntrada(lat: number, lng: number) {
+    setSalvando(true)
+    setMsg('')
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    const { error } = await supabase
+      .from('cemiterios')
+      .update({
+        entrada_latitude: lat,
+        entrada_longitude: lng,
+        entrada_atualizada_em: new Date().toISOString(),
+        entrada_atualizada_por: session?.user?.id || null,
+      })
+      .eq('id', cemiterioId)
+
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setMsg('Entrada do cemitério marcada.')
+      setModoMarcarEntrada(false)
+      await carregar()
+    }
+    setSalvando(false)
   }
 
   async function salvarCoordenada(lapideId: string, lat: number, lng: number) {
@@ -237,11 +283,19 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 longitude: cemiterio.longitude ?? -47.9,
                 latitude: cemiterio.latitude ?? -15.8,
                 zoom: cemiterio.longitude != null ? 17 : 4,
+                pitch: 0,
+                bearing: 0,
               }}
+              maxPitch={70}
               mapStyle={estiloMapa as any}
-              style={{ width: '100%', height: '100%', cursor: modoMarcar && lapideParaMarcar ? 'crosshair' : undefined }}
+              style={{
+                width: '100%',
+                height: '100%',
+                cursor: modoMarcarEntrada || (modoMarcar && lapideParaMarcar) ? 'crosshair' : undefined,
+              }}
               interactiveLayerIds={['lapides-pinos']}
               onClick={aoClicarMapa}
+              onMouseMove={aoMoverMouseMapa}
             >
               <NavigationControl showZoom position="top-right" />
 
@@ -267,6 +321,70 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                   }}
                 />
               </Source>
+
+              {cemiterio.entrada_latitude != null && cemiterio.entrada_longitude != null && (
+                <Marker longitude={cemiterio.entrada_longitude} latitude={cemiterio.entrada_latitude} anchor="bottom">
+                  <div title="Entrada do cemitério">
+                    <Flag size={22} strokeWidth={2} fill="#22c55e" style={{ color: '#0B1D2A' }} />
+                  </div>
+                </Marker>
+              )}
+
+              {lapideHover && lapideHover.id !== lapideSelecionada?.id && (
+                <Popup
+                  longitude={lapideHover.longitude!}
+                  latitude={lapideHover.latitude!}
+                  anchor="bottom"
+                  offset={12}
+                  closeButton={false}
+                  closeOnClick={false}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 160 }}>
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        padding: 2,
+                        flexShrink: 0,
+                        background: 'conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          background: '#0B1D2A',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {homenagemPorLapide.get(lapideHover.id)?.foto_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={homenagemPorLapide.get(lapideHover.id)!.foto_url!}
+                            alt=""
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <Cross size={16} strokeWidth={1.5} style={{ color: '#C9A46A' }} />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
+                        Homenageado(a)
+                      </p>
+                      <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
+                        {homenagemPorLapide.get(lapideHover.id)?.nome_completo}
+                      </p>
+                    </div>
+                  </div>
+                </Popup>
+              )}
 
               {lapideSelecionada && (
                 <Popup
@@ -327,6 +445,37 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
         </div>
 
         <div className="lg:col-span-4">
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
+            <h2 className="text-sm font-semibold text-white mb-1">Entrada do cemitério</h2>
+            <p className="text-xs text-zinc-500 mb-3">
+              {cemiterio.entrada_latitude != null
+                ? 'Marcada — é daqui que a rota até o túmulo começa na página pública.'
+                : 'Ainda não marcada — a rota pública usa o centro genérico do cemitério (menos preciso).'}
+            </p>
+            {modoMarcarEntrada ? (
+              <div className="rounded-lg bg-emerald-950/30 border border-emerald-900/40 px-3 py-2 flex items-center justify-between">
+                <p className="text-xs text-emerald-300">Clique no mapa no portão/entrada real</p>
+                <button type="button" onClick={() => setModoMarcarEntrada(false)} className="text-emerald-400 hover:text-emerald-200">
+                  <X size={14} strokeWidth={1.5} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => {
+                  setModoMarcarEntrada(true)
+                  setModoMarcar(false)
+                  setLapideParaMarcar(null)
+                }}
+                className="w-full text-left text-sm px-2 py-1.5 rounded flex items-center gap-2 text-zinc-300 hover:bg-zinc-800"
+              >
+                <Flag size={12} strokeWidth={1.5} />
+                {cemiterio.entrada_latitude != null ? 'Remarcar entrada' : 'Marcar entrada do cemitério'}
+              </button>
+            )}
+          </div>
+
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4">
             <h2 className="text-sm font-semibold text-white mb-1">Marcar túmulos</h2>
             <p className="text-xs text-zinc-500 mb-3">
