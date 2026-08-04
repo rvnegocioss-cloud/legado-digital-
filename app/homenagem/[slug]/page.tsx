@@ -216,6 +216,10 @@ export default async function HomenagemPage({
     quadra: string | null;
     lote: string | null;
     identificacao: string | null;
+    orto_url: string | null;
+    orto_minzoom: number | null;
+    orto_maxzoom: number | null;
+    orto_bounds: number[] | null;
   } | null;
 
   return (
@@ -440,6 +444,10 @@ export default async function HomenagemPage({
                 lote={localizacao.lote}
                 nomeCompleto={m.nome_completo}
                 fotoUrl={m.foto_url}
+                ortoUrl={localizacao.orto_url}
+                ortoMinzoom={localizacao.orto_minzoom}
+                ortoMaxzoom={localizacao.orto_maxzoom}
+                ortoBounds={localizacao.orto_bounds}
               />
             </div>
           </section>

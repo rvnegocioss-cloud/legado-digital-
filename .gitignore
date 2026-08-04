@@ -45,3 +45,8 @@ next-env.d.ts
 .gstack/
 .playwright-mcp/
 .worktrees/
+
+# ortomosaico: binarios/saidas geradas, arquivos grandes nao vao pro repo
+scripts/ortomosaico/bin/
+scripts/ortomosaico/*.mbtiles
+scripts/ortomosaico/*.pmtiles

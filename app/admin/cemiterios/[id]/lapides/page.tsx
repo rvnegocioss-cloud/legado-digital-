@@ -75,7 +75,16 @@ export default function LapidesCemiterio() {
       <Link href="/admin/cemiterios" className="text-zinc-400 hover:text-white text-sm mb-4 inline-block">
         ← Voltar pra Cemitérios
       </Link>
-      <h1 className="text-2xl font-bold text-white mb-1">Lápides — {cemiterioNome}</h1>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-2xl font-bold text-white">Lápides — {cemiterioNome}</h1>
+        <Link
+          href={`/admin/cemiterios/${id}/mapa`}
+          className="text-sm font-medium px-3 py-1.5 rounded-lg"
+          style={{ background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
+        >
+          Mapa (marcar túmulos)
+        </Link>
+      </div>
       <p className="text-zinc-400 text-sm mb-8">
         Cada lápide é o ponto físico (quadra/lote/número) onde um memorial pode ser vinculado.
       </p>

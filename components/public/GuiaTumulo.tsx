@@ -1,14 +1,21 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Map, { Marker, Popup, Source, Layer, NavigationControl, type MapRef } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Navigation, ChevronDown, ChevronRight, MapPin, Cross } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
+import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
+import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
+
+registrarProtocoloPmtiles()
 
 // Camada raster de satelite (Esri, gratis, sem chave) - mesma fonte que
 // ja era usada no Leaflet, so descrita no formato de estilo do MapLibre.
-const ESTILO_SATELITE = {
+// Base identica a de sempre -- quando o cemiterio tem ortomosaico de drone
+// (ver useMemo abaixo), uma segunda source/layer entra POR CIMA dessa,
+// nunca substituindo.
+const ESTILO_SATELITE_BASE = {
   version: 8 as const,
   sources: {
     esri: {
@@ -32,6 +39,10 @@ interface Props {
   lote: string | null
   nomeCompleto?: string
   fotoUrl?: string | null
+  ortoUrl?: string | null
+  ortoMinzoom?: number | null
+  ortoMaxzoom?: number | null
+  ortoBounds?: number[] | null
 }
 
 function distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -49,7 +60,21 @@ function linkRotaCarro(lat: number, lng: number) {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`
 }
 
-export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, lapideLat, lapideLng, quadra, lote, nomeCompleto, fotoUrl }: Props) {
+export default function GuiaTumulo({
+  cemiterioNome,
+  cemiterioLat,
+  cemiterioLng,
+  lapideLat,
+  lapideLng,
+  quadra,
+  lote,
+  nomeCompleto,
+  fotoUrl,
+  ortoUrl,
+  ortoMinzoom,
+  ortoMaxzoom,
+  ortoBounds,
+}: Props) {
   const [aberto, setAberto] = useState(false)
   const [minhaPos, setMinhaPos] = useState<{ lat: number; lng: number } | null>(null)
   const [erroGps, setErroGps] = useState('')
@@ -59,6 +84,23 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
   const mapRef = useRef<MapRef | null>(null)
 
   const temTumulo = lapideLat != null && lapideLng != null
+
+  const ortomosaico = useMemo(
+    () => normalizarOrtomosaico({ url: ortoUrl, minzoom: ortoMinzoom, maxzoom: ortoMaxzoom, bounds: ortoBounds }),
+    [ortoUrl, ortoMinzoom, ortoMaxzoom, ortoBounds]
+  )
+
+  // Objeto novo a cada render faria o MapLibre reinicializar o estilo e
+  // piscar -- useMemo obrigatório. Sem ortomosaico, é exatamente o estilo
+  // de sempre (mesma referência de conteúdo, só sources/layers estendidos).
+  const estiloMapa = useMemo(() => {
+    if (!ortomosaico) return ESTILO_SATELITE_BASE
+    return {
+      ...ESTILO_SATELITE_BASE,
+      sources: { ...ESTILO_SATELITE_BASE.sources, orto: sourceOrtomosaico(ortomosaico) },
+      layers: [...ESTILO_SATELITE_BASE.layers, { id: 'orto-layer', type: 'raster' as const, source: 'orto' }],
+    }
+  }, [ortomosaico])
 
   useEffect(() => {
     return () => {
@@ -141,7 +183,7 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
                 ref={mapRef}
                 onLoad={aoCarregarMapa}
                 initialViewState={{ longitude: lapideLng!, latitude: lapideLat!, zoom: 19, pitch: 55, bearing: -20 }}
-                mapStyle={ESTILO_SATELITE as any}
+                mapStyle={estiloMapa as any}
                 style={{ height: 260, width: '100%' }}
                 maxPitch={70}
               >
@@ -287,7 +329,9 @@ export default function GuiaTumulo({ cemiterioNome, cemiterioLat, cemiterioLng, 
                   className="text-center mt-3 pt-3"
                   style={{ fontSize: 10, color: '#F5F2EB', opacity: 0.4, borderTop: '1px solid rgba(201,164,106,0.15)' }}
                 >
-                  Imagem de satélite hoje — em breve substituída por ortomosaico de drone com a localização exata do túmulo
+                  {ortomosaico
+                    ? 'Imagem aérea real deste cemitério, capturada por drone.'
+                    : 'Imagem de satélite hoje — em breve substituída por ortomosaico de drone com a localização exata do túmulo'}
                 </p>
               </div>
             </div>
