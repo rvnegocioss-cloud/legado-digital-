@@ -702,10 +702,14 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
     if (error || !data) {
       setMsg(error?.message || 'Erro ao adicionar túmulo.')
-    } else {
-      setLapidesEdicao((atual) => [...atual, { ...data, temMemorial: false }])
-      setMsg(`Túmulo ${codigo} adicionado.`)
+      setSalvando(false)
+      return
     }
+
+    setLapidesEdicao((atual) => [...atual, { ...data, temMemorial: false }])
+    setFilas((atual) => atual.map((f) => (f.id === filaMaisPerto.id ? { ...f, quantidade_prevista: proximoNumero } : f)))
+    await supabase.from('filas').update({ quantidade_prevista: proximoNumero }).eq('id', filaMaisPerto.id)
+    setMsg(`Túmulo ${codigo} adicionado.`)
     setSalvando(false)
   }
 
@@ -724,10 +728,18 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const { error } = await supabase.from('lapides').delete().eq('id', id)
     if (error) {
       setMsg(error.message)
-    } else {
-      setLapidesEdicao((atual) => atual.filter((l) => l.id !== id))
-      setTumuloSelecionadoEdicao(null)
-      setMsg(`Túmulo ${lapide.codigo} apagado.`)
+      setSalvando(false)
+      return
+    }
+
+    setLapidesEdicao((atual) => atual.filter((l) => l.id !== id))
+    setTumuloSelecionadoEdicao(null)
+    setMsg(`Túmulo ${lapide.codigo} apagado.`)
+
+    if (lapide.fila_id) {
+      const restantes = lapidesEdicao.filter((l) => l.fila_id === lapide.fila_id && l.id !== id).length
+      setFilas((atual) => atual.map((f) => (f.id === lapide.fila_id ? { ...f, quantidade_prevista: restantes } : f)))
+      await supabase.from('filas').update({ quantidade_prevista: restantes }).eq('id', lapide.fila_id)
     }
     setSalvando(false)
   }
