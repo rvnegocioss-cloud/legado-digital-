@@ -101,6 +101,16 @@ const CORES_ORIGEM: Record<string, string> = {
 
 const FC_VAZIA = { type: 'FeatureCollection' as const, features: [] as never[] }
 
+// Paleta pra identificar cada fila visualmente (bandeira no mapa + bolinha
+// no painel, mesma cor) -- cicla se tiver mais filas que cores.
+const PALETA_FILAS = [
+  '#f87171', '#fb923c', '#facc15', '#4ade80', '#34d399', '#22d3ee',
+  '#60a5fa', '#a78bfa', '#f472b6', '#fb7185', '#a3e635', '#2dd4bf',
+]
+function corDaFila(numero: number) {
+  return PALETA_FILAS[(numero - 1) % PALETA_FILAS.length]
+}
+
 export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [carregando, setCarregando] = useState(true)
   const [cemiterio, setCemiterio] = useState<Cemiterio | null>(null)
@@ -128,6 +138,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [lapidesEdicao, setLapidesEdicao] = useState<LapideEdicao[]>([])
   const [modoAdicionarTumulo, setModoAdicionarTumulo] = useState(false)
   const [tumuloSelecionadoEdicao, setTumuloSelecionadoEdicao] = useState<string | null>(null)
+  const [referenciaInsercao, setReferenciaInsercao] = useState<string | null>(null)
 
   useEffect(() => {
     carregar()
@@ -277,6 +288,17 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     [filas]
   )
 
+  const quadrasComBandeiraDeFila = useMemo(() => {
+    const ids = Object.keys(quadraExpandida).filter((id) => quadraExpandida[id])
+    if (quadraEmEdicao) ids.push(quadraEmEdicao.id)
+    return new Set(ids)
+  }, [quadraExpandida, quadraEmEdicao])
+
+  const filasComBandeira = useMemo(
+    () => filas.filter((f) => f.eixo && quadrasComBandeiraDeFila.has(f.quadra_id)),
+    [filas, quadrasComBandeiraDeFila]
+  )
+
   const filaDoDialogo = dialogoFila ? filas.find((f) => f.id === dialogoFila.filaId) : null
   const quantidadeNumerica = parseInt(quantidadeInput, 10)
   const previewPontos = useMemo(() => {
@@ -336,8 +358,8 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     }
 
     if (modoAdicionarTumulo) {
-      if (tumuloSelecionadoEdicao) {
-        await inserirTumuloDepoisDe(tumuloSelecionadoEdicao, e.lngLat.lat, e.lngLat.lng)
+      if (referenciaInsercao) {
+        await inserirTumuloDepoisDe(referenciaInsercao, e.lngLat.lat, e.lngLat.lng)
       } else {
         await adicionarTumulo(e.lngLat.lat, e.lngLat.lng)
       }
@@ -603,6 +625,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setQuadraEmEdicao(quadra)
     setModoAdicionarTumulo(false)
     setTumuloSelecionadoEdicao(null)
+    setReferenciaInsercao(null)
   }
 
   async function arrastarVerticeQuadra(index: number, lat: number, lng: number) {
@@ -626,6 +649,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setLapidesEdicao([])
     setModoAdicionarTumulo(false)
     setTumuloSelecionadoEdicao(null)
+    setReferenciaInsercao(null)
   }
 
   async function arrastarTumulo(id: string, lat: number, lng: number) {
@@ -797,7 +821,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const listaAtualizada = await buscarLapidesDaQuadra(quadraEmEdicao.id)
     if (listaAtualizada) setLapidesEdicao(listaAtualizada)
 
-    setTumuloSelecionadoEdicao(data.id)
+    setReferenciaInsercao(data.id)
     setMsg(`Túmulo ${codigoNovo} inserido — ${posteriores.length} reordenado(s) depois dele.`)
     setSalvando(false)
   }
@@ -1004,6 +1028,32 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 </Marker>
               )}
 
+              {filasComBandeira.map((f) => {
+                const cor = corDaFila(f.numero)
+                const [lng, lat] = f.eixo!.coordinates[0]
+                return (
+                  <Marker key={`bandeira-${f.id}`} longitude={lng} latitude={lat} anchor="bottom">
+                    <div title={`Rua ${f.numero}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          color: '#0B1D2A',
+                          background: cor,
+                          borderRadius: 3,
+                          padding: '0 3px',
+                          marginBottom: 1,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        R{f.numero}
+                      </span>
+                      <Flag size={18} strokeWidth={2} fill={cor} style={{ color: '#0B1D2A' }} />
+                    </div>
+                  </Marker>
+                )
+              })}
+
               {quadraEmEdicao?.poligono &&
                 quadraEmEdicao.poligono.coordinates[0].slice(0, -1).map(([lng, lat], index) => (
                   <Marker
@@ -1045,6 +1095,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                         onClick={(e) => {
                           e.stopPropagation()
                           setTumuloSelecionadoEdicao((atual) => (atual === l.id ? null : l.id))
+                          setReferenciaInsercao(l.id)
                         }}
                         title={`${l.codigo || ''}${filaTravada ? ' (fila travada)' : ''}`}
                         style={{
@@ -1082,7 +1133,6 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                     anchor="top"
                     offset={16}
                     closeButton={false}
-                    closeOnClick={false}
                     onClose={() => setTumuloSelecionadoEdicao(null)}
                   >
                     <div style={{ minWidth: 140 }}>
@@ -1433,7 +1483,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                             <ul className="space-y-1">
                               {filasDaQuadra.map((f) => (
                                 <li key={f.id} className="flex items-center justify-between text-xs text-zinc-300">
-                                  <span>
+                                  <span className="flex items-center gap-1.5">
+                                    <span
+                                      className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                                      style={{ background: corDaFila(f.numero) }}
+                                    />
                                     Rua {f.numero} {f.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
                                     {f.quantidade_prevista ? `— ${f.quantidade_prevista} túmulos` : '— sem túmulos'}
                                   </span>
@@ -1489,7 +1543,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
               <button
                 type="button"
-                onClick={() => setModoAdicionarTumulo((v) => !v)}
+                onClick={() => {
+                  setModoAdicionarTumulo((v) => !v)
+                  setReferenciaInsercao(null)
+                }}
                 className={`w-full text-xs px-3 py-1.5 rounded mb-2 flex items-center justify-center gap-1 ${
                   modoAdicionarTumulo ? 'bg-emerald-700 text-white' : 'border border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                 }`}
@@ -1498,13 +1555,20 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 {modoAdicionarTumulo ? 'Clica no mapa pra adicionar (clica de novo pra sair)' : 'Adicionar túmulo (clicando no mapa)'}
               </button>
 
-              <p className="text-xs text-zinc-500 mb-1">Clica numa bolinha pra ver o código e apagar.</p>
+              <p className="text-xs text-zinc-500 mb-1">Clica numa bolinha pra ver o código, apagar, ou marcar como referência de inserção.</p>
               {modoAdicionarTumulo && (
-                <p className="text-xs mb-3" style={{ color: tumuloSelecionadoEdicao ? '#34d399' : '#a1a1aa' }}>
-                  {tumuloSelecionadoEdicao
-                    ? `Vai inserir logo depois do túmulo selecionado (empurra os seguintes +1). Clica noutra bolinha pra trocar a referência, ou clica vazio de novo pra tirar a seleção.`
-                    : 'Sem bolinha selecionada: vai acrescentar no fim da fileira mais perto. Clica numa bolinha antes de clicar no mapa pra inserir no meio (empurra os seguintes +1).'}
-                </p>
+                <div className="text-xs mb-3 flex items-center justify-between gap-2" style={{ color: referenciaInsercao ? '#34d399' : '#a1a1aa' }}>
+                  <span>
+                    {referenciaInsercao
+                      ? `Referência: ${lapidesEdicao.find((l) => l.id === referenciaInsercao)?.codigo || '?'} — próximo clique insere logo depois (empurra os seguintes +1).`
+                      : 'Sem referência: próximo clique acrescenta no fim da fileira mais perto. Clica numa bolinha antes pra inserir no meio.'}
+                  </span>
+                  {referenciaInsercao && (
+                    <button type="button" onClick={() => setReferenciaInsercao(null)} className="text-zinc-400 hover:text-zinc-200 shrink-0">
+                      Limpar
+                    </button>
+                  )}
+                </div>
               )}
 
               <div className="flex items-center gap-2">
