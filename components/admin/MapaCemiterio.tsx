@@ -597,6 +597,22 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setTumuloSelecionadoEdicao(null)
   }
 
+  async function arrastarVerticeQuadra(index: number, lat: number, lng: number) {
+    if (!quadraEmEdicao?.poligono) return
+    const anel = quadraEmEdicao.poligono.coordinates[0].map((p) => [...p]) as number[][]
+    const ultimoIndex = anel.length - 1
+    anel[index] = [lng, lat]
+    if (index === 0) anel[ultimoIndex] = [lng, lat]
+    if (index === ultimoIndex) anel[0] = [lng, lat]
+
+    const novoPoligono = { type: 'Polygon' as const, coordinates: [anel] }
+    setQuadraEmEdicao({ ...quadraEmEdicao, poligono: novoPoligono })
+    setQuadras((atual) => atual.map((q) => (q.id === quadraEmEdicao.id ? { ...q, poligono: novoPoligono } : q)))
+
+    const { error } = await supabase.from('quadras').update({ poligono: novoPoligono }).eq('id', quadraEmEdicao.id)
+    if (error) setMsg(error.message)
+  }
+
   function sairModoEdicao() {
     setQuadraEmEdicao(null)
     setLapidesEdicao([])
@@ -886,6 +902,31 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                   </div>
                 </Marker>
               )}
+
+              {quadraEmEdicao?.poligono &&
+                quadraEmEdicao.poligono.coordinates[0].slice(0, -1).map(([lng, lat], index) => (
+                  <Marker
+                    key={`vertice-${index}`}
+                    longitude={lng}
+                    latitude={lat}
+                    anchor="center"
+                    draggable
+                    onDragEnd={(e) => arrastarVerticeQuadra(index, e.lngLat.lat, e.lngLat.lng)}
+                  >
+                    <div
+                      title="Arrasta pra ajustar a borda da quadra"
+                      style={{
+                        width: 14,
+                        height: 14,
+                        background: '#22d3ee',
+                        border: '2px solid #0B1D2A',
+                        boxShadow: '0 0 0 1px rgba(255,255,255,0.7)',
+                        cursor: 'grab',
+                        transform: 'rotate(45deg)',
+                      }}
+                    />
+                  </Marker>
+                ))}
 
               {quadraEmEdicao &&
                 lapidesEdicao.map((l) => {
@@ -1330,7 +1371,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
           {quadraEmEdicao && (
             <div className="rounded-xl bg-zinc-900 border border-blue-900/40 p-4 mb-4">
               <h2 className="text-sm font-semibold text-white mb-1">Editando Quadra {quadraEmEdicao.numero}</h2>
-              <p className="text-xs text-zinc-500 mb-3">{lapidesEdicao.length} túmulo(s) — arrasta a bolinha pra reposicionar.</p>
+              <p className="text-xs text-zinc-500 mb-1">{lapidesEdicao.length} túmulo(s) — bolinha dourada, arrasta pra reposicionar.</p>
+              <p className="text-xs mb-3" style={{ color: '#22d3ee' }}>
+                ◆ Cantos da quadra — losango ciano, arrasta pra ajustar a borda do contorno.
+              </p>
 
               <button
                 type="button"
