@@ -336,7 +336,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     }
 
     if (modoAdicionarTumulo) {
-      await adicionarTumulo(e.lngLat.lat, e.lngLat.lng)
+      if (tumuloSelecionadoEdicao) {
+        await inserirTumuloDepoisDe(tumuloSelecionadoEdicao, e.lngLat.lat, e.lngLat.lng)
+      } else {
+        await adicionarTumulo(e.lngLat.lat, e.lngLat.lng)
+      }
       return
     }
 
@@ -565,33 +569,37 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setSalvando(false)
   }
 
+  async function buscarLapidesDaQuadra(quadraId: string): Promise<LapideEdicao[] | null> {
+    const { data, error } = await supabase
+      .from('lapides')
+      .select('id, numero, fila_id, codigo, latitude, longitude, situacao, homenagens(id)')
+      .eq('quadra_id', quadraId)
+      .not('latitude', 'is', null)
+      .order('numero')
+    if (error) {
+      setMsg(error.message)
+      return null
+    }
+    return (data || []).map((l: any) => ({
+      id: l.id,
+      numero: l.numero,
+      fila_id: l.fila_id,
+      codigo: l.codigo,
+      latitude: l.latitude,
+      longitude: l.longitude,
+      situacao: l.situacao,
+      temMemorial: Array.isArray(l.homenagens) ? l.homenagens.length > 0 : !!l.homenagens,
+    }))
+  }
+
   async function entrarModoEdicao(quadra: Quadra) {
     setMsg('')
     desenho.cancelar()
     setModoMarcar(false)
     setModoMarcarEntrada(false)
-    const { data, error } = await supabase
-      .from('lapides')
-      .select('id, numero, fila_id, codigo, latitude, longitude, situacao, homenagens(id)')
-      .eq('quadra_id', quadra.id)
-      .not('latitude', 'is', null)
-      .order('numero')
-    if (error) {
-      setMsg(error.message)
-      return
-    }
-    setLapidesEdicao(
-      (data || []).map((l: any) => ({
-        id: l.id,
-        numero: l.numero,
-        fila_id: l.fila_id,
-        codigo: l.codigo,
-        latitude: l.latitude,
-        longitude: l.longitude,
-        situacao: l.situacao,
-        temMemorial: Array.isArray(l.homenagens) ? l.homenagens.length > 0 : !!l.homenagens,
-      }))
-    )
+    const lista = await buscarLapidesDaQuadra(quadra.id)
+    if (lista === null) return
+    setLapidesEdicao(lista)
     setQuadraEmEdicao(quadra)
     setModoAdicionarTumulo(false)
     setTumuloSelecionadoEdicao(null)
@@ -710,6 +718,87 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setFilas((atual) => atual.map((f) => (f.id === filaMaisPerto.id ? { ...f, quantidade_prevista: proximoNumero } : f)))
     await supabase.from('filas').update({ quantidade_prevista: proximoNumero }).eq('id', filaMaisPerto.id)
     setMsg(`Túmulo ${codigo} adicionado.`)
+    setSalvando(false)
+  }
+
+  /** Insere um túmulo logo depois do de referência (numero+1), empurrando +1
+   * todos os que vinham depois dele na mesma fila -- pra quando falta um no
+   * meio da sequência em vez de sempre no fim. Clica na bolinha de referência
+   * primeiro (sem apagar), depois clica no mapa em modo "Adicionar". */
+  async function inserirTumuloDepoisDe(referenciaId: string, lat: number, lng: number) {
+    const referencia = lapidesEdicao.find((l) => l.id === referenciaId)
+    if (!referencia || !referencia.fila_id || referencia.numero == null || !quadraEmEdicao) return
+
+    const fila = filas.find((f) => f.id === referencia.fila_id)
+    if (!fila) return
+    if (fila.geometria_revisada) {
+      setMsg('Essa fileira tá travada -- destrava pra inserir túmulo nela.')
+      return
+    }
+
+    const posteriores = lapidesEdicao
+      .filter((l) => l.fila_id === referencia.fila_id && (l.numero || 0) > referencia.numero!)
+      .sort((a, b) => (b.numero || 0) - (a.numero || 0))
+
+    if (posteriores.some((l) => l.temMemorial)) {
+      setMsg('Tem túmulo depois desse com memorial vinculado -- não dá pra deslocar o código dele automático.')
+      return
+    }
+
+    setSalvando(true)
+
+    for (const l of posteriores) {
+      const novoNumero = (l.numero || 0) + 1
+      const novoCodigo = `Q${String(quadraEmEdicao.numero).padStart(2, '0')}-R${String(fila.numero).padStart(2, '0')}-T${String(novoNumero).padStart(3, '0')}`
+      const { error } = await supabase
+        .from('lapides')
+        .update({ numero: novoNumero, codigo: novoCodigo, identificacao: novoCodigo, lote: String(novoNumero) })
+        .eq('id', l.id)
+      if (error) {
+        setMsg(`Erro reordenando túmulo ${l.codigo}: ${error.message}`)
+        setSalvando(false)
+        return
+      }
+    }
+
+    const numeroNovo = referencia.numero + 1
+    const codigoNovo = `Q${String(quadraEmEdicao.numero).padStart(2, '0')}-R${String(fila.numero).padStart(2, '0')}-T${String(numeroNovo).padStart(3, '0')}`
+
+    const { data, error } = await supabase
+      .from('lapides')
+      .insert({
+        cemiterio_id: cemiterioId,
+        quadra_id: quadraEmEdicao.id,
+        fila_id: fila.id,
+        numero: numeroNovo,
+        codigo: codigoNovo,
+        identificacao: codigoNovo,
+        quadra: String(quadraEmEdicao.numero),
+        lote: String(numeroNovo),
+        latitude: lat,
+        longitude: lng,
+        coordenada_origem: 'ortomosaico',
+        coordenada_precisao: 'exata',
+        situacao: 'nao_confirmada',
+      })
+      .select('id, numero, fila_id, codigo, latitude, longitude, situacao')
+      .single()
+
+    if (error || !data) {
+      setMsg(error?.message || 'Erro ao inserir túmulo.')
+      setSalvando(false)
+      return
+    }
+
+    const totalNaFila = lapidesEdicao.filter((l) => l.fila_id === fila.id).length + 1
+    setFilas((atual) => atual.map((f) => (f.id === fila.id ? { ...f, quantidade_prevista: totalNaFila } : f)))
+    await supabase.from('filas').update({ quantidade_prevista: totalNaFila }).eq('id', fila.id)
+
+    const listaAtualizada = await buscarLapidesDaQuadra(quadraEmEdicao.id)
+    if (listaAtualizada) setLapidesEdicao(listaAtualizada)
+
+    setTumuloSelecionadoEdicao(data.id)
+    setMsg(`Túmulo ${codigoNovo} inserido — ${posteriores.length} reordenado(s) depois dele.`)
     setSalvando(false)
   }
 
@@ -1408,7 +1497,14 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 {modoAdicionarTumulo ? 'Clica no mapa pra adicionar (clica de novo pra sair)' : 'Adicionar túmulo (clicando no mapa)'}
               </button>
 
-              <p className="text-xs text-zinc-500 mb-3">Clica numa bolinha pra ver o código e apagar.</p>
+              <p className="text-xs text-zinc-500 mb-1">Clica numa bolinha pra ver o código e apagar.</p>
+              {modoAdicionarTumulo && (
+                <p className="text-xs mb-3" style={{ color: tumuloSelecionadoEdicao ? '#34d399' : '#a1a1aa' }}>
+                  {tumuloSelecionadoEdicao
+                    ? `Vai inserir logo depois do túmulo selecionado (empurra os seguintes +1). Clica noutra bolinha pra trocar a referência, ou clica vazio de novo pra tirar a seleção.`
+                    : 'Sem bolinha selecionada: vai acrescentar no fim da fileira mais perto. Clica numa bolinha antes de clicar no mapa pra inserir no meio (empurra os seguintes +1).'}
+                </p>
+              )}
 
               <div className="flex items-center gap-2">
                 <button
