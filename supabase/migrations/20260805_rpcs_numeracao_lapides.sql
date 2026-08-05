@@ -333,7 +333,7 @@ begin
       select jsonb_build_object('type', 'FeatureCollection', 'features', coalesce(jsonb_agg(
         jsonb_build_object(
           'type', 'Feature', 'geometry', q.poligono,
-          'properties', jsonb_build_object('id', q.id, 'numero', q.numero, 'nome', q.nome, 'situacao', q.situacao)
+          'properties', jsonb_build_object('id', q.id, 'numero', q.numero, 'nome', q.nome, 'situacao', q.situacao, 'geometria_revisada', q.geometria_revisada)
         )
       ), '[]'::jsonb))
       from quadras q where q.cemiterio_id = p_cemiterio_id and q.poligono is not null

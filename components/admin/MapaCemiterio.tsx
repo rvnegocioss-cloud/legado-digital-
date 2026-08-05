@@ -65,6 +65,18 @@ interface Quadra {
   nome: string | null
   situacao: string
   poligono: { type: 'Polygon'; coordinates: number[][][] } | null
+  geometria_revisada: boolean
+}
+
+interface LapideEdicao {
+  id: string
+  numero: number | null
+  fila_id: string | null
+  codigo: string | null
+  latitude: number
+  longitude: number
+  situacao: string
+  temMemorial: boolean
 }
 
 interface Fila {
@@ -111,6 +123,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [dialogoFila, setDialogoFila] = useState<{ filaId: string; quadraNumero: number; filaNumero: number; comprimentoM: number } | null>(null)
   const [quantidadeInput, setQuantidadeInput] = useState('')
 
+  const [quadraEmEdicao, setQuadraEmEdicao] = useState<Quadra | null>(null)
+  const [lapidesEdicao, setLapidesEdicao] = useState<LapideEdicao[]>([])
+  const [modoAdicionarTumulo, setModoAdicionarTumulo] = useState(false)
+  const [tumuloSelecionadoEdicao, setTumuloSelecionadoEdicao] = useState<string | null>(null)
+
   useEffect(() => {
     carregar()
   }, [cemiterioId])
@@ -139,7 +156,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setHomenagens(h || [])
 
     const geoData = geo as {
-      quadras?: { features: { properties: { id: string; numero: number; nome: string | null; situacao: string }; geometry: Quadra['poligono'] }[] }
+      quadras?: { features: { properties: { id: string; numero: number; nome: string | null; situacao: string; geometria_revisada: boolean }; geometry: Quadra['poligono'] }[] }
       filas?: { features: { properties: { id: string; quadra_id: string; numero: number; quantidade_prevista: number | null }; geometry: Fila['eixo'] }[] }
     } | null
 
@@ -150,6 +167,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
         nome: f.properties.nome,
         situacao: f.properties.situacao,
         poligono: f.geometry,
+        geometria_revisada: f.properties.geometria_revisada,
       }))
     )
     setFilas(
@@ -190,16 +208,20 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const lapidesSemCoordenada = lapides.filter((l) => l.latitude == null || l.longitude == null)
   const homenagemPorLapide = new Map(homenagens.map((h) => [h.lapide_id, h]))
 
+  const idsEdicao = useMemo(() => new Set(lapidesEdicao.map((l) => l.id)), [lapidesEdicao])
+
   const geojsonPinos = useMemo(
     () => ({
       type: 'FeatureCollection' as const,
-      features: lapidesComCoordenada.map((l) => ({
-        type: 'Feature' as const,
-        geometry: { type: 'Point' as const, coordinates: [l.longitude!, l.latitude!] },
-        properties: { lapideId: l.id, origem: l.coordenada_origem || 'desconhecida' },
-      })),
+      features: lapidesComCoordenada
+        .filter((l) => !idsEdicao.has(l.id))
+        .map((l) => ({
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [l.longitude!, l.latitude!] },
+          properties: { lapideId: l.id, origem: l.coordenada_origem || 'desconhecida' },
+        })),
     }),
-    [lapidesComCoordenada]
+    [lapidesComCoordenada, idsEdicao]
   )
 
   const quadrasGeojson = useMemo(
@@ -303,6 +325,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
     if (modoMarcar && lapideParaMarcar) {
       await salvarCoordenada(lapideParaMarcar.id, e.lngLat.lat, e.lngLat.lng)
+      return
+    }
+
+    if (modoAdicionarTumulo) {
+      await adicionarTumulo(e.lngLat.lat, e.lngLat.lng)
       return
     }
 
@@ -531,6 +558,170 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setSalvando(false)
   }
 
+  async function entrarModoEdicao(quadra: Quadra) {
+    setMsg('')
+    desenho.cancelar()
+    setModoMarcar(false)
+    setModoMarcarEntrada(false)
+    const { data, error } = await supabase
+      .from('lapides')
+      .select('id, numero, fila_id, codigo, latitude, longitude, situacao, homenagens(id)')
+      .eq('quadra_id', quadra.id)
+      .not('latitude', 'is', null)
+      .order('numero')
+    if (error) {
+      setMsg(error.message)
+      return
+    }
+    setLapidesEdicao(
+      (data || []).map((l: any) => ({
+        id: l.id,
+        numero: l.numero,
+        fila_id: l.fila_id,
+        codigo: l.codigo,
+        latitude: l.latitude,
+        longitude: l.longitude,
+        situacao: l.situacao,
+        temMemorial: Array.isArray(l.homenagens) ? l.homenagens.length > 0 : !!l.homenagens,
+      }))
+    )
+    setQuadraEmEdicao(quadra)
+    setModoAdicionarTumulo(false)
+    setTumuloSelecionadoEdicao(null)
+  }
+
+  function sairModoEdicao() {
+    setQuadraEmEdicao(null)
+    setLapidesEdicao([])
+    setModoAdicionarTumulo(false)
+    setTumuloSelecionadoEdicao(null)
+  }
+
+  async function arrastarTumulo(id: string, lat: number, lng: number) {
+    setLapidesEdicao((atual) => atual.map((l) => (l.id === id ? { ...l, latitude: lat, longitude: lng } : l)))
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    const { error } = await supabase
+      .from('lapides')
+      .update({
+        latitude: lat,
+        longitude: lng,
+        coordenada_origem: 'ortomosaico',
+        coordenada_precisao: 'exata',
+        coordenada_atualizada_em: new Date().toISOString(),
+        coordenada_atualizada_por: session?.user?.id || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+    if (error) setMsg(error.message)
+  }
+
+  function _distanciaPontoSegmento(px: number, py: number, x1: number, y1: number, x2: number, y2: number) {
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const comprimentoSq = dx * dx + dy * dy
+    let t = comprimentoSq === 0 ? 0 : ((px - x1) * dx + (py - y1) * dy) / comprimentoSq
+    t = Math.max(0, Math.min(1, t))
+    const projX = x1 + t * dx
+    const projY = y1 + t * dy
+    return Math.hypot(px - projX, py - projY)
+  }
+
+  async function adicionarTumulo(lat: number, lng: number) {
+    if (!quadraEmEdicao) return
+    const filasDaQuadra = filas.filter((f) => f.quadra_id === quadraEmEdicao.id && f.eixo)
+    if (filasDaQuadra.length === 0) {
+      setMsg('Essa quadra não tem rua desenhada pra vincular o túmulo novo.')
+      return
+    }
+
+    let filaMaisPerto = filasDaQuadra[0]
+    let menorDist = Infinity
+    for (const f of filasDaQuadra) {
+      const [c0, c1] = f.eixo!.coordinates
+      const d = _distanciaPontoSegmento(lng, lat, c0[0], c0[1], c1[0], c1[1])
+      if (d < menorDist) {
+        menorDist = d
+        filaMaisPerto = f
+      }
+    }
+
+    const numerosDaFila = lapidesEdicao.filter((l) => l.fila_id === filaMaisPerto.id).map((l) => l.numero || 0)
+    const proximoNumero = (numerosDaFila.length > 0 ? Math.max(...numerosDaFila) : 0) + 1
+    const codigo = `Q${String(quadraEmEdicao.numero).padStart(2, '0')}-R${String(filaMaisPerto.numero).padStart(2, '0')}-T${String(proximoNumero).padStart(3, '0')}`
+
+    setSalvando(true)
+    const { data, error } = await supabase
+      .from('lapides')
+      .insert({
+        cemiterio_id: cemiterioId,
+        quadra_id: quadraEmEdicao.id,
+        fila_id: filaMaisPerto.id,
+        numero: proximoNumero,
+        codigo,
+        identificacao: codigo,
+        quadra: String(quadraEmEdicao.numero),
+        lote: String(proximoNumero),
+        latitude: lat,
+        longitude: lng,
+        coordenada_origem: 'ortomosaico',
+        coordenada_precisao: 'exata',
+        situacao: 'nao_confirmada',
+      })
+      .select('id, numero, fila_id, codigo, latitude, longitude, situacao')
+      .single()
+
+    if (error || !data) {
+      setMsg(error?.message || 'Erro ao adicionar túmulo.')
+    } else {
+      setLapidesEdicao((atual) => [...atual, { ...data, temMemorial: false }])
+      setMsg(`Túmulo ${codigo} adicionado.`)
+    }
+    setSalvando(false)
+  }
+
+  async function apagarTumulo(id: string) {
+    const lapide = lapidesEdicao.find((l) => l.id === id)
+    if (!lapide) return
+    if (lapide.temMemorial) {
+      setMsg('Esse túmulo já tem memorial vinculado -- não dá pra apagar por aqui.')
+      return
+    }
+    setSalvando(true)
+    const { error } = await supabase.from('lapides').delete().eq('id', id)
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setLapidesEdicao((atual) => atual.filter((l) => l.id !== id))
+      setTumuloSelecionadoEdicao(null)
+      setMsg(`Túmulo ${lapide.codigo} apagado.`)
+    }
+    setSalvando(false)
+  }
+
+  async function travarQuadra() {
+    if (!quadraEmEdicao) return
+    setSalvando(true)
+    const { error } = await supabase.from('quadras').update({ geometria_revisada: true }).eq('id', quadraEmEdicao.id)
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setMsg(`Quadra ${quadraEmEdicao.numero} travada -- geometria confirmada.`)
+      sairModoEdicao()
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  async function destravarQuadra(quadra: Quadra) {
+    setSalvando(true)
+    const { error } = await supabase.from('quadras').update({ geometria_revisada: false }).eq('id', quadra.id)
+    if (error) setMsg(error.message)
+    else await carregar()
+    setSalvando(false)
+  }
+
   if (carregando) return <p className="text-zinc-400 text-sm">Carregando mapa...</p>
   if (!cemiterio) return <p className="text-zinc-400 text-sm">Cemitério não encontrado.</p>
 
@@ -570,7 +761,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               style={{
                 width: '100%',
                 height: '100%',
-                cursor: modoMarcarEntrada || (modoMarcar && lapideParaMarcar) || desenho.ativo ? 'crosshair' : undefined,
+                cursor:
+                  modoMarcarEntrada || (modoMarcar && lapideParaMarcar) || desenho.ativo || modoAdicionarTumulo
+                    ? 'crosshair'
+                    : undefined,
               }}
               interactiveLayerIds={['lapides-pinos']}
               onClick={aoClicarMapa}
@@ -657,6 +851,80 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                   </div>
                 </Marker>
               )}
+
+              {quadraEmEdicao &&
+                lapidesEdicao.map((l) => (
+                  <Marker
+                    key={l.id}
+                    longitude={l.longitude}
+                    latitude={l.latitude}
+                    anchor="center"
+                    draggable
+                    onDragEnd={(e) => arrastarTumulo(l.id, e.lngLat.lat, e.lngLat.lng)}
+                  >
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setTumuloSelecionadoEdicao((atual) => (atual === l.id ? null : l.id))
+                      }}
+                      title={l.codigo || ''}
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        cursor: 'grab',
+                        color: '#0B1D2A',
+                        background: l.temMemorial ? '#22c55e' : tumuloSelecionadoEdicao === l.id ? '#f87171' : '#C9A46A',
+                        border: '2px solid #0B1D2A',
+                        boxShadow: '0 0 0 1px rgba(255,255,255,0.6)',
+                      }}
+                    >
+                      {l.numero ?? '?'}
+                    </div>
+                  </Marker>
+                ))}
+
+              {tumuloSelecionadoEdicao && (() => {
+                const l = lapidesEdicao.find((x) => x.id === tumuloSelecionadoEdicao)
+                if (!l) return null
+                return (
+                  <Popup
+                    longitude={l.longitude}
+                    latitude={l.latitude}
+                    anchor="top"
+                    offset={16}
+                    closeButton={false}
+                    onClose={() => setTumuloSelecionadoEdicao(null)}
+                  >
+                    <div style={{ minWidth: 140 }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, margin: 0 }}>{l.codigo}</p>
+                      <p style={{ fontSize: 11, color: '#888', margin: '2px 0 8px' }}>
+                        {l.temMemorial ? 'Tem memorial vinculado' : 'Sem memorial'}
+                      </p>
+                      <button
+                        type="button"
+                        disabled={l.temMemorial || salvando}
+                        onClick={() => apagarTumulo(l.id)}
+                        style={{
+                          fontSize: 12,
+                          color: l.temMemorial ? '#999' : '#dc2626',
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: l.temMemorial ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        Apagar túmulo
+                      </button>
+                    </div>
+                  </Popup>
+                )
+              })()}
 
               {lapideHover && lapideHover.id !== lapideSelecionada?.id && (
                 <Popup
@@ -905,15 +1173,16 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                       >
                         {expandida ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         Quadra {q.numero}
+                        {q.geometria_revisada && <span className="text-emerald-400 text-xs">🔒</span>}
                         <span className="text-zinc-500 text-xs ml-auto">{filasDaQuadra.length} rua(s)</span>
                       </button>
 
                       {expandida && (
                         <div className="px-3 pb-2 pt-1 border-t border-zinc-800">
-                          <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
                             <button
                               type="button"
-                              disabled={salvando || desenho.ativo}
+                              disabled={salvando || desenho.ativo || q.geometria_revisada}
                               onClick={() => {
                                 setModoMarcarEntrada(false)
                                 setModoMarcar(false)
@@ -927,10 +1196,30 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                             {cemiterio.entrada_latitude != null && filasDaQuadra.length > 1 && (
                               <button
                                 type="button"
+                                disabled={q.geometria_revisada}
                                 onClick={() => proporNumeracaoFilas(q)}
-                                className="text-xs text-zinc-400 hover:text-zinc-200"
+                                className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-40"
                               >
                                 Numerar ruas
+                              </button>
+                            )}
+                            {q.geometria_revisada ? (
+                              <button
+                                type="button"
+                                disabled={salvando}
+                                onClick={() => destravarQuadra(q)}
+                                className="text-xs text-emerald-400 hover:text-emerald-200 ml-auto"
+                              >
+                                🔒 Travada — destravar
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={salvando || desenho.ativo}
+                                onClick={() => entrarModoEdicao(q)}
+                                className="text-xs text-blue-400 hover:text-blue-200 ml-auto"
+                              >
+                                Editar túmulos no mapa
                               </button>
                             )}
                           </div>
@@ -981,6 +1270,44 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 })}
             </ul>
           </div>
+
+          {quadraEmEdicao && (
+            <div className="rounded-xl bg-zinc-900 border border-blue-900/40 p-4 mb-4">
+              <h2 className="text-sm font-semibold text-white mb-1">Editando Quadra {quadraEmEdicao.numero}</h2>
+              <p className="text-xs text-zinc-500 mb-3">{lapidesEdicao.length} túmulo(s) — arrasta a bolinha pra reposicionar.</p>
+
+              <button
+                type="button"
+                onClick={() => setModoAdicionarTumulo((v) => !v)}
+                className={`w-full text-xs px-3 py-1.5 rounded mb-2 flex items-center justify-center gap-1 ${
+                  modoAdicionarTumulo ? 'bg-emerald-700 text-white' : 'border border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                <Plus size={12} strokeWidth={2} />
+                {modoAdicionarTumulo ? 'Clica no mapa pra adicionar (clica de novo pra sair)' : 'Adicionar túmulo (clicando no mapa)'}
+              </button>
+
+              <p className="text-xs text-zinc-500 mb-3">Clica numa bolinha pra ver o código e apagar.</p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={salvando}
+                  onClick={travarQuadra}
+                  className="flex-1 text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40"
+                >
+                  🔒 Travar quadra (geometria confirmada)
+                </button>
+                <button
+                  type="button"
+                  onClick={sairModoEdicao}
+                  className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                >
+                  Sair
+                </button>
+              </div>
+            </div>
+          )}
 
           {dialogoFila && (
             <div className="rounded-xl bg-zinc-900 border border-amber-900/40 p-4 mb-4">
