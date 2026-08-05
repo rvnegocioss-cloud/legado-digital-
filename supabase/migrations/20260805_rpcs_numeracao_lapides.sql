@@ -342,7 +342,7 @@ begin
       select jsonb_build_object('type', 'FeatureCollection', 'features', coalesce(jsonb_agg(
         jsonb_build_object(
           'type', 'Feature', 'geometry', f.eixo,
-          'properties', jsonb_build_object('id', f.id, 'quadra_id', f.quadra_id, 'numero', f.numero, 'quantidade_prevista', f.quantidade_prevista)
+          'properties', jsonb_build_object('id', f.id, 'quadra_id', f.quadra_id, 'numero', f.numero, 'quantidade_prevista', f.quantidade_prevista, 'geometria_revisada', f.geometria_revisada)
         )
       ), '[]'::jsonb))
       from filas f where f.cemiterio_id = p_cemiterio_id and f.eixo is not null

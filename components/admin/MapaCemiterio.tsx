@@ -85,6 +85,7 @@ interface Fila {
   numero: number
   quantidade_prevista: number | null
   eixo: { type: 'LineString'; coordinates: [number, number][] } | null
+  geometria_revisada: boolean
 }
 
 type ItemNumeracao = { id: string; numero: number; label: string; distancia: number | null }
@@ -157,7 +158,12 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
     const geoData = geo as {
       quadras?: { features: { properties: { id: string; numero: number; nome: string | null; situacao: string; geometria_revisada: boolean }; geometry: Quadra['poligono'] }[] }
-      filas?: { features: { properties: { id: string; quadra_id: string; numero: number; quantidade_prevista: number | null }; geometry: Fila['eixo'] }[] }
+      filas?: {
+        features: {
+          properties: { id: string; quadra_id: string; numero: number; quantidade_prevista: number | null; geometria_revisada: boolean }
+          geometry: Fila['eixo']
+        }[]
+      }
     } | null
 
     setQuadras(
@@ -177,6 +183,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
         numero: f.properties.numero,
         quantidade_prevista: f.properties.quantidade_prevista,
         eixo: f.geometry,
+        geometria_revisada: f.properties.geometria_revisada,
       }))
     )
     setCarregando(false)
@@ -598,6 +605,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   }
 
   async function arrastarTumulo(id: string, lat: number, lng: number) {
+    const lapide = lapidesEdicao.find((l) => l.id === id)
+    if (lapide?.fila_id && filas.find((f) => f.id === lapide.fila_id)?.geometria_revisada) {
+      setMsg('Essa fileira tá travada -- destrava pra mexer nesse túmulo.')
+      return
+    }
     setLapidesEdicao((atual) => atual.map((l) => (l.id === id ? { ...l, latitude: lat, longitude: lng } : l)))
     const {
       data: { session },
@@ -630,9 +642,9 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
   async function adicionarTumulo(lat: number, lng: number) {
     if (!quadraEmEdicao) return
-    const filasDaQuadra = filas.filter((f) => f.quadra_id === quadraEmEdicao.id && f.eixo)
+    const filasDaQuadra = filas.filter((f) => f.quadra_id === quadraEmEdicao.id && f.eixo && !f.geometria_revisada)
     if (filasDaQuadra.length === 0) {
-      setMsg('Essa quadra não tem rua desenhada pra vincular o túmulo novo.')
+      setMsg('Nenhuma rua livre pra vincular o túmulo novo (ou não tem rua, ou tão todas travadas).')
       return
     }
 
@@ -688,6 +700,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       setMsg('Esse túmulo já tem memorial vinculado -- não dá pra apagar por aqui.')
       return
     }
+    if (lapide.fila_id && filas.find((f) => f.id === lapide.fila_id)?.geometria_revisada) {
+      setMsg('Essa fileira tá travada -- destrava pra apagar esse túmulo.')
+      return
+    }
     setSalvando(true)
     const { error } = await supabase.from('lapides').delete().eq('id', id)
     if (error) {
@@ -717,6 +733,25 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   async function destravarQuadra(quadra: Quadra) {
     setSalvando(true)
     const { error } = await supabase.from('quadras').update({ geometria_revisada: false }).eq('id', quadra.id)
+    if (error) setMsg(error.message)
+    else await carregar()
+    setSalvando(false)
+  }
+
+  async function travarFila(quadraNumero: number, fila: Fila) {
+    setSalvando(true)
+    const { error } = await supabase.from('filas').update({ geometria_revisada: true }).eq('id', fila.id)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`Rua ${fila.numero} da Quadra ${quadraNumero} travada.`)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  async function destravarFila(fila: Fila) {
+    setSalvando(true)
+    const { error } = await supabase.from('filas').update({ geometria_revisada: false }).eq('id', fila.id)
     if (error) setMsg(error.message)
     else await carregar()
     setSalvando(false)
@@ -853,45 +888,51 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               )}
 
               {quadraEmEdicao &&
-                lapidesEdicao.map((l) => (
-                  <Marker
-                    key={l.id}
-                    longitude={l.longitude}
-                    latitude={l.latitude}
-                    anchor="center"
-                    draggable
-                    onDragEnd={(e) => arrastarTumulo(l.id, e.lngLat.lat, e.lngLat.lng)}
-                  >
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setTumuloSelecionadoEdicao((atual) => (atual === l.id ? null : l.id))
-                      }}
-                      title={l.codigo || ''}
-                      style={{
-                        width: 26,
-                        height: 26,
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 10,
-                        fontWeight: 700,
-                        cursor: 'grab',
-                        color: '#0B1D2A',
-                        background: l.temMemorial ? '#22c55e' : tumuloSelecionadoEdicao === l.id ? '#f87171' : '#C9A46A',
-                        border: '2px solid #0B1D2A',
-                        boxShadow: '0 0 0 1px rgba(255,255,255,0.6)',
-                      }}
+                lapidesEdicao.map((l) => {
+                  const filaTravada = !!(l.fila_id && filas.find((f) => f.id === l.fila_id)?.geometria_revisada)
+                  return (
+                    <Marker
+                      key={l.id}
+                      longitude={l.longitude}
+                      latitude={l.latitude}
+                      anchor="center"
+                      draggable={!filaTravada}
+                      onDragEnd={(e) => arrastarTumulo(l.id, e.lngLat.lat, e.lngLat.lng)}
                     >
-                      {l.numero ?? '?'}
-                    </div>
-                  </Marker>
-                ))}
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setTumuloSelecionadoEdicao((atual) => (atual === l.id ? null : l.id))
+                        }}
+                        title={`${l.codigo || ''}${filaTravada ? ' (fila travada)' : ''}`}
+                        style={{
+                          width: 26,
+                          height: 26,
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 10,
+                          fontWeight: 700,
+                          cursor: filaTravada ? 'not-allowed' : 'grab',
+                          opacity: filaTravada ? 0.55 : 1,
+                          color: '#0B1D2A',
+                          background: l.temMemorial ? '#22c55e' : tumuloSelecionadoEdicao === l.id ? '#f87171' : '#C9A46A',
+                          border: '2px solid #0B1D2A',
+                          boxShadow: '0 0 0 1px rgba(255,255,255,0.6)',
+                        }}
+                      >
+                        {l.numero ?? '?'}
+                      </div>
+                    </Marker>
+                  )
+                })}
 
               {tumuloSelecionadoEdicao && (() => {
                 const l = lapidesEdicao.find((x) => x.id === tumuloSelecionadoEdicao)
                 if (!l) return null
+                const filaTravada = !!(l.fila_id && filas.find((f) => f.id === l.fila_id)?.geometria_revisada)
+                const bloqueado = l.temMemorial || filaTravada
                 return (
                   <Popup
                     longitude={l.longitude}
@@ -904,19 +945,19 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                     <div style={{ minWidth: 140 }}>
                       <p style={{ fontSize: 12, fontWeight: 600, margin: 0 }}>{l.codigo}</p>
                       <p style={{ fontSize: 11, color: '#888', margin: '2px 0 8px' }}>
-                        {l.temMemorial ? 'Tem memorial vinculado' : 'Sem memorial'}
+                        {l.temMemorial ? 'Tem memorial vinculado' : filaTravada ? 'Fileira travada' : 'Sem memorial'}
                       </p>
                       <button
                         type="button"
-                        disabled={l.temMemorial || salvando}
+                        disabled={bloqueado || salvando}
                         onClick={() => apagarTumulo(l.id)}
                         style={{
                           fontSize: 12,
-                          color: l.temMemorial ? '#999' : '#dc2626',
+                          color: bloqueado ? '#999' : '#dc2626',
                           background: 'none',
                           border: 'none',
                           padding: 0,
-                          cursor: l.temMemorial ? 'not-allowed' : 'pointer',
+                          cursor: bloqueado ? 'not-allowed' : 'pointer',
                         }}
                       >
                         Apagar túmulo
@@ -1241,24 +1282,39 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                               {filasDaQuadra.map((f) => (
                                 <li key={f.id} className="flex items-center justify-between text-xs text-zinc-300">
                                   <span>
-                                    Rua {f.numero} {f.quantidade_prevista ? `— ${f.quantidade_prevista} túmulos` : '— sem túmulos'}
+                                    Rua {f.numero} {f.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
+                                    {f.quantidade_prevista ? `— ${f.quantidade_prevista} túmulos` : '— sem túmulos'}
                                   </span>
-                                  <button
-                                    type="button"
-                                    disabled={salvando}
-                                    onClick={() => {
-                                      setDialogoFila({
-                                        filaId: f.id,
-                                        quadraNumero: q.numero,
-                                        filaNumero: f.numero,
-                                        comprimentoM: f.eixo ? comprimentoPolilinha(f.eixo.coordinates) : 0,
-                                      })
-                                      setQuantidadeInput(f.quantidade_prevista ? String(f.quantidade_prevista) : '')
-                                    }}
-                                    className="text-amber-400 hover:text-amber-200"
-                                  >
-                                    {f.quantidade_prevista ? 'Regerar túmulos' : 'Gerar túmulos'} →
-                                  </button>
+                                  <span className="flex items-center gap-2">
+                                    {!f.geometria_revisada && (
+                                      <button
+                                        type="button"
+                                        disabled={salvando}
+                                        onClick={() => {
+                                          setDialogoFila({
+                                            filaId: f.id,
+                                            quadraNumero: q.numero,
+                                            filaNumero: f.numero,
+                                            comprimentoM: f.eixo ? comprimentoPolilinha(f.eixo.coordinates) : 0,
+                                          })
+                                          setQuantidadeInput(f.quantidade_prevista ? String(f.quantidade_prevista) : '')
+                                        }}
+                                        className="text-amber-400 hover:text-amber-200"
+                                      >
+                                        {f.quantidade_prevista ? 'Regerar' : 'Gerar túmulos'} →
+                                      </button>
+                                    )}
+                                    {f.quantidade_prevista != null &&
+                                      (f.geometria_revisada ? (
+                                        <button type="button" disabled={salvando} onClick={() => destravarFila(f)} className="text-emerald-400 hover:text-emerald-200">
+                                          Destravar
+                                        </button>
+                                      ) : (
+                                        <button type="button" disabled={salvando} onClick={() => travarFila(q.numero, f)} className="text-zinc-400 hover:text-zinc-200">
+                                          🔒 Travar
+                                        </button>
+                                      ))}
+                                  </span>
                                 </li>
                               ))}
                             </ul>
