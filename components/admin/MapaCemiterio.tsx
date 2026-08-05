@@ -1082,6 +1082,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                     anchor="top"
                     offset={16}
                     closeButton={false}
+                    closeOnClick={false}
                     onClose={() => setTumuloSelecionadoEdicao(null)}
                   >
                     <div style={{ minWidth: 140 }}>
