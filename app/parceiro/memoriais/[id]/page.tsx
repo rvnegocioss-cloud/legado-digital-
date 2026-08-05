@@ -166,6 +166,23 @@ function FichaMemorialParceiroInner() {
     if (params.id) load(params.id)
   }, [params.id])
 
+  // Dropdown de lapide so carrega as do cemiterio escolhido -- nunca todas de
+  // uma vez (mesmo motivo do load() acima, teto de 1000 linhas do PostgREST).
+  useEffect(() => {
+    if (!cemiterioSelecionadoId) return
+    supabase
+      .from('lapides')
+      .select('id, identificacao, cemiterio_id')
+      .eq('cemiterio_id', cemiterioSelecionadoId)
+      .limit(5000)
+      .then(({ data }) => {
+        setLapides((atual) => {
+          const semEsseCemiterio = atual.filter((l) => l.cemiterio_id !== cemiterioSelecionadoId)
+          return [...semEsseCemiterio, ...(data || [])]
+        })
+      })
+  }, [cemiterioSelecionadoId])
+
   async function load(id: string) {
     setLoading(true)
 
@@ -199,12 +216,24 @@ function FichaMemorialParceiroInner() {
 
     const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome').order('nome')
     setCemiterios(cemiteriosData || [])
-    const { data: lapidesData } = await supabase.from('lapides').select('id, identificacao, cemiterio_id')
-    setLapides(lapidesData || [])
+
+    // Nunca carregar lapides de todos os cemiterios de uma vez (estoura o teto
+    // de 1000 linhas do PostgREST silenciosamente em cemiterio grande) --
+    // busca so a lapide ja vinculada (se tiver), resto carrega filtrado
+    // quando o parceiro escolhe o cemiterio (useEffect abaixo).
+    let lapidesData: Lapide[] = []
     if (m.lapide_id) {
-      const lapideAtual = (lapidesData || []).find((l) => l.id === m.lapide_id)
-      if (lapideAtual) setCemiterioSelecionadoId(lapideAtual.cemiterio_id)
+      const { data: lapideAtual } = await supabase
+        .from('lapides')
+        .select('id, identificacao, cemiterio_id')
+        .eq('id', m.lapide_id)
+        .single()
+      if (lapideAtual) {
+        lapidesData = [lapideAtual]
+        setCemiterioSelecionadoId(lapideAtual.cemiterio_id)
+      }
     }
+    setLapides(lapidesData)
 
     setMemorial(m)
     setForm({
