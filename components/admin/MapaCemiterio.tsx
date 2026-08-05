@@ -988,21 +988,30 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                       <p style={{ fontSize: 11, color: '#888', margin: '2px 0 8px' }}>
                         {l.temMemorial ? 'Tem memorial vinculado' : filaTravada ? 'Fileira travada' : 'Sem memorial'}
                       </p>
-                      <button
-                        type="button"
-                        disabled={bloqueado || salvando}
-                        onClick={() => apagarTumulo(l.id)}
-                        style={{
-                          fontSize: 12,
-                          color: bloqueado ? '#999' : '#dc2626',
-                          background: 'none',
-                          border: 'none',
-                          padding: 0,
-                          cursor: bloqueado ? 'not-allowed' : 'pointer',
-                        }}
-                      >
-                        Apagar túmulo
-                      </button>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <a
+                          href={`/admin/cemiterios/${cemiterioId}/lapides/${l.id}/gavetas-3d`}
+                          style={{ fontSize: 12, color: '#0B5FFF' }}
+                        >
+                          Gavetas 3D →
+                        </a>
+                        <button
+                          type="button"
+                          disabled={bloqueado || salvando}
+                          onClick={() => apagarTumulo(l.id)}
+                          style={{
+                            fontSize: 12,
+                            color: bloqueado ? '#999' : '#dc2626',
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            textAlign: 'left',
+                            cursor: bloqueado ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          Apagar túmulo
+                        </button>
+                      </div>
                     </div>
                   </Popup>
                 )
