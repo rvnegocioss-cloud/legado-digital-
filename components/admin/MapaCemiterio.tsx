@@ -306,8 +306,9 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     return interpolarPontos(filaDoDialogo.eixo.coordinates, quantidadeNumerica)
   }, [filaDoDialogo, quantidadeNumerica])
 
+  const comprimentoAoVivo = filaDoDialogo?.eixo ? comprimentoPolilinha(filaDoDialogo.eixo.coordinates) : null
   const espacamentoInfo =
-    dialogoFila && previewPontos && previewPontos.length > 1 ? validarEspacamento(dialogoFila.comprimentoM, previewPontos.length) : null
+    comprimentoAoVivo != null && previewPontos && previewPontos.length > 1 ? validarEspacamento(comprimentoAoVivo, previewPontos.length) : null
 
   const geojsonPreviewGeracao = useMemo(
     () => ({
@@ -641,6 +642,24 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setQuadras((atual) => atual.map((q) => (q.id === quadraEmEdicao.id ? { ...q, poligono: novoPoligono } : q)))
 
     const { error } = await supabase.from('quadras').update({ poligono: novoPoligono }).eq('id', quadraEmEdicao.id)
+    if (error) setMsg(error.message)
+  }
+
+  /** Arrasta a ponta (inicio ou fim) da linha de uma fileira -- pra encostar
+   * exato no centro do primeiro/ultimo tumulo real antes de gerar. Sem isso,
+   * qualquer erro pequeno na ponta desalinha os pontos gerados progressivamente
+   * ate o final da fileira (o espacamento entre eles continua uniforme, so
+   * o comprimento total da linha que fica errado). */
+  async function arrastarPontaFileira(filaId: string, index: number, lat: number, lng: number) {
+    const fila = filas.find((f) => f.id === filaId)
+    if (!fila?.eixo) return
+    const coords = fila.eixo.coordinates.map((p) => [...p]) as [number, number][]
+    coords[index] = [lng, lat]
+    const novoEixo = { type: 'LineString' as const, coordinates: coords }
+
+    setFilas((atual) => atual.map((f) => (f.id === filaId ? { ...f, eixo: novoEixo } : f)))
+
+    const { error } = await supabase.from('filas').update({ eixo: novoEixo }).eq('id', filaId)
     if (error) setMsg(error.message)
   }
 
@@ -1078,6 +1097,33 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                   </Marker>
                 )
               })}
+
+              {dialogoFila &&
+                filas
+                  .find((f) => f.id === dialogoFila.filaId)
+                  ?.eixo?.coordinates.map(([lng, lat], index) => (
+                    <Marker
+                      key={`ponta-fileira-${index}`}
+                      longitude={lng}
+                      latitude={lat}
+                      anchor="center"
+                      draggable
+                      onDragEnd={(e) => arrastarPontaFileira(dialogoFila.filaId, index, e.lngLat.lat, e.lngLat.lng)}
+                    >
+                      <div
+                        title={index === 0 ? 'Início da fileira -- arrasta pro centro do 1º túmulo' : 'Fim da fileira -- arrasta pro centro do último túmulo'}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          borderRadius: 3,
+                          background: '#fb923c',
+                          border: '2px solid #0B1D2A',
+                          boxShadow: '0 0 0 1px rgba(255,255,255,0.7)',
+                          cursor: 'grab',
+                        }}
+                      />
+                    </Marker>
+                  ))}
 
               {quadraEmEdicao?.poligono &&
                 quadraEmEdicao.poligono.coordinates[0].slice(0, -1).map(([lng, lat], index) => (
@@ -1624,7 +1670,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               <h2 className="text-sm font-semibold text-white mb-1">
                 Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
               </h2>
-              <p className="text-xs text-zinc-500 mb-2">Comprimento da fileira: {dialogoFila.comprimentoM.toFixed(1)} m</p>
+              <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
+              <p className="text-xs mb-2" style={{ color: '#fb923c' }}>
+                ◼ Pontas da fileira -- quadrado laranja, arrasta pro centro exato do 1º e do último túmulo.
+              </p>
               <label className="block text-xs text-zinc-400 mb-1">Quantidade de túmulos</label>
               <input
                 type="number"
