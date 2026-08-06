@@ -40,7 +40,7 @@ Todos os 4 corrigidos direto no código genérico (não hardcoded pro José Láz
 
 ## Status atual
 
-**José Lázaro (Tupaciguara/MG)**: 1 quadra piloto completa no banco — `Quadra 1` (bloco "F" do reconhecimento global), **10 filas, 186 túmulos**, cada um com código único e coordenada, `situacao='nao_confirmada'` (esperando vistoria de campo). Confirmado com query real + imagem de conferência (pontos lidos de volta do banco batendo com a foto original).
+**José Lázaro (Tupaciguara/MG)**: `Quadra 1` (bloco "F" do reconhecimento global) no banco, mas **maioria das fileiras geradas automaticamente foram apagadas** depois do bug grave abaixo ser confirmado (Filas 1-9, depois Fila 10, depois a fileira de teste que tinha ficado certa também — a pedido direto do Rafael, motivo não detalhado). Sobra hoje: **Fila 11** (revisada/travada na mão pelo Rafael, correta) + fileiras que o Rafael for desenhando manualmente agora (ex: "Fileira 13" em andamento). As 186 túmulos do texto antigo abaixo **não refletem mais o estado real do banco** — ver bug grave.
 
 Reconhecimento global (`mapa`) achou **12 candidatos** no total (`A` a `L`) — descontando pomar/telhado/área de expansão vazia, restam ~7-8 quadras reais ainda não mapeadas.
 
@@ -72,9 +72,41 @@ Motivo: pontos gerados por interpolação matemática não caem 100% em cima do 
 
 **Trava por fileira** (pedido do Rafael, mesmo dia) — travar só a quadra inteira no final era arriscado ("perigoso perder trabalho" se algo desse errado no meio). Agora trava granular: `filas.geometria_revisada` (mesmo padrão de `quadras.geometria_revisada`). Fluxo real: revisa/arrasta a fila 1, clica "🔒 Travar" nela, passa pra fila 2, repete até a quadra inteira — só trava a quadra inteira (`geometria_revisada` de `quadras`) depois de todas as filas fechadas, se quiser. Trava de fila bloqueia de verdade (não só visual): `arrastarTumulo`/`apagarTumulo` recusam se a fila do túmulo tá travada, `adicionarTumulo` só considera fila **não travada** ao achar "a mais próxima", pino fica com `draggable=false` + opacidade menor + cursor `not-allowed`. Botão "Regerar túmulos" some quando a fila já tá travada (evita apagar+recriar tudo por engano em cima do que já foi ajustado na mão).
 
+## Bug grave — fileira gerada caindo em cima do caminho, não do túmulo real (2026-08-05/06)
+
+Achado visual do Rafael ("sua marcacao esta errada muito mesmo... vc ta pegando dois tumulos ocomo se fosse um") depois de gerar Filas 1-9 com pitch "calibrado" de 2,32m. Chamado Opus pra diagnóstico profundo (`subagent_type:"Plan"`, model `opus`, regra do projeto). Causa raiz, 3 problemas empilhados em `lib_malha.py`/`mapear-cemiterio.py`:
+
+1. **Teto de busca de espaçamento baixo demais** — `achar_malha` buscava pitch só entre 0,7m e 6,0m; o pitch real da quadra é ~7,30m (perpendicular às fileiras), **fora da janela de busca inteira**. Corrigido: `faixa_pitch=(0.9, 12.0)`.
+2. **Remoção de harmônico apaga o fundamental verdadeiro** — `_agrupar_remover_harmonicos` (heurística pra descartar picos múltiplos do espectro FFT) tem bug que pode remover o pico correto em vez do harmônico espúrio. **Ainda não corrigido no código genérico.**
+3. **Fase nunca é calculada** — FFT (autocorrelação ou 2D) só descobre o *espaçamento* do padrão, nunca **onde ele começa**. `_gerar_pente` usava `v = v_min + pitch_perp / 2` — um valor que só depende de onde o polígono foi clicado, zero correlação com a imagem real. Era a causa principal do desalinhamento. **Ainda não corrigido no código genérico** (`mapear-cemiterio.py` não tem `--ancora`/`--ancora2` ainda).
+
+Tentativa de autocorreção por textura (escolher a fase que maximiza contraste de textura ao longo do perfil perpendicular) foi testada pelo Opus e **descartada** — em ~2,2cm/px o caminho entre fileiras às vezes pontua melhor que a fileira de túmulo de verdade, gerando o mesmo erro por outro caminho.
+
+**Único caminho validado até agora**: âncora manual — 2 pontos reais verificados a olho (ex: centro do túmulo 1 e do túmulo N de uma fileira certa) definem pitch e fase exatos por cálculo direto, sem depender de detecção nenhuma. Testado uma vez (fileira de teste com 44 pontos, todos batendo com a imagem real, QA visual conferido) via script Python avulso — **não foi integrado como comando reutilizável no `mapear-cemiterio.py` ainda**, e essa fileira de teste foi apagada depois a pedido do Rafael junto com o resto.
+
+## Rua → Fileira (rename, 2026-08-05)
+
+Rafael: "isso nao e rua e uma fileira muda o nome". Renomeado em toda a UI (`MapaCemiterio.tsx`) via troca segura por palavra-inteira (preservando maiúscula/minúscula) — variável/coluna de banco (`filas`) não mudou, só texto visível e rótulo da bandeira (`R{numero}` → `F{numero}`, um rótulo tinha ficado pra trás no primeiro commit do rename, corrigido depois que o Rafael reportou "erro" na bandeira de fileira nova).
+
+## Apagar fileira inteira
+
+Botão "Apagar" na fileira, dentro do painel de edição — bloqueado se qualquer túmulo dela já tiver memorial vinculado (mesma trava de sempre), senão apaga túmulos + a fileira numa tacada (`apagarFileira`, `MapaCemiterio.tsx`). Usado pra descartar as fileiras 1-10 (e a 12 de teste) depois do bug grave acima — regenerar por cima não bastava porque tanto o eixo quanto a fase estavam errados, não dava pra só deslocar.
+
+## Arrastar ponta da fileira (2026-08-06)
+
+Rafael, testando o "Gerar túmulos" numa fileira nova (Fileira 3): "a distancia entre os tumulos nao e a mesma entao do inicio da fileira ate o final nao encaixa". A interpolação uniforme em si estava certa — o problema é que o comprimento real do `eixo` (linha desenhada à mão) quase nunca bate exatamente com a distância real entre o primeiro e o último túmulo, e esse erro pequeno vira desvio progressivo ponto a ponto até o fim da fileira.
+
+Fix: enquanto o diálogo "Gerar túmulos" está aberto, as duas pontas do `eixo` da fileira (`filas.eixo`, LineString) viram `Marker` arrastável (quadrado laranja, `arrastarPontaFileira` grava direto em `filas.eixo` a cada solta) — dá pra encaixar cada ponta exatamente no centro do primeiro/último túmulo real antes de gerar. O comprimento e o aviso de espaçamento mostrados no diálogo (`comprimentoAoVivo`, via `comprimentoPolilinha`) agora recalculam a cada arrasto em vez de ficar travado no valor de quando o diálogo abriu (`espacamentoInfo` usava `dialogoFila.comprimentoM`, capturado uma vez só). Resolve o desalinhamento só quando o eixo já está no ângulo/direção certos — não substitui o fix de fase/âncora do bug grave acima para fileiras geradas do zero automaticamente.
+
 ## Próximos passos
 
 - [x] Modo edição manual (drag/adicionar/apagar/travar)
+- [x] Apagar fileira inteira
+- [x] Rua → Fileira (rename)
+- [x] Arrastar pontas da fileira no diálogo "Gerar túmulos" (corrige drift de comprimento travado)
+- [ ] Corrigir `_agrupar_remover_harmonicos` (bug #2 acima) no código genérico
+- [ ] Implementar `--ancora`/`--ancora2` (âncora manual de 2 pontos) como comando real em `mapear-cemiterio.py`, não só script avulso de teste
+- [ ] Regenerar as fileiras 1-10 da Quadra 1 (apagadas) com o método correto assim que o âncora estiver integrado
 - [ ] Mapear as ~7-8 quadras reais restantes do José Lázaro
 - [ ] Rafael marcar a entrada real (portão) pela Central
 - [ ] Numerar quadras/ruas a partir da entrada (depois que todas estiverem mapeadas)
