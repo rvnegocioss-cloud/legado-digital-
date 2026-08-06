@@ -994,7 +994,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       )}
 
       <div className="grid lg:grid-cols-12 gap-4 mt-4">
-        <div className="lg:col-span-8 lg:sticky lg:top-4 lg:self-start lg:order-2">
+        <div className="lg:col-span-8 lg:order-2">
           <div className="rounded-xl border border-zinc-800 overflow-hidden" style={{ height: 'calc(100vh - 140px)', minHeight: 560 }}>
             <MapGL
               ref={mapRef}
@@ -1399,7 +1399,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
           </div>
         </div>
 
-        <div className="lg:col-span-4 lg:order-1">
+        <div className="lg:col-span-4 lg:order-1 lg:overflow-y-auto lg:pr-1" style={{ maxHeight: 'calc(100vh - 140px)' }}>
           {msg && (
             <p className="text-xs text-zinc-300 mb-3 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">{msg}</p>
           )}
@@ -1479,38 +1479,6 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               </div>
             </div>
           )}
-
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
-            <h2 className="text-sm font-semibold text-white mb-1">Entrada do cemitério</h2>
-            <p className="text-xs text-zinc-500 mb-3">
-              {cemiterio.entrada_latitude != null
-                ? 'Marcada — é daqui que a rota até o túmulo começa na página pública, e as quadras/fileiras são numeradas a partir daqui.'
-                : 'Ainda não marcada — rota pública usa o centro genérico, e não dá pra numerar quadra/fileira sem uma âncora.'}
-            </p>
-            {modoMarcarEntrada ? (
-              <div className="rounded-lg bg-emerald-950/30 border border-emerald-900/40 px-3 py-2 flex items-center justify-between">
-                <p className="text-xs text-emerald-300">Clique no mapa no portão/entrada real</p>
-                <button type="button" onClick={() => setModoMarcarEntrada(false)} className="text-emerald-400 hover:text-emerald-200">
-                  <X size={14} strokeWidth={1.5} />
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                disabled={salvando}
-                onClick={() => {
-                  setModoMarcarEntrada(true)
-                  setModoMarcar(false)
-                  setLapideParaMarcar(null)
-                  desenho.cancelar()
-                }}
-                className="w-full text-left text-sm px-2 py-1.5 rounded flex items-center gap-2 text-zinc-300 hover:bg-zinc-800"
-              >
-                <Flag size={12} strokeWidth={1.5} />
-                {cemiterio.entrada_latitude != null ? 'Remarcar entrada' : 'Marcar entrada do cemitério'}
-              </button>
-            )}
-          </div>
 
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
             <div className="flex items-center justify-between mb-1">
@@ -1862,6 +1830,38 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 Contorno dourado = quadra · linha azul tracejada = fileira
               </div>
             </div>
+          </div>
+
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mt-4">
+            <h2 className="text-sm font-semibold text-white mb-1">Entrada do cemitério</h2>
+            <p className="text-xs text-zinc-500 mb-3">
+              {cemiterio.entrada_latitude != null
+                ? 'Marcada — é daqui que a rota até o túmulo começa na página pública, e as quadras/fileiras são numeradas a partir daqui.'
+                : 'Ainda não marcada — rota pública usa o centro genérico, e não dá pra numerar quadra/fileira sem uma âncora.'}
+            </p>
+            {modoMarcarEntrada ? (
+              <div className="rounded-lg bg-emerald-950/30 border border-emerald-900/40 px-3 py-2 flex items-center justify-between">
+                <p className="text-xs text-emerald-300">Clique no mapa no portão/entrada real</p>
+                <button type="button" onClick={() => setModoMarcarEntrada(false)} className="text-emerald-400 hover:text-emerald-200">
+                  <X size={14} strokeWidth={1.5} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => {
+                  setModoMarcarEntrada(true)
+                  setModoMarcar(false)
+                  setLapideParaMarcar(null)
+                  desenho.cancelar()
+                }}
+                className="w-full text-left text-sm px-2 py-1.5 rounded flex items-center gap-2 text-zinc-300 hover:bg-zinc-800"
+              >
+                <Flag size={12} strokeWidth={1.5} />
+                {cemiterio.entrada_latitude != null ? 'Remarcar entrada' : 'Marcar entrada do cemitério'}
+              </button>
+            )}
           </div>
         </div>
       </div>
