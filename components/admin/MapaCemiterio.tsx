@@ -994,8 +994,8 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       )}
 
       <div className="grid lg:grid-cols-12 gap-4 mt-4">
-        <div className="lg:col-span-8">
-          <div className="rounded-xl border border-zinc-800 overflow-hidden" style={{ height: 560 }}>
+        <div className="lg:col-span-8 lg:sticky lg:top-4 lg:self-start">
+          <div className="rounded-xl border border-zinc-800 overflow-hidden" style={{ height: 'calc(100vh - 140px)', minHeight: 560 }}>
             <MapGL
               ref={mapRef}
               onLoad={aoCarregarMapa}
@@ -1404,6 +1404,82 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
             <p className="text-xs text-zinc-300 mb-3 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">{msg}</p>
           )}
 
+          {dialogoFila && (
+            <div className="rounded-xl bg-zinc-900 border border-amber-900/40 p-4 mb-4">
+              <h2 className="text-sm font-semibold text-white mb-1">
+                Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
+              </h2>
+              <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
+              <p className="text-xs text-zinc-500 mb-1">
+                {lapidesExistentesNaFila.length >= 2
+                  ? `${lapidesExistentesNaFila.length} já confirmado(s) -- distância real medida entre eles, dá pra usar "Preencher resto" abaixo.`
+                  : lapidesExistentesNaFila.length === 1
+                    ? '1 já confirmado -- gera mais 3 ou 4 pra medir uma distância real, depois usa "Preencher resto".'
+                    : 'Nenhum confirmado ainda -- gera um lote pequeno (3 a 5), arrasta cada um pro centro real do túmulo. A distância medida nesse lote vira a base do resto da fileira.'}
+              </p>
+              {medicao && (
+                <p className="text-xs text-zinc-500 mb-1">
+                  Restam ~{medicao.restanteM.toFixed(1)} m até o fim da fileira (~{sugestaoRestante ?? '?'} túmulos no espaçamento{' '}
+                  {medicao.medidoDeVerdade ? 'medido' : 'padrão de 1,6m'}).
+                </p>
+              )}
+              <p className="text-xs mb-1" style={{ color: '#fb923c' }}>
+                ◼ Pontas da fileira -- quadrado laranja, arrasta pro centro exato do 1º e do último túmulo (só importa pro 1º lote / pro fim da fileira).
+              </p>
+              <p className="text-xs mb-2" style={{ color: '#a3e635' }}>
+                ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada), arrasta cada uma pro centro real. Números seguem a ordem da fileira, continuando do último confirmado.
+              </p>
+              <label className="block text-xs text-zinc-400 mb-1">Quantidade deste lote</label>
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={500}
+                  value={quantidadeInput}
+                  onChange={(e) => setQuantidadeInput(e.target.value)}
+                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
+                  placeholder="ex: 10"
+                />
+                {medicao?.medidoDeVerdade && sugestaoRestante != null && (
+                  <button
+                    type="button"
+                    onClick={() => setQuantidadeInput(String(sugestaoRestante))}
+                    title="Usa a distância real medida nos já confirmados pra preencher o resto da fileira de uma vez"
+                    className="shrink-0 text-xs px-2 py-1.5 rounded border border-emerald-700 text-emerald-400 hover:bg-emerald-950"
+                  >
+                    Preencher resto (~{sugestaoRestante})
+                  </button>
+                )}
+              </div>
+              {espacamentoInfo && (
+                <p className={`text-xs mb-2 ${espacamentoInfo.ok ? 'text-zinc-400' : 'text-amber-400'}`}>
+                  {espacamentoInfo.espacamento.toFixed(2)} m entre túmulos (espaçamento usado no lote)
+                  {espacamentoInfo.aviso && ` — ${espacamentoInfo.aviso}`}
+                </p>
+              )}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={salvando || !quantidadeNumerica}
+                  onClick={gerarTumulos}
+                  className="text-xs px-3 py-1.5 rounded bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40"
+                >
+                  Gerar {quantidadeNumerica || ''} túmulos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDialogoFila(null)
+                    setAjustesPreview({})
+                  }}
+                  className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
             <h2 className="text-sm font-semibold text-white mb-1">Entrada do cemitério</h2>
             <p className="text-xs text-zinc-500 mb-3">
@@ -1708,82 +1784,6 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                   className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                 >
                   Sair
-                </button>
-              </div>
-            </div>
-          )}
-
-          {dialogoFila && (
-            <div className="rounded-xl bg-zinc-900 border border-amber-900/40 p-4 mb-4">
-              <h2 className="text-sm font-semibold text-white mb-1">
-                Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
-              </h2>
-              <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
-              <p className="text-xs text-zinc-500 mb-1">
-                {lapidesExistentesNaFila.length >= 2
-                  ? `${lapidesExistentesNaFila.length} já confirmado(s) -- distância real medida entre eles, dá pra usar "Preencher resto" abaixo.`
-                  : lapidesExistentesNaFila.length === 1
-                    ? '1 já confirmado -- gera mais 3 ou 4 pra medir uma distância real, depois usa "Preencher resto".'
-                    : 'Nenhum confirmado ainda -- gera um lote pequeno (3 a 5), arrasta cada um pro centro real do túmulo. A distância medida nesse lote vira a base do resto da fileira.'}
-              </p>
-              {medicao && (
-                <p className="text-xs text-zinc-500 mb-1">
-                  Restam ~{medicao.restanteM.toFixed(1)} m até o fim da fileira (~{sugestaoRestante ?? '?'} túmulos no espaçamento{' '}
-                  {medicao.medidoDeVerdade ? 'medido' : 'padrão de 1,6m'}).
-                </p>
-              )}
-              <p className="text-xs mb-1" style={{ color: '#fb923c' }}>
-                ◼ Pontas da fileira -- quadrado laranja, arrasta pro centro exato do 1º e do último túmulo (só importa pro 1º lote / pro fim da fileira).
-              </p>
-              <p className="text-xs mb-2" style={{ color: '#a3e635' }}>
-                ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada), arrasta cada uma pro centro real. Números seguem a ordem da fileira, continuando do último confirmado.
-              </p>
-              <label className="block text-xs text-zinc-400 mb-1">Quantidade deste lote</label>
-              <div className="flex items-center gap-2 mb-2">
-                <input
-                  type="number"
-                  min={1}
-                  max={500}
-                  value={quantidadeInput}
-                  onChange={(e) => setQuantidadeInput(e.target.value)}
-                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
-                  placeholder="ex: 10"
-                />
-                {medicao?.medidoDeVerdade && sugestaoRestante != null && (
-                  <button
-                    type="button"
-                    onClick={() => setQuantidadeInput(String(sugestaoRestante))}
-                    title="Usa a distância real medida nos já confirmados pra preencher o resto da fileira de uma vez"
-                    className="shrink-0 text-xs px-2 py-1.5 rounded border border-emerald-700 text-emerald-400 hover:bg-emerald-950"
-                  >
-                    Preencher resto (~{sugestaoRestante})
-                  </button>
-                )}
-              </div>
-              {espacamentoInfo && (
-                <p className={`text-xs mb-2 ${espacamentoInfo.ok ? 'text-zinc-400' : 'text-amber-400'}`}>
-                  {espacamentoInfo.espacamento.toFixed(2)} m entre túmulos (espaçamento usado no lote)
-                  {espacamentoInfo.aviso && ` — ${espacamentoInfo.aviso}`}
-                </p>
-              )}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={salvando || !quantidadeNumerica}
-                  onClick={gerarTumulos}
-                  className="text-xs px-3 py-1.5 rounded bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40"
-                >
-                  Gerar {quantidadeNumerica || ''} túmulos
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDialogoFila(null)
-                    setAjustesPreview({})
-                  }}
-                  className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
-                >
-                  Cancelar
                 </button>
               </div>
             </div>
