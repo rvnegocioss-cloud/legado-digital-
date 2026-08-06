@@ -1071,7 +1071,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        R{f.numero}
+                        F{f.numero}
                       </span>
                       <Flag size={18} strokeWidth={2} fill={cor} style={{ color: '#0B1D2A' }} />
                     </div>
