@@ -10,7 +10,7 @@ import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
 import { centroide, comprimentoPolilinha } from '@/lib/geo'
-import { interpolarPontos, validarEspacamento } from '@/lib/enderecoTumulo'
+import { gerarPontosContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
 
 registrarProtocoloPmtiles()
 
@@ -49,6 +49,8 @@ interface Lapide {
   latitude: number | null
   longitude: number | null
   coordenada_origem: string | null
+  fila_id: string | null
+  numero: number | null
 }
 
 interface Homenagem {
@@ -159,7 +161,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
         .single(),
       supabase
         .from('lapides')
-        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem')
+        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero')
         .eq('cemiterio_id', cemiterioId)
         .limit(20000),
       supabase
@@ -306,14 +308,24 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
   const filaDoDialogo = dialogoFila ? filas.find((f) => f.id === dialogoFila.filaId) : null
   const quantidadeNumerica = parseInt(quantidadeInput, 10)
-  const previewPontos = useMemo(() => {
+
+  const lapidesExistentesNaFila = useMemo(() => {
+    if (!dialogoFila) return []
+    return lapides
+      .filter((l) => l.fila_id === dialogoFila.filaId && l.numero != null && l.latitude != null && l.longitude != null)
+      .sort((a, b) => (a.numero as number) - (b.numero as number))
+      .map((l) => ({ lat: l.latitude as number, lng: l.longitude as number }))
+  }, [lapides, dialogoFila])
+
+  const geracaoContinuacao = useMemo(() => {
     if (!filaDoDialogo?.eixo || !quantidadeNumerica || quantidadeNumerica < 1) return null
-    return interpolarPontos(filaDoDialogo.eixo.coordinates, quantidadeNumerica)
-  }, [filaDoDialogo, quantidadeNumerica])
+    return gerarPontosContinuacao(filaDoDialogo.eixo.coordinates, lapidesExistentesNaFila, quantidadeNumerica)
+  }, [filaDoDialogo, lapidesExistentesNaFila, quantidadeNumerica])
+
+  const previewPontos = geracaoContinuacao?.pontos ?? null
 
   const comprimentoAoVivo = filaDoDialogo?.eixo ? comprimentoPolilinha(filaDoDialogo.eixo.coordinates) : null
-  const espacamentoInfo =
-    comprimentoAoVivo != null && previewPontos && previewPontos.length > 1 ? validarEspacamento(comprimentoAoVivo, previewPontos.length) : null
+  const espacamentoInfo = geracaoContinuacao ? validarEspacamento(geracaoContinuacao.pitch, 2) : null
 
   const previewPontosFinal = useMemo(() => {
     if (!previewPontos) return null
@@ -585,7 +597,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     if (error) {
       setMsg(error.message)
     } else {
-      setMsg(`${quantidadeNumerica} túmulos gerados na Fileira ${dialogoFila.filaNumero} da Quadra ${dialogoFila.quadraNumero}.`)
+      const totalAntes = lapidesExistentesNaFila.length
+      setMsg(
+        `+${quantidadeNumerica} túmulos na Fileira ${dialogoFila.filaNumero} da Quadra ${dialogoFila.quadraNumero} (total ${totalAntes + quantidadeNumerica}) -- confere/arrasta e clica "Gerar mais" pra continuar.`
+      )
       setDialogoFila(null)
       setAjustesPreview({})
       await carregar()
@@ -1594,12 +1609,12 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                             filaNumero: f.numero,
                                             comprimentoM: f.eixo ? comprimentoPolilinha(f.eixo.coordinates) : 0,
                                           })
-                                          setQuantidadeInput(f.quantidade_prevista ? String(f.quantidade_prevista) : '')
+                                          setQuantidadeInput('')
                                           setAjustesPreview({})
                                         }}
                                         className="text-amber-400 hover:text-amber-200"
                                       >
-                                        {f.quantidade_prevista ? 'Regerar' : 'Gerar túmulos'} →
+                                        {f.quantidade_prevista ? 'Gerar mais' : 'Gerar túmulos'} →
                                       </button>
                                     )}
                                     {f.quantidade_prevista != null &&
@@ -1692,13 +1707,25 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
               </h2>
               <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
+              <p className="text-xs text-zinc-500 mb-1">
+                {lapidesExistentesNaFila.length > 0
+                  ? `${lapidesExistentesNaFila.length} já confirmado(s) -- o lote abaixo continua a partir do último, na mesma distância medida entre eles.`
+                  : 'Nenhum confirmado ainda -- o lote começa do início da fileira (ponta laranja).'}
+              </p>
+              {geracaoContinuacao && (
+                <p className="text-xs text-zinc-500 mb-1">
+                  Restam ~{geracaoContinuacao.restanteM.toFixed(1)} m até o fim da fileira (~
+                  {geracaoContinuacao.pitch > 0 ? Math.max(0, Math.round(geracaoContinuacao.restanteM / geracaoContinuacao.pitch)) : '?'} no
+                  espaçamento atual) -- digita a quantidade certa quando for o último lote.
+                </p>
+              )}
               <p className="text-xs mb-1" style={{ color: '#fb923c' }}>
-                ◼ Pontas da fileira -- quadrado laranja, arrasta pro centro exato do 1º e do último túmulo.
+                ◼ Pontas da fileira -- quadrado laranja, arrasta pro centro exato do 1º e do último túmulo (só importa pro 1º lote / pro fim da fileira).
               </p>
               <p className="text-xs mb-2" style={{ color: '#a3e635' }}>
-                ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada), arrasta cada uma pro centro real. Números seguem a ordem da fileira.
+                ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada), arrasta cada uma pro centro real. Números seguem a ordem da fileira, continuando do último confirmado.
               </p>
-              <label className="block text-xs text-zinc-400 mb-1">Quantidade de túmulos</label>
+              <label className="block text-xs text-zinc-400 mb-1">Quantidade deste lote</label>
               <input
                 type="number"
                 min={1}
@@ -1706,11 +1733,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 value={quantidadeInput}
                 onChange={(e) => setQuantidadeInput(e.target.value)}
                 className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white mb-2"
-                placeholder="ex: 15"
+                placeholder="ex: 10"
               />
               {espacamentoInfo && (
                 <p className={`text-xs mb-2 ${espacamentoInfo.ok ? 'text-zinc-400' : 'text-amber-400'}`}>
-                  {espacamentoInfo.espacamento.toFixed(2)} m entre túmulos
+                  {espacamentoInfo.espacamento.toFixed(2)} m entre túmulos (espaçamento usado no lote)
                   {espacamentoInfo.aviso && ` — ${espacamentoInfo.aviso}`}
                 </p>
               )}

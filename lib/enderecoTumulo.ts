@@ -1,4 +1,4 @@
-import { comprimentoPolilinha } from './geo'
+import { comprimentoPolilinha, distanciaMetros } from './geo'
 
 export interface RotulosCemiterio {
   rotulo_quadra: string
@@ -81,6 +81,48 @@ function segmentoMetros(lat1: number, lng1: number, lat2: number, lng2: number) 
     Math.sin(dLat / 2) ** 2 +
     Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) ** 2
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+/** Gera um LOTE de pontos continuando a partir do último túmulo já confirmado
+ *  na fileira (ou do início do eixo, se nenhum ainda) -- em vez de reinterpolar
+ *  a fileira inteira do zero a cada geração. O espaçamento usado é a MÉDIA
+ *  real medida entre os túmulos já confirmados (quando tem 2+); sem histórico
+ *  ainda, chuta dividindo o trecho restante do eixo pela quantidade pedida --
+ *  chute que o staff corrige arrastando cada ponto do lote antes de gerar. */
+export function gerarPontosContinuacao(
+  eixo: [number, number][],
+  existentes: { lat: number; lng: number }[],
+  quantidade: number
+): { pontos: [number, number][]; pitch: number; restanteM: number } {
+  const inicio = eixo[0]
+  const fim = eixo[eixo.length - 1]
+  const dirDist = comprimentoPolilinha([inicio, fim]) || 1
+  const dirLng = (fim[0] - inicio[0]) / dirDist
+  const dirLat = (fim[1] - inicio[1]) / dirDist
+
+  const ultimo = existentes.length > 0 ? existentes[existentes.length - 1] : { lat: inicio[1], lng: inicio[0] }
+  const restanteM = distanciaMetros(ultimo.lat, ultimo.lng, fim[1], fim[0])
+
+  let pitch: number
+  if (existentes.length >= 2) {
+    let soma = 0
+    for (let i = 1; i < existentes.length; i++) {
+      soma += distanciaMetros(existentes[i - 1].lat, existentes[i - 1].lng, existentes[i].lat, existentes[i].lng)
+    }
+    pitch = soma / (existentes.length - 1)
+  } else {
+    pitch = quantidade > 0 ? restanteM / quantidade : restanteM
+  }
+
+  const kInicial = existentes.length > 0 ? 1 : 0
+  const pontos: [number, number][] = []
+  for (let i = 0; i < quantidade; i++) {
+    const k = kInicial + i
+    const distancia = k * pitch
+    pontos.push([ultimo.lng + dirLng * distancia, ultimo.lat + dirLat * distancia])
+  }
+
+  return { pontos, pitch, restanteM }
 }
 
 export function validarEspacamento(comprimentoM: number, quantidade: number) {
