@@ -106,7 +106,13 @@ Ainda não bastou — gerar a fileira inteira numa tacada só obriga acertar dez
 
 **Fix (parte 4, "Preencher resto")** — mesmo com lote continuado, repetir "gera 5, ajusta, salva" até o fim de uma fileira de 30-40 túmulos ainda era repetitivo demais ("nao e produtivo... tinha que ter um jeito eu medir os primeiros 5 e baseado nisso ser feito o resto"). `medirContinuacao()` (novo, separado de `gerarPontosContinuacao`) calcula pitch + distância restante independente de quantidade digitada — permite mostrar "restam ~N túmulos" e um botão **"Preencher resto (~N)"** assim que a fileira tem 2+ túmulos confirmados (pitch real medido, não mais o chute de 1,6m). Um clique preenche o campo de quantidade com a estimativa pra cobrir o resto inteiro da fileira nesse espaçamento; "Gerar" fecha tudo de uma vez (as bolinhas continuam arrastáveis uma a uma se algum ponto não bater antes de confirmar). Fluxo completo agora: gera um lote pequeno (3-5) pra calibrar → ajusta na mão → "Gerar" (salva) → "Preencher resto" → confere/ajusta o que sobrar → "Gerar" de novo, fim da fileira em 2 rodadas em vez de 6-8.
 
-**Medida ao vivo tipo trena ao desenhar a fileira** (mesmo pedido, "nao tem como colocar em metros la quando faz a fileira... como se fosse uma trena") — a barra de desenho da fileira (clique no início + clique no fim) agora mostra o comprimento acumulado em metros a cada ponto clicado, direto na `BarraDesenho`, sem precisar concluir o desenho pra saber o tamanho. Diálogo mostra quantos já estão confirmados e quantos metros/túmulos restam até o fim da fileira, pra saber a quantidade certa do último lote (ex: "restam 3"). `p_substituir=true` continua existindo (apaga tudo e recomeça do zero), só não é mais o padrão. Botão mudou de rótulo: "Regerar" virou "Gerar mais".
+**Medida ao vivo tipo trena ao desenhar a fileira** (mesmo pedido, "nao tem como colocar em metros la quando faz a fileira... como se fosse uma trena") — a barra de desenho da fileira (clique no início + clique no fim) agora mostra o comprimento acumulado em metros a cada ponto clicado, direto na `BarraDesenho`, sem precisar concluir o desenho pra saber o tamanho.
+
+## Fix de layout — mapa saía da tela (2026-08-06)
+
+Achado real do Rafael: painel lateral crescia bem mais alto que o mapa (fixo em 560px), então a página inteira rolava — e o card "Gerar túmulos", o mais usado no fluxo de mapeamento, ficava lá embaixo depois de toda a árvore de quadras. Abrir esse card rolava o mapa pra fora da tela, obrigando alternar rolagem pra cima/baixo o tempo todo pra ver o mapa e editar ao mesmo tempo.
+
+Corrigido: coluna do mapa (`lg:col-span-8`) ganhou `lg:sticky lg:top-4 lg:self-start` — fica fixa na tela enquanto o painel lateral (`lg:col-span-4`) rola por baixo dela, dentro do `<main overflow-y-auto>` do layout da Central (que já é o scroll container real, não a janela). Mapa também cresceu de 560px fixo pra `calc(100vh - 140px)` (regra 13 do CLAUDE.md, tela larga aproveitada). O card "Gerar túmulos" (`dialogoFila`) saiu do meio do painel (depois da árvore de quadras) e foi pro topo, logo abaixo da mensagem de status — aparece na hora ao clicar "Gerar túmulos"/"Gerar mais", sem precisar rolar pra achar. Diálogo mostra quantos já estão confirmados e quantos metros/túmulos restam até o fim da fileira, pra saber a quantidade certa do último lote (ex: "restam 3"). `p_substituir=true` continua existindo (apaga tudo e recomeça do zero), só não é mais o padrão. Botão mudou de rótulo: "Regerar" virou "Gerar mais".
 
 ## Próximos passos
 
@@ -118,6 +124,7 @@ Ainda não bastou — gerar a fileira inteira numa tacada só obriga acertar dez
 - [x] Geração em lotes continuados (gera 10, salva, gera mais 10 na distância real medida, até fechar a fileira)
 - [x] Botão "Preencher resto" (calibra com lote pequeno, preenche o resto da fileira de uma vez)
 - [x] Medida ao vivo (trena) ao desenhar a fileira
+- [x] Mapa sticky + card "Gerar túmulos" movido pro topo do painel (mapa não sai mais da tela)
 - [ ] Corrigir `_agrupar_remover_harmonicos` (bug #2 acima) no código genérico
 - [ ] Implementar `--ancora`/`--ancora2` (âncora manual de 2 pontos) como comando real em `mapear-cemiterio.py`, não só script avulso de teste
 - [ ] Regenerar as fileiras 1-10 da Quadra 1 (apagadas) com o método correto assim que o âncora estiver integrado
