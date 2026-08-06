@@ -483,12 +483,12 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       .single()
 
     if (error || !data) {
-      setMsg(error?.message || 'Erro ao criar rua.')
+      setMsg(error?.message || 'Erro ao criar fileira.')
       setSalvando(false)
       return
     }
 
-    setMsg(`Rua ${proximoNumero} da Quadra ${quadraAtivaParaFila.numero} criada — agora gera os túmulos.`)
+    setMsg(`Fileira ${proximoNumero} da Quadra ${quadraAtivaParaFila.numero} criada — agora gera os túmulos.`)
     await carregar()
     setDialogoFila({
       filaId: data.id,
@@ -535,7 +535,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       itens: ((data || []) as { fila_id: string; numero_sugerido: number; distancia_entrada_m: number | null }[]).map((d) => ({
         id: d.fila_id,
         numero: d.numero_sugerido,
-        label: `Rua`,
+        label: `Fileira`,
         distancia: d.distancia_entrada_m,
       })),
     })
@@ -562,7 +562,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
         setMsg(error.message)
       }
     } else {
-      setMsg(numeracaoProposta.tipo === 'quadras' ? 'Quadras numeradas.' : 'Ruas numeradas.')
+      setMsg(numeracaoProposta.tipo === 'quadras' ? 'Quadras numeradas.' : 'Fileiras numeradas.')
       setNumeracaoProposta(null)
       await carregar()
     }
@@ -584,7 +584,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     if (error) {
       setMsg(error.message)
     } else {
-      setMsg(`${quantidadeNumerica} túmulos gerados na Rua ${dialogoFila.filaNumero} da Quadra ${dialogoFila.quadraNumero}.`)
+      setMsg(`${quantidadeNumerica} túmulos gerados na Fileira ${dialogoFila.filaNumero} da Quadra ${dialogoFila.quadraNumero}.`)
       setDialogoFila(null)
       await carregar()
     }
@@ -692,7 +692,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     if (!quadraEmEdicao) return
     const filasDaQuadra = filas.filter((f) => f.quadra_id === quadraEmEdicao.id && f.eixo && !f.geometria_revisada)
     if (filasDaQuadra.length === 0) {
-      setMsg('Nenhuma rua livre pra vincular o túmulo novo (ou não tem rua, ou tão todas travadas).')
+      setMsg('Nenhuma fileira livre pra vincular o túmulo novo (ou não tem fileira, ou tão todas travadas).')
       return
     }
 
@@ -884,7 +884,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const { error } = await supabase.from('filas').update({ geometria_revisada: true }).eq('id', fila.id)
     if (error) setMsg(error.message)
     else {
-      setMsg(`Rua ${fila.numero} da Quadra ${quadraNumero} travada.`)
+      setMsg(`Fileira ${fila.numero} da Quadra ${quadraNumero} travada.`)
       await carregar()
     }
     setSalvando(false)
@@ -895,6 +895,31 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const { error } = await supabase.from('filas').update({ geometria_revisada: false }).eq('id', fila.id)
     if (error) setMsg(error.message)
     else await carregar()
+    setSalvando(false)
+  }
+
+  async function apagarFileira(fila: Fila) {
+    setSalvando(true)
+    setMsg('')
+    const { count } = await supabase
+      .from('homenagens')
+      .select('id', { count: 'exact', head: true })
+      .in('lapide_id', (await supabase.from('lapides').select('id').eq('fila_id', fila.id)).data?.map((l) => l.id) || [])
+
+    if (count && count > 0) {
+      setMsg(`Fileira ${fila.numero} tem túmulo com memorial vinculado -- não dá pra apagar.`)
+      setSalvando(false)
+      return
+    }
+
+    await supabase.from('lapides').delete().eq('fila_id', fila.id)
+    const { error } = await supabase.from('filas').delete().eq('id', fila.id)
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setMsg(`Fileira ${fila.numero} apagada.`)
+      await carregar()
+    }
     setSalvando(false)
   }
 
@@ -911,7 +936,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       </Link>
       <h1 className="text-2xl font-bold text-white mb-1">Mapa — {cemiterio.nome}</h1>
       <p className="text-zinc-400 text-sm mb-2">
-        {quadras.length} quadra(s) · {filas.length} rua(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
+        {quadras.length} quadra(s) · {filas.length} fileira(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
       </p>
       {!ortomosaico && (
         <p className="text-amber-400 text-xs mb-4 bg-amber-950/30 border border-amber-900/40 rounded-lg px-3 py-2 inline-block">
@@ -1033,7 +1058,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 const [lng, lat] = f.eixo!.coordinates[0]
                 return (
                   <Marker key={`bandeira-${f.id}`} longitude={lng} latitude={lat} anchor="bottom">
-                    <div title={`Rua ${f.numero}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div title={`Fileira ${f.numero}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <span
                         style={{
                           fontSize: 9,
@@ -1292,8 +1317,8 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
             <h2 className="text-sm font-semibold text-white mb-1">Entrada do cemitério</h2>
             <p className="text-xs text-zinc-500 mb-3">
               {cemiterio.entrada_latitude != null
-                ? 'Marcada — é daqui que a rota até o túmulo começa na página pública, e as quadras/ruas são numeradas a partir daqui.'
-                : 'Ainda não marcada — rota pública usa o centro genérico, e não dá pra numerar quadra/rua sem uma âncora.'}
+                ? 'Marcada — é daqui que a rota até o túmulo começa na página pública, e as quadras/fileiras são numeradas a partir daqui.'
+                : 'Ainda não marcada — rota pública usa o centro genérico, e não dá pra numerar quadra/fileira sem uma âncora.'}
             </p>
             {modoMarcarEntrada ? (
               <div className="rounded-lg bg-emerald-950/30 border border-emerald-900/40 px-3 py-2 flex items-center justify-between">
@@ -1322,7 +1347,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-sm font-semibold text-white">Quadras e ruas</h2>
+              <h2 className="text-sm font-semibold text-white">Quadras e fileiras</h2>
               <button
                 type="button"
                 disabled={salvando || desenho.ativo}
@@ -1337,7 +1362,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               </button>
             </div>
             <p className="text-xs text-zinc-500 mb-3">
-              Desenha o contorno de cada quadra, numera a partir da entrada, depois desenha as ruas dentro dela.
+              Desenha o contorno de cada quadra, numera a partir da entrada, depois desenha as fileiras dentro dela.
             </p>
 
             {desenhandoQuadra && (
@@ -1373,9 +1398,9 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               if (quadrasSemFila.length === 0 && filasSemTumulo.length === 0) return null
               return (
                 <p className="text-xs text-amber-400 mb-2">
-                  ⚠ Pendências: {quadrasSemFila.length > 0 && `${quadrasSemFila.length} quadra(s) sem rua`}
+                  ⚠ Pendências: {quadrasSemFila.length > 0 && `${quadrasSemFila.length} quadra(s) sem fileira`}
                   {quadrasSemFila.length > 0 && filasSemTumulo.length > 0 && ' · '}
-                  {filasSemTumulo.length > 0 && `${filasSemTumulo.length} rua(s) sem túmulo gerado`}
+                  {filasSemTumulo.length > 0 && `${filasSemTumulo.length} fileira(s) sem túmulo gerado`}
                 </p>
               )
             })()}
@@ -1417,7 +1442,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                         {expandida ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         Quadra {q.numero}
                         {q.geometria_revisada && <span className="text-emerald-400 text-xs">🔒</span>}
-                        <span className="text-zinc-500 text-xs ml-auto">{filasDaQuadra.length} rua(s)</span>
+                        <span className="text-zinc-500 text-xs ml-auto">{filasDaQuadra.length} fileira(s)</span>
                       </button>
 
                       {expandida && (
@@ -1434,7 +1459,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                               }}
                               className="text-xs flex items-center gap-1 text-amber-400 hover:text-amber-200 disabled:opacity-40"
                             >
-                              <Plus size={11} strokeWidth={2} /> Nova rua
+                              <Plus size={11} strokeWidth={2} /> Nova fileira
                             </button>
                             {cemiterio.entrada_latitude != null && filasDaQuadra.length > 1 && (
                               <button
@@ -1443,7 +1468,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                 onClick={() => proporNumeracaoFilas(q)}
                                 className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-40"
                               >
-                                Numerar ruas
+                                Numerar fileiras
                               </button>
                             )}
                             {q.geometria_revisada ? (
@@ -1469,7 +1494,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
                           {numeracaoProposta?.tipo === 'filas' && numeracaoProposta.contexto === q.id && (
                             <PainelNumeracaoProposta
-                              titulo="Ordem proposta das ruas"
+                              titulo="Ordem proposta das fileiras"
                               itens={numeracaoProposta.itens}
                               precisaConfirmar={numeracaoProposta.precisaConfirmar}
                               onConfirmar={() => confirmarNumeracao(numeracaoProposta.precisaConfirmar)}
@@ -1478,7 +1503,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                           )}
 
                           {filasDaQuadra.length === 0 ? (
-                            <p className="text-zinc-500 text-xs">Nenhuma rua desenhada.</p>
+                            <p className="text-zinc-500 text-xs">Nenhuma fileira desenhada.</p>
                           ) : (
                             <ul className="space-y-1">
                               {filasDaQuadra.map((f) => (
@@ -1488,7 +1513,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                       className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
                                       style={{ background: corDaFila(f.numero) }}
                                     />
-                                    Rua {f.numero} {f.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
+                                    Fileira {f.numero} {f.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
                                     {f.quantidade_prevista ? `— ${f.quantidade_prevista} túmulos` : '— sem túmulos'}
                                   </span>
                                   <span className="flex items-center gap-2">
@@ -1520,6 +1545,9 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                           🔒 Travar
                                         </button>
                                       ))}
+                                    <button type="button" disabled={salvando} onClick={() => apagarFileira(f)} className="text-red-400 hover:text-red-200">
+                                      Apagar
+                                    </button>
                                   </span>
                                 </li>
                               ))}
@@ -1594,7 +1622,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
           {dialogoFila && (
             <div className="rounded-xl bg-zinc-900 border border-amber-900/40 p-4 mb-4">
               <h2 className="text-sm font-semibold text-white mb-1">
-                Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Rua {dialogoFila.filaNumero}
+                Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
               </h2>
               <p className="text-xs text-zinc-500 mb-2">Comprimento da fileira: {dialogoFila.comprimentoM.toFixed(1)} m</p>
               <label className="block text-xs text-zinc-400 mb-1">Quantidade de túmulos</label>
@@ -1636,7 +1664,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4">
             <h2 className="text-sm font-semibold text-white mb-1">Marcar túmulo avulso</h2>
             <p className="text-xs text-zinc-500 mb-3">
-              Pra lápide que já existe no cadastro mas ainda não tem coordenada (fora do fluxo de quadra/rua acima).
+              Pra lápide que já existe no cadastro mas ainda não tem coordenada (fora do fluxo de quadra/fileira acima).
             </p>
 
             {modoMarcar && lapideParaMarcar && (
@@ -1703,7 +1731,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               </div>
               <div className="flex items-center gap-2">
                 <MapPin size={12} strokeWidth={1.5} style={{ color: '#C9A46A' }} />
-                Contorno dourado = quadra · linha azul tracejada = rua
+                Contorno dourado = quadra · linha azul tracejada = fileira
               </div>
             </div>
           </div>
