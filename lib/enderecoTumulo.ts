@@ -83,12 +83,21 @@ function segmentoMetros(lat1: number, lng1: number, lat2: number, lng2: number) 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+/** Espaçamento padrão entre túmulos quando ainda não há histórico real pra
+ *  medir (chute do 1º lote de uma fileira nova) -- baseado na faixa real já
+ *  medida no José Lázaro (~1,5-1,66m ao longo da fileira), não no comprimento
+ *  do eixo. Gera os pontos GRUDADOS logo após o início/último confirmado; o
+ *  staff arrasta pra abrir/ajustar, nunca precisa "puxar de volta" um chute
+ *  que espalhou os túmulos até o fim da fileira. */
+const PITCH_PADRAO_M = 1.6
+
 /** Gera um LOTE de pontos continuando a partir do último túmulo já confirmado
  *  na fileira (ou do início do eixo, se nenhum ainda) -- em vez de reinterpolar
  *  a fileira inteira do zero a cada geração. O espaçamento usado é a MÉDIA
  *  real medida entre os túmulos já confirmados (quando tem 2+); sem histórico
- *  ainda, chuta dividindo o trecho restante do eixo pela quantidade pedida --
- *  chute que o staff corrige arrastando cada ponto do lote antes de gerar. */
+ *  ainda, usa PITCH_PADRAO_M (chute fixo, não escala com o tamanho do lote
+ *  nem com o que resta de fileira) -- o staff corrige arrastando cada ponto
+ *  do lote antes de gerar. */
 export function gerarPontosContinuacao(
   eixo: [number, number][],
   existentes: { lat: number; lng: number }[],
@@ -111,7 +120,7 @@ export function gerarPontosContinuacao(
     }
     pitch = soma / (existentes.length - 1)
   } else {
-    pitch = quantidade > 0 ? restanteM / quantidade : restanteM
+    pitch = PITCH_PADRAO_M
   }
 
   const kInicial = existentes.length > 0 ? 1 : 0
