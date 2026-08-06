@@ -96,7 +96,9 @@ Botão "Apagar" na fileira, dentro do painel de edição — bloqueado se qualqu
 
 Rafael, testando o "Gerar túmulos" numa fileira nova (Fileira 3): "a distancia entre os tumulos nao e a mesma entao do inicio da fileira ate o final nao encaixa". A interpolação uniforme em si estava certa — o problema é que o comprimento real do `eixo` (linha desenhada à mão) quase nunca bate exatamente com a distância real entre o primeiro e o último túmulo, e esse erro pequeno vira desvio progressivo ponto a ponto até o fim da fileira.
 
-Fix: enquanto o diálogo "Gerar túmulos" está aberto, as duas pontas do `eixo` da fileira (`filas.eixo`, LineString) viram `Marker` arrastável (quadrado laranja, `arrastarPontaFileira` grava direto em `filas.eixo` a cada solta) — dá pra encaixar cada ponta exatamente no centro do primeiro/último túmulo real antes de gerar. O comprimento e o aviso de espaçamento mostrados no diálogo (`comprimentoAoVivo`, via `comprimentoPolilinha`) agora recalculam a cada arrasto em vez de ficar travado no valor de quando o diálogo abriu (`espacamentoInfo` usava `dialogoFila.comprimentoM`, capturado uma vez só). Resolve o desalinhamento só quando o eixo já está no ângulo/direção certos — não substitui o fix de fase/âncora do bug grave acima para fileiras geradas do zero automaticamente.
+Fix (parte 1): enquanto o diálogo "Gerar túmulos" está aberto, as duas pontas do `eixo` da fileira (`filas.eixo`, LineString) viram `Marker` arrastável (quadrado laranja, `arrastarPontaFileira` grava direto em `filas.eixo` a cada solta) — dá pra encaixar cada ponta exatamente no centro do primeiro/último túmulo real antes de gerar. O comprimento e o aviso de espaçamento mostrados no diálogo (`comprimentoAoVivo`, via `comprimentoPolilinha`) agora recalculam a cada arrasto em vez de ficar travado no valor de quando o diálogo abriu.
+
+Rafael testou e não bastou — fileira real raramente é perfeitamente reta/uniforme, então só corrigir as 2 pontas ainda deixa os túmulos do meio desencaixados ("quero arrastar as pre marcaçoes dos tumulos que vao ser gerados pra se encaixarem direito"). **Fix (parte 2, o que resolveu de verdade)**: cada ponto pré-marcado do preview (antes só um `Layer` GeoJSON não-interativo) virou `Marker` arrastável individual — bolinha verde, fica amarela quando ajustada na mão (`ajustesPreview`, estado `Record<índice, [lng,lat]>`). Geração deixou de usar a RPC de interpolação automática (`gerar_lapides_fila`, que só sabe pitch uniforme a partir do eixo) e passou a chamar `gerar_lapides_fila_manual` (nova RPC, migration `20260806_gerar_lapides_fila_manual.sql`) — recebe o array de pontos já na posição final (ajustada ou não), grava `numero`/`codigo` na ordem 1..N da fileira (numeração sempre correta independente de quanto cada bolinha foi arrastada) e marca `coordenada_precisao='exata'` só nos pontos que o Rafael de fato tocou, `'interpolada'` no resto. `ajustesPreview` reseta ao trocar de fileira, mudar a quantidade digitada, ou fechar/gerar o diálogo (índice só faz sentido pro mesmo conjunto de pontos).
 
 ## Próximos passos
 
@@ -104,6 +106,7 @@ Fix: enquanto o diálogo "Gerar túmulos" está aberto, as duas pontas do `eixo`
 - [x] Apagar fileira inteira
 - [x] Rua → Fileira (rename)
 - [x] Arrastar pontas da fileira no diálogo "Gerar túmulos" (corrige drift de comprimento travado)
+- [x] Arrastar cada pré-marcação de túmulo individualmente antes de gerar (`gerar_lapides_fila_manual`)
 - [ ] Corrigir `_agrupar_remover_harmonicos` (bug #2 acima) no código genérico
 - [ ] Implementar `--ancora`/`--ancora2` (âncora manual de 2 pontos) como comando real em `mapear-cemiterio.py`, não só script avulso de teste
 - [ ] Regenerar as fileiras 1-10 da Quadra 1 (apagadas) com o método correto assim que o âncora estiver integrado
