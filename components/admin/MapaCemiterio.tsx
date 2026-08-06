@@ -994,7 +994,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       )}
 
       <div className="grid lg:grid-cols-12 gap-4 mt-4">
-        <div className="lg:col-span-8 lg:sticky lg:top-4 lg:self-start">
+        <div className="lg:col-span-8 lg:sticky lg:top-4 lg:self-start lg:order-2">
           <div className="rounded-xl border border-zinc-800 overflow-hidden" style={{ height: 'calc(100vh - 140px)', minHeight: 560 }}>
             <MapGL
               ref={mapRef}
@@ -1399,7 +1399,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
           </div>
         </div>
 
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-4 lg:order-1">
           {msg && (
             <p className="text-xs text-zinc-300 mb-3 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">{msg}</p>
           )}
