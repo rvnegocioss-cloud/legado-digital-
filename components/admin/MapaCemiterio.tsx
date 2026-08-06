@@ -10,7 +10,7 @@ import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
 import { centroide, comprimentoPolilinha } from '@/lib/geo'
-import { gerarPontosContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
+import { gerarPontosContinuacao, medirContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
 
 registrarProtocoloPmtiles()
 
@@ -317,6 +317,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       .map((l) => ({ lat: l.latitude as number, lng: l.longitude as number }))
   }, [lapides, dialogoFila])
 
+  const medicao = useMemo(() => {
+    if (!filaDoDialogo?.eixo) return null
+    return medirContinuacao(filaDoDialogo.eixo.coordinates, lapidesExistentesNaFila)
+  }, [filaDoDialogo, lapidesExistentesNaFila])
+
   const geracaoContinuacao = useMemo(() => {
     if (!filaDoDialogo?.eixo || !quantidadeNumerica || quantidadeNumerica < 1) return null
     return gerarPontosContinuacao(filaDoDialogo.eixo.coordinates, lapidesExistentesNaFila, quantidadeNumerica)
@@ -326,6 +331,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
   const comprimentoAoVivo = filaDoDialogo?.eixo ? comprimentoPolilinha(filaDoDialogo.eixo.coordinates) : null
   const espacamentoInfo = geracaoContinuacao ? validarEspacamento(geracaoContinuacao.pitch, 2) : null
+
+  const sugestaoRestante = useMemo(() => {
+    if (!medicao || medicao.pitch <= 0) return null
+    return Math.min(500, Math.max(1, Math.round(medicao.restanteM / medicao.pitch)))
+  }, [medicao])
 
   const previewPontosFinal = useMemo(() => {
     if (!previewPontos) return null
@@ -1458,7 +1468,9 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
             {desenhandoFila && (
               <BarraDesenho
-                texto={`Clica no centro do 1º e do último túmulo da fileira (${desenho.pontos.length} ponto${desenho.pontos.length === 1 ? '' : 's'})`}
+                texto={`Clica no centro do 1º e do último túmulo da fileira (${desenho.pontos.length} ponto${desenho.pontos.length === 1 ? '' : 's'})${
+                  desenho.pontos.length >= 2 ? ` — ${comprimentoPolilinha(desenho.pontos).toFixed(1)} m (como uma trena)` : ''
+                }`}
                 podeConcluir={desenho.pontos.length >= 2}
                 onConcluir={desenho.concluir}
                 onDesfazer={desenho.desfazerUltimoPonto}
@@ -1708,15 +1720,16 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               </h2>
               <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
               <p className="text-xs text-zinc-500 mb-1">
-                {lapidesExistentesNaFila.length > 0
-                  ? `${lapidesExistentesNaFila.length} já confirmado(s) -- o lote abaixo continua a partir do último, na mesma distância medida entre eles.`
-                  : 'Nenhum confirmado ainda -- o lote começa do início da fileira (ponta laranja).'}
+                {lapidesExistentesNaFila.length >= 2
+                  ? `${lapidesExistentesNaFila.length} já confirmado(s) -- distância real medida entre eles, dá pra usar "Preencher resto" abaixo.`
+                  : lapidesExistentesNaFila.length === 1
+                    ? '1 já confirmado -- gera mais 3 ou 4 pra medir uma distância real, depois usa "Preencher resto".'
+                    : 'Nenhum confirmado ainda -- gera um lote pequeno (3 a 5), arrasta cada um pro centro real do túmulo. A distância medida nesse lote vira a base do resto da fileira.'}
               </p>
-              {geracaoContinuacao && (
+              {medicao && (
                 <p className="text-xs text-zinc-500 mb-1">
-                  Restam ~{geracaoContinuacao.restanteM.toFixed(1)} m até o fim da fileira (~
-                  {geracaoContinuacao.pitch > 0 ? Math.max(0, Math.round(geracaoContinuacao.restanteM / geracaoContinuacao.pitch)) : '?'} no
-                  espaçamento atual) -- digita a quantidade certa quando for o último lote.
+                  Restam ~{medicao.restanteM.toFixed(1)} m até o fim da fileira (~{sugestaoRestante ?? '?'} túmulos no espaçamento{' '}
+                  {medicao.medidoDeVerdade ? 'medido' : 'padrão de 1,6m'}).
                 </p>
               )}
               <p className="text-xs mb-1" style={{ color: '#fb923c' }}>
@@ -1726,15 +1739,27 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada), arrasta cada uma pro centro real. Números seguem a ordem da fileira, continuando do último confirmado.
               </p>
               <label className="block text-xs text-zinc-400 mb-1">Quantidade deste lote</label>
-              <input
-                type="number"
-                min={1}
-                max={500}
-                value={quantidadeInput}
-                onChange={(e) => setQuantidadeInput(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white mb-2"
-                placeholder="ex: 10"
-              />
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={500}
+                  value={quantidadeInput}
+                  onChange={(e) => setQuantidadeInput(e.target.value)}
+                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
+                  placeholder="ex: 10"
+                />
+                {medicao?.medidoDeVerdade && sugestaoRestante != null && (
+                  <button
+                    type="button"
+                    onClick={() => setQuantidadeInput(String(sugestaoRestante))}
+                    title="Usa a distância real medida nos já confirmados pra preencher o resto da fileira de uma vez"
+                    className="shrink-0 text-xs px-2 py-1.5 rounded border border-emerald-700 text-emerald-400 hover:bg-emerald-950"
+                  >
+                    Preencher resto (~{sugestaoRestante})
+                  </button>
+                )}
+              </div>
               {espacamentoInfo && (
                 <p className={`text-xs mb-2 ${espacamentoInfo.ok ? 'text-zinc-400' : 'text-amber-400'}`}>
                   {espacamentoInfo.espacamento.toFixed(2)} m entre túmulos (espaçamento usado no lote)

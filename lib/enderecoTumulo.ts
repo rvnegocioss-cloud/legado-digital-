@@ -91,18 +91,11 @@ function segmentoMetros(lat1: number, lng1: number, lat2: number, lng2: number) 
  *  que espalhou os túmulos até o fim da fileira. */
 const PITCH_PADRAO_M = 1.6
 
-/** Gera um LOTE de pontos continuando a partir do último túmulo já confirmado
- *  na fileira (ou do início do eixo, se nenhum ainda) -- em vez de reinterpolar
- *  a fileira inteira do zero a cada geração. O espaçamento usado é a MÉDIA
- *  real medida entre os túmulos já confirmados (quando tem 2+); sem histórico
- *  ainda, usa PITCH_PADRAO_M (chute fixo, não escala com o tamanho do lote
- *  nem com o que resta de fileira) -- o staff corrige arrastando cada ponto
- *  do lote antes de gerar. */
-export function gerarPontosContinuacao(
-  eixo: [number, number][],
-  existentes: { lat: number; lng: number }[],
-  quantidade: number
-): { pontos: [number, number][]; pitch: number; restanteM: number } {
+/** Mede o espaçamento real (baseado nos já confirmados, ou o chute padrão) e
+ *  quanto falta de fileira -- independe de quantidade, então dá pra mostrar
+ *  "restam ~N túmulos" e o botão "preencher até o fim" mesmo antes do staff
+ *  digitar um tamanho de lote. */
+export function medirContinuacao(eixo: [number, number][], existentes: { lat: number; lng: number }[]) {
   const inicio = eixo[0]
   const fim = eixo[eixo.length - 1]
   const dirDist = comprimentoPolilinha([inicio, fim]) || 1
@@ -123,6 +116,23 @@ export function gerarPontosContinuacao(
     pitch = PITCH_PADRAO_M
   }
 
+  return { ultimo, dirLng, dirLat, pitch, restanteM, medidoDeVerdade: existentes.length >= 2 }
+}
+
+/** Gera um LOTE de pontos continuando a partir do último túmulo já confirmado
+ *  na fileira (ou do início do eixo, se nenhum ainda) -- em vez de reinterpolar
+ *  a fileira inteira do zero a cada geração. O espaçamento usado é a MÉDIA
+ *  real medida entre os túmulos já confirmados (quando tem 2+); sem histórico
+ *  ainda, usa PITCH_PADRAO_M (chute fixo, não escala com o tamanho do lote
+ *  nem com o que resta de fileira) -- o staff corrige arrastando cada ponto
+ *  do lote antes de gerar. */
+export function gerarPontosContinuacao(
+  eixo: [number, number][],
+  existentes: { lat: number; lng: number }[],
+  quantidade: number
+): { pontos: [number, number][]; pitch: number; restanteM: number; medidoDeVerdade: boolean } {
+  const { ultimo, dirLng, dirLat, pitch, restanteM, medidoDeVerdade } = medirContinuacao(eixo, existentes)
+
   const kInicial = existentes.length > 0 ? 1 : 0
   const pontos: [number, number][] = []
   for (let i = 0; i < quantidade; i++) {
@@ -131,7 +141,7 @@ export function gerarPontosContinuacao(
     pontos.push([ultimo.lng + dirLng * distancia, ultimo.lat + dirLat * distancia])
   }
 
-  return { pontos, pitch, restanteM }
+  return { pontos, pitch, restanteM, medidoDeVerdade }
 }
 
 export function validarEspacamento(comprimentoM: number, quantidade: number) {
