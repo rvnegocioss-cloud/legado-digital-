@@ -133,6 +133,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [numeracaoProposta, setNumeracaoProposta] = useState<NumeracaoProposta | null>(null)
   const [dialogoFila, setDialogoFila] = useState<{ filaId: string; quadraNumero: number; filaNumero: number; comprimentoM: number } | null>(null)
   const [quantidadeInput, setQuantidadeInput] = useState('')
+  const [ajustesPreview, setAjustesPreview] = useState<Record<number, [number, number]>>({})
 
   const [quadraEmEdicao, setQuadraEmEdicao] = useState<Quadra | null>(null)
   const [lapidesEdicao, setLapidesEdicao] = useState<LapideEdicao[]>([])
@@ -143,6 +144,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   useEffect(() => {
     carregar()
   }, [cemiterioId])
+
+  useEffect(() => {
+    setAjustesPreview({})
+  }, [quantidadeInput, dialogoFila?.filaId])
 
   async function carregar() {
     setCarregando(true)
@@ -310,17 +315,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const espacamentoInfo =
     comprimentoAoVivo != null && previewPontos && previewPontos.length > 1 ? validarEspacamento(comprimentoAoVivo, previewPontos.length) : null
 
-  const geojsonPreviewGeracao = useMemo(
-    () => ({
-      type: 'FeatureCollection' as const,
-      features: (previewPontos || []).map((p, i) => ({
-        type: 'Feature' as const,
-        geometry: { type: 'Point' as const, coordinates: p },
-        properties: { i },
-      })),
-    }),
-    [previewPontos]
-  )
+  const previewPontosFinal = useMemo(() => {
+    if (!previewPontos) return null
+    return previewPontos.map((p, i) => ajustesPreview[i] || p)
+  }, [previewPontos, ajustesPreview])
 
   function aoCarregarMapa() {
     if (!mapRef.current) return
@@ -498,6 +496,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       comprimentoM: comprimentoPolilinha(pontos),
     })
     setQuantidadeInput('')
+    setAjustesPreview({})
     setQuadraAtivaParaFila(null)
     setSalvando(false)
   }
@@ -571,15 +570,16 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   }
 
   async function gerarTumulos() {
-    if (!dialogoFila || !quantidadeNumerica || quantidadeNumerica < 1) {
+    if (!dialogoFila || !quantidadeNumerica || quantidadeNumerica < 1 || !previewPontosFinal) {
       setMsg('Digita uma quantidade válida.')
       return
     }
     setSalvando(true)
     setMsg('')
-    const { error } = await supabase.rpc('gerar_lapides_fila', {
+    const pontos = previewPontosFinal.map(([lng, lat], i) => ({ lng, lat, exata: Boolean(ajustesPreview[i]) }))
+    const { error } = await supabase.rpc('gerar_lapides_fila_manual', {
       p_fila_id: dialogoFila.filaId,
-      p_quantidade: quantidadeNumerica,
+      p_pontos: pontos,
       p_substituir: false,
     })
     if (error) {
@@ -587,6 +587,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     } else {
       setMsg(`${quantidadeNumerica} túmulos gerados na Fileira ${dialogoFila.filaNumero} da Quadra ${dialogoFila.quadraNumero}.`)
       setDialogoFila(null)
+      setAjustesPreview({})
       await carregar()
     }
     setSalvando(false)
@@ -661,6 +662,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
     const { error } = await supabase.from('filas').update({ eixo: novoEixo }).eq('id', filaId)
     if (error) setMsg(error.message)
+  }
+
+  function arrastarPontoPreview(index: number, lat: number, lng: number) {
+    setAjustesPreview((atual) => ({ ...atual, [index]: [lng, lat] }))
   }
 
   function sairModoEdicao() {
@@ -1031,16 +1036,6 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 />
               </Source>
 
-              {dialogoFila && (
-                <Source id="preview-geracao" type="geojson" data={geojsonPreviewGeracao}>
-                  <Layer
-                    id="preview-geracao-pontos"
-                    type="circle"
-                    paint={{ 'circle-radius': 4, 'circle-color': '#a3e635', 'circle-stroke-width': 1, 'circle-stroke-color': '#0B1D2A' }}
-                  />
-                </Source>
-              )}
-
               <Source id="lapides" type="geojson" data={geojsonPinos}>
                 <Layer
                   id="lapides-pinos"
@@ -1124,6 +1119,31 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                       />
                     </Marker>
                   ))}
+
+              {dialogoFila &&
+                previewPontosFinal?.map(([lng, lat], index) => (
+                  <Marker
+                    key={`preview-tumulo-${index}`}
+                    longitude={lng}
+                    latitude={lat}
+                    anchor="center"
+                    draggable
+                    onDragEnd={(e) => arrastarPontoPreview(index, e.lngLat.lat, e.lngLat.lng)}
+                  >
+                    <div
+                      title={`Túmulo previsto #${index + 1} -- arrasta pro centro real`}
+                      style={{
+                        width: 11,
+                        height: 11,
+                        borderRadius: '50%',
+                        background: ajustesPreview[index] ? '#facc15' : '#a3e635',
+                        border: '1.5px solid #0B1D2A',
+                        boxShadow: '0 0 0 1px rgba(255,255,255,0.7)',
+                        cursor: 'grab',
+                      }}
+                    />
+                  </Marker>
+                ))}
 
               {quadraEmEdicao?.poligono &&
                 quadraEmEdicao.poligono.coordinates[0].slice(0, -1).map(([lng, lat], index) => (
@@ -1575,6 +1595,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                             comprimentoM: f.eixo ? comprimentoPolilinha(f.eixo.coordinates) : 0,
                                           })
                                           setQuantidadeInput(f.quantidade_prevista ? String(f.quantidade_prevista) : '')
+                                          setAjustesPreview({})
                                         }}
                                         className="text-amber-400 hover:text-amber-200"
                                       >
@@ -1671,8 +1692,11 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
               </h2>
               <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
-              <p className="text-xs mb-2" style={{ color: '#fb923c' }}>
+              <p className="text-xs mb-1" style={{ color: '#fb923c' }}>
                 ◼ Pontas da fileira -- quadrado laranja, arrasta pro centro exato do 1º e do último túmulo.
+              </p>
+              <p className="text-xs mb-2" style={{ color: '#a3e635' }}>
+                ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada), arrasta cada uma pro centro real. Números seguem a ordem da fileira.
               </p>
               <label className="block text-xs text-zinc-400 mb-1">Quantidade de túmulos</label>
               <input
@@ -1701,7 +1725,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setDialogoFila(null)}
+                  onClick={() => {
+                    setDialogoFila(null)
+                    setAjustesPreview({})
+                  }}
                   className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                 >
                   Cancelar
