@@ -972,7 +972,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     setSalvando(false)
   }
 
-  if (carregando) return <p className="text-zinc-400 text-sm">Carregando mapa...</p>
+  if (carregando && !cemiterio) return <p className="text-zinc-400 text-sm">Carregando mapa...</p>
   if (!cemiterio) return <p className="text-zinc-400 text-sm">Cemitério não encontrado.</p>
 
   const desenhandoQuadra = desenho.ativo && desenho.modo === 'poligono'
