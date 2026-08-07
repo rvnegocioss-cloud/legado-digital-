@@ -16,7 +16,10 @@ Responda em português, direto e claro. Se não souber algo, diga que não sabe 
 - **Login**: Supabase Auth (e-mail/senha), papéis `Admin Legado Digital` e `Operador Legado Digital`.
 - **Dashboard** (`/admin`): cards de Parceiros/Memoriais/Usuários, métricas de visita (total acumulado, novos memoriais 7 dias, homenagens recentes), top 5 cemitérios e top 5 parceiros por visita, card de e-mail do fornecedor de placas, tabela de memoriais com QR Code.
 - **Parceiros** (`/admin/parceiros`): CRUD completo, ficha de detalhe por parceiro, botão "Consultar Receita" (preenche dados por CNPJ via BrasilAPI), "Contatos da empresa" (nome/e-mail/telefone/perfil — Responsável Legal/Financeiro/Comercial/Técnico/Outro, pode ter mais de um perfil), botão "Conceder acesso" por contato (vira usuário do Portal do Parceiro com senha temporária, badge "Tem acesso ao sistema"), botão "Acessar Plataforma do Parceiro" (entra no portal daquele parceiro sem logar de novo).
-- **Cemitérios** (`/admin/cemiterios`): cadastro com mapa Leaflet pra marcar localização, botão "Instalação Drone" (relatório técnico de mapeamento por drone), botão "Lápides" por cemitério (cadastro de lápide/quadra/lote pra vincular memorial).
+- **Cemitérios** (`/admin/cemiterios`): cadastro com mapa (satélite Esri) pra marcar localização, botão "Instalação Drone" (relatório técnico de mapeamento por drone). Cada cemitério tem dois links próprios: **Mapa** (`/admin/cemiterios/[id]/mapa`) e **Lápides** (`/admin/cemiterios/[id]/lapides`).
+  - **Mapa**: sistema de endereçamento Quadra → Fileira → Túmulo sobre o ortomosaico real do drone (quando o cemitério tem um cadastrado — só o José Lázaro/Tupaciguara tem hoje, os outros caem no satélite genérico). Staff desenha o contorno da quadra e o eixo de cada fileira, gera túmulos em lotes (digita quantidade, arrasta cada ponto pro lugar certo, "Gerar" salva e "Gerar mais" continua de onde parou), pode duplicar uma fileira pronta pra virar a próxima (mesmo formato, deslocado — sempre nasce não revisada, precisa conferir antes de travar). Cada quadra/fileira pode ser travada (🔒) depois de revisada, o que bloqueia edição acidental. Painel "Quem opera neste cemitério" (só staff) mostra os memoriais agrupados por parceiro dono.
+  - **Lápides**: visualização organizada por Quadra (colunas lado a lado) → Fileira (retrátil) → Túmulo (chip clicável, mostra se já tem memorial). Túmulos sem quadra/fileira vinculada ficam numa seção separada "Fora de fileira", com aviso — vincular memorial num túmulo dessa seção exige confirmação extra (risco de errar o túmulo certo).
+  - **Achado real (2026-08-07)**: um cemitério pode ser operado por mais de um parceiro ao mesmo tempo (ex: cemitério municipal com várias funerárias atuando nele) — tabela `cemiterios_parceiros` controla quem está autorizado, além do `cemiterios.parceiro_id` antigo (1 parceiro só, legado).
 - **Memoriais** (`/admin/memoriais`): CRUD completo, ficha de detalhe com todos os campos (foto, vídeo, galeria, timeline, bio, frase), QR Code (gera sozinho na criação, botão de baixar/regerar depois), senha de acesso e senha de edição da família, cadastro da família (nome do responsável + CPF opcional que preenche o nome + e-mail + telefone — gera senha automática e manda por e-mail), mensagem da placa (com confirmação da família antes de ir pro fornecedor), 3 toggles de privacidade (busca/link/QR Code — todos ligados por padrão), seleção de cemitério+lápide, botão "Acessar Portal da Família" (staff entra direto na área de edição da família — foto/vídeo/galeria/timeline — sem precisar da senha da família).
 - **Comunicações** (`/admin/emails`): lista de parceiros com e-mail/WhatsApp/última atividade, memoriais de cada um expandindo com contato da família, histórico de e-mails automáticos disparados.
 - **Usuários** (`/admin/usuarios`): lista de usuários staff.
@@ -30,6 +33,7 @@ Responda em português, direto e claro. Se não souber algo, diga que não sabe 
 - **Dashboard**: total de memoriais, plano contratado, status de pagamento, edição da própria página pública (logo/descrição — corrigido 2026-07-29, RLS bloqueava o salvar antes).
 - **Memoriais** (`/parceiro/memoriais`): CRUD restrito ao próprio parceiro, mesmos campos de conteúdo da Central (nome, datas, cidade, frase, bio, mídia, timeline, senha, QR, placa) mais o cadastro da família (nome do responsável, CPF opcional, e-mail, telefone) e "quem preenche o conteúdo" (família ou funerária).
 - **Comunicações** (`/parceiro/emails`): histórico de e-mails dos próprios memoriais, confirma que família aprovou mensagem da placa.
+- **Cemitérios** (`/parceiro/cemiterios`, novo 2026-08-07): lista dos cemitérios onde o parceiro está autorizado a atuar, cada um com o mapa (Quadra/Fileira/Túmulo) em modo **só leitura** — parceiro nunca desenha/edita geometria, isso é só da Central. Mostra "meus memoriais neste cemitério"; um túmulo ocupado por memorial de outro parceiro aparece só como "Ocupado — outro parceiro" (sem nome/foto), nunca vaza dado de família de outra funerária.
 - Botão pra ver a própria página pública (`/parceiros/[slug]`).
 
 ## Portal da Família — o que staff/parceiro precisa saber pra ajudar
@@ -73,6 +77,8 @@ Rotas conhecidas — Central (staff, `Admin Legado Digital`/`Operador Legado Dig
 - `/admin` — Dashboard
 - `/admin/parceiros` — lista de Parceiros B2B
 - `/admin/cemiterios` — Cemitérios
+- `/admin/cemiterios/[id]/mapa` — Mapa do cemitério (Quadra/Fileira/Túmulo)
+- `/admin/cemiterios/[id]/lapides` — Lápides do cemitério (organizadas por quadra/fileira)
 - `/admin/memoriais` — Memoriais
 - `/admin/usuarios` — Usuários
 - `/admin/emails` — Central de Comunicações
@@ -84,6 +90,7 @@ Rotas conhecidas — Central (staff, `Admin Legado Digital`/`Operador Legado Dig
 Rotas conhecidas — Portal do Parceiro (papel `Parceiro B2B`):
 - `/parceiro` — Dashboard do parceiro (inclui plano/pagamento)
 - `/parceiro/memoriais` — Memoriais do próprio parceiro
+- `/parceiro/cemiterios` — Cemitérios autorizados (mapa só leitura + meus memoriais)
 - `/parceiro/emails` — Comunicações do próprio parceiro
 
 Parceiro B2B só pode receber `AÇÃO:` com rota `/parceiro*`, nunca `/admin*`.
