@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import PainelParceirosCemiterio from '@/components/admin/PainelParceirosCemiterio'
 
 // MapLibre acessa `window`, não pode renderizar no servidor.
 const MapaCemiterio = dynamic(
@@ -11,5 +12,10 @@ const MapaCemiterio = dynamic(
 
 export default function MapaCemiterioPage() {
   const { id } = useParams<{ id: string }>()
-  return <MapaCemiterio cemiterioId={id} />
+  return (
+    <div>
+      <MapaCemiterio cemiterioId={id} />
+      <PainelParceirosCemiterio cemiterioId={id} />
+    </div>
+  )
 }
