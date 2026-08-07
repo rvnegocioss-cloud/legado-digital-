@@ -256,14 +256,9 @@ export default function AdminCemiterios() {
                   </td>
                   <td className="py-3 px-4 text-zinc-400">
                     {c.latitude != null && c.longitude != null ? (
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${c.latitude},${c.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline"
-                      >
+                      <Link href={`/admin/cemiterios/${c.id}/mapa`} className="text-blue-400 hover:underline">
                         ver no mapa
-                      </a>
+                      </Link>
                     ) : (
                       '—'
                     )}
