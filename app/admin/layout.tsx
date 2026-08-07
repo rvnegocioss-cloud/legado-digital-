@@ -124,6 +124,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={160} height={64} className="md:hidden h-12 w-auto object-contain" />
           <div className="hidden md:block" />
           <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="md:hidden text-zinc-400 hover:text-white transition-colors"
+              aria-label="Voltar pro Site"
+              title="Voltar pro Site"
+            >
+              <Home size={18} />
+            </Link>
             <button className="text-zinc-400 hover:text-white transition-colors" aria-label="Alertas">
               <Bell size={18} />
             </button>
