@@ -9,9 +9,12 @@ import { supabase } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
+import { BarraDesenho } from './mapa/BarraDesenho'
+import PainelRuas from './mapa/PainelRuas'
 import { centroide, comprimentoPolilinha, deMetrosLocal, projetarLocal } from '@/lib/geo'
 import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, medirPassoEntreFileiras, validarEspacamento } from '@/lib/enderecoTumulo'
 import { corDaFila } from '@/lib/coresFila'
+import { calcularRota, diagnosticarRede, type ResultadoRota, type RuaMapeada } from '@/lib/rotaCemiterio'
 
 const JANELA_VAOS_CONTINUACAO = 6
 
@@ -93,6 +96,15 @@ interface Fila {
   geometria_revisada: boolean
 }
 
+interface Rua {
+  id: string
+  numero: number
+  nome: string | null
+  eixo: { type: 'LineString'; coordinates: [number, number][] } | null
+  geometria_revisada: boolean
+  comprimento_m: number | null
+}
+
 type ItemNumeracao = { id: string; numero: number; label: string; distancia: number | null }
 type NumeracaoProposta = { tipo: 'quadras' | 'filas'; contexto: string; itens: ItemNumeracao[]; precisaConfirmar: boolean }
 type DuplicacaoFila = { filaOrigemId: string; quadraId: string; quadraNumero: number; numeroOrigem: number }
@@ -117,6 +129,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [homenagens, setHomenagens] = useState<Homenagem[]>([])
   const [quadras, setQuadras] = useState<Quadra[]>([])
   const [filas, setFilas] = useState<Fila[]>([])
+  const [ruas, setRuas] = useState<Rua[]>([])
+  const [ruaEmEdicao, setRuaEmEdicao] = useState<Rua | null>(null)
+  const [modoTestarRota, setModoTestarRota] = useState(false)
+  const [rotaTeste, setRotaTeste] = useState<ResultadoRota | null>(null)
   const [lapideSelecionada, setLapideSelecionada] = useState<Lapide | null>(null)
   const [lapideHover, setLapideHover] = useState<Lapide | null>(null)
   const [temMemorialGeo, setTemMemorialGeo] = useState<Record<string, boolean>>({})
@@ -245,6 +261,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         }[]
       }
       lapides?: { features: { properties: { id: string; tem_memorial: boolean } }[] }
+      ruas?: {
+        features: {
+          properties: { id: string; numero: number; nome: string | null; situacao: string; geometria_revisada: boolean; comprimento_m: number | null }
+          geometry: Rua['eixo']
+        }[]
+      }
     } | null
 
     setTemMemorialGeo(Object.fromEntries((geoData?.lapides?.features || []).map((f) => [f.properties.id, f.properties.tem_memorial])))
@@ -267,6 +289,16 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         quantidade_prevista: f.properties.quantidade_prevista,
         eixo: f.geometry,
         geometria_revisada: f.properties.geometria_revisada,
+      }))
+    )
+    setRuas(
+      (geoData?.ruas?.features || []).map((r) => ({
+        id: r.properties.id,
+        numero: r.properties.numero,
+        nome: r.properties.nome,
+        eixo: r.geometry,
+        geometria_revisada: r.properties.geometria_revisada,
+        comprimento_m: r.properties.comprimento_m,
       }))
     )
     setCarregando(false)
@@ -359,6 +391,30 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }),
     [filas]
   )
+
+  const ruasGeojson = useMemo(
+    () => ({
+      type: 'FeatureCollection' as const,
+      features: ruas
+        .filter((r) => r.eixo)
+        .map((r) => ({
+          type: 'Feature' as const,
+          geometry: r.eixo!,
+          properties: { id: r.id, numero: r.numero, label: r.nome || `Rua ${r.numero}` },
+        })),
+    }),
+    [ruas]
+  )
+
+  const ruasParaRota = useMemo<RuaMapeada[]>(
+    () => ruas.filter((r) => r.eixo).map((r) => ({ id: r.id, numero: r.numero, nome: r.nome, coordenadas: r.eixo!.coordinates })),
+    [ruas]
+  )
+
+  const diagnosticoRuas = useMemo(() => {
+    if (!cemiterio?.entrada_latitude || !cemiterio?.entrada_longitude) return null
+    return diagnosticarRede({ lat: cemiterio.entrada_latitude, lng: cemiterio.entrada_longitude }, ruasParaRota)
+  }, [cemiterio?.entrada_latitude, cemiterio?.entrada_longitude, ruasParaRota])
 
   const quadrasComBandeiraDeFila = useMemo(() => {
     const ids = Object.keys(quadraExpandida).filter((id) => quadraExpandida[id])
@@ -588,6 +644,22 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         await inserirTumuloDepoisDe(referenciaInsercao, e.lngLat.lat, e.lngLat.lng)
       } else {
         await adicionarTumulo(e.lngLat.lat, e.lngLat.lng)
+      }
+      return
+    }
+
+    if (modoTestarRota) {
+      const feat = e.features?.[0]
+      const lapideId = feat?.properties?.lapideId
+      const lapide = lapideId ? lapides.find((l) => l.id === lapideId) : null
+      if (lapide?.latitude != null && lapide?.longitude != null && cemiterio?.entrada_latitude != null && cemiterio?.entrada_longitude != null) {
+        setRotaTeste(
+          calcularRota(
+            { lat: cemiterio.entrada_latitude, lng: cemiterio.entrada_longitude },
+            { lat: lapide.latitude, lng: lapide.longitude },
+            ruasParaRota
+          )
+        )
       }
       return
     }
@@ -1193,11 +1265,93 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
+  // --- Ruas (caminhos internos do cemiterio, por onde a rota ate o tumulo
+  // anda de verdade em vez de cortar reto por cima de quadra/muro) ---
+
+  async function onConcluirRua(pontos: [number, number][]) {
+    setSalvando(true)
+    setMsg('')
+    const proximoNumero = ruas.reduce((max, r) => Math.max(max, r.numero), 0) + 1
+    const { error } = await supabase.from('ruas_cemiterio').insert({
+      cemiterio_id: cemiterioId,
+      numero: proximoNumero,
+      eixo: { type: 'LineString', coordinates: pontos },
+      comprimento_m: comprimentoPolilinha(pontos),
+    })
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setMsg(`Rua ${proximoNumero} criada.`)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  async function renomearRua(ruaId: string, nome: string) {
+    setSalvando(true)
+    const { error } = await supabase.from('ruas_cemiterio').update({ nome: nome.trim() || null }).eq('id', ruaId)
+    if (error) setMsg(error.message)
+    else await carregar()
+    setSalvando(false)
+  }
+
+  async function travarRua(rua: Rua) {
+    setSalvando(true)
+    const { error } = await supabase.from('ruas_cemiterio').update({ geometria_revisada: true }).eq('id', rua.id)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`Rua ${rua.numero} travada.`)
+      if (ruaEmEdicao?.id === rua.id) setRuaEmEdicao(null)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  async function destravarRua(rua: Rua) {
+    setSalvando(true)
+    const { error } = await supabase.from('ruas_cemiterio').update({ geometria_revisada: false }).eq('id', rua.id)
+    if (error) setMsg(error.message)
+    else await carregar()
+    setSalvando(false)
+  }
+
+  async function arrastarVerticeRua(ruaId: string, index: number, lat: number, lng: number) {
+    const rua = ruas.find((r) => r.id === ruaId)
+    if (!rua?.eixo || rua.geometria_revisada) return
+    const coords = rua.eixo.coordinates.map((p) => [...p]) as [number, number][]
+    coords[index] = [lng, lat]
+    const novoEixo = { type: 'LineString' as const, coordinates: coords }
+    const novoComprimento = comprimentoPolilinha(coords)
+
+    setRuas((atual) => atual.map((r) => (r.id === ruaId ? { ...r, eixo: novoEixo, comprimento_m: novoComprimento } : r)))
+    setRuaEmEdicao((atual) => (atual?.id === ruaId ? { ...atual, eixo: novoEixo, comprimento_m: novoComprimento } : atual))
+
+    const { error } = await supabase.from('ruas_cemiterio').update({ eixo: novoEixo, comprimento_m: novoComprimento }).eq('id', ruaId)
+    if (error) setMsg(error.message)
+  }
+
+  async function apagarRua(rua: Rua) {
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase.from('ruas_cemiterio').delete().eq('id', rua.id)
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setMsg(`Rua ${rua.numero} apagada.`)
+      if (ruaEmEdicao?.id === rua.id) setRuaEmEdicao(null)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
   if (carregando && !cemiterio) return <p className="text-zinc-400 text-sm">Carregando mapa...</p>
   if (!cemiterio) return <p className="text-zinc-400 text-sm">Cemitério não encontrado.</p>
 
   const desenhandoQuadra = desenho.ativo && desenho.modo === 'poligono'
-  const desenhandoFila = desenho.ativo && desenho.modo === 'linha'
+  // Fileira E rua desenham como 'linha' -- diferenciadas por quadraAtivaParaFila
+  // (so fileira sempre passa por uma quadra antes de comecar a desenhar).
+  const desenhandoFila = desenho.ativo && desenho.modo === 'linha' && quadraAtivaParaFila != null
+  const desenhandoRua = desenho.ativo && desenho.modo === 'linha' && quadraAtivaParaFila == null
 
   return (
     <div>
@@ -1211,7 +1365,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       </div>
       <h1 className="text-2xl font-bold text-white mb-1">Mapa — {cemiterio.nome}</h1>
       <p className="text-zinc-400 text-sm mb-2">
-        {quadras.length} quadra(s) · {filas.length} fileira(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
+        {quadras.length} quadra(s) · {filas.length} fileira(s) · {ruas.length} rua(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
       </p>
       {!ortomosaico && (
         <p className="text-amber-400 text-xs mb-4 bg-amber-950/30 border border-amber-900/40 rounded-lg px-3 py-2 inline-block">
@@ -1265,6 +1419,33 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               <Source id="filas" type="geojson" data={filasGeojson}>
                 <Layer id="filas-linha" type="line" paint={{ 'line-color': '#4285F4', 'line-width': 2, 'line-opacity': 0.7, 'line-dasharray': [1, 1] }} />
               </Source>
+
+              <Source id="ruas" type="geojson" data={ruasGeojson}>
+                {/* casing escuro embaixo: legibilidade sobre qualquer ortomosaico */}
+                <Layer id="ruas-casing" type="line" paint={{ 'line-color': '#0B1D2A', 'line-width': 8, 'line-opacity': 0.55 }} layout={{ 'line-cap': 'round', 'line-join': 'round' }} />
+                <Layer id="ruas-linha" type="line" paint={{ 'line-color': '#a855f7', 'line-width': 4, 'line-opacity': 0.9 }} layout={{ 'line-cap': 'round', 'line-join': 'round' }} />
+                <Layer
+                  id="ruas-label"
+                  type="symbol"
+                  layout={{ 'symbol-placement': 'line-center', 'text-field': ['get', 'label'], 'text-size': 12 }}
+                  paint={{ 'text-color': '#e9d5ff', 'text-halo-color': '#0B1D2A', 'text-halo-width': 1.5 }}
+                />
+              </Source>
+
+              {rotaTeste && (
+                <Source
+                  id="rota-teste"
+                  type="geojson"
+                  data={{ type: 'Feature', geometry: { type: 'LineString', coordinates: rotaTeste.coordenadas }, properties: {} }}
+                >
+                  <Layer
+                    id="rota-teste-linha"
+                    type="line"
+                    paint={{ 'line-color': rotaTeste.usouRede ? '#a855f7' : '#f87171', 'line-width': 3, 'line-dasharray': [2, 2] }}
+                    layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                  />
+                </Source>
+              )}
 
               <Source id="desenho-preview" type="geojson" data={desenho.geojsonPreview ?? FC_VAZIA}>
                 <Layer
@@ -1417,6 +1598,31 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       />
                     </Marker>
                   ))}
+
+              {ruaEmEdicao?.eixo?.coordinates.map(([lng, lat], index) => (
+                <Marker
+                  key={`vertice-rua-${index}`}
+                  longitude={lng}
+                  latitude={lat}
+                  anchor="center"
+                  draggable={!ruaEmEdicao.geometria_revisada}
+                  onDragEnd={(e) => arrastarVerticeRua(ruaEmEdicao.id, index, e.lngLat.lat, e.lngLat.lng)}
+                >
+                  <div
+                    title="Vértice da rua -- arrasta pro meio do caminho real"
+                    style={{
+                      width: 15,
+                      height: 15,
+                      borderRadius: 2,
+                      background: '#a855f7',
+                      border: '2px solid #0B1D2A',
+                      boxShadow: '0 0 0 1px rgba(255,255,255,0.75)',
+                      cursor: ruaEmEdicao.geometria_revisada ? 'not-allowed' : 'grab',
+                      opacity: ruaEmEdicao.geometria_revisada ? 0.5 : 1,
+                    }}
+                  />
+                </Marker>
+              ))}
 
               {dialogoFila &&
                 previewPontosFinal?.map(([lng, lat], index) => (
@@ -2174,6 +2380,36 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             </ul>
           </div>
 
+          <PainelRuas
+            ruas={ruas}
+            editavel={editavel}
+            salvando={salvando}
+            desenhandoRua={desenhandoRua}
+            desenho={desenho}
+            ruaEmEdicao={ruaEmEdicao}
+            diagnostico={diagnosticoRuas}
+            temEntrada={cemiterio.entrada_latitude != null && cemiterio.entrada_longitude != null}
+            modoTestarRota={modoTestarRota}
+            rotaTeste={rotaTeste}
+            onNovaRua={() => {
+              setModoMarcarEntrada(false)
+              setModoMarcar(false)
+              setQuadraAtivaParaFila(null)
+              setRuaEmEdicao(null)
+              desenho.iniciar('linha', onConcluirRua)
+            }}
+            onRenomear={renomearRua}
+            onTravar={travarRua}
+            onDestravar={destravarRua}
+            onEditar={setRuaEmEdicao}
+            onSairEdicao={() => setRuaEmEdicao(null)}
+            onApagar={apagarRua}
+            onToggleTestarRota={() => {
+              setModoTestarRota((v) => !v)
+              setRotaTeste(null)
+            }}
+          />
+
           {quadraEmEdicao && (
             <div className="rounded-xl bg-zinc-900 border border-blue-900/40 p-4 mb-4">
               <h2 className="text-sm font-semibold text-white mb-1">Editando Quadra {quadraEmEdicao.numero}</h2>
@@ -2306,6 +2542,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 <MapPin size={12} strokeWidth={1.5} style={{ color: '#C9A46A' }} />
                 Contorno dourado = quadra · linha azul tracejada = fileira
               </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-0.5 inline-block" style={{ background: '#a855f7' }} />
+                Linha roxa = rua (caminho interno, por onde a rota anda) · quadrado roxo = vértice de rua · quadrado laranja = ponta de fileira
+              </div>
             </div>
           </div>
 
@@ -2341,42 +2581,6 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             )}
           </div>
         </div>
-      </div>
-    </div>
-  )
-}
-
-function BarraDesenho({
-  texto,
-  podeConcluir,
-  onConcluir,
-  onDesfazer,
-  onCancelar,
-}: {
-  texto: string
-  podeConcluir: boolean
-  onConcluir: () => void
-  onDesfazer: () => void
-  onCancelar: () => void
-}) {
-  return (
-    <div className="rounded-lg bg-emerald-950/30 border border-emerald-900/40 px-3 py-2 mb-3">
-      <p className="text-xs text-emerald-300 mb-2">{texto}</p>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          disabled={!podeConcluir}
-          onClick={onConcluir}
-          className="text-xs px-2 py-1 rounded bg-emerald-700 text-white hover:bg-emerald-600 disabled:opacity-40"
-        >
-          Concluir
-        </button>
-        <button type="button" onClick={onDesfazer} className="text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-          Desfazer ponto
-        </button>
-        <button type="button" onClick={onCancelar} className="text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-          Cancelar
-        </button>
       </div>
     </div>
   )
