@@ -10,7 +10,7 @@ import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
 import { centroide, comprimentoPolilinha } from '@/lib/geo'
-import { gerarPontosContinuacao, medirContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
+import { acharSobreposicoes, gerarPontosContinuacao, medirContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
 
 registrarProtocoloPmtiles()
 
@@ -136,6 +136,8 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [dialogoFila, setDialogoFila] = useState<{ filaId: string; quadraNumero: number; filaNumero: number; comprimentoM: number } | null>(null)
   const [quantidadeInput, setQuantidadeInput] = useState('')
   const [ajustesPreview, setAjustesPreview] = useState<Record<number, [number, number]>>({})
+  const [existentesFrescos, setExistentesFrescos] = useState<{ lat: number; lng: number }[] | null>(null)
+  const [carregandoExistentes, setCarregandoExistentes] = useState(false)
 
   const [quadraEmEdicao, setQuadraEmEdicao] = useState<Quadra | null>(null)
   const [lapidesEdicao, setLapidesEdicao] = useState<LapideEdicao[]>([])
@@ -150,6 +152,35 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   useEffect(() => {
     setAjustesPreview({})
   }, [quantidadeInput, dialogoFila?.filaId])
+
+  // Busca os túmulos da fileira DIRETO DO BANCO ao abrir o diálogo -- o state
+  // global `lapides` só é atualizado por carregar() e as mutações do modo de
+  // edição (arrastar/adicionar/apagar túmulo) não chamam carregar(), então ler
+  // dali podia devolver posição de ANTES de um arrasto (bug real: lote novo
+  // nascia em cima da posição pré-arrasto do último túmulo, sobrepondo o que
+  // já tinha sido organizado na mão -- achado com o Opus, 2026-08-07).
+  useEffect(() => {
+    if (!dialogoFila) {
+      setExistentesFrescos(null)
+      return
+    }
+    let cancelado = false
+    setCarregandoExistentes(true)
+    supabase
+      .from('lapides')
+      .select('latitude, longitude')
+      .eq('fila_id', dialogoFila.filaId)
+      .not('latitude', 'is', null)
+      .order('numero', { ascending: true })
+      .then(({ data }) => {
+        if (cancelado) return
+        setExistentesFrescos((data || []).map((l) => ({ lat: l.latitude as number, lng: l.longitude as number })))
+        setCarregandoExistentes(false)
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [dialogoFila])
 
   async function carregar() {
     setCarregando(true)
@@ -309,23 +340,15 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const filaDoDialogo = dialogoFila ? filas.find((f) => f.id === dialogoFila.filaId) : null
   const quantidadeNumerica = parseInt(quantidadeInput, 10)
 
-  const lapidesExistentesNaFila = useMemo(() => {
-    if (!dialogoFila) return []
-    return lapides
-      .filter((l) => l.fila_id === dialogoFila.filaId && l.numero != null && l.latitude != null && l.longitude != null)
-      .sort((a, b) => (a.numero as number) - (b.numero as number))
-      .map((l) => ({ lat: l.latitude as number, lng: l.longitude as number }))
-  }, [lapides, dialogoFila])
-
   const medicao = useMemo(() => {
-    if (!filaDoDialogo?.eixo) return null
-    return medirContinuacao(filaDoDialogo.eixo.coordinates, lapidesExistentesNaFila)
-  }, [filaDoDialogo, lapidesExistentesNaFila])
+    if (!filaDoDialogo?.eixo || !existentesFrescos || carregandoExistentes) return null
+    return medirContinuacao(filaDoDialogo.eixo.coordinates, existentesFrescos)
+  }, [filaDoDialogo, existentesFrescos, carregandoExistentes])
 
   const geracaoContinuacao = useMemo(() => {
-    if (!filaDoDialogo?.eixo || !quantidadeNumerica || quantidadeNumerica < 1) return null
-    return gerarPontosContinuacao(filaDoDialogo.eixo.coordinates, lapidesExistentesNaFila, quantidadeNumerica)
-  }, [filaDoDialogo, lapidesExistentesNaFila, quantidadeNumerica])
+    if (!filaDoDialogo?.eixo || !existentesFrescos || carregandoExistentes || !quantidadeNumerica || quantidadeNumerica < 1) return null
+    return gerarPontosContinuacao(filaDoDialogo.eixo.coordinates, existentesFrescos, quantidadeNumerica)
+  }, [filaDoDialogo, existentesFrescos, carregandoExistentes, quantidadeNumerica])
 
   const previewPontos = geracaoContinuacao?.pontos ?? null
 
@@ -333,7 +356,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const espacamentoInfo = geracaoContinuacao ? validarEspacamento(geracaoContinuacao.pitch, 2) : null
 
   const sugestaoRestante = useMemo(() => {
-    if (!medicao || medicao.pitch <= 0) return null
+    if (!medicao || medicao.pitch <= 0 || medicao.passouDoFim) return null
     return Math.min(500, Math.max(1, Math.round(medicao.restanteM / medicao.pitch)))
   }, [medicao])
 
@@ -341,6 +364,12 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     if (!previewPontos) return null
     return previewPontos.map((p, i) => ajustesPreview[i] || p)
   }, [previewPontos, ajustesPreview])
+
+  const sobreposicoes = useMemo(() => {
+    if (!previewPontosFinal || !existentesFrescos || existentesFrescos.length === 0 || !medicao) return []
+    const limiar = Math.max(0.6, medicao.pitch * 0.45)
+    return acharSobreposicoes(previewPontosFinal, existentesFrescos, limiar)
+  }, [previewPontosFinal, existentesFrescos, medicao])
 
   function aoCarregarMapa() {
     if (!mapRef.current) return
@@ -596,6 +625,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       setMsg('Digita uma quantidade válida.')
       return
     }
+    if (sobreposicoes.length > 0) {
+      setMsg('Tem ponto do lote em cima de um túmulo já confirmado -- arrasta pra desencostar antes de gerar.')
+      return
+    }
     setSalvando(true)
     setMsg('')
     const pontos = previewPontosFinal.map(([lng, lat], i) => ({ lng, lat, exata: Boolean(ajustesPreview[i]) }))
@@ -607,7 +640,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     if (error) {
       setMsg(error.message)
     } else {
-      const totalAntes = lapidesExistentesNaFila.length
+      const totalAntes = existentesFrescos?.length ?? 0
       setMsg(
         `+${quantidadeNumerica} túmulos na Fileira ${dialogoFila.filaNumero} da Quadra ${dialogoFila.quadraNumero} (total ${totalAntes + quantidadeNumerica}) -- confere/arrasta e clica "Gerar mais" pra continuar.`
       )
@@ -1156,12 +1189,16 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                     onDragEnd={(e) => arrastarPontoPreview(index, e.lngLat.lat, e.lngLat.lng)}
                   >
                     <div
-                      title={`Túmulo previsto #${index + 1} -- arrasta pro centro real`}
+                      title={
+                        sobreposicoes.includes(index)
+                          ? `Túmulo previsto #${index + 1} -- em cima de um já confirmado, arrasta pra desencostar`
+                          : `Túmulo previsto #${index + 1} -- arrasta pro centro real`
+                      }
                       style={{
                         width: 11,
                         height: 11,
                         borderRadius: '50%',
-                        background: ajustesPreview[index] ? '#facc15' : '#a3e635',
+                        background: sobreposicoes.includes(index) ? '#ef4444' : ajustesPreview[index] ? '#facc15' : '#a3e635',
                         border: '1.5px solid #0B1D2A',
                         boxShadow: '0 0 0 1px rgba(255,255,255,0.7)',
                         cursor: 'grab',
@@ -1410,17 +1447,31 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
               </h2>
               <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
-              <p className="text-xs text-zinc-500 mb-1">
-                {lapidesExistentesNaFila.length >= 2
-                  ? `${lapidesExistentesNaFila.length} já confirmado(s) -- distância real medida entre eles, dá pra usar "Preencher resto" abaixo.`
-                  : lapidesExistentesNaFila.length === 1
-                    ? '1 já confirmado -- gera mais 3 ou 4 pra medir uma distância real, depois usa "Preencher resto".'
-                    : 'Nenhum confirmado ainda -- gera um lote pequeno (3 a 5), arrasta cada um pro centro real do túmulo. A distância medida nesse lote vira a base do resto da fileira.'}
-              </p>
-              {medicao && (
+              {carregandoExistentes ? (
+                <p className="text-xs text-zinc-500 mb-1">Buscando os túmulos já confirmados dessa fileira...</p>
+              ) : (
+                <p className="text-xs text-zinc-500 mb-1">
+                  {(existentesFrescos?.length ?? 0) >= 2
+                    ? `${existentesFrescos?.length} já confirmado(s) -- distância real medida entre eles, dá pra usar "Preencher resto" abaixo.`
+                    : (existentesFrescos?.length ?? 0) === 1
+                      ? '1 já confirmado -- gera mais 3 ou 4 pra medir uma distância real, depois usa "Preencher resto".'
+                      : 'Nenhum confirmado ainda -- gera um lote pequeno (3 a 5), arrasta cada um pro centro real do túmulo. A distância medida nesse lote vira a base do resto da fileira.'}
+                </p>
+              )}
+              {medicao && !medicao.passouDoFim && (
                 <p className="text-xs text-zinc-500 mb-1">
                   Restam ~{medicao.restanteM.toFixed(1)} m até o fim da fileira (~{sugestaoRestante ?? '?'} túmulos no espaçamento{' '}
                   {medicao.medidoDeVerdade ? 'medido' : 'padrão de 1,6m'}).
+                </p>
+              )}
+              {medicao?.passouDoFim && (
+                <p className="text-xs mb-1 text-amber-400">
+                  O último confirmado já passou da ponta laranja do fim -- arrasta a ponta pro real fim da fileira antes de continuar.
+                </p>
+              )}
+              {sobreposicoes.length > 0 && (
+                <p className="text-xs mb-1 text-red-400">
+                  {sobreposicoes.length} ponto(s) do lote em cima de túmulo já confirmado -- arrasta pra desencostar antes de gerar (bolinha vermelha no mapa).
                 </p>
               )}
               <p className="text-xs mb-1" style={{ color: '#fb923c' }}>
@@ -1460,7 +1511,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  disabled={salvando || !quantidadeNumerica}
+                  disabled={salvando || !quantidadeNumerica || carregandoExistentes || sobreposicoes.length > 0}
                   onClick={gerarTumulos}
                   className="text-xs px-3 py-1.5 rounded bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40"
                 >

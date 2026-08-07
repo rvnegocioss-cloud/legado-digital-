@@ -19,6 +19,29 @@ export function comprimentoPolilinha(coordenadas: [number, number][]) {
   return total
 }
 
+/** Projeta um ponto [lng,lat] num plano local em metros (x = leste, y = norte)
+ *  relativo a uma origem -- equiretangular, válido pra distâncias de até
+ *  algumas centenas de metros (escala de cemitério). Evita fazer aritmética
+ *  de reta/direção direto em graus, onde 1° de longitude != 1° de latitude
+ *  em metros (só funciona por acidente quando o deslocamento é colinear). */
+export function projetarLocal(origem: [number, number], ponto: [number, number]) {
+  const R = 6371000
+  const rad = Math.PI / 180
+  const [lngO, latO] = origem
+  const [lng, lat] = ponto
+  return {
+    x: (lng - lngO) * rad * R * Math.cos(latO * rad),
+    y: (lat - latO) * rad * R,
+  }
+}
+
+export function deMetrosLocal(origem: [number, number], offset: { x: number; y: number }): [number, number] {
+  const R = 6371000
+  const rad = Math.PI / 180
+  const [lngO, latO] = origem
+  return [lngO + offset.x / (rad * R * Math.cos(latO * rad)), latO + offset.y / (rad * R)]
+}
+
 export function centroide(coordenadas: [number, number][]) {
   const soma = coordenadas.reduce(
     (acc, [lng, lat]) => ({ lng: acc.lng + lng, lat: acc.lat + lat }),

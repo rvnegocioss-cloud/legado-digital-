@@ -1,4 +1,4 @@
-import { comprimentoPolilinha, distanciaMetros } from './geo'
+import { comprimentoPolilinha, deMetrosLocal, distanciaMetros, projetarLocal } from './geo'
 
 export interface RotulosCemiterio {
   rotulo_quadra: string
@@ -91,57 +91,116 @@ function segmentoMetros(lat1: number, lng1: number, lat2: number, lng2: number) 
  *  que espalhou os túmulos até o fim da fileira. */
 const PITCH_PADRAO_M = 1.6
 
+function mediana(valores: number[]): number {
+  if (valores.length === 0) return 0
+  const s = [...valores].sort((a, b) => a - b)
+  const meio = Math.floor(s.length / 2)
+  return s.length % 2 === 1 ? s[meio] : (s[meio - 1] + s[meio]) / 2
+}
+
 /** Mede o espaçamento real (baseado nos já confirmados, ou o chute padrão) e
  *  quanto falta de fileira -- independe de quantidade, então dá pra mostrar
  *  "restam ~N túmulos" e o botão "preencher até o fim" mesmo antes do staff
- *  digitar um tamanho de lote. */
+ *  digitar um tamanho de lote.
+ *
+ *  Tudo calculado num plano local em metros (não em graus crus -- 1° de
+ *  longitude != 1° de latitude em metros, só dava certo antes porque o
+ *  deslocamento era sempre colinear ao eixo).
+ *
+ *  A "frente" da fileira (de onde o próximo lote continua) é achada por
+ *  PROJEÇÃO na direção da fileira, não pelo maior `numero` -- um túmulo
+ *  pode ter sido inserido no meio ou arrastado fora de ordem sem que isso
+ *  deixe de ser espacialmente o mais avançado. A direção usada é a medida
+ *  entre o 1º e o último confirmado (tendência real), caindo pro eixo
+ *  desenhado só se tiver pouco confirmado ainda ou a tendência apontar pro
+ *  sentido contrário do eixo (proteção contra eixo desenhado ao contrário). */
 export function medirContinuacao(eixo: [number, number][], existentes: { lat: number; lng: number }[]) {
-  const inicio = eixo[0]
-  const fim = eixo[eixo.length - 1]
-  const dirDist = comprimentoPolilinha([inicio, fim]) || 1
-  const dirLng = (fim[0] - inicio[0]) / dirDist
-  const dirLat = (fim[1] - inicio[1]) / dirDist
+  const origem = eixo[0]
+  const fimLocal = projetarLocal(origem, eixo[eixo.length - 1])
+  const distEixo = Math.hypot(fimLocal.x, fimLocal.y) || 1
+  let dir = { x: fimLocal.x / distEixo, y: fimLocal.y / distEixo }
 
-  const ultimo = existentes.length > 0 ? existentes[existentes.length - 1] : { lat: inicio[1], lng: inicio[0] }
-  const restanteM = distanciaMetros(ultimo.lat, ultimo.lng, fim[1], fim[0])
+  const locais = existentes.map((p) => projetarLocal(origem, [p.lng, p.lat]))
 
-  let pitch: number
-  if (existentes.length >= 2) {
-    let soma = 0
-    for (let i = 1; i < existentes.length; i++) {
-      soma += distanciaMetros(existentes[i - 1].lat, existentes[i - 1].lng, existentes[i].lat, existentes[i].lng)
+  if (locais.length >= 2) {
+    const a = locais[0]
+    const b = locais[locais.length - 1]
+    const dx = b.x - a.x
+    const dy = b.y - a.y
+    const distEmpirica = Math.hypot(dx, dy)
+    if (distEmpirica >= 0.5) {
+      const dirEmpirica = { x: dx / distEmpirica, y: dy / distEmpirica }
+      if (dirEmpirica.x * dir.x + dirEmpirica.y * dir.y > 0) dir = dirEmpirica
     }
-    pitch = soma / (existentes.length - 1)
-  } else {
-    pitch = PITCH_PADRAO_M
   }
 
-  return { ultimo, dirLng, dirLat, pitch, restanteM, medidoDeVerdade: existentes.length >= 2 }
+  const projecoes = locais.map((p) => p.x * dir.x + p.y * dir.y)
+  let indiceFrente = 0
+  for (let i = 1; i < projecoes.length; i++) {
+    if (projecoes[i] > projecoes[indiceFrente]) indiceFrente = i
+  }
+
+  const ultimoLocal = locais.length > 0 ? locais[indiceFrente] : { x: 0, y: 0 }
+  const sUltimo = locais.length > 0 ? projecoes[indiceFrente] : 0
+  const sFim = fimLocal.x * dir.x + fimLocal.y * dir.y
+  const restanteM = Math.max(0, sFim - sUltimo)
+  const passouDoFim = locais.length > 0 && sUltimo > sFim + 0.5
+
+  let pitch = PITCH_PADRAO_M
+  let medidoDeVerdade = false
+  if (locais.length >= 2) {
+    const ordenados = [...locais].sort((p1, p2) => p1.x * dir.x + p1.y * dir.y - (p2.x * dir.x + p2.y * dir.y))
+    const vaos: number[] = []
+    for (let i = 1; i < ordenados.length; i++) {
+      const d = Math.hypot(ordenados[i].x - ordenados[i - 1].x, ordenados[i].y - ordenados[i - 1].y)
+      if (d >= 0.3) vaos.push(d)
+    }
+    if (vaos.length > 0) {
+      pitch = mediana(vaos)
+      medidoDeVerdade = true
+    }
+  }
+
+  return { origem, dir, ultimoLocal, pitch, restanteM, medidoDeVerdade, passouDoFim }
 }
 
-/** Gera um LOTE de pontos continuando a partir do último túmulo já confirmado
- *  na fileira (ou do início do eixo, se nenhum ainda) -- em vez de reinterpolar
- *  a fileira inteira do zero a cada geração. O espaçamento usado é a MÉDIA
- *  real medida entre os túmulos já confirmados (quando tem 2+); sem histórico
- *  ainda, usa PITCH_PADRAO_M (chute fixo, não escala com o tamanho do lote
- *  nem com o que resta de fileira) -- o staff corrige arrastando cada ponto
- *  do lote antes de gerar. */
+/** Gera um LOTE de pontos continuando a partir do túmulo já confirmado mais
+ *  avançado na fileira (ou do início do eixo, se nenhum ainda) -- em vez de
+ *  reinterpolar a fileira inteira do zero a cada geração. O espaçamento
+ *  usado é a MEDIANA real medida entre os túmulos já confirmados (quando
+ *  tem 2+, descartando vãos < 0,3m de ponto duplicado/arrasto em cima);
+ *  sem histórico ainda, usa PITCH_PADRAO_M -- o staff corrige arrastando
+ *  cada ponto do lote antes de gerar. */
 export function gerarPontosContinuacao(
   eixo: [number, number][],
   existentes: { lat: number; lng: number }[],
   quantidade: number
-): { pontos: [number, number][]; pitch: number; restanteM: number; medidoDeVerdade: boolean } {
-  const { ultimo, dirLng, dirLat, pitch, restanteM, medidoDeVerdade } = medirContinuacao(eixo, existentes)
+): { pontos: [number, number][]; pitch: number; restanteM: number; medidoDeVerdade: boolean; passouDoFim: boolean } {
+  const { origem, dir, ultimoLocal, pitch, restanteM, medidoDeVerdade, passouDoFim } = medirContinuacao(eixo, existentes)
 
   const kInicial = existentes.length > 0 ? 1 : 0
   const pontos: [number, number][] = []
   for (let i = 0; i < quantidade; i++) {
     const k = kInicial + i
     const distancia = k * pitch
-    pontos.push([ultimo.lng + dirLng * distancia, ultimo.lat + dirLat * distancia])
+    pontos.push(deMetrosLocal(origem, { x: ultimoLocal.x + dir.x * distancia, y: ultimoLocal.y + dir.y * distancia }))
   }
 
-  return { pontos, pitch, restanteM, medidoDeVerdade }
+  return { pontos, pitch, restanteM, medidoDeVerdade, passouDoFim }
+}
+
+/** Índices de `pontos` que caem em cima (ou perto demais) de um túmulo já
+ *  confirmado da mesma fileira -- rede de segurança pro "Gerar" não gravar
+ *  um lote por cima do que o staff já organizou (a causa real do bug era
+ *  ler posição desatualizada, isso aqui pega qualquer recorrência futura
+ *  do mesmo jeito de bug, não só essa). */
+export function acharSobreposicoes(pontos: [number, number][], existentes: { lat: number; lng: number }[], limiarM: number): number[] {
+  const indices: number[] = []
+  pontos.forEach(([lng, lat], i) => {
+    const tocaAlgum = existentes.some((e) => distanciaMetros(lat, lng, e.lat, e.lng) < limiarM)
+    if (tocaAlgum) indices.push(i)
+  })
+  return indices
 }
 
 export function validarEspacamento(comprimentoM: number, quantidade: number) {
