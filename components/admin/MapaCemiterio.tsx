@@ -11,6 +11,7 @@ import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
 import { centroide, comprimentoPolilinha, deMetrosLocal, projetarLocal } from '@/lib/geo'
 import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, medirPassoEntreFileiras, validarEspacamento } from '@/lib/enderecoTumulo'
+import { corDaFila } from '@/lib/coresFila'
 
 const JANELA_VAOS_CONTINUACAO = 6
 
@@ -108,15 +109,8 @@ const FC_VAZIA = { type: 'FeatureCollection' as const, features: [] as never[] }
 
 // Paleta pra identificar cada fila visualmente (bandeira no mapa + bolinha
 // no painel, mesma cor) -- cicla se tiver mais filas que cores.
-const PALETA_FILAS = [
-  '#f87171', '#fb923c', '#facc15', '#4ade80', '#34d399', '#22d3ee',
-  '#60a5fa', '#a78bfa', '#f472b6', '#fb7185', '#a3e635', '#2dd4bf',
-]
-function corDaFila(numero: number) {
-  return PALETA_FILAS[(numero - 1) % PALETA_FILAS.length]
-}
-
-export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
+export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: string; modo?: 'edicao' | 'leitura' }) {
+  const editavel = modo === 'edicao'
   const [carregando, setCarregando] = useState(true)
   const [cemiterio, setCemiterio] = useState<Cemiterio | null>(null)
   const [lapides, setLapides] = useState<Lapide[]>([])
@@ -125,6 +119,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [filas, setFilas] = useState<Fila[]>([])
   const [lapideSelecionada, setLapideSelecionada] = useState<Lapide | null>(null)
   const [lapideHover, setLapideHover] = useState<Lapide | null>(null)
+  const [temMemorialGeo, setTemMemorialGeo] = useState<Record<string, boolean>>({})
   const [modoMarcar, setModoMarcar] = useState(false)
   const [lapideParaMarcar, setLapideParaMarcar] = useState<Lapide | null>(null)
   const [modoMarcarEntrada, setModoMarcarEntrada] = useState(false)
@@ -247,7 +242,10 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
           geometry: Fila['eixo']
         }[]
       }
+      lapides?: { features: { properties: { id: string; tem_memorial: boolean } }[] }
     } | null
+
+    setTemMemorialGeo(Object.fromEntries((geoData?.lapides?.features || []).map((f) => [f.properties.id, f.properties.tem_memorial])))
 
     setQuadras(
       (geoData?.quadras?.features || []).map((f) => ({
@@ -562,6 +560,17 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   }
 
   async function aoClicarMapa(e: MapLayerMouseEvent) {
+    if (!editavel) {
+      const feature = e.features?.[0]
+      if (feature?.properties?.lapideId) {
+        const lapide = lapides.find((l) => l.id === feature.properties!.lapideId)
+        if (lapide) setLapideSelecionada(lapide)
+      } else {
+        setLapideSelecionada(null)
+      }
+      return
+    }
+
     if (modoMarcarEntrada) {
       await salvarEntrada(e.lngLat.lat, e.lngLat.lng)
       return
@@ -599,7 +608,8 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const feature = e.features?.[0]
     if (feature?.properties?.lapideId) {
       const lapide = lapides.find((l) => l.id === feature.properties!.lapideId)
-      setLapideHover(lapide && homenagemPorLapide.get(lapide.id) ? lapide : null)
+      const ocupado = lapide && (homenagemPorLapide.get(lapide.id) || temMemorialGeo[lapide.id])
+      setLapideHover(ocupado ? lapide : null)
     } else {
       setLapideHover(null)
     }
@@ -1589,12 +1599,18 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                       </div>
                     </div>
                     <div>
-                      <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
-                        Homenageado(a)
-                      </p>
-                      <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
-                        {homenagemPorLapide.get(lapideHover.id)?.nome_completo}
-                      </p>
+                      {homenagemPorLapide.get(lapideHover.id) ? (
+                        <>
+                          <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
+                            Homenageado(a)
+                          </p>
+                          <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
+                            {homenagemPorLapide.get(lapideHover.id)?.nome_completo}
+                          </p>
+                        </>
+                      ) : (
+                        <p style={{ fontSize: 12, margin: 0, fontWeight: 600, color: '#a15c00' }}>Ocupado — outro parceiro</p>
+                      )}
                     </div>
                   </div>
                 </Popup>
@@ -1860,18 +1876,20 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-sm font-semibold text-white">Quadras e fileiras</h2>
-              <button
-                type="button"
-                disabled={salvando || desenho.ativo}
-                onClick={() => {
-                  setModoMarcarEntrada(false)
-                  setModoMarcar(false)
-                  desenho.iniciar('poligono', onConcluirQuadra)
-                }}
-                className="text-xs flex items-center gap-1 text-amber-400 hover:text-amber-200 disabled:opacity-40"
-              >
-                <Plus size={12} strokeWidth={2} /> Nova quadra
-              </button>
+              {editavel && (
+                <button
+                  type="button"
+                  disabled={salvando || desenho.ativo}
+                  onClick={() => {
+                    setModoMarcarEntrada(false)
+                    setModoMarcar(false)
+                    desenho.iniciar('poligono', onConcluirQuadra)
+                  }}
+                  className="text-xs flex items-center gap-1 text-amber-400 hover:text-amber-200 disabled:opacity-40"
+                >
+                  <Plus size={12} strokeWidth={2} /> Nova quadra
+                </button>
+              )}
             </div>
             <p className="text-xs text-zinc-500 mb-3">
               Desenha o contorno de cada quadra, numera a partir da entrada, depois desenha as fileiras dentro dela.
@@ -1961,50 +1979,52 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
                       {expandida && (
                         <div className="px-3 pb-2 pt-1 border-t border-zinc-800">
-                          <div className="flex items-center gap-3 mb-2 flex-wrap">
-                            <button
-                              type="button"
-                              disabled={salvando || desenho.ativo || q.geometria_revisada}
-                              onClick={() => {
-                                setModoMarcarEntrada(false)
-                                setModoMarcar(false)
-                                setQuadraAtivaParaFila(q)
-                                desenho.iniciar('linha', onConcluirFila)
-                              }}
-                              className="text-xs flex items-center gap-1 text-amber-400 hover:text-amber-200 disabled:opacity-40"
-                            >
-                              <Plus size={11} strokeWidth={2} /> Nova fileira
-                            </button>
-                            {cemiterio.entrada_latitude != null && filasDaQuadra.length > 1 && (
+                          {editavel && (
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
                               <button
                                 type="button"
-                                disabled={q.geometria_revisada}
-                                onClick={() => proporNumeracaoFilas(q)}
-                                className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-40"
+                                disabled={salvando || desenho.ativo || q.geometria_revisada}
+                                onClick={() => {
+                                  setModoMarcarEntrada(false)
+                                  setModoMarcar(false)
+                                  setQuadraAtivaParaFila(q)
+                                  desenho.iniciar('linha', onConcluirFila)
+                                }}
+                                className="text-xs flex items-center gap-1 text-amber-400 hover:text-amber-200 disabled:opacity-40"
                               >
-                                Numerar fileiras
+                                <Plus size={11} strokeWidth={2} /> Nova fileira
                               </button>
-                            )}
-                            {q.geometria_revisada ? (
-                              <button
-                                type="button"
-                                disabled={salvando}
-                                onClick={() => destravarQuadra(q)}
-                                className="text-xs text-emerald-400 hover:text-emerald-200 ml-auto"
-                              >
-                                🔒 Travada — destravar
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled={salvando || desenho.ativo}
-                                onClick={() => entrarModoEdicao(q)}
-                                className="text-xs text-blue-400 hover:text-blue-200 ml-auto"
-                              >
-                                Editar túmulos no mapa
-                              </button>
-                            )}
-                          </div>
+                              {cemiterio.entrada_latitude != null && filasDaQuadra.length > 1 && (
+                                <button
+                                  type="button"
+                                  disabled={q.geometria_revisada}
+                                  onClick={() => proporNumeracaoFilas(q)}
+                                  className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-40"
+                                >
+                                  Numerar fileiras
+                                </button>
+                              )}
+                              {q.geometria_revisada ? (
+                                <button
+                                  type="button"
+                                  disabled={salvando}
+                                  onClick={() => destravarQuadra(q)}
+                                  className="text-xs text-emerald-400 hover:text-emerald-200 ml-auto"
+                                >
+                                  🔒 Travada — destravar
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={salvando || desenho.ativo}
+                                  onClick={() => entrarModoEdicao(q)}
+                                  className="text-xs text-blue-400 hover:text-blue-200 ml-auto"
+                                >
+                                  Editar túmulos no mapa
+                                </button>
+                              )}
+                            </div>
+                          )}
 
                           {numeracaoProposta?.tipo === 'filas' && numeracaoProposta.contexto === q.id && (
                             <PainelNumeracaoProposta
@@ -2030,57 +2050,59 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                     Fileira {f.numero} {f.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
                                     {f.quantidade_prevista ? `— ${f.quantidade_prevista} túmulos` : '— sem túmulos'}
                                   </span>
-                                  <span className="flex items-center gap-2">
-                                    {!f.geometria_revisada && (
-                                      <button
-                                        type="button"
-                                        disabled={salvando}
-                                        onClick={() => {
-                                          setDialogoFila({
-                                            filaId: f.id,
-                                            quadraNumero: q.numero,
-                                            filaNumero: f.numero,
-                                            comprimentoM: f.eixo ? comprimentoPolilinha(f.eixo.coordinates) : 0,
-                                          })
-                                          setQuantidadeInput('')
-                                          setAjustesPreview({})
-                                        }}
-                                        className="text-amber-400 hover:text-amber-200"
-                                      >
-                                        {f.quantidade_prevista ? 'Gerar mais' : 'Gerar túmulos'} →
-                                      </button>
-                                    )}
-                                    {f.quantidade_prevista != null &&
-                                      (f.geometria_revisada ? (
-                                        <button type="button" disabled={salvando} onClick={() => destravarFila(f)} className="text-emerald-400 hover:text-emerald-200">
-                                          Destravar
+                                  {editavel && (
+                                    <span className="flex items-center gap-2">
+                                      {!f.geometria_revisada && (
+                                        <button
+                                          type="button"
+                                          disabled={salvando}
+                                          onClick={() => {
+                                            setDialogoFila({
+                                              filaId: f.id,
+                                              quadraNumero: q.numero,
+                                              filaNumero: f.numero,
+                                              comprimentoM: f.eixo ? comprimentoPolilinha(f.eixo.coordinates) : 0,
+                                            })
+                                            setQuantidadeInput('')
+                                            setAjustesPreview({})
+                                          }}
+                                          className="text-amber-400 hover:text-amber-200"
+                                        >
+                                          {f.quantidade_prevista ? 'Gerar mais' : 'Gerar túmulos'} →
                                         </button>
-                                      ) : (
-                                        <button type="button" disabled={salvando} onClick={() => travarFila(q.numero, f)} className="text-zinc-400 hover:text-zinc-200">
-                                          🔒 Travar
+                                      )}
+                                      {f.quantidade_prevista != null &&
+                                        (f.geometria_revisada ? (
+                                          <button type="button" disabled={salvando} onClick={() => destravarFila(f)} className="text-emerald-400 hover:text-emerald-200">
+                                            Destravar
+                                          </button>
+                                        ) : (
+                                          <button type="button" disabled={salvando} onClick={() => travarFila(q.numero, f)} className="text-zinc-400 hover:text-zinc-200">
+                                            🔒 Travar
+                                          </button>
+                                        ))}
+                                      {f.eixo && (
+                                        <button
+                                          type="button"
+                                          disabled={salvando}
+                                          onClick={() => {
+                                            setDuplicacaoFila({ filaOrigemId: f.id, quadraId: q.id, quadraNumero: q.numero, numeroOrigem: f.numero })
+                                            setNumeroDestinoInput(String(f.numero + 1))
+                                            setPassoManualInput('')
+                                            setLadoInvertido(false)
+                                            setCopiarTumulosDuplicacao(true)
+                                            setOffsetManualDuplicacao(null)
+                                          }}
+                                          className="text-sky-400 hover:text-sky-200"
+                                        >
+                                          Duplicar
                                         </button>
-                                      ))}
-                                    {f.eixo && (
-                                      <button
-                                        type="button"
-                                        disabled={salvando}
-                                        onClick={() => {
-                                          setDuplicacaoFila({ filaOrigemId: f.id, quadraId: q.id, quadraNumero: q.numero, numeroOrigem: f.numero })
-                                          setNumeroDestinoInput(String(f.numero + 1))
-                                          setPassoManualInput('')
-                                          setLadoInvertido(false)
-                                          setCopiarTumulosDuplicacao(true)
-                                          setOffsetManualDuplicacao(null)
-                                        }}
-                                        className="text-sky-400 hover:text-sky-200"
-                                      >
-                                        Duplicar
+                                      )}
+                                      <button type="button" disabled={salvando} onClick={() => apagarFileira(f)} className="text-red-400 hover:text-red-200">
+                                        Apagar
                                       </button>
-                                    )}
-                                    <button type="button" disabled={salvando} onClick={() => apagarFileira(f)} className="text-red-400 hover:text-red-200">
-                                      Apagar
-                                    </button>
-                                  </span>
+                                    </span>
+                                  )}
                                 </li>
                               ))}
                             </ul>
@@ -2151,6 +2173,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
             </div>
           )}
 
+          {editavel && (
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4">
             <h2 className="text-sm font-semibold text-white mb-1">Marcar túmulo avulso</h2>
             <p className="text-xs text-zinc-500 mb-3">
@@ -2203,6 +2226,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
               )}
             </ul>
           </div>
+          )}
 
           <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mt-4">
             <h2 className="text-sm font-semibold text-white mb-2">Legenda</h2>
@@ -2233,7 +2257,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 ? 'Marcada — é daqui que a rota até o túmulo começa na página pública, e as quadras/fileiras são numeradas a partir daqui.'
                 : 'Ainda não marcada — rota pública usa o centro genérico, e não dá pra numerar quadra/fileira sem uma âncora.'}
             </p>
-            {modoMarcarEntrada ? (
+            {!editavel ? null : modoMarcarEntrada ? (
               <div className="rounded-lg bg-emerald-950/30 border border-emerald-900/40 px-3 py-2 flex items-center justify-between">
                 <p className="text-xs text-emerald-300">Clique no mapa no portão/entrada real</p>
                 <button type="button" onClick={() => setModoMarcarEntrada(false)} className="text-emerald-400 hover:text-emerald-200">
