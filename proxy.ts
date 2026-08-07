@@ -66,6 +66,19 @@ const RATE_LIMIT_CONFIG: Record<string, RateLimitConfig> = {
       '/api/', // tudo em /api que não caiu em categorias anteriores
     ],
   },
+  // Navegação de PÁGINA dentro de /admin, /parceiro, /familia (não é chamada
+  // de API) -- limite bem mais alto que o de API. Achado real (2026-08-07):
+  // clicar entre Mapa do cemitério e Gavetas 3D algumas vezes estourava o
+  // 429 porque cada troca de página contava no MESMO balde de 30/min das
+  // chamadas de API, e o Next.js ainda faz prefetch automático de link
+  // visível na tela -- staff navegando normal em ferramenta densa (Central)
+  // não é o vetor de abuso que esse rate limit foi desenhado pra barrar
+  // (login/força-bruta, upload, escrita pública), então não devia competir
+  // pelo mesmo orçamento.
+  pagina: {
+    limit: 180,
+    routePatterns: [],
+  },
 }
 
 /**
@@ -79,7 +92,7 @@ function getRateLimitType(pathname: string): string {
       }
     }
   }
-  return 'api' // default
+  return pathname.startsWith('/api/') ? 'api' : 'pagina'
 }
 
 /**
