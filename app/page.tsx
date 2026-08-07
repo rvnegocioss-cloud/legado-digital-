@@ -43,9 +43,9 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-tight"
           >
-            <span className="gradient-text">Preservando Histórias</span>
+            <span className="gradient-text">Toda Família</span>
             <br />
-            <span className="text-white/90">Para Sempre</span>
+            <span className="text-white/90">Tem Uma História</span>
           </motion.h1>
 
           <motion.p
