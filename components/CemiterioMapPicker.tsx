@@ -51,8 +51,9 @@ export default function CemiterioMapPicker({ lat, lng, onChange }: Props) {
         style={{ height: '280px', width: '100%' }}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={19}
         />
         <ClickHandler onChange={onChange} />
         <Recentralizar lat={lat} lng={lng} />

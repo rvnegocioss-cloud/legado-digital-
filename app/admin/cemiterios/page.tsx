@@ -279,12 +279,9 @@ export default function AdminCemiterios() {
                     </button>
                   </td>
                   <td className="py-3 px-4">
-                    <button
-                      onClick={() => abrirEdicao(c)}
-                      className="text-zinc-400 hover:text-white text-xs"
-                    >
-                      Editar
-                    </button>
+                    <Link href={`/admin/cemiterios/${c.id}/mapa`} className="text-xs font-medium" style={{ color: '#C9A46A' }}>
+                      Mapa
+                    </Link>
                   </td>
                   <td className="py-3 px-4">
                     <Link href={`/admin/cemiterios/${c.id}/lapides`} className="text-zinc-400 hover:text-white text-xs">
@@ -292,9 +289,12 @@ export default function AdminCemiterios() {
                     </Link>
                   </td>
                   <td className="py-3 px-4">
-                    <Link href={`/admin/cemiterios/${c.id}/mapa`} className="text-xs" style={{ color: '#C9A46A' }}>
-                      Mapa
-                    </Link>
+                    <button
+                      onClick={() => abrirEdicao(c)}
+                      className="text-zinc-400 hover:text-white text-xs"
+                    >
+                      Editar
+                    </button>
                   </td>
                 </tr>
               ))}
