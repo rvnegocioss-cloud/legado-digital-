@@ -114,6 +114,22 @@ Achado real do Rafael: painel lateral crescia bem mais alto que o mapa (fixo em 
 
 Corrigido: coluna do mapa (`lg:col-span-8`) ganhou `lg:sticky lg:top-4 lg:self-start` — fica fixa na tela enquanto o painel lateral (`lg:col-span-4`) rola por baixo dela, dentro do `<main overflow-y-auto>` do layout da Central (que já é o scroll container real, não a janela). Mapa também cresceu de 560px fixo pra `calc(100vh - 140px)` (regra 13 do CLAUDE.md, tela larga aproveitada). O card "Gerar túmulos" (`dialogoFila`) saiu do meio do painel (depois da árvore de quadras) e foi pro topo, logo abaixo da mensagem de status — aparece na hora ao clicar "Gerar túmulos"/"Gerar mais", sem precisar rolar pra achar. Diálogo mostra quantos já estão confirmados e quantos metros/túmulos restam até o fim da fileira, pra saber a quantidade certa do último lote (ex: "restam 3"). `p_substituir=true` continua existindo (apaga tudo e recomeça do zero), só não é mais o padrão. Botão mudou de rótulo: "Regerar" virou "Gerar mais".
 
+## Bug grave 2 — "Gerar mais" sobrepondo túmulos já organizados (2026-08-07, diagnóstico com Opus)
+
+Rafael reportou dois sintomas juntos: o espaçamento do lote novo não replicava o real medido nos anteriores, e os pontos novos nasciam em cima dos que ele já tinha arrastado/organizado. Chamado Opus (`subagent_type:"Plan"`, model `opus`) pra investigar com dado real — reproduziu e provou matematicamente a partir dos pontos que o Rafael de fato gerou.
+
+**Causa raiz confirmada** (não teoria — reconstruída com os timestamps reais do banco): o "último túmulo confirmado" usado pra continuar a fileira vinha do state global `lapides`, atualizado só por `carregar()`. As 4 mutações do modo de edição (`arrastarTumulo`/`adicionarTumulo`/`inserirTumuloDepoisDe`/`apagarTumulo`) escrevem no banco e num state local separado (`lapidesEdicao`), **sem nunca chamar `carregar()`**. Resultado: ao clicar "Gerar mais" depois de arrastar pontos no modo de edição, o cálculo de distância/posição de partida usava as coordenadas de **antes** do arrasto. No caso real: o lote novo nasceu 7,4m atrás da frente real da fileira, direto em cima de 3 túmulos que o Rafael já tinha organizado na mão.
+
+**Fix**:
+- Diálogo "Gerar túmulos" busca os túmulos da fileira **direto do banco** ao abrir (não mais do state global, que pode estar desatualizado) — com guarda pra não calcular nada enquanto o fetch não volta.
+- `lib/geo.ts` ganhou `projetarLocal`/`deMetrosLocal` — cálculo de direção/distância passa a rodar num plano local em metros, não mais em graus crus (1° de longitude ≠ 1° de latitude em metros; só funcionava por coincidência quando o deslocamento era colinear ao eixo).
+- `lib/enderecoTumulo.ts`: o "último confirmado" deixou de ser o de maior `numero` (frágil — inserção no meio ou arrasto fora de ordem quebra essa suposição) e passou a ser achado por **projeção espacial real** (o mais avançado na direção da fileira, independente de `numero`). Direção usa a tendência real entre 1º e último confirmado, caindo pro eixo desenhado só com pouco histórico ou se a tendência apontar pro lado errado (proteção contra eixo desenhado ao contrário). Espaçamento passou de média pra **mediana** dos vãos (resistente a 1 vão ruim), descartando vãos < 0,3m (ponto duplicado/arrasto em cima).
+- **Rede de segurança nova** (`acharSobreposicoes`): qualquer ponto do lote em cima de um túmulo já confirmado pinta vermelho no mapa, trava o botão "Gerar" e avisa — pega qualquer recorrência futura do mesmo tipo de bug, não só esse caso específico.
+
+**Dado sujo já gravado**: 4 túmulos da Fileira 1 (Q01-R01) ficaram sobrepostos por esse bug antes da correção. Não foram corrigidos automaticamente (nenhum tinha memorial vinculado) — precisam ser apagados e regerados pelo próprio painel de edição.
+
+**Deixado de propósito, não implementado ainda** (mapeado pelo Opus, menor prioridade que o fix acima): validação de sobreposição também no RPC `gerar_lapides_fila_manual` (hoje só client-side — qualquer outro caminho de escrita futuro não fica protegido); unificar `lapides`/`lapidesEdicao` numa fonte única de verdade (Camada 0 do plano do Opus — eliminaria essa classe de bug de vez, mas é refatoração maior, adiada); ajuste de direção por PCA nos últimos N pontos em vez da reta 1º→último (mais robusto pra fileira bem curva, ganho pequeno pro caso real de hoje).
+
 ## Próximos passos
 
 - [x] Modo edição manual (drag/adicionar/apagar/travar)
@@ -125,6 +141,11 @@ Corrigido: coluna do mapa (`lg:col-span-8`) ganhou `lg:sticky lg:top-4 lg:self-s
 - [x] Botão "Preencher resto" (calibra com lote pequeno, preenche o resto da fileira de uma vez)
 - [x] Medida ao vivo (trena) ao desenhar a fileira
 - [x] Mapa sticky + card "Gerar túmulos" movido pro topo do painel (mapa não sai mais da tela)
+- [x] Painel de edição à esquerda, mesma altura do mapa, rolagem própria (não sticky) -- mapa nunca sai da tela
+- [x] Mapa não perde mais posição (pan/zoom) ao salvar qualquer coisa
+- [x] "Gerar mais" não sobrepõe mais túmulos já organizados (busca fresca do banco + frente por projeção espacial + rede de segurança anti-sobreposição)
+- [ ] Validação de sobreposição também no RPC (hoje só client-side)
+- [ ] Unificar `lapides`/`lapidesEdicao` numa fonte única de verdade (Camada 0 do plano do Opus)
 - [ ] Corrigir `_agrupar_remover_harmonicos` (bug #2 acima) no código genérico
 - [ ] Implementar `--ancora`/`--ancora2` (âncora manual de 2 pontos) como comando real em `mapear-cemiterio.py`, não só script avulso de teste
 - [ ] Regenerar as fileiras 1-10 da Quadra 1 (apagadas) com o método correto assim que o âncora estiver integrado
