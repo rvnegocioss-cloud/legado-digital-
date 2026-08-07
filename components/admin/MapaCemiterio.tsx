@@ -9,8 +9,8 @@ import { supabase } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
-import { centroide, comprimentoPolilinha } from '@/lib/geo'
-import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
+import { centroide, comprimentoPolilinha, deMetrosLocal, projetarLocal } from '@/lib/geo'
+import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, medirPassoEntreFileiras, validarEspacamento } from '@/lib/enderecoTumulo'
 
 const JANELA_VAOS_CONTINUACAO = 6
 
@@ -94,6 +94,7 @@ interface Fila {
 
 type ItemNumeracao = { id: string; numero: number; label: string; distancia: number | null }
 type NumeracaoProposta = { tipo: 'quadras' | 'filas'; contexto: string; itens: ItemNumeracao[]; precisaConfirmar: boolean }
+type DuplicacaoFila = { filaOrigemId: string; quadraId: string; quadraNumero: number; numeroOrigem: number }
 
 const CORES_ORIGEM: Record<string, string> = {
   ortomosaico: '#C9A46A',
@@ -140,6 +141,12 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [ajustesPreview, setAjustesPreview] = useState<Record<number, [number, number]>>({})
   const [existentesFrescos, setExistentesFrescos] = useState<{ lat: number; lng: number }[] | null>(null)
   const [carregandoExistentes, setCarregandoExistentes] = useState(false)
+  const [duplicacaoFila, setDuplicacaoFila] = useState<DuplicacaoFila | null>(null)
+  const [numeroDestinoInput, setNumeroDestinoInput] = useState('')
+  const [passoManualInput, setPassoManualInput] = useState('')
+  const [ladoInvertido, setLadoInvertido] = useState(false)
+  const [copiarTumulosDuplicacao, setCopiarTumulosDuplicacao] = useState(true)
+  const [tumulosOrigemFrescos, setTumulosOrigemFrescos] = useState<{ lat: number; lng: number }[] | null>(null)
 
   const [quadraEmEdicao, setQuadraEmEdicao] = useState<Quadra | null>(null)
   const [lapidesEdicao, setLapidesEdicao] = useState<LapideEdicao[]>([])
@@ -183,6 +190,30 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       cancelado = true
     }
   }, [dialogoFila])
+
+  // Mesmo padrão acima, agora pra fileira de ORIGEM da duplicação -- os
+  // túmulos que serão copiados/transladados precisam da posição real
+  // (pós-arrasto), não do state global potencialmente desatualizado.
+  useEffect(() => {
+    if (!duplicacaoFila) {
+      setTumulosOrigemFrescos(null)
+      return
+    }
+    let cancelado = false
+    supabase
+      .from('lapides')
+      .select('latitude, longitude')
+      .eq('fila_id', duplicacaoFila.filaOrigemId)
+      .not('latitude', 'is', null)
+      .order('numero', { ascending: true })
+      .then(({ data }) => {
+        if (cancelado) return
+        setTumulosOrigemFrescos((data || []).map((l) => ({ lat: l.latitude as number, lng: l.longitude as number })))
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [duplicacaoFila])
 
   async function carregar() {
     setCarregando(true)
@@ -392,6 +423,90 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const limiar = Math.max(0.6, medicao.pitch * 0.45)
     return acharSobreposicoes(previewPontosFinal, existentesFrescos, limiar)
   }, [previewPontosFinal, existentesFrescos, medicao])
+
+  const filaOrigemDuplicacao = duplicacaoFila ? filas.find((f) => f.id === duplicacaoFila.filaOrigemId) : null
+
+  const eixosDaQuadraDuplicacao = useMemo(() => {
+    if (!duplicacaoFila) return []
+    return filas.filter((f) => f.quadra_id === duplicacaoFila.quadraId && f.eixo).map((f) => ({ numero: f.numero, coordenadas: f.eixo!.coordinates }))
+  }, [filas, duplicacaoFila])
+
+  const medidaPassoDuplicacao = useMemo(() => {
+    if (!duplicacaoFila) return null
+    return medirPassoEntreFileiras(eixosDaQuadraDuplicacao, duplicacaoFila.numeroOrigem)
+  }, [eixosDaQuadraDuplicacao, duplicacaoFila])
+
+  const passoManualNumerico = passoManualInput ? parseFloat(passoManualInput.replace(',', '.')) : null
+  const passoFinalDuplicacao = passoManualNumerico && passoManualNumerico > 0 ? passoManualNumerico : (medidaPassoDuplicacao?.passoM ?? null)
+  const sentidoFinalDuplicacao = ladoInvertido ? -(medidaPassoDuplicacao?.sentido ?? 1) : (medidaPassoDuplicacao?.sentido ?? 1)
+
+  const numeroDestinoNumerico = numeroDestinoInput ? parseInt(numeroDestinoInput, 10) : null
+  const filaDestinoExistente = numeroDestinoNumerico != null ? filas.find((f) => f.quadra_id === duplicacaoFila?.quadraId && f.numero === numeroDestinoNumerico) : null
+  const destinoOcupado = !!(filaDestinoExistente && (filaDestinoExistente.eixo != null || (filaDestinoExistente.quantidade_prevista ?? 0) > 0))
+
+  const previewDuplicacao = useMemo(() => {
+    if (!filaOrigemDuplicacao?.eixo || !passoFinalDuplicacao) return null
+    const origem = filaOrigemDuplicacao.eixo.coordinates[0]
+    const fimLocal = projetarLocal(origem, filaOrigemDuplicacao.eixo.coordinates[filaOrigemDuplicacao.eixo.coordinates.length - 1])
+    const distEixo = Math.hypot(fimLocal.x, fimLocal.y) || 1
+    const u = { x: fimLocal.x / distEixo, y: fimLocal.y / distEixo }
+    const n = { x: -u.y, y: u.x }
+    const offset = { x: n.x * passoFinalDuplicacao * sentidoFinalDuplicacao, y: n.y * passoFinalDuplicacao * sentidoFinalDuplicacao }
+
+    const transladar = (ponto: [number, number]): [number, number] => {
+      const l = projetarLocal(origem, ponto)
+      return deMetrosLocal(origem, { x: l.x + offset.x, y: l.y + offset.y })
+    }
+
+    const eixoNovo = filaOrigemDuplicacao.eixo.coordinates.map(transladar)
+    const pontosNovos = copiarTumulosDuplicacao && tumulosOrigemFrescos ? tumulosOrigemFrescos.map((p) => transladar([p.lng, p.lat])) : []
+
+    return { eixoNovo, pontosNovos }
+  }, [filaOrigemDuplicacao, passoFinalDuplicacao, sentidoFinalDuplicacao, copiarTumulosDuplicacao, tumulosOrigemFrescos])
+
+  const geojsonPreviewDuplicacao = useMemo(() => {
+    if (!previewDuplicacao) return FC_VAZIA
+    return {
+      type: 'FeatureCollection' as const,
+      features: [
+        { type: 'Feature' as const, geometry: { type: 'LineString' as const, coordinates: previewDuplicacao.eixoNovo }, properties: {} },
+        ...previewDuplicacao.pontosNovos.map((p) => ({ type: 'Feature' as const, geometry: { type: 'Point' as const, coordinates: p }, properties: {} })),
+      ],
+    }
+  }, [previewDuplicacao])
+
+  async function confirmarDuplicacao() {
+    if (!duplicacaoFila || !previewDuplicacao || !numeroDestinoNumerico || numeroDestinoNumerico < 1) {
+      setMsg('Digita o número da fileira destino.')
+      return
+    }
+    if (destinoOcupado) {
+      setMsg(`Fileira ${numeroDestinoNumerico} já existe com geometria/túmulos -- escolhe outro número.`)
+      return
+    }
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase.rpc('duplicar_fila', {
+      p_fila_origem_id: duplicacaoFila.filaOrigemId,
+      p_numero_destino: numeroDestinoNumerico,
+      p_eixo: { type: 'LineString', coordinates: previewDuplicacao.eixoNovo },
+      p_pontos: previewDuplicacao.pontosNovos.map(([lng, lat]) => ({ lng, lat })),
+      p_confirmar_preencher_vazia: true,
+    })
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setMsg(
+        `Fileira ${numeroDestinoNumerico} criada a partir da Fileira ${duplicacaoFila.numeroOrigem} -- geometria NÃO revisada, confere/arrasta os túmulos e trava quando estiver certo.`
+      )
+      setDuplicacaoFila(null)
+      setNumeroDestinoInput('')
+      setPassoManualInput('')
+      setLadoInvertido(false)
+      await carregar()
+    }
+    setSalvando(false)
+  }
 
   function aoCarregarMapa() {
     if (!mapRef.current) return
@@ -1116,6 +1231,23 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 />
               </Source>
 
+              {duplicacaoFila && (
+                <Source id="preview-duplicacao" type="geojson" data={geojsonPreviewDuplicacao}>
+                  <Layer
+                    id="preview-duplicacao-linha"
+                    type="line"
+                    filter={['==', ['geometry-type'], 'LineString']}
+                    paint={{ 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [2, 2] }}
+                  />
+                  <Layer
+                    id="preview-duplicacao-pontos"
+                    type="circle"
+                    filter={['==', ['geometry-type'], 'Point']}
+                    paint={{ 'circle-radius': 4, 'circle-color': '#38bdf8', 'circle-stroke-width': 1, 'circle-stroke-color': '#0B1D2A' }}
+                  />
+                </Source>
+              )}
+
               <Source id="lapides" type="geojson" data={geojsonPinos}>
                 <Layer
                   id="lapides-pinos"
@@ -1473,6 +1605,91 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
             <p className="text-xs text-zinc-300 mb-3 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">{msg}</p>
           )}
 
+          {duplicacaoFila && (
+            <div className="rounded-xl bg-zinc-900 border border-sky-900/40 p-4 mb-4">
+              <h2 className="text-sm font-semibold text-white mb-1">
+                Duplicar Fileira {duplicacaoFila.numeroOrigem} — Quadra {duplicacaoFila.quadraNumero}
+              </h2>
+              <p className="text-xs text-zinc-500 mb-2">
+                Copia o formato da Fileira {duplicacaoFila.numeroOrigem} (eixo{copiarTumulosDuplicacao ? ' + túmulos' : ''}) deslocado pro lado, pra virar
+                uma fileira nova -- geometria nasce não revisada, precisa conferir/ajustar antes de travar.
+              </p>
+
+              <label className="block text-xs text-zinc-400 mb-1">Número da fileira destino</label>
+              <input
+                type="number"
+                min={1}
+                max={999}
+                value={numeroDestinoInput}
+                onChange={(e) => setNumeroDestinoInput(e.target.value)}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white mb-1"
+                placeholder="ex: 2"
+              />
+              {destinoOcupado && (
+                <p className="text-xs text-red-400 mb-2">Fileira {numeroDestinoNumerico} já existe com geometria/túmulos -- escolhe outro número.</p>
+              )}
+
+              <p className="text-xs text-zinc-500 mb-1">
+                Distância perpendicular:{' '}
+                {medidaPassoDuplicacao?.medidoDeVerdade
+                  ? `${medidaPassoDuplicacao.passoM.toFixed(2)} m -- mediana entre ${medidaPassoDuplicacao.amostras + 1} fileira(s) já desenhada(s) desta quadra.`
+                  : `${(medidaPassoDuplicacao?.passoM ?? 7).toFixed(2)} m -- chute padrão, nenhuma outra fileira pra medir ainda.`}
+              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={passoManualInput}
+                  onChange={(e) => setPassoManualInput(e.target.value)}
+                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
+                  placeholder={`substituir (ex: ${(medidaPassoDuplicacao?.passoM ?? 7).toFixed(2)})`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setLadoInvertido((v) => !v)}
+                  className={`shrink-0 text-xs px-2 py-1.5 rounded border ${ladoInvertido ? 'border-sky-600 text-sky-300 bg-sky-950' : 'border-zinc-700 text-zinc-300'}`}
+                >
+                  ⇄ Inverter lado
+                </button>
+              </div>
+
+              <label className="flex items-center gap-2 text-xs text-zinc-300 mb-2">
+                <input type="checkbox" checked={copiarTumulosDuplicacao} onChange={(e) => setCopiarTumulosDuplicacao(e.target.checked)} />
+                Copiar também os túmulos ({tumulosOrigemFrescos?.length ?? '...'})
+              </label>
+
+              {previewDuplicacao && (
+                <p className="text-xs text-zinc-500 mb-2">
+                  Fileira nova: {comprimentoPolilinha(previewDuplicacao.eixoNovo).toFixed(1)} m
+                  {copiarTumulosDuplicacao && previewDuplicacao.pontosNovos.length > 0 && `, ${previewDuplicacao.pontosNovos.length} túmulos (interpolados, precisam de revisão)`}.
+                </p>
+              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={salvando || !previewDuplicacao || !numeroDestinoNumerico || destinoOcupado}
+                  onClick={confirmarDuplicacao}
+                  className="text-xs px-3 py-1.5 rounded bg-sky-600 text-white hover:bg-sky-500 disabled:opacity-40"
+                >
+                  Confirmar duplicação
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDuplicacaoFila(null)
+                    setNumeroDestinoInput('')
+                    setPassoManualInput('')
+                    setLadoInvertido(false)
+                  }}
+                  className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
           {dialogoFila && (
             <div className="rounded-xl bg-zinc-900 border border-amber-900/40 p-4 mb-4">
               <h2 className="text-sm font-semibold text-white mb-1">
@@ -1766,6 +1983,22 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                           🔒 Travar
                                         </button>
                                       ))}
+                                    {f.eixo && (
+                                      <button
+                                        type="button"
+                                        disabled={salvando}
+                                        onClick={() => {
+                                          setDuplicacaoFila({ filaOrigemId: f.id, quadraId: q.id, quadraNumero: q.numero, numeroOrigem: f.numero })
+                                          setNumeroDestinoInput(String(f.numero + 1))
+                                          setPassoManualInput('')
+                                          setLadoInvertido(false)
+                                          setCopiarTumulosDuplicacao(true)
+                                        }}
+                                        className="text-sky-400 hover:text-sky-200"
+                                      >
+                                        Duplicar
+                                      </button>
+                                    )}
                                     <button type="button" disabled={salvando} onClick={() => apagarFileira(f)} className="text-red-400 hover:text-red-200">
                                       Apagar
                                     </button>

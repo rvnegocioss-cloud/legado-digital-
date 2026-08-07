@@ -361,6 +361,68 @@ export function acharSobreposicoes(pontos: [number, number][], existentes: { lat
   return indices
 }
 
+/** Distância perpendicular padrão entre fileiras vizinhas quando a quadra
+ *  ainda não tem 2+ fileiras desenhadas pra medir de verdade -- chute
+ *  genérico (a distância real medida no José Lázaro foi ~7,30m, ver
+ *  docs/mapa.md). Editável na UI, nunca usado calado sem avisar que é
+ *  chute. */
+const PASSO_FILA_PADRAO_M = 7.0
+
+function pontoMedioLocal(origem: [number, number], coordenadas: [number, number][]) {
+  const a = projetarLocal(origem, coordenadas[0])
+  const b = projetarLocal(origem, coordenadas[coordenadas.length - 1])
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+}
+
+/** Mede a distância perpendicular real entre a fileira de referência e as
+ *  outras fileiras já desenhadas na mesma quadra -- usa a MEDIANA dos vãos
+ *  consecutivos (mesmo princípio do pitch entre túmulos: não confiar numa
+ *  amostra só), descartando vãos < 0,5m (fileira redesenhada quase em cima
+ *  de outra). Sentido (pra qual lado o número CRESCE) vem do sinal
+ *  predominante do deslocamento perpendicular entre fileiras de número
+ *  consecutivo. Sem 2+ fileiras com eixo na quadra, devolve o chute
+ *  padrão com `medidoDeVerdade: false`. */
+export function medirPassoEntreFileiras(
+  eixos: { numero: number; coordenadas: [number, number][] }[],
+  numeroReferencia: number
+): { passoM: number; sentido: 1 | -1; medidoDeVerdade: boolean; amostras: number } {
+  const referencia = eixos.find((e) => e.numero === numeroReferencia && e.coordenadas.length >= 2)
+  if (!referencia || eixos.length < 2) {
+    return { passoM: PASSO_FILA_PADRAO_M, sentido: 1, medidoDeVerdade: false, amostras: 0 }
+  }
+
+  const origem = referencia.coordenadas[0]
+  const fimRefLocal = projetarLocal(origem, referencia.coordenadas[referencia.coordenadas.length - 1])
+  const distRef = Math.hypot(fimRefLocal.x, fimRefLocal.y) || 1
+  const u = { x: fimRefLocal.x / distRef, y: fimRefLocal.y / distRef }
+  const n = { x: -u.y, y: u.x }
+
+  const medidas = eixos
+    .filter((e) => e.coordenadas.length >= 2)
+    .map((e) => ({ numero: e.numero, s: pontoMedioLocal(origem, e.coordenadas).x * n.x + pontoMedioLocal(origem, e.coordenadas).y * n.y }))
+    .sort((a, b) => a.s - b.s)
+
+  const vaos: number[] = []
+  const vaosComSinal: { delta: number; passoNumero: number }[] = []
+  for (let i = 1; i < medidas.length; i++) {
+    const d = medidas[i].s - medidas[i - 1].s
+    if (Math.abs(d) >= 0.5) {
+      vaos.push(Math.abs(d))
+      vaosComSinal.push({ delta: d, passoNumero: medidas[i].numero - medidas[i - 1].numero })
+    }
+  }
+
+  if (vaos.length === 0) {
+    return { passoM: PASSO_FILA_PADRAO_M, sentido: 1, medidoDeVerdade: false, amostras: 0 }
+  }
+
+  const consistentes = vaosComSinal.filter((v) => v.passoNumero !== 0)
+  const positivos = consistentes.filter((v) => v.delta / v.passoNumero > 0).length
+  const sentido: 1 | -1 = positivos >= consistentes.length - positivos ? 1 : -1
+
+  return { passoM: mediana(vaos), sentido, medidoDeVerdade: true, amostras: vaos.length }
+}
+
 export function validarEspacamento(comprimentoM: number, quantidade: number) {
   if (quantidade <= 1) return { ok: true, espacamento: 0, aviso: '' }
   const espacamento = comprimentoM / (quantidade - 1)
