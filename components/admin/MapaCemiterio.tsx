@@ -147,6 +147,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const [ladoInvertido, setLadoInvertido] = useState(false)
   const [copiarTumulosDuplicacao, setCopiarTumulosDuplicacao] = useState(true)
   const [tumulosOrigemFrescos, setTumulosOrigemFrescos] = useState<{ lat: number; lng: number }[] | null>(null)
+  const [offsetManualDuplicacao, setOffsetManualDuplicacao] = useState<{ x: number; y: number } | null>(null)
 
   const [quadraEmEdicao, setQuadraEmEdicao] = useState<Quadra | null>(null)
   const [lapidesEdicao, setLapidesEdicao] = useState<LapideEdicao[]>([])
@@ -445,13 +446,20 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const destinoOcupado = !!(filaDestinoExistente && (filaDestinoExistente.eixo != null || (filaDestinoExistente.quantidade_prevista ?? 0) > 0))
 
   const previewDuplicacao = useMemo(() => {
-    if (!filaOrigemDuplicacao?.eixo || !passoFinalDuplicacao) return null
+    if (!filaOrigemDuplicacao?.eixo) return null
     const origem = filaOrigemDuplicacao.eixo.coordinates[0]
-    const fimLocal = projetarLocal(origem, filaOrigemDuplicacao.eixo.coordinates[filaOrigemDuplicacao.eixo.coordinates.length - 1])
-    const distEixo = Math.hypot(fimLocal.x, fimLocal.y) || 1
-    const u = { x: fimLocal.x / distEixo, y: fimLocal.y / distEixo }
-    const n = { x: -u.y, y: u.x }
-    const offset = { x: n.x * passoFinalDuplicacao * sentidoFinalDuplicacao, y: n.y * passoFinalDuplicacao * sentidoFinalDuplicacao }
+
+    let offset: { x: number; y: number }
+    if (offsetManualDuplicacao) {
+      offset = offsetManualDuplicacao
+    } else {
+      if (!passoFinalDuplicacao) return null
+      const fimLocal = projetarLocal(origem, filaOrigemDuplicacao.eixo.coordinates[filaOrigemDuplicacao.eixo.coordinates.length - 1])
+      const distEixo = Math.hypot(fimLocal.x, fimLocal.y) || 1
+      const u = { x: fimLocal.x / distEixo, y: fimLocal.y / distEixo }
+      const n = { x: -u.y, y: u.x }
+      offset = { x: n.x * passoFinalDuplicacao * sentidoFinalDuplicacao, y: n.y * passoFinalDuplicacao * sentidoFinalDuplicacao }
+    }
 
     const transladar = (ponto: [number, number]): [number, number] => {
       const l = projetarLocal(origem, ponto)
@@ -461,8 +469,27 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
     const eixoNovo = filaOrigemDuplicacao.eixo.coordinates.map(transladar)
     const pontosNovos = copiarTumulosDuplicacao && tumulosOrigemFrescos ? tumulosOrigemFrescos.map((p) => transladar([p.lng, p.lat])) : []
 
-    return { eixoNovo, pontosNovos }
-  }, [filaOrigemDuplicacao, passoFinalDuplicacao, sentidoFinalDuplicacao, copiarTumulosDuplicacao, tumulosOrigemFrescos])
+    return { eixoNovo, pontosNovos, origem }
+  }, [filaOrigemDuplicacao, passoFinalDuplicacao, sentidoFinalDuplicacao, offsetManualDuplicacao, copiarTumulosDuplicacao, tumulosOrigemFrescos])
+
+  const handleDuplicacaoPos = useMemo((): [number, number] | null => {
+    if (!previewDuplicacao) return null
+    const a = previewDuplicacao.eixoNovo[0]
+    const b = previewDuplicacao.eixoNovo[previewDuplicacao.eixoNovo.length - 1]
+    return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+  }, [previewDuplicacao])
+
+  function arrastarDuplicacaoInteira(lat: number, lng: number) {
+    if (!filaOrigemDuplicacao?.eixo) return
+    const origem = filaOrigemDuplicacao.eixo.coordinates[0]
+    const coords = filaOrigemDuplicacao.eixo.coordinates
+    const meioLocal = {
+      x: (projetarLocal(origem, coords[0]).x + projetarLocal(origem, coords[coords.length - 1]).x) / 2,
+      y: (projetarLocal(origem, coords[0]).y + projetarLocal(origem, coords[coords.length - 1]).y) / 2,
+    }
+    const novoLocal = projetarLocal(origem, [lng, lat])
+    setOffsetManualDuplicacao({ x: novoLocal.x - meioLocal.x, y: novoLocal.y - meioLocal.y })
+  }
 
   const geojsonPreviewDuplicacao = useMemo(() => {
     if (!previewDuplicacao) return FC_VAZIA
@@ -503,6 +530,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
       setNumeroDestinoInput('')
       setPassoManualInput('')
       setLadoInvertido(false)
+      setOffsetManualDuplicacao(null)
       await carregar()
     }
     setSalvando(false)
@@ -1248,6 +1276,36 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 </Source>
               )}
 
+              {duplicacaoFila && handleDuplicacaoPos && (
+                <Marker
+                  longitude={handleDuplicacaoPos[0]}
+                  latitude={handleDuplicacaoPos[1]}
+                  anchor="center"
+                  draggable
+                  onDragEnd={(e) => arrastarDuplicacaoInteira(e.lngLat.lat, e.lngLat.lng)}
+                >
+                  <div
+                    title="Arrasta pra mover a fileira duplicada inteira (eixo + túmulos) pra onde quiser"
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      background: '#38bdf8',
+                      border: '2px solid #0B1D2A',
+                      boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
+                      cursor: 'move',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#0B1D2A',
+                      fontSize: 12,
+                    }}
+                  >
+                    ✛
+                  </div>
+                </Marker>
+              )}
+
               <Source id="lapides" type="geojson" data={geojsonPinos}>
                 <Layer
                   id="lapides-pinos"
@@ -1614,6 +1672,18 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 Copia o formato da Fileira {duplicacaoFila.numeroOrigem} (eixo{copiarTumulosDuplicacao ? ' + túmulos' : ''}) deslocado pro lado, pra virar
                 uma fileira nova -- geometria nasce não revisada, precisa conferir/ajustar antes de travar.
               </p>
+              <p className="text-xs mb-2" style={{ color: '#38bdf8' }}>
+                ✛ Alça azul no mapa -- arrasta pra mover a fileira duplicada inteira (eixo + túmulos juntos) pra onde quiser.
+              </p>
+              {offsetManualDuplicacao && (
+                <button
+                  type="button"
+                  onClick={() => setOffsetManualDuplicacao(null)}
+                  className="w-full text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800 mb-2"
+                >
+                  Resetar posição (volta pra distância medida/digitada)
+                </button>
+              )}
 
               <label className="block text-xs text-zinc-400 mb-1">Número da fileira destino</label>
               <input
@@ -1629,29 +1699,35 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 <p className="text-xs text-red-400 mb-2">Fileira {numeroDestinoNumerico} já existe com geometria/túmulos -- escolhe outro número.</p>
               )}
 
-              <p className="text-xs text-zinc-500 mb-1">
-                Distância perpendicular:{' '}
-                {medidaPassoDuplicacao?.medidoDeVerdade
-                  ? `${medidaPassoDuplicacao.passoM.toFixed(2)} m -- mediana entre ${medidaPassoDuplicacao.amostras + 1} fileira(s) já desenhada(s) desta quadra.`
-                  : `${(medidaPassoDuplicacao?.passoM ?? 7).toFixed(2)} m -- chute padrão, nenhuma outra fileira pra medir ainda.`}
-              </p>
-              <div className="flex items-center gap-2 mb-2">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={passoManualInput}
-                  onChange={(e) => setPassoManualInput(e.target.value)}
-                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
-                  placeholder={`substituir (ex: ${(medidaPassoDuplicacao?.passoM ?? 7).toFixed(2)})`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setLadoInvertido((v) => !v)}
-                  className={`shrink-0 text-xs px-2 py-1.5 rounded border ${ladoInvertido ? 'border-sky-600 text-sky-300 bg-sky-950' : 'border-zinc-700 text-zinc-300'}`}
-                >
-                  ⇄ Inverter lado
-                </button>
-              </div>
+              {offsetManualDuplicacao ? (
+                <p className="text-xs text-sky-300 mb-2">Posição definida arrastando a alça no mapa -- distância/lado abaixo ficam sem efeito até você resetar.</p>
+              ) : (
+                <>
+                  <p className="text-xs text-zinc-500 mb-1">
+                    Distância perpendicular:{' '}
+                    {medidaPassoDuplicacao?.medidoDeVerdade
+                      ? `${medidaPassoDuplicacao.passoM.toFixed(2)} m -- mediana entre ${medidaPassoDuplicacao.amostras + 1} fileira(s) já desenhada(s) desta quadra.`
+                      : `${(medidaPassoDuplicacao?.passoM ?? 7).toFixed(2)} m -- chute padrão, nenhuma outra fileira pra medir ainda.`}
+                  </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={passoManualInput}
+                      onChange={(e) => setPassoManualInput(e.target.value)}
+                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
+                      placeholder={`substituir (ex: ${(medidaPassoDuplicacao?.passoM ?? 7).toFixed(2)})`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setLadoInvertido((v) => !v)}
+                      className={`shrink-0 text-xs px-2 py-1.5 rounded border ${ladoInvertido ? 'border-sky-600 text-sky-300 bg-sky-950' : 'border-zinc-700 text-zinc-300'}`}
+                    >
+                      ⇄ Inverter lado
+                    </button>
+                  </div>
+                </>
+              )}
 
               <label className="flex items-center gap-2 text-xs text-zinc-300 mb-2">
                 <input type="checkbox" checked={copiarTumulosDuplicacao} onChange={(e) => setCopiarTumulosDuplicacao(e.target.checked)} />
@@ -1681,6 +1757,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                     setNumeroDestinoInput('')
                     setPassoManualInput('')
                     setLadoInvertido(false)
+                    setOffsetManualDuplicacao(null)
                   }}
                   className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                 >
@@ -1993,6 +2070,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                                           setPassoManualInput('')
                                           setLadoInvertido(false)
                                           setCopiarTumulosDuplicacao(true)
+                                          setOffsetManualDuplicacao(null)
                                         }}
                                         className="text-sky-400 hover:text-sky-200"
                                       >
