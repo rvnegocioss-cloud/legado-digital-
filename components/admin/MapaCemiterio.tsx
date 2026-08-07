@@ -10,7 +10,9 @@ import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
 import { centroide, comprimentoPolilinha } from '@/lib/geo'
-import { acharSobreposicoes, gerarPontosContinuacao, medirContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
+import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, validarEspacamento } from '@/lib/enderecoTumulo'
+
+const JANELA_VAOS_CONTINUACAO = 6
 
 registrarProtocoloPmtiles()
 
@@ -151,7 +153,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
 
   useEffect(() => {
     setAjustesPreview({})
-  }, [quantidadeInput, dialogoFila?.filaId])
+  }, [dialogoFila?.filaId])
 
   // Busca os túmulos da fileira DIRETO DO BANCO ao abrir o diálogo -- o state
   // global `lapides` só é atualizado por carregar() e as mutações do modo de
@@ -340,30 +342,50 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
   const filaDoDialogo = dialogoFila ? filas.find((f) => f.id === dialogoFila.filaId) : null
   const quantidadeNumerica = parseInt(quantidadeInput, 10)
 
+  // Diminuir a quantidade descarta só as âncoras que ficaram fora do lote
+  // (índice >= nova quantidade) -- aumentar/reduzir não pode jogar fora o
+  // que o staff já arrastou e fixou, senão "Preencher resto" (que muda a
+  // quantidade) apaga a calibração bem na hora que ela mais importa.
+  useEffect(() => {
+    if (!quantidadeNumerica || quantidadeNumerica < 1) return
+    setAjustesPreview((atual) => {
+      const chaves = Object.keys(atual)
+      if (chaves.every((k) => Number(k) < quantidadeNumerica)) return atual
+      const aparado: Record<number, [number, number]> = {}
+      for (const k of chaves) {
+        const i = Number(k)
+        if (i < quantidadeNumerica) aparado[i] = atual[i]
+      }
+      return aparado
+    })
+  }, [quantidadeNumerica])
+
   const medicao = useMemo(() => {
     if (!filaDoDialogo?.eixo || !existentesFrescos || carregandoExistentes) return null
-    return medirContinuacao(filaDoDialogo.eixo.coordinates, existentesFrescos)
+    return medirContinuacao(filaDoDialogo.eixo.coordinates, existentesFrescos, { janelaVaos: JANELA_VAOS_CONTINUACAO })
   }, [filaDoDialogo, existentesFrescos, carregandoExistentes])
 
-  const geracaoContinuacao = useMemo(() => {
+  // Reprojeta ao vivo: pontos do lote que o staff ainda não arrastou usam o
+  // espaçamento real das âncoras (banco + o que já foi arrastado NESTE lote),
+  // não um cálculo travado no momento em que o diálogo abriu -- pedido direto
+  // do Rafael ("os proximos tumulos vao se distanciando ao inves de usar o
+  // calculo dos que eu ja fixei no lugar correto"), corrigido com o Opus.
+  const geracaoAncorada = useMemo(() => {
     if (!filaDoDialogo?.eixo || !existentesFrescos || carregandoExistentes || !quantidadeNumerica || quantidadeNumerica < 1) return null
-    return gerarPontosContinuacao(filaDoDialogo.eixo.coordinates, existentesFrescos, quantidadeNumerica)
-  }, [filaDoDialogo, existentesFrescos, carregandoExistentes, quantidadeNumerica])
+    return gerarPontosLoteAncorado(filaDoDialogo.eixo.coordinates, existentesFrescos, quantidadeNumerica, ajustesPreview, {
+      janelaVaos: JANELA_VAOS_CONTINUACAO,
+    })
+  }, [filaDoDialogo, existentesFrescos, carregandoExistentes, quantidadeNumerica, ajustesPreview])
 
-  const previewPontos = geracaoContinuacao?.pontos ?? null
+  const previewPontosFinal = geracaoAncorada?.pontos ?? null
 
   const comprimentoAoVivo = filaDoDialogo?.eixo ? comprimentoPolilinha(filaDoDialogo.eixo.coordinates) : null
-  const espacamentoInfo = geracaoContinuacao ? validarEspacamento(geracaoContinuacao.pitch, 2) : null
+  const espacamentoInfo = geracaoAncorada ? validarEspacamento(geracaoAncorada.pitch, 2) : null
 
   const sugestaoRestante = useMemo(() => {
     if (!medicao || medicao.pitch <= 0 || medicao.passouDoFim) return null
     return Math.min(500, Math.max(1, Math.round(medicao.restanteM / medicao.pitch)))
   }, [medicao])
-
-  const previewPontosFinal = useMemo(() => {
-    if (!previewPontos) return null
-    return previewPontos.map((p, i) => ajustesPreview[i] || p)
-  }, [previewPontos, ajustesPreview])
 
   const sobreposicoes = useMemo(() => {
     if (!previewPontosFinal || !existentesFrescos || existentesFrescos.length === 0 || !medicao) return []
@@ -1189,10 +1211,20 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                     onDragEnd={(e) => arrastarPontoPreview(index, e.lngLat.lat, e.lngLat.lng)}
                   >
                     <div
+                      onClick={(e) => {
+                        if (!ajustesPreview[index]) return
+                        e.stopPropagation()
+                        setAjustesPreview((atual) => {
+                          const { [index]: _remover, ...resto } = atual
+                          return resto
+                        })
+                      }}
                       title={
                         sobreposicoes.includes(index)
                           ? `Túmulo previsto #${index + 1} -- em cima de um já confirmado, arrasta pra desencostar`
-                          : `Túmulo previsto #${index + 1} -- arrasta pro centro real`
+                          : ajustesPreview[index]
+                            ? `Túmulo previsto #${index + 1} -- ajustado à mão, clica pra desfazer`
+                            : `Túmulo previsto #${index + 1} -- arrasta pro centro real`
                       }
                       style={{
                         width: 11,
@@ -1201,7 +1233,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                         background: sobreposicoes.includes(index) ? '#ef4444' : ajustesPreview[index] ? '#facc15' : '#a3e635',
                         border: '1.5px solid #0B1D2A',
                         boxShadow: '0 0 0 1px rgba(255,255,255,0.7)',
-                        cursor: 'grab',
+                        cursor: ajustesPreview[index] ? 'pointer' : 'grab',
                       }}
                     />
                   </Marker>
@@ -1478,7 +1510,7 @@ export function MapaCemiterio({ cemiterioId }: { cemiterioId: string }) {
                 ◼ Pontas da fileira -- quadrado laranja, arrasta pro centro exato do 1º e do último túmulo (só importa pro 1º lote / pro fim da fileira).
               </p>
               <p className="text-xs mb-2" style={{ color: '#a3e635' }}>
-                ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada), arrasta cada uma pro centro real. Números seguem a ordem da fileira, continuando do último confirmado.
+                ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada, clica nela pra desfazer). Arrasta cada uma pro centro real: os que ainda não foram tocados se reposicionam sozinhos usando a distância real que você acabou de fixar nos vizinhos.
               </p>
               <label className="block text-xs text-zinc-400 mb-1">Quantidade deste lote</label>
               <div className="flex items-center gap-2 mb-2">

@@ -114,17 +114,46 @@ function mediana(valores: number[]): number {
  *  entre o 1º e o último confirmado (tendência real), caindo pro eixo
  *  desenhado só se tiver pouco confirmado ainda ou a tendência apontar pro
  *  sentido contrário do eixo (proteção contra eixo desenhado ao contrário). */
-export function medirContinuacao(eixo: [number, number][], existentes: { lat: number; lng: number }[]) {
+export function medirContinuacao(
+  eixo: [number, number][],
+  existentes: { lat: number; lng: number }[],
+  opcoes?: { janelaVaos?: number }
+) {
   const origem = eixo[0]
   const fimLocal = projetarLocal(origem, eixo[eixo.length - 1])
   const distEixo = Math.hypot(fimLocal.x, fimLocal.y) || 1
   let dir = { x: fimLocal.x / distEixo, y: fimLocal.y / distEixo }
 
-  const locais = existentes.map((p) => projetarLocal(origem, [p.lng, p.lat]))
+  const locaisTodos = existentes.map((p) => projetarLocal(origem, [p.lng, p.lat]))
 
+  // Janela: mede pitch/direção só nos últimos N confirmados (por projeção no
+  // eixo original), não na fileira inteira -- fileira real pode mudar de
+  // módulo no meio (jazigo mais largo, corredor), e mediana global "engole"
+  // uma mudança recente de espaçamento.
+  let locais = locaisTodos
+  if (opcoes?.janelaVaos != null && locaisTodos.length > opcoes.janelaVaos + 1) {
+    const s0 = locaisTodos.map((p) => p.x * dir.x + p.y * dir.y)
+    locais = locaisTodos
+      .map((p, i) => ({ p, s: s0[i] }))
+      .sort((a, b) => a.s - b.s)
+      .slice(-(opcoes.janelaVaos + 1))
+      .map((o) => o.p)
+  }
+
+  // Direção empírica: extremos ESPACIAIS (por projeção no eixo), não os
+  // extremos do ARRAY -- a ordem de chegada (ex: order by numero) não é
+  // garantia de ordem espacial real (mesmo motivo que a "frente" abaixo não
+  // usa o maior número).
   if (locais.length >= 2) {
-    const a = locais[0]
-    const b = locais[locais.length - 1]
+    const s0 = locais.map((p) => p.x * dir.x + p.y * dir.y)
+    let iMin = 0
+    let iMax = 0
+    for (let i = 1; i < s0.length; i++) {
+      if (s0[i] < s0[iMin]) iMin = i
+      if (s0[i] > s0[iMax]) iMax = i
+    }
+    const a = locais[iMin]
+    const b = locais[iMax]
     const dx = b.x - a.x
     const dy = b.y - a.y
     const distEmpirica = Math.hypot(dx, dy)
@@ -174,9 +203,10 @@ export function medirContinuacao(eixo: [number, number][], existentes: { lat: nu
 export function gerarPontosContinuacao(
   eixo: [number, number][],
   existentes: { lat: number; lng: number }[],
-  quantidade: number
+  quantidade: number,
+  opcoes?: { janelaVaos?: number }
 ): { pontos: [number, number][]; pitch: number; restanteM: number; medidoDeVerdade: boolean; passouDoFim: boolean } {
-  const { origem, dir, ultimoLocal, pitch, restanteM, medidoDeVerdade, passouDoFim } = medirContinuacao(eixo, existentes)
+  const { origem, dir, ultimoLocal, pitch, restanteM, medidoDeVerdade, passouDoFim } = medirContinuacao(eixo, existentes, opcoes)
 
   const kInicial = existentes.length > 0 ? 1 : 0
   const pontos: [number, number][] = []
@@ -187,6 +217,134 @@ export function gerarPontosContinuacao(
   }
 
   return { pontos, pitch, restanteM, medidoDeVerdade, passouDoFim }
+}
+
+/** Gera o lote MISTURANDO âncoras reais: túmulos já confirmados no banco +
+ *  pontos do preview atual que o staff já arrastou pro lugar certo
+ *  (`ajustes`, índice do array -> [lng,lat]). Pontos ENTRE duas âncoras são
+ *  interpolados linearmente (o staff já deu as duas pontas daquele trecho);
+ *  pontos DEPOIS da última âncora extrapolam usando o passo real medido
+ *  entre as duas âncoras mais próximas (não o pitch global, que mediria
+ *  errado se as âncoras não forem consecutivas -- ex: arrastou só o #1 e
+ *  o #4, o "vão" entre eles é 3 passos, não 1). Sem nenhum ajuste, devolve
+ *  bit-a-bit o mesmo resultado de `gerarPontosContinuacao` -- contrato
+ *  coberto pelo branch abaixo. */
+export function gerarPontosLoteAncorado(
+  eixo: [number, number][],
+  confirmados: { lat: number; lng: number }[],
+  quantidade: number,
+  ajustes: Record<number, [number, number]>,
+  opcoes?: { janelaVaos?: number }
+): {
+  pontos: [number, number][]
+  pitch: number
+  restanteM: number
+  medidoDeVerdade: boolean
+  passouDoFim: boolean
+  ancorasForaDeOrdem: number[]
+} {
+  const indicesAncora = Object.keys(ajustes)
+    .map(Number)
+    .filter((i) => Number.isInteger(i) && i >= 0 && i < quantidade)
+    .sort((a, b) => a - b)
+
+  if (indicesAncora.length === 0) {
+    const base = gerarPontosContinuacao(eixo, confirmados, quantidade, opcoes)
+    return { ...base, ancorasForaDeOrdem: [] }
+  }
+
+  const medicaoBanco = medirContinuacao(eixo, confirmados, opcoes)
+  const origem = medicaoBanco.origem
+
+  const ajustesLatLng = indicesAncora.map((i) => ({ lat: ajustes[i][1], lng: ajustes[i][0] }))
+  const medicaoComAncoras = medirContinuacao(eixo, [...confirmados, ...ajustesLatLng], opcoes)
+  const dirUsado = medicaoComAncoras.dir
+  const pitchGlobal = medicaoComAncoras.pitch
+
+  const projetar = (lngLat: [number, number]) => {
+    const l = projetarLocal(origem, lngLat)
+    return l.x * dirUsado.x + l.y * dirUsado.y
+  }
+
+  type Parada = { indice: number; s: number; lngLat: [number, number] }
+  const paradas: Parada[] = []
+  if (confirmados.length > 0) {
+    const frenteLngLat = deMetrosLocal(origem, medicaoBanco.ultimoLocal)
+    paradas.push({ indice: -1, s: projetar(frenteLngLat), lngLat: frenteLngLat })
+  }
+  indicesAncora.forEach((i) => paradas.push({ indice: i, s: projetar(ajustes[i]), lngLat: ajustes[i] }))
+  paradas.sort((a, b) => a.indice - b.indice)
+
+  const ancorasForaDeOrdem: number[] = []
+  for (let k = 1; k < paradas.length; k++) {
+    if (paradas[k].indice >= 0 && paradas[k].s < paradas[k - 1].s - 0.5 * pitchGlobal) {
+      ancorasForaDeOrdem.push(paradas[k].indice)
+    }
+  }
+
+  const passoLocal = (a: Parada, b: Parada) => {
+    const la = projetarLocal(origem, a.lngLat)
+    const lb = projetarLocal(origem, b.lngLat)
+    const dist = Math.hypot(lb.x - la.x, lb.y - la.y)
+    const passos = Math.abs(b.indice - a.indice) || 1
+    return dist / passos
+  }
+
+  const pontos: [number, number][] = new Array(quantidade)
+  indicesAncora.forEach((i) => {
+    pontos[i] = ajustes[i]
+  })
+
+  for (let i = 0; i < quantidade; i++) {
+    if (pontos[i]) continue
+
+    let anterior: Parada | null = null
+    let anteAnterior: Parada | null = null
+    let proxima: Parada | null = null
+    let proximaProxima: Parada | null = null
+    for (let k = 0; k < paradas.length; k++) {
+      const p = paradas[k]
+      if (p.indice < i) {
+        anteAnterior = anterior
+        anterior = p
+      } else if (p.indice > i && !proxima) {
+        proxima = p
+        proximaProxima = paradas[k + 1] ?? null
+      }
+    }
+
+    if (anterior && proxima) {
+      const la = projetarLocal(origem, anterior.lngLat)
+      const lb = projetarLocal(origem, proxima.lngLat)
+      const t = (i - anterior.indice) / (proxima.indice - anterior.indice)
+      pontos[i] = deMetrosLocal(origem, { x: la.x + (lb.x - la.x) * t, y: la.y + (lb.y - la.y) * t })
+    } else if (anterior) {
+      const passo = anteAnterior ? passoLocal(anteAnterior, anterior) : pitchGlobal
+      const la = projetarLocal(origem, anterior.lngLat)
+      const k = i - anterior.indice
+      pontos[i] = deMetrosLocal(origem, { x: la.x + dirUsado.x * passo * k, y: la.y + dirUsado.y * passo * k })
+    } else if (proxima) {
+      const passo = proximaProxima ? passoLocal(proxima, proximaProxima) : pitchGlobal
+      const lb = projetarLocal(origem, proxima.lngLat)
+      const k = i - proxima.indice
+      pontos[i] = deMetrosLocal(origem, { x: lb.x + dirUsado.x * passo * k, y: lb.y + dirUsado.y * passo * k })
+    } else {
+      const k = i + 1
+      pontos[i] = deMetrosLocal(origem, {
+        x: medicaoBanco.ultimoLocal.x + dirUsado.x * pitchGlobal * k,
+        y: medicaoBanco.ultimoLocal.y + dirUsado.y * pitchGlobal * k,
+      })
+    }
+  }
+
+  return {
+    pontos,
+    pitch: pitchGlobal,
+    restanteM: medicaoComAncoras.restanteM,
+    medidoDeVerdade: medicaoComAncoras.medidoDeVerdade,
+    passouDoFim: medicaoComAncoras.passouDoFim,
+    ancorasForaDeOrdem,
+  }
 }
 
 /** Índices de `pontos` que caem em cima (ou perto demais) de um túmulo já
