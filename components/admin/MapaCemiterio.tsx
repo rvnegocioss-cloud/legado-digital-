@@ -1188,9 +1188,14 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
   return (
     <div>
-      <Link href={`/admin/cemiterios/${cemiterioId}/lapides`} className="text-zinc-400 hover:text-white text-sm mb-4 inline-block">
-        ← Voltar pra Lápides de {cemiterio.nome}
-      </Link>
+      <div className="flex items-center gap-4 mb-4 flex-wrap">
+        <Link href="/admin/cemiterios" className="text-zinc-400 hover:text-white text-sm inline-block">
+          ← Voltar pra Cemitérios
+        </Link>
+        <Link href={`/admin/cemiterios/${cemiterioId}/lapides`} className="text-sm inline-block" style={{ color: '#C9A46A' }}>
+          Ver Lápides deste cemitério →
+        </Link>
+      </div>
       <h1 className="text-2xl font-bold text-white mb-1">Mapa — {cemiterio.nome}</h1>
       <p className="text-zinc-400 text-sm mb-2">
         {quadras.length} quadra(s) · {filas.length} fileira(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
