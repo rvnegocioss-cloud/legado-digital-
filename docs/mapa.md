@@ -130,6 +130,34 @@ Rafael reportou dois sintomas juntos: o espaçamento do lote novo não replicava
 
 **Deixado de propósito, não implementado ainda** (mapeado pelo Opus, menor prioridade que o fix acima): validação de sobreposição também no RPC `gerar_lapides_fila_manual` (hoje só client-side — qualquer outro caminho de escrita futuro não fica protegido); unificar `lapides`/`lapidesEdicao` numa fonte única de verdade (Camada 0 do plano do Opus — eliminaria essa classe de bug de vez, mas é refatoração maior, adiada); ajuste de direção por PCA nos últimos N pontos em vez da reta 1º→último (mais robusto pra fileira bem curva, ganho pequeno pro caso real de hoje).
 
+## Bug 3 — rate limit 429 navegando entre páginas do admin (2026-08-07)
+
+Rafael reportou erro ao voltar de Gavetas 3D pro Mapa: `"Limite de 30 requisições por minuto excedido"`. Causa em `proxy.ts`: `getRateLimitType()` caía no default `'api'` (30/min) pra QUALQUER rota que não batesse com login/upload — inclusive navegação de PÁGINA normal dentro de `/admin/*`, não só chamada de API. Cada clique (mais o prefetch automático de link que o Next.js já faz sozinho) contava no mesmo orçamento das rotas sensíveis (força bruta, upload, escrita pública) — não era o vetor de abuso que esse rate limit foi desenhado pra barrar (auditoria 2026-07-24). Fix: navegação de página ganhou balde próprio (`'pagina'`, 180/min), separado do balde de API (30/min, mantido). Login/upload sem mudança.
+
+## Bug 4 — drift dentro do próprio lote ainda não salvo (2026-08-07, diagnóstico com Opus)
+
+Depois do fix do bug grave 2, Rafael reportou uma variante mais sutil: dentro do MESMO lote ainda aberto no diálogo (antes de clicar "Gerar"), arrastar o túmulo #1 e #2 pro lugar real revela o espaçamento real daquele trecho — mas os #3/#4/#5 (ainda não tocados) continuavam usando o cálculo inicial (chute ou pitch antigo), cada vez mais errados.
+
+**Fix** (`lib/enderecoTumulo.ts`, função nova `gerarPontosLoteAncorado`): combina os túmulos confirmados do banco com os pontos do preview já arrastados — ambos viram "âncoras". Pontos ENTRE duas âncoras interpolam linear (o staff já deu as duas pontas daquele trecho); pontos DEPOIS da última âncora extrapolam usando o passo real medido entre as 2 âncoras mais próximas (não o pitch global — mediria errado se as âncoras não forem consecutivas, ex: arrastou só #1 e #4, o vão entre eles é 3 passos, não 1). Sem nenhum arrasto, devolve bit-a-bit o mesmo resultado de antes (contrato coberto por teste do próprio código).
+
+`medirContinuacao` ganhou opção de janela (`janelaVaos`, mede só os últimos N vãos, não a fileira inteira — usa 6 no componente) e corrigiu um bug latente: a direção empírica usava os extremos do ARRAY (ordem de chegada), não os extremos ESPACIAIS — inofensivo até então, mas podia ativar com âncoras fora de ordem.
+
+No componente: `ajustesPreview` virou dependência do cálculo (antes só sobrescrevia o próprio índice, sem afetar os outros pontos do lote); o efeito que zerava os ajustes ao mudar a quantidade digitada agora só apara os índices que ficaram de fora — antes apagava a calibração bem na hora que "Preencher resto" mudava a quantidade, destruindo o trabalho que acabou de ser feito. Clicar numa bolinha amarela (já ajustada) desfaz o arrasto (volta a ser calculada).
+
+## Feature — Duplicar fileira (2026-08-07, planejada com Opus)
+
+Pedido do Rafael: fileiras dentro de uma quadra costumam ser paralelas e regulares — duplicar uma já pronta (eixo + túmulos calibrados) pra virar a próxima, ou uma numerada a dedo ("achei uma fileira lá na frente"), poupa desenhar+gerar+ajustar tudo de novo do zero.
+
+**Geometria do offset** (`medirPassoEntreFileiras`, `lib/enderecoTumulo.ts`): distância perpendicular real entre a fileira de origem e as outras já desenhadas na mesma quadra — mediana dos vãos (mesmo princípio do pitch entre túmulos, não confia numa amostra só), descartando vãos < 0,5m. Sentido (pra que lado o número cresce) vem do sinal predominante do deslocamento entre fileiras de número consecutivo. Sem 2+ fileiras pra medir, usa chute padrão (~7m, a distância real medida no José Lázaro foi 7,30m) — sempre **editável na UI com a procedência escrita** ("7,30m — mediana entre 3 fileiras" vs "chute padrão"), nunca silencioso.
+
+**Trust model** (regra do projeto: geometria nova nasce não-confirmada): fileira nova SEMPRE `geometria_revisada=false`, mesmo copiando de uma origem travada (a cópia é hipótese de paralelismo, não verificação — fileira real de cemitério nem sempre é perfeitamente paralela/regular); túmulos copiados SEMPRE `coordenada_precisao='interpolada'` e `situacao='nao_confirmada'`, mesmo que fossem `'exata'`/`'confirmada'` na origem — exatidão foi verificada NAQUELE lugar, não neste.
+
+**RPC nova `duplicar_fila`** (`supabase/migrations/20260807_duplicar_fila.sql`, staff-only, transação atômica): cliente manda a geometria FINAL já transladada (eixo + pontos), mesmo padrão WYSIWYG de `gerar_lapides_fila_manual` — servidor só grava, não recalcula por conta própria. Recusa se a quadra está travada, se o número destino já tem geometria/túmulos (nunca sobrescreve), ou se passa de 500 pontos. Preenche fileira destino vazia (número já usado mas sem eixo/túmulo) sem duplicar registro.
+
+**UI**: botão "Duplicar" na lista de fileiras (ao lado de "Apagar"/"Travar") abre painel no topo do painel lateral (mesma posição prioritária do "Gerar túmulos") — número destino (validado ao vivo contra colisão), distância medida/editável, "⇄ Inverter lado", checkbox "copiar também os túmulos", preview tracejado azul no mapa antes de confirmar. Túmulos da fileira de origem buscados **frescos do banco** ao abrir (mesma lição do bug grave 2 — state global pode estar desatualizado depois de arrasto no modo de edição).
+
+**Escopo simplificado conscientemente** (documentado, não é gambiarra silenciosa): a translação é só deslocamento perpendicular uniforme (sem rotação/escala) — cobre bem o caso comum (fileiras realmente paralelas). Não tem preview com pontas arrastáveis ANTES de confirmar (diferente do "Gerar túmulos") — depois de criada, a fileira nova usa as ferramentas que já existem (arrastar ponta da fileira, editar túmulos no mapa) pra ajustar. Se uma fileira distante não for exatamente paralela, esse ajuste fino acontece depois da duplicação, não antes.
+
 ## Próximos passos
 
 - [x] Modo edição manual (drag/adicionar/apagar/travar)
@@ -144,8 +172,13 @@ Rafael reportou dois sintomas juntos: o espaçamento do lote novo não replicava
 - [x] Painel de edição à esquerda, mesma altura do mapa, rolagem própria (não sticky) -- mapa nunca sai da tela
 - [x] Mapa não perde mais posição (pan/zoom) ao salvar qualquer coisa
 - [x] "Gerar mais" não sobrepõe mais túmulos já organizados (busca fresca do banco + frente por projeção espacial + rede de segurança anti-sobreposição)
+- [x] Rate limit de navegação de página separado do de API (mapa <-> gavetas 3D não estoura mais 429)
+- [x] Pontos não arrastados do lote se reprojetam ao vivo pela distância real já fixada (não só entre lotes, dentro do mesmo lote também)
+- [x] Duplicar fileira (copia eixo+túmulos deslocado pro lado, mediana da distância entre fileiras vizinhas)
 - [ ] Validação de sobreposição também no RPC (hoje só client-side)
 - [ ] Unificar `lapides`/`lapidesEdicao` numa fonte única de verdade (Camada 0 do plano do Opus)
+- [ ] Duplicar fileira com rotação/escala (fileira alvo não perfeitamente paralela) -- hoje só translação uniforme
+- [ ] Preview com pontas arrastáveis antes de confirmar a duplicação (hoje ajusta só depois, com as ferramentas que já existem)
 - [ ] Corrigir `_agrupar_remover_harmonicos` (bug #2 acima) no código genérico
 - [ ] Implementar `--ancora`/`--ancora2` (âncora manual de 2 pontos) como comando real em `mapear-cemiterio.py`, não só script avulso de teste
 - [ ] Regenerar as fileiras 1-10 da Quadra 1 (apagadas) com o método correto assim que o âncora estiver integrado
