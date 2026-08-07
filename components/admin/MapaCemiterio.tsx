@@ -129,6 +129,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
   const desenho = useDesenhoNoMapa()
   const [quadraExpandida, setQuadraExpandida] = useState<Record<string, boolean>>({})
+  const [renomeandoQuadraId, setRenomeandoQuadraId] = useState<string | null>(null)
+  const [nomeQuadraInput, setNomeQuadraInput] = useState('')
   const [quadraAtivaParaFila, setQuadraAtivaParaFila] = useState<Quadra | null>(null)
   const [numeracaoProposta, setNumeracaoProposta] = useState<NumeracaoProposta | null>(null)
   const [dialogoFila, setDialogoFila] = useState<{ filaId: string; quadraNumero: number; filaNumero: number; comprimentoM: number } | null>(null)
@@ -1114,6 +1116,17 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
+  async function renomearQuadra(quadraId: string, nome: string) {
+    setSalvando(true)
+    const { error } = await supabase.from('quadras').update({ nome: nome.trim() || null }).eq('id', quadraId)
+    if (error) {
+      setMsg(error.message)
+    } else {
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
   async function travarQuadra() {
     if (!quadraEmEdicao) return
     setSalvando(true)
@@ -1978,12 +1991,53 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       >
                         {expandida ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         Quadra {q.numero}
+                        {q.nome && <span className="text-zinc-400 font-normal">— {q.nome}</span>}
                         {q.geometria_revisada && <span className="text-emerald-400 text-xs">🔒</span>}
                         <span className="text-zinc-500 text-xs ml-auto">{filasDaQuadra.length} fileira(s)</span>
                       </button>
 
                       {expandida && (
                         <div className="px-3 pb-2 pt-1 border-t border-zinc-800">
+                          {editavel && (
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              {renomeandoQuadraId === q.id ? (
+                                <>
+                                  <input
+                                    autoFocus
+                                    value={nomeQuadraInput}
+                                    onChange={(e) => setNomeQuadraInput(e.target.value)}
+                                    placeholder="Nome real que o cemitério usa (ex: Setor A, Bloco Central)"
+                                    className="text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white flex-1 min-w-[180px]"
+                                  />
+                                  <button
+                                    type="button"
+                                    disabled={salvando}
+                                    onClick={async () => {
+                                      await renomearQuadra(q.id, nomeQuadraInput)
+                                      setRenomeandoQuadraId(null)
+                                    }}
+                                    className="text-xs text-emerald-400 hover:text-emerald-200"
+                                  >
+                                    Salvar
+                                  </button>
+                                  <button type="button" onClick={() => setRenomeandoQuadraId(null)} className="text-xs text-zinc-400 hover:text-zinc-200">
+                                    Cancelar
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setRenomeandoQuadraId(q.id)
+                                    setNomeQuadraInput(q.nome || '')
+                                  }}
+                                  className="text-xs text-zinc-400 hover:text-white"
+                                >
+                                  ✎ Renomear quadra
+                                </button>
+                              )}
+                            </div>
+                          )}
                           {editavel && (
                             <div className="flex items-center gap-3 mb-2 flex-wrap">
                               <button
