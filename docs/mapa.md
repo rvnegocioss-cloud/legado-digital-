@@ -156,7 +156,9 @@ Pedido do Rafael: fileiras dentro de uma quadra costumam ser paralelas e regular
 
 **UI**: botão "Duplicar" na lista de fileiras (ao lado de "Apagar"/"Travar") abre painel no topo do painel lateral (mesma posição prioritária do "Gerar túmulos") — número destino (validado ao vivo contra colisão), distância medida/editável, "⇄ Inverter lado", checkbox "copiar também os túmulos", preview tracejado azul no mapa antes de confirmar. Túmulos da fileira de origem buscados **frescos do banco** ao abrir (mesma lição do bug grave 2 — state global pode estar desatualizado depois de arrasto no modo de edição).
 
-**Escopo simplificado conscientemente** (documentado, não é gambiarra silenciosa): a translação é só deslocamento perpendicular uniforme (sem rotação/escala) — cobre bem o caso comum (fileiras realmente paralelas). Não tem preview com pontas arrastáveis ANTES de confirmar (diferente do "Gerar túmulos") — depois de criada, a fileira nova usa as ferramentas que já existem (arrastar ponta da fileira, editar túmulos no mapa) pra ajustar. Se uma fileira distante não for exatamente paralela, esse ajuste fino acontece depois da duplicação, não antes.
+**Arrastar a duplicação inteira** (mesmo dia, pedido do Rafael logo em seguida) — em vez de só digitar distância/inverter lado, uma alça azul (círculo, ✛) nasce no meio do preview tracejado, arrastável: mover ela translada o eixo + todos os túmulos copiados juntos, como bloco rígido, pra qualquer lugar do mapa. `offsetManualDuplicacao` (deslocamento em metros no plano local) assume prioridade sobre o cálculo de distância perpendicular medida/digitada quando definido; botão "Resetar posição" volta pro cálculo automático. Resolve bem o caso "achei uma fileira lá na frente, não é adjacente nem precisamente paralela" sem precisar de transformação com rotação.
+
+**Escopo simplificado conscientemente** (documentado, não é gambiarra silenciosa): a translação é só deslocamento uniforme (sem rotação/escala) — a alça move o conjunto inteiro mas não gira nem estica. Cobre bem o caso comum (fileiras paralelas, mesmo não-adjacentes). Depois de criada, ajuste fino ponto-a-ponto usa as ferramentas que já existem (arrastar ponta da fileira, editar túmulos no mapa).
 
 ## Próximos passos
 
@@ -177,8 +179,8 @@ Pedido do Rafael: fileiras dentro de uma quadra costumam ser paralelas e regular
 - [x] Duplicar fileira (copia eixo+túmulos deslocado pro lado, mediana da distância entre fileiras vizinhas)
 - [ ] Validação de sobreposição também no RPC (hoje só client-side)
 - [ ] Unificar `lapides`/`lapidesEdicao` numa fonte única de verdade (Camada 0 do plano do Opus)
-- [ ] Duplicar fileira com rotação/escala (fileira alvo não perfeitamente paralela) -- hoje só translação uniforme
-- [ ] Preview com pontas arrastáveis antes de confirmar a duplicação (hoje ajusta só depois, com as ferramentas que já existem)
+- [x] Arrastar a fileira duplicada inteira (eixo + túmulos) antes de confirmar
+- [ ] Duplicar fileira com rotação/escala (fileira alvo não perfeitamente paralela em ângulo) -- hoje só translação uniforme
 - [ ] Corrigir `_agrupar_remover_harmonicos` (bug #2 acima) no código genérico
 - [ ] Implementar `--ancora`/`--ancora2` (âncora manual de 2 pontos) como comando real em `mapear-cemiterio.py`, não só script avulso de teste
 - [ ] Regenerar as fileiras 1-10 da Quadra 1 (apagadas) com o método correto assim que o âncora estiver integrado
