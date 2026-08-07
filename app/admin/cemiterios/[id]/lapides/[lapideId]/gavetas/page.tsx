@@ -32,6 +32,7 @@ export default function GavetasLapide() {
   const [homenagens, setHomenagens] = useState<Homenagem[]>([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(FORM_INICIAL)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -66,14 +67,17 @@ export default function GavetasLapide() {
     setSalvando(true)
     setErro('')
 
-    const { error } = await supabase.from('gavetas').insert({
-      lapide_id: lapideId,
+    const payload = {
       codigo: form.codigo,
       linha: parseInt(form.linha, 10) || 1,
       coluna: parseInt(form.coluna, 10) || 1,
       homenagem_id: form.homenagem_id || null,
       observacoes: form.observacoes || null,
-    })
+    }
+
+    const { error } = editandoId
+      ? await supabase.from('gavetas').update(payload).eq('id', editandoId)
+      : await supabase.from('gavetas').insert({ ...payload, lapide_id: lapideId })
 
     if (error) {
       setErro(error.message)
@@ -82,12 +86,31 @@ export default function GavetasLapide() {
     }
 
     setForm(FORM_INICIAL)
+    setEditandoId(null)
     setSalvando(false)
     load()
   }
 
+  function editar(g: Gaveta) {
+    setEditandoId(g.id)
+    setForm({
+      codigo: g.codigo,
+      linha: String(g.linha),
+      coluna: String(g.coluna),
+      homenagem_id: g.homenagem_id || '',
+      observacoes: g.observacoes || '',
+    })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
+    setForm(FORM_INICIAL)
+  }
+
   async function remover(gavetaId: string) {
     await supabase.from('gavetas').delete().eq('id', gavetaId)
+    if (editandoId === gavetaId) cancelarEdicao()
     load()
   }
 
@@ -98,12 +121,29 @@ export default function GavetasLapide() {
       <Link href={`/admin/cemiterios/${id}/lapides`} className="text-zinc-400 hover:text-white text-sm mb-4 inline-block">
         ← Voltar pra Lápides
       </Link>
-      <h1 className="text-2xl font-bold text-white mb-1">Gavetas — {lapideNome}</h1>
+      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+        <h1 className="text-2xl font-bold text-white">Gavetas — {lapideNome}</h1>
+        <Link
+          href={`/admin/cemiterios/${id}/lapides/${lapideId}/gavetas-3d`}
+          className="text-sm font-medium px-3 py-1.5 rounded-lg"
+          style={{ background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
+        >
+          Ver Gavetas 3D →
+        </Link>
+      </div>
       <p className="text-zinc-400 text-sm mb-8">
         Cada gaveta é uma posição física dentro do jazigo. Vincule um memorial já cadastrado pra marcar quem está ali.
       </p>
 
       <form onSubmit={salvar} className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-8 space-y-3 max-w-lg">
+        {editandoId && (
+          <p className="text-xs" style={{ color: '#C9A46A' }}>
+            Editando a gaveta {gavetas.find((g) => g.id === editandoId)?.codigo} —{' '}
+            <button type="button" onClick={cancelarEdicao} className="underline">
+              cancelar
+            </button>
+          </p>
+        )}
         <div>
           <label className="block text-xs text-zinc-500 mb-1">Código</label>
           <Input
@@ -159,9 +199,16 @@ export default function GavetasLapide() {
           />
         </div>
         {erro && <p className="text-red-400 text-sm">{erro}</p>}
-        <Button type="submit" disabled={salvando}>
-          {salvando ? 'Salvando...' : '+ Adicionar Gaveta'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button type="submit" disabled={salvando}>
+            {salvando ? 'Salvando...' : editandoId ? 'Salvar alteração' : '+ Adicionar Gaveta'}
+          </Button>
+          {editandoId && (
+            <button type="button" onClick={cancelarEdicao} className="text-sm text-zinc-400 hover:text-white">
+              Cancelar
+            </button>
+          )}
+        </div>
       </form>
 
       {gavetas.length === 0 ? (
@@ -175,7 +222,7 @@ export default function GavetasLapide() {
                 <th className="text-left py-3 px-4">Andar</th>
                 <th className="text-left py-3 px-4">Coluna</th>
                 <th className="text-left py-3 px-4">Memorial</th>
-                <th className="text-left py-3 px-4">Observações</th>
+                <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
               </tr>
             </thead>
@@ -194,7 +241,11 @@ export default function GavetasLapide() {
                       <span className="text-zinc-500">Vaga</span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-zinc-400">{g.observacoes || '—'}</td>
+                  <td className="py-3 px-4">
+                    <button onClick={() => editar(g)} className="text-zinc-400 hover:text-white text-xs">
+                      Editar
+                    </button>
+                  </td>
                   <td className="py-3 px-4">
                     <button onClick={() => remover(g.id)} className="text-zinc-500 hover:text-red-400 text-xs">
                       Remover
