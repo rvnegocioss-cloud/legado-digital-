@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart, Sun, Moon } from 'lucide-react'
 import { getAdminUser, signOut, supabase } from '@/lib/auth'
+import { rotuloTipoEmail } from '@/lib/emailLog'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 
 const ALLOWED_ROLES = ['Admin Legado Digital', 'Operador Legado Digital']
@@ -21,6 +22,26 @@ type ParceiroResumo = {
   nome: string
 }
 
+type AlertaComunicacao = {
+  id: string
+  homenagem_id: string | null
+  tipo: string
+  destinatario: string
+  status: string
+  created_at: string
+  homenagens: { nome_completo: string } | null
+}
+
+function tempoRelativo(iso: string) {
+  const minutos = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  if (minutos < 1) return 'agora'
+  if (minutos < 60) return `há ${minutos} min`
+  const horas = Math.floor(minutos / 60)
+  if (horas < 24) return `há ${horas}h`
+  const dias = Math.floor(horas / 24)
+  return `há ${dias}d`
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,6 +50,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [tema, setTema] = useState<'escuro' | 'claro'>('escuro')
   const [parceiros, setParceiros] = useState<ParceiroResumo[]>([])
   const [parceirosAberto, setParceirosAberto] = useState(false)
+  const [alertas, setAlertas] = useState<AlertaComunicacao[]>([])
+  const [alertasAberto, setAlertasAberto] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -74,6 +97,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .order('nome')
       .then(({ data }) => setParceiros(data || []))
   }, [])
+
+  // Alerta = feed das comunicações que o sistema já registra (emails_enviados,
+  // mesma tabela que alimenta /admin/emails) -- nada de tabela nova, só
+  // superfície do que já existe direto no header, com link pro memorial.
+  useEffect(() => {
+    supabase
+      .from('emails_enviados')
+      .select('id, homenagem_id, tipo, destinatario, status, created_at, homenagens(nome_completo)')
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => setAlertas((data as any) || []))
+  }, [])
+
+  const alertasComErro = alertas.filter((a) => a.status === 'erro').length
 
   // Página de login não precisa do layout admin
   if (pathname === '/admin/login') return <>{children}</>
@@ -204,9 +241,60 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               {tema === 'escuro' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button className="text-zinc-400 hover:text-white transition-colors" aria-label="Alertas">
-              <Bell size={18} />
-            </button>
+            <div
+              className="relative"
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) setAlertasAberto(false)
+              }}
+            >
+              <button
+                onClick={() => setAlertasAberto(!alertasAberto)}
+                className="relative text-zinc-400 hover:text-white transition-colors"
+                aria-label="Alertas de comunicações"
+                title="Alertas de comunicações"
+              >
+                <Bell size={18} />
+                {alertasComErro > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center">
+                    {alertasComErro}
+                  </span>
+                )}
+              </button>
+              {alertasAberto && (
+                <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-zinc-800 bg-zinc-900 shadow-lg py-1 z-50 max-h-96 overflow-y-auto">
+                  {alertas.length === 0 ? (
+                    <p className="px-4 py-3 text-xs text-zinc-500">Nenhuma comunicação registrada ainda.</p>
+                  ) : (
+                    alertas.map((a) => (
+                      <Link
+                        key={a.id}
+                        href={a.homenagem_id ? `/admin/memoriais/${a.homenagem_id}` : '/admin/emails'}
+                        onClick={() => setAlertasAberto(false)}
+                        className="block px-4 py-2.5 hover:bg-zinc-800 border-b border-zinc-800/50 last:border-0"
+                      >
+                        <p className="text-xs flex items-center gap-1.5">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.status === 'erro' ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                          <span className="text-zinc-300">{rotuloTipoEmail(a.tipo)}</span>
+                          <span className="text-zinc-600">·</span>
+                          <span className="text-zinc-500 ml-auto shrink-0">{tempoRelativo(a.created_at)}</span>
+                        </p>
+                        <p className="text-xs text-zinc-500 mt-0.5 truncate">
+                          {a.homenagens?.nome_completo || a.destinatario}
+                        </p>
+                      </Link>
+                    ))
+                  )}
+                  <Link
+                    href="/admin/emails"
+                    onClick={() => setAlertasAberto(false)}
+                    className="block px-4 py-2 text-xs text-center hover:bg-zinc-800"
+                    style={{ color: '#C9A46A' }}
+                  >
+                    Ver todas as comunicações
+                  </Link>
+                </div>
+              )}
+            </div>
             <div className="relative">
               <button
                 onClick={() => setMenuAberto(!menuAberto)}

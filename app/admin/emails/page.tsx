@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { linkWhatsApp } from '@/lib/linkWhatsApp'
+import { rotuloTipoEmail } from '@/lib/emailLog'
 
 interface EmailEnviado {
   id: string
@@ -42,13 +43,6 @@ function textoAtividade(iso: string | null) {
   if (dias === 1) return 'ativo ontem'
   if (dias <= 30) return `ativo há ${dias} dias`
   return `último acesso em ${new Date(iso).toLocaleDateString('pt-BR')}`
-}
-
-const TIPO_LABEL: Record<string, string> = {
-  senha_familia: 'Senha da família',
-  confirmacao_placa: 'Confirmação de placa',
-  envio_fornecedor: 'Envio ao fornecedor',
-  convite_parceiro: 'Convite de acesso (parceiro)',
 }
 
 const STATUS_STYLE: Record<string, string> = {
@@ -219,7 +213,7 @@ export default function AdminComunicacoes() {
         >
           <span className={emails[0].status === 'erro' ? 'text-red-300' : 'text-green-300'}>
             {emails[0].status === 'erro' ? '✕ Último e-mail falhou' : '✓ Último e-mail enviado com sucesso'} —{' '}
-            {TIPO_LABEL[emails[0].tipo] || emails[0].tipo} pra {emails[0].destinatario}
+            {rotuloTipoEmail(emails[0].tipo)} pra {emails[0].destinatario}
           </span>
           <span className="text-zinc-400 text-xs whitespace-nowrap ml-4">
             {new Date(emails[0].created_at).toLocaleString('pt-BR')}
@@ -245,7 +239,7 @@ export default function AdminComunicacoes() {
               {emails.map((e) => (
                 <tr key={e.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
                   <td className="py-3 px-4 text-white">{e.homenagens?.nome_completo || '—'}</td>
-                  <td className="py-3 px-4 text-zinc-300">{TIPO_LABEL[e.tipo] || e.tipo}</td>
+                  <td className="py-3 px-4 text-zinc-300">{rotuloTipoEmail(e.tipo)}</td>
                   <td className="py-3 px-4 text-zinc-300">{e.destinatario}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded text-xs ${STATUS_STYLE[e.status] || 'bg-zinc-800 text-zinc-400'}`}>
