@@ -115,7 +115,7 @@ export default function AdminUsuarios() {
   }
 
   if (loading) {
-    return <p className="text-zinc-400">Carregando...</p>
+    return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
   }
 
   return (
@@ -130,7 +130,7 @@ export default function AdminUsuarios() {
               </Button>
             }
           />
-          <DialogContent className="bg-zinc-900 text-white ring-zinc-800 sm:max-w-md">
+          <DialogContent className="bg-[var(--tema-zinc-900)] text-white ring-[var(--tema-zinc-800)] sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">Novo Usuário</DialogTitle>
             </DialogHeader>
@@ -139,43 +139,43 @@ export default function AdminUsuarios() {
               <div className="space-y-3">
                 <p className="text-green-400 text-sm">
                   Acesso criado pra <strong>{sucesso.email}</strong> — senha temporária:{' '}
-                  <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{sucesso.tempPassword}</code>{' '}
+                  <code className="bg-[var(--tema-zinc-800)] px-1.5 py-0.5 rounded">{sucesso.tempPassword}</code>{' '}
                   (repasse e peça pra trocar). Login em{' '}
-                  <code className="bg-zinc-800 px-1.5 py-0.5 rounded">/admin/login</code>.
+                  <code className="bg-[var(--tema-zinc-800)] px-1.5 py-0.5 rounded">/admin/login</code>.
                 </p>
-                <DialogFooter className="bg-transparent border-zinc-800">
+                <DialogFooter className="bg-transparent border-[var(--tema-zinc-800)]">
                   <Button type="button" onClick={() => setDialogAberto(false)}>Fechar</Button>
                 </DialogFooter>
               </div>
             ) : (
               <form onSubmit={convidar} className="space-y-3">
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Nome</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome</label>
                   <Input
                     placeholder="Nome completo"
                     required
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">E-mail</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">E-mail</label>
                   <Input
                     type="email"
                     placeholder="nome@legadodigital.com.br"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Papel</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Papel</label>
                   <select
                     value={papel}
                     onChange={(e) => setPapel(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                    className="flex h-10 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white"
                   >
                     {PAPEIS_STAFF.map((p) => (
                       <option key={p} value={p}>{p}</option>
@@ -183,7 +183,7 @@ export default function AdminUsuarios() {
                   </select>
                 </div>
                 {erro && <p className="text-red-400 text-sm">{erro}</p>}
-                <DialogFooter className="bg-transparent border-zinc-800 mt-4">
+                <DialogFooter className="bg-transparent border-[var(--tema-zinc-800)] mt-4">
                   <Button type="submit" disabled={convidando}>
                     {convidando ? 'Criando...' : 'Criar usuário'}
                   </Button>
@@ -196,13 +196,13 @@ export default function AdminUsuarios() {
 
       {usuarios.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-zinc-400">Nenhum usuário cadastrado ainda.</p>
+          <p className="text-[var(--tema-zinc-400)]">Nenhum usuário cadastrado ainda.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-zinc-800">
+        <div className="overflow-x-auto rounded-xl border border-[var(--tema-zinc-800)]">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800 bg-zinc-900/60">
+              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)]/60">
                 <th className="text-left py-3 px-4">Nome</th>
                 <th className="text-left py-3 px-4">Email</th>
                 <th className="text-left py-3 px-4">Papel</th>
@@ -213,15 +213,15 @@ export default function AdminUsuarios() {
             </thead>
             <tbody>
               {usuarios.map((u) => (
-                <tr key={u.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                <tr key={u.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">{u.nome}</td>
-                  <td className="py-3 px-4 text-zinc-300">{u.email}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{u.email}</td>
                   <td className="py-3 px-4">
                     <select
                       value={papelDe(u) || ''}
                       disabled={alterandoId === u.id}
                       onChange={(e) => trocarPapel(u, e.target.value)}
-                      className="rounded-md border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs text-white"
+                      className="rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-2 py-1 text-xs text-white"
                     >
                       {!papelDe(u) && <option value="">—</option>}
                       {PAPEIS_STAFF.map((p) => (
@@ -236,7 +236,7 @@ export default function AdminUsuarios() {
                       {u.ativo ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(u.criado_em).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="py-3 px-4">
@@ -250,7 +250,7 @@ export default function AdminUsuarios() {
                         {u.ativo ? 'Desativar' : 'Ativar'}
                       </button>
                     ) : (
-                      <span className="text-xs text-zinc-600">você</span>
+                      <span className="text-xs text-[var(--tema-zinc-600)]">você</span>
                     )}
                   </td>
                 </tr>

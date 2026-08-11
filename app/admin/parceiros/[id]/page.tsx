@@ -8,8 +8,8 @@ import SecaoRetratil from '@/components/admin/SecaoRetratil'
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[110px_1fr] gap-x-3 py-1.5 border-b border-zinc-800/60 last:border-0 items-center">
-      <dt className="text-zinc-500">{label}</dt>
+    <div className="grid grid-cols-[110px_1fr] gap-x-3 py-1.5 border-b border-[var(--tema-zinc-800)]/60 last:border-0 items-center">
+      <dt className="text-[var(--tema-zinc-500)]">{label}</dt>
       <dd className="text-white truncate">{children}</dd>
     </div>
   )
@@ -80,7 +80,7 @@ const PAGAMENTO_LABEL: Record<string, { label: string; className: string }> = {
 // Nenhuma tela ainda escreve status_pagamento (modulo financeiro é Fase 4) —
 // cair no verde "Em dia" por padrão pra valor desconhecido/nulo passava a
 // impressão de pagamento confirmado, quando nunca foi configurado.
-const PAGAMENTO_NAO_CONFIGURADO = { label: 'Não configurado', className: 'bg-zinc-800 text-zinc-400' }
+const PAGAMENTO_NAO_CONFIGURADO = { label: 'Não configurado', className: 'bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-400)]' }
 
 export default function DetalheParceiro() {
   const params = useParams<{ id: string }>()
@@ -293,14 +293,14 @@ export default function DetalheParceiro() {
     setConcedendoAcessoId(null)
   }
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
-  if (!parceiro) return <p className="text-zinc-400">Parceiro não encontrado.</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
+  if (!parceiro) return <p className="text-[var(--tema-zinc-400)]">Parceiro não encontrado.</p>
 
   const pagamento = PAGAMENTO_LABEL[parceiro.status_pagamento] || PAGAMENTO_NAO_CONFIGURADO
 
   return (
     <div>
-      <Link href="/admin/parceiros" className="text-sm text-zinc-400 hover:text-white">
+      <Link href="/admin/parceiros" className="text-sm text-[var(--tema-zinc-400)] hover:text-white">
         ← Voltar pra Parceiros
       </Link>
 
@@ -309,7 +309,7 @@ export default function DetalheParceiro() {
           <h1 className="text-2xl font-bold text-white">
             {parceiro.nome_fantasia || parceiro.razao_social}
           </h1>
-          <p className="text-zinc-400 text-sm mt-1">
+          <p className="text-[var(--tema-zinc-400)] text-sm mt-1">
             {TIPO_LABEL[parceiro.tipo_parceiro] || parceiro.tipo_parceiro}
             {parceiro.cidade && ` · ${parceiro.cidade}${parceiro.estado ? '/' + parceiro.estado : ''}`}
           </p>
@@ -317,7 +317,7 @@ export default function DetalheParceiro() {
         <div className="flex items-center gap-3">
           <Link
             href={`/parceiro?parceiro_id=${parceiro.id}`}
-            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap"
+            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-branco-fixo text-sm font-medium whitespace-nowrap"
           >
             Acessar Plataforma do Parceiro
           </Link>
@@ -332,8 +332,8 @@ export default function DetalheParceiro() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-3">Dados cadastrais</h2>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
+          <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-3">Dados cadastrais</h2>
           <dl>
             <Campo label="Razão social">{parceiro.razao_social}</Campo>
             <Campo label="CNPJ">{parceiro.cnpj || '—'}</Campo>
@@ -342,8 +342,8 @@ export default function DetalheParceiro() {
           </dl>
         </div>
 
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
-          <h2 className="text-sm font-medium text-zinc-400 mb-3">Plano e pagamento</h2>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
+          <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-3">Plano e pagamento</h2>
           <dl>
             <Campo label="Plano">{parceiro.plano_contratado || '—'}</Campo>
             <Campo label="Pagamento">
@@ -355,9 +355,9 @@ export default function DetalheParceiro() {
           </dl>
         </div>
 
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5">
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-zinc-400">Página pública do parceiro</h2>
+            <h2 className="text-sm font-medium text-[var(--tema-zinc-400)]">Página pública do parceiro</h2>
             {parceiro.slug && (
               <a
                 href={`/parceiros/${parceiro.slug}`}
@@ -374,28 +374,28 @@ export default function DetalheParceiro() {
           )}
           <form onSubmit={salvarPaginaPublica} className="space-y-3">
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Logo</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Logo</label>
               {logoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-zinc-800 rounded p-2" />
+                <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-[var(--tema-zinc-800)] rounded p-2" />
               )}
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleLogoChange}
                 disabled={enviandoLogo}
-                className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+                className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)]"
               />
-              {enviandoLogo && <p className="text-xs text-zinc-500 mt-1">Enviando logo...</p>}
+              {enviandoLogo && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando logo...</p>}
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Descrição institucional (aparece na página pública)</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Descrição institucional (aparece na página pública)</label>
               <textarea
                 placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
                 rows={3}
                 value={descricaoPublica}
                 onChange={(e) => setDescricaoPublica(e.target.value)}
-                className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
               />
             </div>
             {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
@@ -403,16 +403,16 @@ export default function DetalheParceiro() {
             <button
               type="submit"
               disabled={salvandoPagina}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-branco-fixo text-sm font-medium rounded-lg"
             >
               {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
             </button>
           </form>
         </div>
 
-        <div className="lg:col-span-2 xl:col-span-3 rounded-xl bg-zinc-900 border border-zinc-800 p-5 space-y-5">
+        <div className="lg:col-span-2 xl:col-span-3 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 space-y-5">
             <SecaoRetratil titulo={`Contatos da empresa ${contatos.length > 0 ? `(${contatos.length})` : ''}`} abertoPorPadrao>
-              <p className="text-zinc-500 text-xs mb-4">
+              <p className="text-[var(--tema-zinc-500)] text-xs mb-4">
                 Contato cadastrado com e-mail já recebe o acesso ao Portal do Parceiro automaticamente,
                 com senha temporária por e-mail. Deixe o e-mail em branco se for só um contato de referência,
                 sem login.
@@ -421,11 +421,11 @@ export default function DetalheParceiro() {
               {contatos.length > 0 && (
                 <ul className="space-y-2">
                   {contatos.map((c) => (
-                    <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2">
+                    <li key={c.id} className="bg-[var(--tema-zinc-800)]/50 rounded-lg px-3 py-2">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-white text-sm">{c.nome}</p>
-                          <p className="text-zinc-500 text-xs">
+                          <p className="text-[var(--tema-zinc-500)] text-xs">
                             {[c.email, c.telefone].filter(Boolean).join(' · ') || 'sem contato cadastrado'}
                           </p>
                           <div className="flex gap-1 mt-1 flex-wrap items-center">
@@ -455,7 +455,7 @@ export default function DetalheParceiro() {
                           <button
                             type="button"
                             onClick={() => removerContato(c.id)}
-                            className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap"
+                            className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 whitespace-nowrap"
                           >
                             Remover
                           </button>
@@ -463,7 +463,7 @@ export default function DetalheParceiro() {
                       </div>
                       {acessoConcedido?.contatoId === c.id && (
                         <p className="text-green-400 text-xs mt-2">
-                          Acesso criado — senha temporária: <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{acessoConcedido.tempPassword}</code> (repasse e peça pra trocar)
+                          Acesso criado — senha temporária: <code className="bg-[var(--tema-zinc-800)] px-1.5 py-0.5 rounded">{acessoConcedido.tempPassword}</code> (repasse e peça pra trocar)
                         </p>
                       )}
                     </li>
@@ -471,7 +471,7 @@ export default function DetalheParceiro() {
                 </ul>
               )}
 
-              <form onSubmit={adicionarContato} className="space-y-3 md:border-l md:border-zinc-800 md:pl-6">
+              <form onSubmit={adicionarContato} className="space-y-3 md:border-l md:border-[var(--tema-zinc-800)] md:pl-6">
                 <div className="flex gap-3">
                   <input
                     type="text"
@@ -479,7 +479,7 @@ export default function DetalheParceiro() {
                     required
                     value={novoContatoNome}
                     onChange={(e) => setNovoContatoNome(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                    className="flex-1 px-3 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm placeholder-[var(--tema-zinc-500)]"
                   />
                 </div>
                 <div className="flex gap-3">
@@ -488,21 +488,21 @@ export default function DetalheParceiro() {
                     placeholder="E-mail"
                     value={novoContatoEmail}
                     onChange={(e) => setNovoContatoEmail(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                    className="flex-1 px-3 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm placeholder-[var(--tema-zinc-500)]"
                   />
                   <input
                     type="text"
                     placeholder="Telefone"
                     value={novoContatoTelefone}
                     onChange={(e) => setNovoContatoTelefone(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                    className="flex-1 px-3 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm placeholder-[var(--tema-zinc-500)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">Perfil (pode marcar mais de um)</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Perfil (pode marcar mais de um)</label>
                   <div className="flex gap-3 flex-wrap">
                     {PERFIS_DISPONIVEIS.map((perfil) => (
-                      <label key={perfil} className="flex items-center gap-1.5 text-xs text-zinc-300">
+                      <label key={perfil} className="flex items-center gap-1.5 text-xs text-[var(--tema-zinc-300)]">
                         <input
                           type="checkbox"
                           checked={novoContatoPerfis.includes(perfil)}
@@ -517,7 +517,7 @@ export default function DetalheParceiro() {
                 <button
                   type="submit"
                   disabled={salvandoContato}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-branco-fixo text-sm font-medium rounded-lg"
                 >
                   {salvandoContato ? 'Adicionando...' : '+ Adicionar contato'}
                 </button>
@@ -526,7 +526,7 @@ export default function DetalheParceiro() {
             </SecaoRetratil>
 
             <SecaoRetratil titulo="Acesso ao Portal do Parceiro (convite avulso)">
-              <p className="text-zinc-500 text-sm mb-4">
+              <p className="text-[var(--tema-zinc-500)] text-sm mb-4">
                 Cria (ou atualiza) o login desse contato pro Portal do Parceiro, com senha temporária.
               </p>
               <form onSubmit={convidarContato} className="flex flex-col sm:flex-row gap-3">
@@ -535,7 +535,7 @@ export default function DetalheParceiro() {
                   placeholder="Nome do contato"
                   value={conviteNome}
                   onChange={(e) => setConviteNome(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                  className="flex-1 px-3 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm placeholder-[var(--tema-zinc-500)]"
                 />
                 <input
                   type="email"
@@ -543,12 +543,12 @@ export default function DetalheParceiro() {
                   required
                   value={conviteEmail}
                   onChange={(e) => setConviteEmail(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                  className="flex-1 px-3 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm placeholder-[var(--tema-zinc-500)]"
                 />
                 <button
                   type="submit"
                   disabled={convidando}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg whitespace-nowrap"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-branco-fixo text-sm font-medium rounded-lg whitespace-nowrap"
                 >
                   {convidando ? 'Criando...' : 'Convidar contato'}
                 </button>
@@ -557,20 +557,20 @@ export default function DetalheParceiro() {
               {conviteSucesso && (
                 <p className="text-green-400 text-sm mt-3">
                   Acesso criado pra <strong>{conviteSucesso.email}</strong> — senha temporária:{' '}
-                  <code className="bg-zinc-800 px-1.5 py-0.5 rounded">{conviteSucesso.tempPassword}</code>{' '}
+                  <code className="bg-[var(--tema-zinc-800)] px-1.5 py-0.5 rounded">{conviteSucesso.tempPassword}</code>{' '}
                   (repasse pro parceiro e peça pra trocar). Login em{' '}
-                  <code className="bg-zinc-800 px-1.5 py-0.5 rounded">/parceiro/login</code>.
+                  <code className="bg-[var(--tema-zinc-800)] px-1.5 py-0.5 rounded">/parceiro/login</code>.
                 </p>
               )}
             </SecaoRetratil>
 
             <SecaoRetratil titulo={`Memoriais ${memoriais.length > 0 ? `(${memoriais.length})` : ''}`}>
               {memoriais.length === 0 ? (
-                <p className="text-zinc-500 text-sm">Nenhum memorial cadastrado por este parceiro ainda.</p>
+                <p className="text-[var(--tema-zinc-500)] text-sm">Nenhum memorial cadastrado por este parceiro ainda.</p>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-zinc-400 border-b border-zinc-800">
+                    <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                       <th className="text-left py-2">Nome</th>
                       <th className="text-left py-2">Cidade</th>
                       <th className="text-left py-2">Criado em</th>
@@ -578,10 +578,10 @@ export default function DetalheParceiro() {
                   </thead>
                   <tbody>
                     {memoriais.map((m) => (
-                      <tr key={m.id} className="border-b border-zinc-800/50">
+                      <tr key={m.id} className="border-b border-[var(--tema-zinc-800)]/50">
                         <td className="py-2 text-white">{m.nome_completo}</td>
-                        <td className="py-2 text-zinc-300">{m.cidade || '-'}</td>
-                        <td className="py-2 text-zinc-400">
+                        <td className="py-2 text-[var(--tema-zinc-300)]">{m.cidade || '-'}</td>
+                        <td className="py-2 text-[var(--tema-zinc-400)]">
                           {new Date(m.created_at).toLocaleDateString('pt-BR')}
                         </td>
                       </tr>

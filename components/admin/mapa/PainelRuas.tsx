@@ -67,7 +67,7 @@ export default function PainelRuas({
   const [nomeInput, setNomeInput] = useState('')
 
   return (
-    <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
+    <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-4">
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-sm font-semibold text-white">Ruas (caminhos internos) · {ruas.length}</h2>
         {editavel && (
@@ -76,7 +76,7 @@ export default function PainelRuas({
           </button>
         )}
       </div>
-      <p className="text-xs text-zinc-500 mb-3">
+      <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
         Desenha por onde a pessoa anda de verdade (asfalto/calçada) -- a rota da página pública segue essas ruas em vez de cortar reto por cima das
         quadras.
       </p>
@@ -94,7 +94,7 @@ export default function PainelRuas({
       )}
 
       {!temEntrada ? (
-        <p className="text-xs text-zinc-500 mb-3">Marque a entrada do cemitério (card mais abaixo) pra eu conferir se as ruas se conectam com a portaria.</p>
+        <p className="text-xs text-[var(--tema-zinc-500)] mb-3">Marque a entrada do cemitério (card mais abaixo) pra eu conferir se as ruas se conectam com a portaria.</p>
       ) : ruas.length > 0 && diagnostico ? (
         diagnostico.idsDesconectadas.length > 0 ? (
           <p className="text-xs mb-3" style={{ color: '#f59e0b' }}>
@@ -112,7 +112,7 @@ export default function PainelRuas({
           disabled={!temEntrada}
           onClick={onToggleTestarRota}
           className={`w-full text-xs px-3 py-1.5 rounded mb-2 disabled:opacity-40 ${
-            modoTestarRota ? 'bg-purple-700 text-white' : 'border border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+            modoTestarRota ? 'bg-purple-700 text-branco-fixo' : 'border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]'
           }`}
         >
           {modoTestarRota ? 'Clica num túmulo pra testar a rota (clica de novo pra sair)' : 'Testar rota até um túmulo'}
@@ -135,14 +135,14 @@ export default function PainelRuas({
       )}
 
       {ruas.length === 0 ? (
-        <p className="text-zinc-500 text-xs">Nenhuma rua desenhada ainda.</p>
+        <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma rua desenhada ainda.</p>
       ) : (
         <ul className="space-y-1">
           {ruas
             .slice()
             .sort((a, b) => a.numero - b.numero)
             .map((r) => (
-              <li key={r.id} className="rounded border border-zinc-800 px-2 py-1.5">
+              <li key={r.id} className="rounded border border-[var(--tema-zinc-800)] px-2 py-1.5">
                 {renomeandoId === r.id ? (
                   <div className="flex items-center gap-1.5">
                     <input
@@ -150,7 +150,7 @@ export default function PainelRuas({
                       value={nomeInput}
                       onChange={(e) => setNomeInput(e.target.value)}
                       placeholder="Nome da rua (ex: Alameda Central)"
-                      className="text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white flex-1 min-w-[140px]"
+                      className="text-xs bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1 text-white flex-1 min-w-[140px]"
                     />
                     <button
                       type="button"
@@ -163,16 +163,16 @@ export default function PainelRuas({
                     >
                       Salvar
                     </button>
-                    <button type="button" onClick={() => setRenomeandoId(null)} className="text-xs text-zinc-400 hover:text-zinc-200">
+                    <button type="button" onClick={() => setRenomeandoId(null)} className="text-xs text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]">
                       Cancelar
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between gap-2 flex-wrap text-xs text-zinc-300">
+                  <div className="flex items-center justify-between gap-2 flex-wrap text-xs text-[var(--tema-zinc-300)]">
                     <span className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-[2px] inline-block shrink-0" style={{ background: '#a855f7' }} />
                       Rua {r.numero} {r.nome && `— ${r.nome}`} {r.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
-                      {r.comprimento_m != null && <span className="text-zinc-500">({r.comprimento_m.toFixed(0)} m)</span>}
+                      {r.comprimento_m != null && <span className="text-[var(--tema-zinc-500)]">({r.comprimento_m.toFixed(0)} m)</span>}
                       {diagnostico?.idsDesconectadas.includes(r.id) && <span style={{ color: '#f59e0b' }}>⚠ desconectada</span>}
                     </span>
                     {editavel && (
@@ -183,7 +183,7 @@ export default function PainelRuas({
                             setRenomeandoId(r.id)
                             setNomeInput(r.nome || '')
                           }}
-                          className="text-zinc-400 hover:text-white"
+                          className="text-[var(--tema-zinc-400)] hover:text-white"
                         >
                           ✎ Renomear
                         </button>
@@ -201,7 +201,7 @@ export default function PainelRuas({
                             Destravar
                           </button>
                         ) : (
-                          <button type="button" disabled={salvando} onClick={() => onTravar(r)} className="text-zinc-400 hover:text-zinc-200">
+                          <button type="button" disabled={salvando} onClick={() => onTravar(r)} className="text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]">
                             🔒 Travar
                           </button>
                         )}

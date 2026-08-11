@@ -22,7 +22,7 @@ const PREENCHIDO_POR_LABEL: Record<string, string> = {
 
 export default function ParceiroMemoriais() {
   return (
-    <Suspense fallback={<p className="text-zinc-400">Carregando...</p>}>
+    <Suspense fallback={<p className="text-[var(--tema-zinc-400)]">Carregando...</p>}>
       <ParceiroMemoriaisInner />
     </Suspense>
   )
@@ -118,7 +118,7 @@ function ParceiroMemoriaisInner() {
     router.push(`/parceiro/memoriais/${id}${suffix}`)
   }
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
 
   return (
     <div>
@@ -133,13 +133,13 @@ function ParceiroMemoriaisInner() {
 
       {memoriais.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-zinc-400">Nenhum memorial cadastrado ainda.</p>
+          <p className="text-[var(--tema-zinc-400)]">Nenhum memorial cadastrado ainda.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800">
+              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Nome</th>
                 <th className="text-left py-3 px-4">Cidade</th>
                 <th className="text-left py-3 px-4">Conteúdo por</th>
@@ -151,13 +151,13 @@ function ParceiroMemoriaisInner() {
             </thead>
             <tbody>
               {memoriais.map((m) => (
-                <tr key={m.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                <tr key={m.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">{m.nome_completo}</td>
-                  <td className="py-3 px-4 text-zinc-300">{m.cidade || '-'}</td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{m.cidade || '-'}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {m.preenchido_por ? PREENCHIDO_POR_LABEL[m.preenchido_por] : '—'}
                   </td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(m.created_at).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="py-3 px-4">
@@ -184,7 +184,7 @@ function ParceiroMemoriaisInner() {
                   <td className="py-3 px-4">
                     <a
                       href={`/parceiro/memoriais/${m.id}${suffix}`}
-                      className="text-zinc-400 hover:text-white text-xs"
+                      className="text-[var(--tema-zinc-400)] hover:text-white text-xs"
                     >
                       Editar
                     </a>

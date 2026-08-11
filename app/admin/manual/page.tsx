@@ -117,18 +117,18 @@ const SECOES: Secao[] = [
 export default function ManualPage() {
   return (
     <div>
-      <Link href="/admin/mapa" className="text-sm text-zinc-400 hover:text-white">
+      <Link href="/admin/mapa" className="text-sm text-[var(--tema-zinc-400)] hover:text-white">
         ← Voltar pro Mapa
       </Link>
 
       <h1 className="text-2xl font-bold text-white mt-4 mb-2">Manual do Sistema</h1>
-      <p className="text-zinc-400 text-sm mb-8 max-w-2xl">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-8 max-w-2xl">
         O que tem em cada página e como ela se integra com o resto — atualizado junto com o mapa,
         toda vez que algo muda de verdade.
       </p>
 
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-5 mb-8">
-        <p className="text-xs text-zinc-500 uppercase tracking-wide mb-3">Neste manual</p>
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 mb-8">
+        <p className="text-xs text-[var(--tema-zinc-500)] uppercase tracking-wide mb-3">Neste manual</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
           {SECOES.map((s) => (
             <a key={s.id} href={`#${s.id}`} className="text-sm text-blue-400 hover:underline">
@@ -140,11 +140,11 @@ export default function ManualPage() {
 
       <div className="space-y-8 max-w-2xl">
         {SECOES.map((s) => (
-          <section key={s.id} id={s.id} className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 scroll-mt-6">
+          <section key={s.id} id={s.id} className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 scroll-mt-6">
             <h2 className="text-lg font-medium text-white mb-1">{s.titulo}</h2>
-            {s.path && <p className="text-xs text-zinc-500 font-mono mb-3">{s.path}</p>}
+            {s.path && <p className="text-xs text-[var(--tema-zinc-500)] font-mono mb-3">{s.path}</p>}
             {s.texto.map((p, i) => (
-              <p key={i} className="text-sm text-zinc-400 mt-2 first:mt-0">
+              <p key={i} className="text-sm text-[var(--tema-zinc-400)] mt-2 first:mt-0">
                 {p}
               </p>
             ))}

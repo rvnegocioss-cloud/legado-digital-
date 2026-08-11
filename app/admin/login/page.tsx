@@ -29,17 +29,17 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--tema-zinc-950)]">
       <div className="w-full max-w-md p-8 space-y-6">
         <div className="text-center">
           <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={320} height={128} className="mx-auto h-28 w-auto object-contain mb-4" priority />
           <h1 className="text-xl font-bold text-white">Central</h1>
-          <p className="text-zinc-400 mt-2">Faça login para continuar</p>
+          <p className="text-[var(--tema-zinc-400)] mt-2">Faça login para continuar</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
+            <label htmlFor="email" className="block text-sm font-medium text-[var(--tema-zinc-300)]">
               Email
             </label>
             <input
@@ -48,13 +48,13 @@ export default function AdminLogin() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-full px-4 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white placeholder-[var(--tema-zinc-500)] focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="admin@legadodigital.com.br"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
+            <label htmlFor="password" className="block text-sm font-medium text-[var(--tema-zinc-300)]">
               Senha
             </label>
             <input
@@ -63,7 +63,7 @@ export default function AdminLogin() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-full px-4 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white placeholder-[var(--tema-zinc-500)] focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="••••••••"
             />
           </div>
@@ -75,17 +75,17 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-branco-fixo font-medium rounded-lg transition-colors"
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
 
-          <Link href="/recuperar-senha" className="block text-center text-xs text-zinc-500 hover:text-white">
+          <Link href="/recuperar-senha" className="block text-center text-xs text-[var(--tema-zinc-500)] hover:text-white">
             Esqueceu sua senha?
           </Link>
         </form>
 
-        <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-white">
+        <Link href="/" className="block text-center text-xs text-[var(--tema-zinc-500)] hover:text-white">
           ← Voltar pro site
         </Link>
       </div>

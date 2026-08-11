@@ -37,36 +37,98 @@
   --color-blue-900: #4a3a21;
 }
 
-/* Tema claro/escuro do Dashboard da Central -- escopo deliberadamente restrito
-   (não é o tema do site inteiro): só o conteúdo de app/admin/page.tsx lê essas
-   variáveis hoje, via classe Tailwind com valor arbitrário (bg-[var(--dash-bg)]),
-   nunca sobrescrevendo zinc-*/blue-* acima (isso recoloriria Central inteira,
-   Portal do Parceiro e Portal da Família de uma vez). Escuro é o padrão --
-   valores aqui espelham exatamente a paleta zinc já usada, zero mudança visual
-   até o toggle (app/admin/layout.tsx) setar data-tema-central="claro".
-   Qualquer página nova do admin pode entrar no mesmo tema só usando os
-   tokens --dash-*, sem precisar deste bloco de novo. */
+/* Tema claro/escuro da Central + Portal do Parceiro inteiros (app/admin/**
+   e app/parceiro/**, aplicado via html[data-tema="claro"] em document.
+   documentElement por lib/useTema.ts -- NUNCA landing/memorial público/Portal
+   da Família, que não usam esses tokens).
+
+   Por que tokens novos (--tema-zinc-*) em vez de sobrescrever as variáveis
+   --color-zinc-* e --color-blue-* já remapeadas pro navy acima: tentei (não
+   funcionou -- achado real ao testar) redefinir --color-zinc-900 direto,
+   tanto dentro de um segundo `@theme{}` quanto como `:root{}` puro. Tailwind
+   v4 ignora as duas formas e mantém o cinza padrão do próprio pacote --
+   o `@theme inline` acima só funciona porque grava o hex direto na utility
+   em build-time (bg-zinc-900 vira background-color:#10222f literal), sem
+   indireção nenhuma pra sobrescrever depois. Como esses tokens NÃO usam o
+   namespace --color-*, o compilador do Tailwind não tenta "reivindicar"
+   nem mesclar essas declarações -- é ordinary CSS, `:root` sem @layer
+   sempre vence @layer theme/utilities (mesmo mecanismo de `.glass` abaixo),
+   garantido e testado. Cada arquivo troca a classe zinc-NNN por
+   `bg-[var(--tema-zinc-NNN)]` (ou text-/border-/etc) -- funciona com
+   modificador de opacidade também (`bg-[var(--tema-zinc-900)]/50` gera
+   color-mix() de verdade, testado).
+
+   --dash-* continuam existindo como alias 1:1 dos tokens novos, só pra
+   app/admin/page.tsx e components/admin/SecaoRetratil.tsx (primeira leva
+   convertida) não precisarem trocar de nome — mesmo valor, dois nomes. */
 :root {
-  --dash-bg: var(--color-zinc-900);
-  --dash-bg-alt: var(--color-zinc-950);
-  --dash-border: var(--color-zinc-800);
+  --tema-zinc-950: var(--color-zinc-950);
+  --tema-zinc-900: var(--color-zinc-900);
+  --tema-zinc-800: var(--color-zinc-800);
+  --tema-zinc-700: var(--color-zinc-700);
+  --tema-zinc-600: var(--color-zinc-600);
+  --tema-zinc-500: var(--color-zinc-500);
+  --tema-zinc-400: var(--color-zinc-400);
+  --tema-zinc-300: var(--color-zinc-300);
+  --tema-zinc-200: #e4e4e7;
+  --tema-blue-300: var(--color-blue-300);
+  --tema-blue-400: var(--color-blue-400);
+
+  --dash-bg: var(--tema-zinc-900);
+  --dash-bg-alt: var(--tema-zinc-950);
+  --dash-border: var(--tema-zinc-800);
   --dash-fg: #ffffff;
-  --dash-fg-muted: var(--color-zinc-400);
-  --dash-fg-faint: var(--color-zinc-500);
-  --dash-input-bg: var(--color-zinc-800);
-  --dash-input-border: var(--color-zinc-700);
+  --dash-fg-muted: var(--tema-zinc-400);
+  --dash-fg-faint: var(--tema-zinc-500);
+  --dash-input-bg: var(--tema-zinc-800);
+  --dash-input-border: var(--tema-zinc-700);
 }
 
-[data-tema-central="claro"] {
-  --dash-bg: #ffffff;
-  --dash-bg-alt: #f4f4f5;
-  --dash-border: #e4e4e7;
+html[data-tema="claro"] {
+  --tema-zinc-950: #f4f4f5;
+  --tema-zinc-900: #ffffff;
+  --tema-zinc-800: #f4f4f5;
+  --tema-zinc-700: #e4e4e7;
+  --tema-zinc-600: #d4d4d8;
+  --tema-zinc-500: #71717a;
+  --tema-zinc-400: #52525b;
+  --tema-zinc-300: #3f3f46;
+  --tema-zinc-200: #27272a;
+  --tema-blue-300: #a8834a;
+  --tema-blue-400: #8a6c3c;
+
+  --dash-bg: var(--tema-zinc-900);
+  --dash-bg-alt: var(--tema-zinc-950);
+  --dash-border: var(--tema-zinc-800);
   --dash-fg: #18181b;
-  --dash-fg-muted: #52525b;
-  --dash-fg-faint: #71717a;
-  --dash-input-bg: #f4f4f5;
-  --dash-input-border: #d4d4d8;
+  --dash-fg-muted: var(--tema-zinc-400);
+  --dash-fg-faint: var(--tema-zinc-500);
+  --dash-input-bg: var(--tema-zinc-800);
+  --dash-input-border: var(--tema-zinc-700);
+
+  background: #f4f4f5;
 }
+
+/* `.text-white`/variantes: no escuro é `var(--color-white)` = #fff (igual
+   Tailwind default), sem nenhuma regra abaixo pra atrapalhar. No claro,
+   sobrescreve a CLASSE (nunca a variável --color-white -- essa fica intocada
+   de propósito, é o que mantém `bg-white` literal pro QR Code, ver abaixo).
+   Unlayered, mesmo mecanismo de `.glass`: vence @layer utilities sem
+   precisar de !important nem depender de ordem de import. */
+html[data-tema="claro"] .text-white { color: #18181b; }
+html[data-tema="claro"] .hover\:text-white:hover { color: #18181b; }
+html[data-tema="claro"] .file\:text-white::file-selector-button { color: #18181b; }
+html[data-tema="claro"] .ring-white { --tw-ring-color: #18181b; }
+/* bg-white: AUSENTE de propósito -- QR Code (app/admin/page.tsx,
+   app/admin/memoriais/[id], app/parceiro/page.tsx, app/parceiro/memoriais/[id])
+   precisa de fundo branco literal sempre, nos dois temas, pra continuar
+   escaneável. Nunca adicionar regra de bg-white aqui. */
+
+/* Pros ~23 lugares onde text-white é branco literal sobre fundo colorido
+   (botão dourado/verde/vermelho/âmbar/roxo), não o padrão invertível de
+   "texto de contraste sobre fundo neutro" -- essa classe nunca muda de cor
+   em nenhum tema, exatamente como bg-white acima. */
+.text-branco-fixo { color: #fff; }
 
 * {
   scrollbar-width: thin;

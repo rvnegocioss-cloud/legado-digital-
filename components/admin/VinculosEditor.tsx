@@ -30,14 +30,14 @@ export function VinculosEditor({ value, onChange }: { value: string[]; onChange:
           {value.map((v) => (
             <span
               key={v}
-              className="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-800 pl-2.5 pr-1.5 py-1 text-xs text-zinc-200"
+              className="inline-flex items-center gap-1 rounded-full border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] pl-2.5 pr-1.5 py-1 text-xs text-[var(--tema-zinc-200)]"
             >
               {v}
               <button
                 type="button"
                 onClick={() => remover(v)}
                 aria-label={`Remover ${v}`}
-                className="text-zinc-500 hover:text-red-400"
+                className="text-[var(--tema-zinc-500)] hover:text-red-400"
               >
                 <X size={12} strokeWidth={1.5} />
               </button>
@@ -57,12 +57,12 @@ export function VinculosEditor({ value, onChange }: { value: string[]; onChange:
             }
           }}
           placeholder="Ex: Pai, Avô..."
-          className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white placeholder-zinc-500"
+          className="flex h-9 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-1.5 text-sm text-white placeholder-[var(--tema-zinc-500)]"
         />
         <button
           type="button"
           onClick={() => adicionar(novo)}
-          className="shrink-0 px-3 rounded-md border border-zinc-700 bg-zinc-800 text-xs text-zinc-300 hover:text-white hover:bg-zinc-700"
+          className="shrink-0 px-3 rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] text-xs text-[var(--tema-zinc-300)] hover:text-white hover:bg-[var(--tema-zinc-700)]"
         >
           Adicionar
         </button>
@@ -74,7 +74,7 @@ export function VinculosEditor({ value, onChange }: { value: string[]; onChange:
               key={s}
               type="button"
               onClick={() => adicionar(s)}
-              className="text-[11px] text-zinc-500 hover:text-zinc-300 border border-zinc-800 rounded-full px-2 py-0.5"
+              className="text-[11px] text-[var(--tema-zinc-500)] hover:text-[var(--tema-zinc-300)] border border-[var(--tema-zinc-800)] rounded-full px-2 py-0.5"
             >
               + {s}
             </button>

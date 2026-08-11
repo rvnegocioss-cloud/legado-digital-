@@ -660,19 +660,19 @@ export default function DetalheMemorial() {
     setGaleria((atual) => atual.filter((u) => u !== url))
   }
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
-  if (!memorial) return <p className="text-zinc-400">Memorial não encontrado.</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
+  if (!memorial) return <p className="text-[var(--tema-zinc-400)]">Memorial não encontrado.</p>
 
   return (
     <div>
-      <Link href="/admin/memoriais" className="text-sm text-zinc-400 hover:text-white">
+      <Link href="/admin/memoriais" className="text-sm text-[var(--tema-zinc-400)] hover:text-white">
         ← Voltar pra Memoriais
       </Link>
 
       <div className="flex items-start justify-between mt-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white">{memorial.nome_completo}</h1>
-          <p className="text-zinc-400 text-sm mt-1">
+          <p className="text-[var(--tema-zinc-400)] text-sm mt-1">
             {parceiro
               ? `Cadastrado por ${parceiro.nome_fantasia || parceiro.razao_social}`
               : 'Cadastrado diretamente pela Legado Digital'}
@@ -684,13 +684,13 @@ export default function DetalheMemorial() {
               type="button"
               onClick={acessarPortalFamilia}
               disabled={acessandoFamilia}
-              className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white text-sm font-medium whitespace-nowrap disabled:opacity-60"
+              className="px-3 py-1.5 rounded-lg bg-[var(--tema-zinc-800)] hover:bg-[var(--tema-zinc-700)] border border-[var(--tema-zinc-700)] text-white text-sm font-medium whitespace-nowrap disabled:opacity-60"
             >
               {acessandoFamilia ? 'Entrando...' : 'Acessar Portal da Família'}
             </button>
             <a
               href={`/homenagem/${memorial.slug}`}
-              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap"
+              className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-branco-fixo text-sm font-medium whitespace-nowrap"
             >
               Acessar página do memorial
             </a>
@@ -699,28 +699,28 @@ export default function DetalheMemorial() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-        <h2 className="text-sm font-medium text-zinc-400 mb-4">Dados do memorial</h2>
+      <div className="lg:col-span-2 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">
+        <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-4">Dados do memorial</h2>
         <form onSubmit={salvar} className="space-y-3">
           <div className="flex gap-6 items-start">
           <div className="max-w-sm flex-1">
-            <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome completo</label>
             <Input
               placeholder="Nome completo do falecido"
               required
               value={form.nome_completo}
               onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-              className="bg-zinc-800 border-zinc-700 text-white"
+              className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
             />
           </div>
 
           <div className="flex-1 max-w-sm">
           <SecaoRetratil titulo="Mídia (foto, vídeo, galeria)">
           <div className="space-y-4">
-            <div className="pb-3 border-b border-zinc-800">
-              <p className="text-xs text-zinc-500 mb-2">Armazenamento do memorial</p>
+            <div className="pb-3 border-b border-[var(--tema-zinc-800)]">
+              <p className="text-xs text-[var(--tema-zinc-500)] mb-2">Armazenamento do memorial</p>
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-[var(--tema-zinc-800)] rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-colors ${
                       usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
@@ -728,18 +728,18 @@ export default function DetalheMemorial() {
                     style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
                   />
                 </div>
-                <span className="text-xs text-zinc-400 whitespace-nowrap">{usoStorageMB}MB / 500MB</span>
+                <span className="text-xs text-[var(--tema-zinc-400)] whitespace-nowrap">{usoStorageMB}MB / 500MB</span>
               </div>
             </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
-            <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Foto do homenageado (máx 10MB)</label>
+            <p className="text-xs text-[var(--tema-zinc-400)] mb-2">JPEG, PNG ou GIF</p>
             {fotoUrl && (
               <div className="flex items-center gap-3 mb-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover" />
-                <button type="button" onClick={removerFotoPrincipal} className="text-xs text-zinc-500 hover:text-red-400">
+                <button type="button" onClick={removerFotoPrincipal} className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400">
                   Remover foto
                 </button>
               </div>
@@ -749,18 +749,18 @@ export default function DetalheMemorial() {
               accept="image/*"
               onChange={handleFotoChange}
               disabled={enviandoFoto}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+              className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)]"
             />
-            {enviandoFoto && <p className="text-xs text-zinc-500 mt-1">Enviando foto...</p>}
+            {enviandoFoto && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando foto...</p>}
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
-            <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Vídeo (máx 50MB)</label>
+            <p className="text-xs text-[var(--tema-zinc-400)] mb-2">MP4, WebM ou QuickTime</p>
             {videoUrl && (
               <div className="mb-2">
                 <video src={videoUrl} controls className="w-full rounded-md max-h-48 bg-black" />
-                <button type="button" onClick={removerVideo} className="text-xs text-zinc-500 hover:text-red-400 mt-1">
+                <button type="button" onClick={removerVideo} className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 mt-1">
                   Remover vídeo
                 </button>
               </div>
@@ -770,16 +770,16 @@ export default function DetalheMemorial() {
               accept="video/*"
               onChange={handleVideoChange}
               disabled={enviandoVideo}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+              className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)]"
             />
-            {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
+            {enviandoVideo && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando vídeo...</p>}
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">
               Galeria de vídeos ({videosGaleria.length}/{LIMITE_VIDEOS})
             </label>
-            <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_VIDEOS} vídeos além do vídeo principal, máx 100MB cada</p>
+            <p className="text-xs text-[var(--tema-zinc-400)] mb-2">Até {LIMITE_VIDEOS} vídeos além do vídeo principal, máx 100MB cada</p>
             {videosGaleria.length > 0 && (
               <div className="grid grid-cols-2 gap-2 mb-2">
                 {videosGaleria.map((url) => (
@@ -802,16 +802,16 @@ export default function DetalheMemorial() {
               multiple
               onChange={handleVideosGaleriaChange}
               disabled={enviandoVideosGaleria || videosGaleria.length >= LIMITE_VIDEOS}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+              className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)] disabled:opacity-50"
             />
-            {enviandoVideosGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando vídeos...</p>}
+            {enviandoVideosGaleria && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando vídeos...</p>}
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">
               Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
             </label>
-            <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
+            <p className="text-xs text-[var(--tema-zinc-400)] mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
             {galeria.length > 0 && (
               <div className="grid grid-cols-4 gap-2 mb-2">
                 {galeria.map((url) => (
@@ -835,14 +835,14 @@ export default function DetalheMemorial() {
               multiple
               onChange={handleGaleriaChange}
               disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
-              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+              className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)] disabled:opacity-50"
             />
-            {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
+            {enviandoGaleria && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando fotos...</p>}
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Tema da página pública</label>
-            <p className="text-xs text-zinc-400 mb-2">Cor de fundo e detalhes dourados da página do memorial</p>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Tema da página pública</label>
+            <p className="text-xs text-[var(--tema-zinc-400)] mb-2">Cor de fundo e detalhes dourados da página do memorial</p>
             <div className="flex gap-2">
               {PALETAS_MEMORIAL.map((p) => (
                 <button
@@ -850,7 +850,7 @@ export default function DetalheMemorial() {
                   type="button"
                   onClick={() => setTema(p.id)}
                   title={p.nome}
-                  className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
+                  className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-[var(--tema-zinc-700)]'}`}
                   style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
                 />
               ))}
@@ -863,43 +863,43 @@ export default function DetalheMemorial() {
 
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-xs text-zinc-500 mb-1">Data de nascimento</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Data de nascimento</label>
               <Input
                 placeholder="DD/MM/AAAA"
                 value={form.data_nascimento}
                 onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
+                className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs text-zinc-500 mb-1">Data de falecimento</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Data de falecimento</label>
               <Input
                 placeholder="DD/MM/AAAA"
                 value={form.data_falecimento}
                 onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
-                className="bg-zinc-800 border-zinc-700 text-white"
+                className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Cidade</label>
             <Input
               placeholder="Cidade onde viveu ou faleceu"
               value={form.cidade}
               onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-              className="bg-zinc-800 border-zinc-700 text-white"
+              className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
             />
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-xs text-zinc-500 mb-1">Cemitério</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Cemitério</label>
               <select
                 value={cemiterioSelecionadoId}
                 onChange={(e) => {
                   setCemiterioSelecionadoId(e.target.value)
                   setForm({ ...form, lapide_id: '' })
                 }}
-                className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                className="flex h-10 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white"
               >
                 <option value="">Sem cemitério vinculado</option>
                 {cemiterios.map((c) => (
@@ -908,7 +908,7 @@ export default function DetalheMemorial() {
               </select>
             </div>
             <div className="flex-1">
-              <label className="block text-xs text-zinc-500 mb-1">Lápide</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Lápide</label>
               <select
                 value={form.lapide_id}
                 onChange={(e) => {
@@ -916,7 +916,7 @@ export default function DetalheMemorial() {
                   setConfirmoVinculoLapide(false)
                 }}
                 disabled={!cemiterioSelecionadoId}
-                className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white disabled:opacity-50"
               >
                 <option value="">Sem lápide vinculada</option>
                 {(() => {
@@ -978,40 +978,40 @@ export default function DetalheMemorial() {
             )
           })()}
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Vínculo/papel (aparece perto do nome na página)</label>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Vínculo/papel (aparece perto do nome na página)</label>
             <VinculosEditor value={vinculos} onChange={setVinculos} />
           </div>
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Frase preferida</label>
             <Input
               placeholder="Uma frase marcante da pessoa"
               value={form.frase_preferida}
               onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-              className="bg-zinc-800 border-zinc-700 text-white"
+              className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
             />
           </div>
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Biografia</label>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Biografia</label>
             <textarea
               placeholder="Conte a história de vida da pessoa"
               rows={4}
               value={form.biografia}
               onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-              className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+              className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
             />
           </div>
         </form>
 
-        <div className="mt-4 pt-4 border-t border-zinc-800 space-y-4">
+        <div className="mt-4 pt-4 border-t border-[var(--tema-zinc-800)] space-y-4">
           <SecaoRetratil titulo="Privacidade — senha de acesso">
-            <p className="text-zinc-500 text-xs mb-4">
+            <p className="text-[var(--tema-zinc-500)] text-xs mb-4">
               {temSenha
                 ? 'Este memorial exige senha na busca pública E pra abrir a página direto (link ou QR Code). Deixe o campo em branco e salve pra tornar público de novo.'
                 : 'Este memorial está público — qualquer um encontra pelo nome na busca ou abre direto pelo link/QR Code. Defina uma senha pra exigir acesso restrito em ambos.'}
             </p>
             <form onSubmit={salvarSenha} className="flex gap-3">
               <div className="flex-1">
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">
                   {temSenha ? 'Nova senha (ou deixe em branco pra remover)' : 'Senha de acesso'}
                 </label>
                 <Input
@@ -1019,14 +1019,14 @@ export default function DetalheMemorial() {
                   placeholder="Deixe em branco pra público"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <Button type="submit" disabled={salvandoSenha} className="self-end">
                 {salvandoSenha ? 'Salvando...' : 'Salvar'}
               </Button>
             </form>
-            {senhaMsg && <p className="text-xs text-zinc-400 mt-2">{senhaMsg}</p>}
+            {senhaMsg && <p className="text-xs text-[var(--tema-zinc-400)] mt-2">{senhaMsg}</p>}
           </SecaoRetratil>
 
           <SecaoRetratil titulo="Privacidade — modos de acesso">
@@ -1034,7 +1034,7 @@ export default function DetalheMemorial() {
           </SecaoRetratil>
 
           <SecaoRetratil titulo="Cadastro da família">
-            <p className="text-zinc-500 text-xs mb-4">
+            <p className="text-[var(--tema-zinc-500)] text-xs mb-4">
               CPF do responsável (opcional, preenche o nome automaticamente) e e-mail de contato —
               o sistema gera uma senha simples sozinho e manda por e-mail. Ela usa essa senha pra
               entrar em /familia/login e enviar fotos, vídeo e a história. Esse e-mail também recebe
@@ -1043,12 +1043,12 @@ export default function DetalheMemorial() {
 
             <div className="flex gap-3 mb-3">
               <div className="flex-1">
-                <label className="block text-xs text-zinc-500 mb-1">CPF do responsável</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">CPF do responsável</label>
                 <Input
                   placeholder="000.000.000-00"
                   value={familiaCpf}
                   onChange={(e) => setFamiliaCpf(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <Button type="button" onClick={consultarCpf} disabled={consultandoCpf} className="self-end whitespace-nowrap">
@@ -1056,22 +1056,22 @@ export default function DetalheMemorial() {
               </Button>
             </div>
             {cpfMsg && (
-              <p className={`text-xs mb-3 ${cpfModoTeste ? 'text-yellow-400' : 'text-zinc-400'}`}>{cpfMsg}</p>
+              <p className={`text-xs mb-3 ${cpfModoTeste ? 'text-yellow-400' : 'text-[var(--tema-zinc-400)]'}`}>{cpfMsg}</p>
             )}
             <div className="mb-4">
-              <label className="block text-xs text-zinc-500 mb-1">Nome do responsável</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome do responsável</label>
               <Input
                 placeholder="Preenchido pela consulta ou digite manualmente"
                 value={familiaNome}
                 onChange={(e) => setFamiliaNome(e.target.value)}
-                className="bg-zinc-800 border-zinc-700 text-white"
+                className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs text-zinc-500 mb-2">Quem preenche o conteúdo?</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-2">Quem preenche o conteúdo?</label>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <label className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
                   <input
                     type="radio"
                     checked={preenchidoPor === 'familia'}
@@ -1080,7 +1080,7 @@ export default function DetalheMemorial() {
                   />
                   A família preenche
                 </label>
-                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <label className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
                   <input
                     type="radio"
                     checked={preenchidoPor === 'funeraria'}
@@ -1095,24 +1095,24 @@ export default function DetalheMemorial() {
             <form onSubmit={cadastrarEmailFamilia} className="space-y-3">
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 mb-1">E-mail da família</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">E-mail da família</label>
                   <Input
                     type="email"
                     placeholder="email@familia.com"
                     required
                     value={familiaEmail}
                     onChange={(e) => setFamiliaEmail(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
                 <div className="w-44">
-                  <label className="block text-xs text-zinc-500 mb-1">Telefone</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Telefone</label>
                   <Input
                     type="tel"
                     placeholder="(00) 00000-0000"
                     value={familiaTelefone}
                     onChange={(e) => setFamiliaTelefone(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
               </div>
@@ -1120,27 +1120,27 @@ export default function DetalheMemorial() {
                 {cadastrandoFamiliaEmail ? 'Cadastrando...' : temSenhaFamilia ? 'Gerar nova senha' : 'Cadastrar'}
               </Button>
             </form>
-            {familiaEmailMsg && <p className="text-xs text-zinc-400 mt-2">{familiaEmailMsg}</p>}
+            {familiaEmailMsg && <p className="text-xs text-[var(--tema-zinc-400)] mt-2">{familiaEmailMsg}</p>}
           </SecaoRetratil>
 
           <SecaoRetratil titulo={`Moderação do mural de memórias ${mural.length > 0 ? `(${mural.length})` : ''}`}>
             {mural.length === 0 ? (
-              <p className="text-zinc-500 text-xs">Nenhuma memória deixada ainda.</p>
+              <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma memória deixada ainda.</p>
             ) : (
               <ul className="space-y-2">
                 {mural.map((m) => (
-                  <li key={m.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                  <li key={m.id} className="bg-[var(--tema-zinc-800)]/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-white text-sm">
-                        {m.nome} {m.parentesco && <span className="text-zinc-500 text-xs">· {m.parentesco}</span>}
+                        {m.nome} {m.parentesco && <span className="text-[var(--tema-zinc-500)] text-xs">· {m.parentesco}</span>}
                       </p>
-                      <p className="text-zinc-400 text-xs mt-0.5 break-words">{m.texto}</p>
+                      <p className="text-[var(--tema-zinc-400)] text-xs mt-0.5 break-words">{m.texto}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => removerMemoria(m.id)}
                       disabled={removendoMuralId === m.id}
-                      className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                      className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 whitespace-nowrap shrink-0"
                     >
                       {removendoMuralId === m.id ? '...' : 'Remover'}
                     </button>
@@ -1152,20 +1152,20 @@ export default function DetalheMemorial() {
 
           <SecaoRetratil titulo={`Moderação do Livro de Assinaturas ${condolencias.length > 0 ? `(${condolencias.length})` : ''}`}>
             {condolencias.length === 0 ? (
-              <p className="text-zinc-500 text-xs">Ninguém assinou o livro ainda.</p>
+              <p className="text-[var(--tema-zinc-500)] text-xs">Ninguém assinou o livro ainda.</p>
             ) : (
               <ul className="space-y-2">
                 {condolencias.map((c) => (
-                  <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                  <li key={c.id} className="bg-[var(--tema-zinc-800)]/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-white text-sm">{c.visitor_name}</p>
-                      <p className="text-zinc-400 text-xs mt-0.5 break-words">{c.message}</p>
+                      <p className="text-[var(--tema-zinc-400)] text-xs mt-0.5 break-words">{c.message}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => removerCondolencia(c.id)}
                       disabled={removendoCondolenciaId === c.id}
-                      className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                      className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 whitespace-nowrap shrink-0"
                     >
                       {removendoCondolenciaId === c.id ? '...' : 'Remover'}
                     </button>
@@ -1176,7 +1176,7 @@ export default function DetalheMemorial() {
           </SecaoRetratil>
         </div>
 
-        <form onSubmit={salvar} className="space-y-3 mt-4 pt-4 border-t border-zinc-800">
+        <form onSubmit={salvar} className="space-y-3 mt-4 pt-4 border-t border-[var(--tema-zinc-800)]">
           <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
 
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
@@ -1188,21 +1188,21 @@ export default function DetalheMemorial() {
         </form>
       </div>
 
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 lg:self-start">
-        <h2 className="text-sm font-medium text-zinc-400 mb-4">QR Code do memorial</h2>
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 lg:self-start">
+        <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-4">QR Code do memorial</h2>
         <div className="flex items-center gap-4">
           {qrCodeUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={qrCodeUrl} alt="" className="w-28 h-28 rounded bg-white p-1.5" />
           ) : (
-            <div className="w-28 h-28 rounded bg-zinc-800" />
+            <div className="w-28 h-28 rounded bg-[var(--tema-zinc-800)]" />
           )}
           <div className="flex flex-col gap-2">
             {qrCodeUrl && (
               <a
                 href={qrCodeUrl}
                 download={`qrcode-${memorial.slug}.png`}
-                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium text-center"
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-branco-fixo text-sm font-medium text-center"
               >
                 Baixar QR Code
               </a>
@@ -1211,7 +1211,7 @@ export default function DetalheMemorial() {
               type="button"
               onClick={gerarQrCode}
               disabled={gerandoQrCode}
-              className="text-zinc-400 hover:text-white text-xs text-left"
+              className="text-[var(--tema-zinc-400)] hover:text-white text-xs text-left"
             >
               {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar QR Code' : 'Gerar QR Code'}
             </button>
@@ -1219,9 +1219,9 @@ export default function DetalheMemorial() {
         </div>
         {qrCodeMsg && <p className="text-xs text-yellow-400 mt-2">{qrCodeMsg}</p>}
 
-        <form onSubmit={salvarMensagemPlaca} className="mt-5 pt-4 border-t border-zinc-800">
-          <label className="block text-xs text-zinc-500 mb-1">Mensagem da placa</label>
-          <p className="text-zinc-500 text-xs mb-2">
+        <form onSubmit={salvarMensagemPlaca} className="mt-5 pt-4 border-t border-[var(--tema-zinc-800)]">
+          <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Mensagem da placa</label>
+          <p className="text-[var(--tema-zinc-500)] text-xs mb-2">
             Texto que a família quer gravado na placa junto do QR Code — vai anexado no e-mail
             pro fornecedor de placas, pra confeccionar tudo junto.
           </p>
@@ -1230,7 +1230,7 @@ export default function DetalheMemorial() {
             placeholder="Ex: Em memória eterna de..."
             value={mensagemPlaca}
             onChange={(e) => setMensagemPlaca(e.target.value)}
-            className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
+            className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)] mb-2"
           />
           <div className="flex items-center gap-3">
             <Button type="submit" disabled={salvandoMensagemPlaca}>
@@ -1256,7 +1256,7 @@ export default function DetalheMemorial() {
               </span>
             )}
           </div>
-          {mensagemPlacaMsg && <p className="text-xs text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
+          {mensagemPlacaMsg && <p className="text-xs text-[var(--tema-zinc-400)] mt-2">{mensagemPlacaMsg}</p>}
         </form>
       </div>
       </div>

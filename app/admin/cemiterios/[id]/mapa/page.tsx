@@ -7,7 +7,7 @@ import PainelParceirosCemiterio from '@/components/admin/PainelParceirosCemiteri
 // MapLibre acessa `window`, não pode renderizar no servidor.
 const MapaCemiterio = dynamic(
   () => import('@/components/admin/MapaCemiterio').then((m) => m.MapaCemiterio),
-  { ssr: false, loading: () => <p className="text-zinc-400 text-sm">Carregando mapa...</p> }
+  { ssr: false, loading: () => <p className="text-[var(--tema-zinc-400)] text-sm">Carregando mapa...</p> }
 )
 
 export default function MapaCemiterioPage() {

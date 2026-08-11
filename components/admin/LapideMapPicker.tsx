@@ -44,9 +44,9 @@ export default function LapideMapPicker({ lat, lng, centroCemiterio, onChange }:
     lat != null && lng != null ? [lat, lng] : centroCemiterio || [-14.235, -51.9253]
 
   return (
-    <div className="rounded-md overflow-hidden border border-zinc-700">
-      <div className="flex items-center justify-between bg-zinc-800 px-3 py-1.5">
-        <p className="text-xs text-zinc-500">Clique no mapa pra marcar o túmulo exato.</p>
+    <div className="rounded-md overflow-hidden border border-[var(--tema-zinc-700)]">
+      <div className="flex items-center justify-between bg-[var(--tema-zinc-800)] px-3 py-1.5">
+        <p className="text-xs text-[var(--tema-zinc-500)]">Clique no mapa pra marcar o túmulo exato.</p>
         <button
           type="button"
           onClick={() => setSatelite(!satelite)}

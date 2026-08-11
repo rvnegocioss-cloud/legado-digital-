@@ -191,11 +191,11 @@ export default function LapidesCemiterio() {
     return arvore.fora_de_fileira.com_memorial + arvore.fora_de_fileira.com_coordenada + arvore.fora_de_fileira.sem_coordenada
   }, [arvore])
 
-  if (carregando) return <p className="text-zinc-400">Carregando...</p>
+  if (carregando) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
 
   return (
     <div>
-      <Link href="/admin/cemiterios" className="text-zinc-400 hover:text-white text-sm mb-4 inline-block">
+      <Link href="/admin/cemiterios" className="text-[var(--tema-zinc-400)] hover:text-white text-sm mb-4 inline-block">
         ← Voltar pra Cemitérios
       </Link>
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
@@ -208,32 +208,32 @@ export default function LapidesCemiterio() {
           Mapa (marcar túmulos)
         </Link>
       </div>
-      <p className="text-zinc-400 text-sm mb-4">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-4">
         Organizado por Quadra → Fileira → Túmulo, do jeito que foi mapeado. Clica numa fileira pra ver os túmulos dela.
       </p>
 
-      {msg && <p className="text-xs text-zinc-300 mb-4 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">{msg}</p>}
+      {msg && <p className="text-xs text-[var(--tema-zinc-300)] mb-4 bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] rounded-lg px-3 py-2">{msg}</p>}
 
       <div className="mb-6 max-w-md">
-        <label className="block text-xs text-zinc-500 mb-1">Buscar por código (ex: Q01-R02)</label>
+        <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Buscar por código (ex: Q01-R02)</label>
         <input
           value={busca}
           onChange={(e) => buscarPorCodigo(e.target.value)}
           placeholder="Digite o código do túmulo"
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+          className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-3 py-2 text-sm text-white"
         />
         {resultadoBusca && (
-          <div className="mt-2 rounded-lg bg-zinc-900 border border-zinc-800 max-h-56 overflow-y-auto">
+          <div className="mt-2 rounded-lg bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] max-h-56 overflow-y-auto">
             {resultadoBusca.length === 0 ? (
-              <p className="text-xs text-zinc-500 p-3">Nenhum túmulo com esse código.</p>
+              <p className="text-xs text-[var(--tema-zinc-500)] p-3">Nenhum túmulo com esse código.</p>
             ) : (
               resultadoBusca.map((l) => (
                 <button
                   key={l.id}
                   onClick={() => setTumuloSelecionado(l)}
-                  className="w-full text-left text-xs px-3 py-2 hover:bg-zinc-800 text-zinc-200 border-b border-zinc-800 last:border-0"
+                  className="w-full text-left text-xs px-3 py-2 hover:bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-200)] border-b border-[var(--tema-zinc-800)] last:border-0"
                 >
-                  {l.codigo} {l.homenagens.length > 0 && <span className="text-zinc-500">— {l.homenagens.length} memorial(is)</span>}
+                  {l.codigo} {l.homenagens.length > 0 && <span className="text-[var(--tema-zinc-500)]">— {l.homenagens.length} memorial(is)</span>}
                 </button>
               ))
             )}
@@ -242,7 +242,7 @@ export default function LapidesCemiterio() {
       </div>
 
       {!arvore || arvore.quadras.length === 0 ? (
-        <p className="text-zinc-500 text-sm mb-6">
+        <p className="text-[var(--tema-zinc-500)] text-sm mb-6">
           Nenhuma quadra mapeada ainda. Use o <Link href={`/admin/cemiterios/${id}/mapa`} className="underline">mapa</Link> pra desenhar
           quadra/fileira e gerar túmulos.
         </p>
@@ -250,39 +250,39 @@ export default function LapidesCemiterio() {
         <div className="overflow-x-auto pb-2 mb-6">
           <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
             {arvore.quadras.map((q) => (
-              <div key={q.id} className="rounded-xl bg-zinc-900 border border-zinc-800 p-3" style={{ minWidth: 300, width: 300 }}>
+              <div key={q.id} className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-3" style={{ minWidth: 300, width: 300 }}>
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-sm font-semibold text-white">
                     Quadra {q.numero} {q.geometria_revisada && <span className="text-emerald-400">🔒</span>}
                   </h2>
-                  <span className="text-xs text-zinc-500">{q.filas.length} fileira(s)</span>
+                  <span className="text-xs text-[var(--tema-zinc-500)]">{q.filas.length} fileira(s)</span>
                 </div>
 
                 {q.filas.length === 0 ? (
-                  <p className="text-xs text-zinc-500">Nenhuma fileira desenhada.</p>
+                  <p className="text-xs text-[var(--tema-zinc-500)]">Nenhuma fileira desenhada.</p>
                 ) : (
                   <div className="space-y-1.5">
                     {q.filas.map((f) => {
                       const filaKey = f.id
                       const aberta = !!expandidas[filaKey]
                       return (
-                        <div key={f.id} className="rounded border border-zinc-800">
+                        <div key={f.id} className="rounded border border-[var(--tema-zinc-800)]">
                           <button
                             type="button"
                             onClick={() => alternarFila(f.id)}
-                            className="w-full flex items-center gap-1.5 text-left text-xs px-2 py-1.5 text-zinc-200 hover:bg-zinc-800"
+                            className="w-full flex items-center gap-1.5 text-left text-xs px-2 py-1.5 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
                           >
                             {aberta ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                             <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ background: corDaFila(f.numero) }} />
                             Fileira {f.numero} {f.geometria_revisada && <span className="text-emerald-400">🔒</span>}
-                            <span className="text-zinc-500 ml-auto">{f.total_tumulos}</span>
+                            <span className="text-[var(--tema-zinc-500)] ml-auto">{f.total_tumulos}</span>
                           </button>
                           {aberta && (
-                            <div className="p-2 border-t border-zinc-800">
+                            <div className="p-2 border-t border-[var(--tema-zinc-800)]">
                               {carregandoFila === f.id ? (
-                                <p className="text-xs text-zinc-500">Carregando...</p>
+                                <p className="text-xs text-[var(--tema-zinc-500)]">Carregando...</p>
                               ) : (tumulosPorFila[f.id]?.length ?? 0) === 0 ? (
-                                <p className="text-xs text-zinc-500">Sem túmulos ainda.</p>
+                                <p className="text-xs text-[var(--tema-zinc-500)]">Sem túmulos ainda.</p>
                               ) : (
                                 <div className="flex flex-wrap gap-1">
                                   {tumulosPorFila[f.id]!.map((l) => (
@@ -327,7 +327,7 @@ export default function LapidesCemiterio() {
           {totalForaDeFileira > 0 ? `⚠ Túmulos fora de fileira — ${totalForaDeFileira}` : '✓ Nenhum túmulo fora de fileira'}
         </h2>
         {totalForaDeFileira > 0 && (
-          <p className="text-xs text-zinc-400 mb-3">
+          <p className="text-xs text-[var(--tema-zinc-400)] mb-3">
             Sem quadra/fileira vinculada — confere com atenção antes de vincular um memorial aqui, pra não errar de túmulo.
           </p>
         )}
@@ -340,13 +340,13 @@ export default function LapidesCemiterio() {
               .map((l) => (
                 <div
                   key={l.id}
-                  className="rounded-lg bg-zinc-900 border px-3 py-2"
+                  className="rounded-lg bg-[var(--tema-zinc-900)] border px-3 py-2"
                   style={{ borderColor: l.homenagens.length > 0 ? 'rgba(239,68,68,0.4)' : 'rgba(245,158,11,0.3)' }}
                 >
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <p className="text-sm text-white">{l.identificacao}</p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-[var(--tema-zinc-500)]">
                         {l.quadra && `Q${l.quadra} `}
                         {l.lote && `· L${l.lote} `}
                         {l.latitude != null ? `· coordenada: ${l.coordenada_origem || 'sim'}` : '· sem coordenada'}
@@ -376,16 +376,16 @@ export default function LapidesCemiterio() {
                           <button
                             type="button"
                             onClick={() => confirmarRemocao(l)}
-                            className="text-xs px-2 py-1 rounded bg-red-700 text-white hover:bg-red-600"
+                            className="text-xs px-2 py-1 rounded bg-red-700 text-branco-fixo hover:bg-red-600"
                           >
                             {l.homenagens.length > 0 ? `Confirmar (desvincula ${l.homenagens.length})` : 'Confirmar remoção'}
                           </button>
-                          <button type="button" onClick={() => setRemovendo(null)} className="text-xs text-zinc-400 hover:text-zinc-200">
+                          <button type="button" onClick={() => setRemovendo(null)} className="text-xs text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]">
                             Cancelar
                           </button>
                         </>
                       ) : (
-                        <button type="button" onClick={() => setRemovendo(l)} className="text-xs text-zinc-500 hover:text-red-400">
+                        <button type="button" onClick={() => setRemovendo(l)} className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400">
                           Remover
                         </button>
                       )}
@@ -399,16 +399,16 @@ export default function LapidesCemiterio() {
 
       {vinculando && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setVinculando(null)}>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] rounded-xl p-5 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-sm font-semibold text-white mb-3">Vincular {vinculando.identificacao} a uma fileira</h3>
-            <label className="block text-xs text-zinc-400 mb-1">Quadra</label>
+            <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Quadra</label>
             <select
               value={quadraVinculo}
               onChange={(e) => {
                 setQuadraVinculo(e.target.value)
                 setFilaVinculo('')
               }}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white mb-2"
+              className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-sm text-white mb-2"
             >
               <option value="">Escolhe a quadra</option>
               {arvore?.quadras.map((q) => (
@@ -417,12 +417,12 @@ export default function LapidesCemiterio() {
                 </option>
               ))}
             </select>
-            <label className="block text-xs text-zinc-400 mb-1">Fileira</label>
+            <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Fileira</label>
             <select
               value={filaVinculo}
               onChange={(e) => setFilaVinculo(e.target.value)}
               disabled={!quadraVinculo}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white mb-2 disabled:opacity-40"
+              className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-sm text-white mb-2 disabled:opacity-40"
             >
               <option value="">Escolhe a fileira</option>
               {quadraDoVinculo?.filas.map((f) => (
@@ -431,25 +431,25 @@ export default function LapidesCemiterio() {
                 </option>
               ))}
             </select>
-            <label className="block text-xs text-zinc-400 mb-1">Número do túmulo nessa fileira</label>
+            <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Número do túmulo nessa fileira</label>
             <input
               type="number"
               min={1}
               value={numeroVinculo}
               onChange={(e) => setNumeroVinculo(e.target.value)}
               placeholder="ex: 12"
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white mb-3"
+              className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-sm text-white mb-3"
             />
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={confirmarVinculo}
                 disabled={!filaVinculo || !numeroVinculo}
-                className="text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40"
+                className="text-xs px-3 py-1.5 rounded bg-emerald-600 text-branco-fixo hover:bg-emerald-500 disabled:opacity-40"
               >
                 Confirmar vínculo
               </button>
-              <button type="button" onClick={() => setVinculando(null)} className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300">
+              <button type="button" onClick={() => setVinculando(null)} className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)]">
                 Cancelar
               </button>
             </div>
@@ -459,23 +459,23 @@ export default function LapidesCemiterio() {
 
       {tumuloSelecionado && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setTumuloSelecionado(null)}>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] rounded-xl p-5 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold text-white">{tumuloSelecionado.codigo || `Túmulo #${tumuloSelecionado.numero}`}</h3>
-              <button onClick={() => setTumuloSelecionado(null)} className="text-zinc-400 hover:text-white">
+              <button onClick={() => setTumuloSelecionado(null)} className="text-[var(--tema-zinc-400)] hover:text-white">
                 <X size={16} />
               </button>
             </div>
-            <p className="text-xs text-zinc-500 mb-1">
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
               Situação: {tumuloSelecionado.situacao} · Precisão: {tumuloSelecionado.coordenada_precisao || '—'}
             </p>
-            <p className="text-xs text-zinc-400 mb-3">
+            <p className="text-xs text-[var(--tema-zinc-400)] mb-3">
               {tumuloSelecionado.homenagens.length === 0
                 ? 'Nenhum memorial vinculado.'
                 : `${tumuloSelecionado.homenagens.length} memorial(is): ${tumuloSelecionado.homenagens.map((h) => h.nome_completo).join(', ')}`}
             </p>
             <div className="flex flex-col gap-1 text-xs">
-              <Link href={`/admin/cemiterios/${id}/lapides/${tumuloSelecionado.id}/gavetas`} className="text-zinc-300 hover:text-white">
+              <Link href={`/admin/cemiterios/${id}/lapides/${tumuloSelecionado.id}/gavetas`} className="text-[var(--tema-zinc-300)] hover:text-white">
                 Ver gavetas
               </Link>
               <Link href={`/admin/cemiterios/${id}/lapides/${tumuloSelecionado.id}/gavetas-3d`} style={{ color: '#C9A46A' }}>
@@ -487,55 +487,55 @@ export default function LapidesCemiterio() {
       )}
 
       <details className="mb-8" open={avancadoAberto} onToggle={(e) => setAvancadoAberto((e.target as HTMLDetailsElement).open)}>
-        <summary className="text-xs text-zinc-500 hover:text-zinc-300 cursor-pointer mb-2">
+        <summary className="text-xs text-[var(--tema-zinc-500)] hover:text-[var(--tema-zinc-300)] cursor-pointer mb-2">
           Avançado — cadastro manual sem quadra/fileira (cria túmulo fora de fileira)
         </summary>
-        <form onSubmit={salvarManual} className="rounded-xl bg-zinc-900 border border-amber-900/30 p-4 mt-2 space-y-3 max-w-lg">
+        <form onSubmit={salvarManual} className="rounded-xl bg-[var(--tema-zinc-900)] border border-amber-900/30 p-4 mt-2 space-y-3 max-w-lg">
           <p className="text-xs text-amber-400">
             Só use isso pra caso emergencial. O túmulo nasce sem quadra/fileira -- vai pra seção "fora de fileira" acima, precisa vincular
             depois.
           </p>
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Identificação</label>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Identificação</label>
             <input
               placeholder="Ex: Q-12 L-23"
               required
               value={form.identificacao}
               onChange={(e) => setForm({ ...form, identificacao: e.target.value })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+              className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-3 py-2 text-sm text-white"
             />
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-xs text-zinc-500 mb-1">Quadra (texto livre)</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Quadra (texto livre)</label>
               <input
                 value={form.quadra}
                 onChange={(e) => setForm({ ...form, quadra: e.target.value })}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+                className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-3 py-2 text-sm text-white"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs text-zinc-500 mb-1">Lote (texto livre)</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Lote (texto livre)</label>
               <input
                 value={form.lote}
                 onChange={(e) => setForm({ ...form, lote: e.target.value })}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+                className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-3 py-2 text-sm text-white"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Observações</label>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Observações</label>
             <input
               value={form.observacoes}
               onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+              className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-3 py-2 text-sm text-white"
             />
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
           <button
             type="submit"
             disabled={salvando}
-            className="text-xs px-3 py-1.5 rounded bg-amber-700 text-white hover:bg-amber-600 disabled:opacity-40"
+            className="text-xs px-3 py-1.5 rounded bg-amber-700 text-branco-fixo hover:bg-amber-600 disabled:opacity-40"
           >
             {salvando ? 'Salvando...' : '+ Adicionar lápide fora de fileira'}
           </button>

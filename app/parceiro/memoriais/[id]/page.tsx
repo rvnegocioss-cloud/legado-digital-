@@ -97,7 +97,7 @@ async function removerArquivoStorage(url: string) {
 
 export default function FichaMemorialParceiro() {
   return (
-    <Suspense fallback={<p className="text-zinc-400">Carregando...</p>}>
+    <Suspense fallback={<p className="text-[var(--tema-zinc-400)]">Carregando...</p>}>
       <FichaMemorialParceiroInner />
     </Suspense>
   )
@@ -699,8 +699,8 @@ function FichaMemorialParceiroInner() {
     })
   }
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
-  if (!memorial) return <p className="text-zinc-400">Memorial não encontrado.</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
+  if (!memorial) return <p className="text-[var(--tema-zinc-400)]">Memorial não encontrado.</p>
 
   const conteudoPreenchidoPelaFamilia = preenchidoPor === 'familia'
 
@@ -736,7 +736,7 @@ function FichaMemorialParceiroInner() {
 
   return (
     <div>
-      <Link href={`/parceiro/memoriais${suffix}`} className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white">
+      <Link href={`/parceiro/memoriais${suffix}`} className="inline-flex items-center gap-1.5 text-sm text-[var(--tema-zinc-400)] hover:text-white">
         <ArrowLeft size={14} strokeWidth={1.5} />
         Voltar pra Meus Memoriais
       </Link>
@@ -746,7 +746,7 @@ function FichaMemorialParceiroInner() {
         {memorial.slug && (
           <a
             href={`/homenagem/${memorial.slug}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-branco-fixo text-sm font-medium whitespace-nowrap shrink-0"
           >
             Ver página do memorial
             <ExternalLink size={14} strokeWidth={1.5} />
@@ -757,14 +757,14 @@ function FichaMemorialParceiroInner() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-6">
         <div className="lg:col-span-8 @container">
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">
             <form onSubmit={salvar}>
               <SecaoFicha titulo="Identificação" icon={User} primeira>
                 <div className="flex flex-wrap items-start gap-4">
                   <div className="shrink-0">
-                    <label className="block text-xs text-zinc-400 mb-1.5">Foto (máx 10MB)</label>
+                    <label className="block text-xs text-[var(--tema-zinc-400)] mb-1.5">Foto (máx 10MB)</label>
                     <div className="flex items-center gap-2">
-                      <div className="w-16 h-16 rounded-full bg-zinc-800 overflow-hidden shrink-0">
+                      <div className="w-16 h-16 rounded-full bg-[var(--tema-zinc-800)] overflow-hidden shrink-0">
                         {fotoUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={fotoUrl} alt="" className="w-full h-full object-cover" />
@@ -773,7 +773,7 @@ function FichaMemorialParceiroInner() {
                       <div className="flex flex-col gap-1">
                         <label
                           htmlFor="input-foto-perfil"
-                          className="text-[11px] text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 rounded-md px-2 py-1 cursor-pointer text-center"
+                          className="text-[11px] text-[var(--tema-zinc-300)] hover:text-white bg-[var(--tema-zinc-800)] hover:bg-[var(--tema-zinc-700)] rounded-md px-2 py-1 cursor-pointer text-center"
                         >
                           {enviandoFoto ? 'Enviando...' : 'Enviar'}
                         </label>
@@ -786,7 +786,7 @@ function FichaMemorialParceiroInner() {
                           className="hidden"
                         />
                         {fotoUrl && (
-                          <button type="button" onClick={removerFotoPrincipal} className="text-[11px] text-zinc-500 hover:text-red-400">
+                          <button type="button" onClick={removerFotoPrincipal} className="text-[11px] text-[var(--tema-zinc-500)] hover:text-red-400">
                             Remover
                           </button>
                         )}
@@ -798,7 +798,7 @@ function FichaMemorialParceiroInner() {
                       required
                       value={form.nome_completo}
                       onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-                      className="bg-zinc-800 border-zinc-700 text-white"
+                      className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                     />
                   </CampoFicha>
                   <CampoFicha label="Nascimento" className="w-36">
@@ -806,7 +806,7 @@ function FichaMemorialParceiroInner() {
                       placeholder="DD/MM/AAAA"
                       value={form.data_nascimento}
                       onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
-                      className="bg-zinc-800 border-zinc-700 text-white"
+                      className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                     />
                   </CampoFicha>
                   <CampoFicha label="Falecimento" className="w-36">
@@ -814,14 +814,14 @@ function FichaMemorialParceiroInner() {
                       placeholder="DD/MM/AAAA"
                       value={form.data_falecimento}
                       onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
-                      className="bg-zinc-800 border-zinc-700 text-white"
+                      className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                     />
                   </CampoFicha>
                   <CampoFicha label="Cidade" className="w-44">
                     <Input
                       value={form.cidade}
                       onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                      className="bg-zinc-800 border-zinc-700 text-white"
+                      className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                     />
                   </CampoFicha>
                   <CampoFicha label="Cemitério" className="w-48" hint="Sem isso, 'Como Chegar' não aparece na página.">
@@ -831,7 +831,7 @@ function FichaMemorialParceiroInner() {
                         setCemiterioSelecionadoId(e.target.value)
                         setForm({ ...form, lapide_id: '' })
                       }}
-                      className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white"
+                      className="flex h-9 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-1.5 text-sm text-white"
                     >
                       <option value="">Sem cemitério vinculado</option>
                       {cemiterios.map((c) => (
@@ -847,7 +847,7 @@ function FichaMemorialParceiroInner() {
                         setConfirmoVinculoLapide(false)
                       }}
                       disabled={!cemiterioSelecionadoId}
-                      className="flex h-9 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                      className="flex h-9 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-1.5 text-sm text-white disabled:opacity-50"
                     >
                       <option value="">Sem lápide vinculada</option>
                       {(() => {
@@ -926,7 +926,7 @@ function FichaMemorialParceiroInner() {
                       rows={10}
                       value={form.biografia}
                       onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-                      className="flex w-full max-w-[72ch] rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                      className="flex w-full max-w-[72ch] rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
                     />
                   </CampoFicha>
                   <CampoFicha label="Frase preferida">
@@ -934,7 +934,7 @@ function FichaMemorialParceiroInner() {
                       rows={3}
                       value={form.frase_preferida}
                       onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-                      className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                      className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
                     />
                   </CampoFicha>
                 </div>
@@ -945,7 +945,7 @@ function FichaMemorialParceiroInner() {
                 icon={Images}
                 acao={
                   <div className="flex items-center gap-2 w-32">
-                    <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-[var(--tema-zinc-800)] rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-colors ${
                           usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
@@ -953,7 +953,7 @@ function FichaMemorialParceiroInner() {
                         style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[11px] text-zinc-400 whitespace-nowrap">{usoStorageMB}MB/500MB</span>
+                    <span className="text-[11px] text-[var(--tema-zinc-400)] whitespace-nowrap">{usoStorageMB}MB/500MB</span>
                   </div>
                 }
               >
@@ -969,7 +969,7 @@ function FichaMemorialParceiroInner() {
                               type="button"
                               onClick={() => removerFoto(url)}
                               aria-label="Remover foto"
-                              className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+                              className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tema-zinc-400)]"
                             >
                               ×
                             </button>
@@ -983,15 +983,15 @@ function FichaMemorialParceiroInner() {
                       multiple
                       onChange={handleGaleriaChange}
                       disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
-                      className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+                      className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)] disabled:opacity-50"
                     />
-                    {enviandoGaleria && <p className="text-[11px] text-zinc-500 mt-1">Enviando fotos...</p>}
+                    {enviandoGaleria && <p className="text-[11px] text-[var(--tema-zinc-500)] mt-1">Enviando fotos...</p>}
                   </CampoFicha>
                   <CampoFicha label="Vídeo (máx 100MB)">
                     {videoUrl && (
                       <div className="mb-2">
                         <video src={videoUrl} controls className="w-full rounded-md max-h-40 bg-black" />
-                        <button type="button" onClick={removerVideo} className="text-[11px] text-zinc-500 hover:text-red-400 mt-1">
+                        <button type="button" onClick={removerVideo} className="text-[11px] text-[var(--tema-zinc-500)] hover:text-red-400 mt-1">
                           Remover vídeo
                         </button>
                       </div>
@@ -1001,9 +1001,9 @@ function FichaMemorialParceiroInner() {
                       accept="video/*"
                       onChange={handleVideoChange}
                       disabled={enviandoVideo}
-                      className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+                      className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)]"
                     />
-                    {enviandoVideo && <p className="text-[11px] text-zinc-500 mt-1">Enviando vídeo...</p>}
+                    {enviandoVideo && <p className="text-[11px] text-[var(--tema-zinc-500)] mt-1">Enviando vídeo...</p>}
                   </CampoFicha>
                   <CampoFicha label={`Galeria de vídeos (${videosGaleria.length}/${LIMITE_VIDEOS})`} className="@lg:col-span-2">
                     {videosGaleria.length > 0 && (
@@ -1028,9 +1028,9 @@ function FichaMemorialParceiroInner() {
                       multiple
                       onChange={handleVideosGaleriaChange}
                       disabled={enviandoVideosGaleria || videosGaleria.length >= LIMITE_VIDEOS}
-                      className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+                      className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)] disabled:opacity-50"
                     />
-                    {enviandoVideosGaleria && <p className="text-[11px] text-zinc-500 mt-1">Enviando vídeos...</p>}
+                    {enviandoVideosGaleria && <p className="text-[11px] text-[var(--tema-zinc-500)] mt-1">Enviando vídeos...</p>}
                   </CampoFicha>
                   <CampoFicha label="Tema da página pública" hint="Cor de fundo e detalhes dourados da página do memorial">
                     <div className="flex gap-2">
@@ -1040,7 +1040,7 @@ function FichaMemorialParceiroInner() {
                           type="button"
                           onClick={() => setTema(p.id)}
                           title={p.nome}
-                          className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
+                          className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-[var(--tema-zinc-700)]'}`}
                           style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
                         />
                       ))}
@@ -1053,7 +1053,7 @@ function FichaMemorialParceiroInner() {
                 <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
               </SecaoFicha>
 
-              <div className="flex items-center gap-4 mt-6 pt-4 border-t border-zinc-800">
+              <div className="flex items-center gap-4 mt-6 pt-4 border-t border-[var(--tema-zinc-800)]">
                 <Button type="submit" disabled={salvando}>
                   {salvando ? 'Salvando...' : 'Salvar memorial'}
                 </Button>
@@ -1065,7 +1065,7 @@ function FichaMemorialParceiroInner() {
         </div>
 
         <div className="lg:col-span-4">
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">
             <SecaoFicha titulo="Quem preenche o conteúdo" icon={UserCog} primeira>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -1075,7 +1075,7 @@ function FichaMemorialParceiroInner() {
                   className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                     preenchidoPor === 'familia'
                       ? 'border-blue-500/60 bg-blue-500/10 text-blue-300'
-                      : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200'
+                      : 'border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-950)] text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]'
                   }`}
                 >
                   A família preenche
@@ -1087,13 +1087,13 @@ function FichaMemorialParceiroInner() {
                   className={`rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                     preenchidoPor === 'funeraria'
                       ? 'border-blue-500/60 bg-blue-500/10 text-blue-300'
-                      : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200'
+                      : 'border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-950)] text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]'
                   }`}
                 >
                   Nós preenchemos
                 </button>
               </div>
-              {salvandoPreenchidoPor && <p className="text-[11px] text-zinc-500 mt-1.5">Salvando...</p>}
+              {salvandoPreenchidoPor && <p className="text-[11px] text-[var(--tema-zinc-500)] mt-1.5">Salvando...</p>}
             </SecaoFicha>
 
             <SecaoFicha titulo="Acesso da família" icon={Mail}>
@@ -1104,21 +1104,21 @@ function FichaMemorialParceiroInner() {
                       placeholder="000.000.000-00"
                       value={familiaCpf}
                       onChange={(e) => setFamiliaCpf(e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                      className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white flex-1"
                     />
                     <Button type="button" onClick={consultarCpf} disabled={consultandoCpf} className="whitespace-nowrap">
                       {consultandoCpf ? '...' : 'Consultar'}
                     </Button>
                   </div>
                   {cpfMsg && (
-                    <p className={`text-[11px] mt-1 ${cpfModoTeste ? 'text-yellow-400' : 'text-zinc-400'}`}>{cpfMsg}</p>
+                    <p className={`text-[11px] mt-1 ${cpfModoTeste ? 'text-yellow-400' : 'text-[var(--tema-zinc-400)]'}`}>{cpfMsg}</p>
                   )}
                 </CampoFicha>
                 <CampoFicha label="Nome do responsável">
                   <Input
                     value={familiaNomeResponsavel}
                     onChange={(e) => setFamiliaNomeResponsavel(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </CampoFicha>
                 <CampoFicha label="E-mail">
@@ -1128,7 +1128,7 @@ function FichaMemorialParceiroInner() {
                     required
                     value={familiaEmail}
                     onChange={(e) => setFamiliaEmail(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </CampoFicha>
                 <CampoFicha label="Telefone">
@@ -1137,13 +1137,13 @@ function FichaMemorialParceiroInner() {
                     placeholder="(00) 00000-0000"
                     value={familiaTelefone}
                     onChange={(e) => setFamiliaTelefone(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </CampoFicha>
                 <Button type="submit" disabled={cadastrandoFamiliaEmail} className="w-full">
                   {cadastrandoFamiliaEmail ? 'Enviando...' : temSenhaFamilia ? 'Reenviar acesso' : 'Enviar acesso'}
                 </Button>
-                {familiaEmailMsg && <p className="text-[11px] text-zinc-400">{familiaEmailMsg}</p>}
+                {familiaEmailMsg && <p className="text-[11px] text-[var(--tema-zinc-400)]">{familiaEmailMsg}</p>}
               </form>
             </SecaoFicha>
 
@@ -1159,14 +1159,14 @@ function FichaMemorialParceiroInner() {
                       placeholder="Deixe em branco pra público"
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
-                      className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                      className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white flex-1"
                     />
                     <Button type="submit" disabled={salvandoSenha}>
                       {salvandoSenha ? '...' : temSenha ? 'Atualizar' : 'Definir'}
                     </Button>
                   </div>
                 </CampoFicha>
-                {senhaMsg && <p className="text-[11px] text-zinc-400">{senhaMsg}</p>}
+                {senhaMsg && <p className="text-[11px] text-[var(--tema-zinc-400)]">{senhaMsg}</p>}
               </form>
             </SecaoFicha>
 
@@ -1180,7 +1180,7 @@ function FichaMemorialParceiroInner() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={qrCodeUrl} alt="" className="w-16 h-16 rounded bg-white p-1" />
                 ) : (
-                  <div className="w-16 h-16 rounded bg-zinc-800" />
+                  <div className="w-16 h-16 rounded bg-[var(--tema-zinc-800)]" />
                 )}
                 <div className="flex flex-col gap-1">
                   {qrCodeUrl && (
@@ -1192,7 +1192,7 @@ function FichaMemorialParceiroInner() {
                     type="button"
                     onClick={gerarQrCode}
                     disabled={gerandoQrCode}
-                    className="text-zinc-400 hover:text-white text-xs text-left"
+                    className="text-[var(--tema-zinc-400)] hover:text-white text-xs text-left"
                   >
                     {gerandoQrCode ? 'Gerando...' : qrCodeUrl ? 'Atualizar' : 'Gerar'}
                   </button>
@@ -1208,7 +1208,7 @@ function FichaMemorialParceiroInner() {
                   placeholder="Ex: Em memória eterna de..."
                   value={mensagemPlaca}
                   onChange={(e) => setMensagemPlaca(e.target.value)}
-                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 mb-2"
+                  className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)] mb-2"
                 />
                 <div className="flex items-center gap-3">
                   <Button type="submit" disabled={salvandoMensagemPlaca}>
@@ -1234,28 +1234,28 @@ function FichaMemorialParceiroInner() {
                     </span>
                   )}
                 </div>
-                {mensagemPlacaMsg && <p className="text-[11px] text-zinc-400 mt-2">{mensagemPlacaMsg}</p>}
+                {mensagemPlacaMsg && <p className="text-[11px] text-[var(--tema-zinc-400)] mt-2">{mensagemPlacaMsg}</p>}
               </form>
             </SecaoFicha>
 
             <SecaoFicha titulo={`Mural de memórias ${mural.length > 0 ? `(${mural.length})` : ''}`} icon={MessageSquare}>
               {mural.length === 0 ? (
-                <p className="text-zinc-500 text-xs">Nenhuma memória deixada ainda.</p>
+                <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma memória deixada ainda.</p>
               ) : (
                 <ul className="space-y-2 max-h-72 overflow-y-auto">
                   {mural.map((m) => (
-                    <li key={m.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                    <li key={m.id} className="bg-[var(--tema-zinc-800)]/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-white text-sm">
-                          {m.nome} {m.parentesco && <span className="text-zinc-500 text-xs">· {m.parentesco}</span>}
+                          {m.nome} {m.parentesco && <span className="text-[var(--tema-zinc-500)] text-xs">· {m.parentesco}</span>}
                         </p>
-                        <p className="text-zinc-400 text-xs mt-0.5 break-words">{m.texto}</p>
+                        <p className="text-[var(--tema-zinc-400)] text-xs mt-0.5 break-words">{m.texto}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => removerMemoria(m.id)}
                         disabled={removendoMuralId === m.id}
-                        className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                        className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 whitespace-nowrap shrink-0"
                       >
                         {removendoMuralId === m.id ? '...' : 'Remover'}
                       </button>
@@ -1267,20 +1267,20 @@ function FichaMemorialParceiroInner() {
 
             <SecaoFicha titulo={`Livro de Assinaturas ${condolencias.length > 0 ? `(${condolencias.length})` : ''}`} icon={BookOpen}>
               {condolencias.length === 0 ? (
-                <p className="text-zinc-500 text-xs">Ninguém assinou o livro ainda.</p>
+                <p className="text-[var(--tema-zinc-500)] text-xs">Ninguém assinou o livro ainda.</p>
               ) : (
                 <ul className="space-y-2 max-h-72 overflow-y-auto">
                   {condolencias.map((c) => (
-                    <li key={c.id} className="bg-zinc-800/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
+                    <li key={c.id} className="bg-[var(--tema-zinc-800)]/50 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-white text-sm">{c.visitor_name}</p>
-                        <p className="text-zinc-400 text-xs mt-0.5 break-words">{c.message}</p>
+                        <p className="text-[var(--tema-zinc-400)] text-xs mt-0.5 break-words">{c.message}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => removerCondolencia(c.id)}
                         disabled={removendoCondolenciaId === c.id}
-                        className="text-xs text-zinc-500 hover:text-red-400 whitespace-nowrap shrink-0"
+                        className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 whitespace-nowrap shrink-0"
                       >
                         {removendoCondolenciaId === c.id ? '...' : 'Remover'}
                       </button>

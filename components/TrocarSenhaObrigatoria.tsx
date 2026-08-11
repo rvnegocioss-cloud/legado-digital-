@@ -41,42 +41,42 @@ export default function TrocarSenhaObrigatoria({ onConcluido }: { onConcluido: (
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--tema-zinc-950)] px-4">
       <div className="w-full max-w-md p-8 space-y-6">
         <div className="text-center">
           <h1 className="text-xl font-bold text-white">Mude seu login pra acessar a plataforma</h1>
-          <p className="text-zinc-400 text-sm mt-2">
+          <p className="text-[var(--tema-zinc-400)] text-sm mt-2">
             Você entrou com uma senha temporária. Crie uma senha nova pra continuar.
           </p>
         </div>
 
         <form onSubmit={salvar} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-zinc-300">Nova senha</label>
+            <label className="block text-sm font-medium text-[var(--tema-zinc-300)]">Nova senha</label>
             <input
               type="password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
               autoFocus
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-full px-4 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-300">Confirmar nova senha</label>
+            <label className="block text-sm font-medium text-[var(--tema-zinc-300)]">Confirmar nova senha</label>
             <input
               type="password"
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-full px-4 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
           <button
             type="submit"
             disabled={salvando}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white font-medium rounded-lg"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-branco-fixo font-medium rounded-lg"
           >
             {salvando ? 'Salvando...' : 'Salvar e entrar'}
           </button>

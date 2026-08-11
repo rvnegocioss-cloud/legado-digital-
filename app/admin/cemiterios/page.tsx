@@ -19,7 +19,7 @@ import 'leaflet/dist/leaflet.css'
 // Leaflet acessa `window`, então não pode ser renderizado no servidor
 const CemiterioMapPicker = dynamic(() => import('@/components/CemiterioMapPicker'), {
   ssr: false,
-  loading: () => <div className="h-[280px] rounded-md bg-zinc-800 animate-pulse" />,
+  loading: () => <div className="h-[280px] rounded-md bg-[var(--tema-zinc-800)] animate-pulse" />,
 })
 
 interface Cemiterio {
@@ -124,7 +124,7 @@ export default function AdminCemiterios() {
   }
 
   if (loading) {
-    return <p className="text-zinc-400">Carregando...</p>
+    return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
   }
 
   return (
@@ -134,13 +134,13 @@ export default function AdminCemiterios() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/mapa/drone"
-            className="px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 text-sm font-medium whitespace-nowrap"
+            className="px-3 py-1.5 rounded-lg border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:text-white hover:border-[var(--tema-zinc-500)] text-sm font-medium whitespace-nowrap"
           >
             Instalação Drone
           </Link>
           <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
             <DialogTrigger render={<Button onClick={abrirNovo}>+ Novo Cemitério</Button>} />
-          <DialogContent className="bg-zinc-900 text-white ring-zinc-800 sm:max-w-md">
+          <DialogContent className="bg-[var(--tema-zinc-900)] text-white ring-[var(--tema-zinc-800)] sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {editando ? 'Editar Cemitério' : 'Novo Cemitério'}
@@ -149,59 +149,59 @@ export default function AdminCemiterios() {
 
             <form onSubmit={salvar} className="space-y-3">
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Nome</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome</label>
                 <Input
                   placeholder="Nome do cemitério ou crematório"
                   required
                   value={form.nome}
                   onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Tipo</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Tipo</label>
                 <select
                   value={form.tipo}
                   onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                  className="flex h-10 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white"
                 >
                   <option value="cemiterio">Cemitério</option>
                   <option value="crematorio">Crematório</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Endereço</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Endereço</label>
                 <Input
                   placeholder="Rua, número, bairro"
                   value={form.endereco}
                   onChange={(e) => setForm({ ...form, endereco: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Cidade</label>
                   <Input
                     placeholder="Cidade"
                     value={form.cidade}
                     onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">UF</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">UF</label>
                   <Input
                     placeholder="UF"
                     maxLength={2}
                     value={form.estado}
                     onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })}
-                    className="bg-zinc-800 border-zinc-700 text-white w-20"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white w-20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Localização no mapa</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Localização no mapa</label>
                 <CemiterioMapPicker
                   lat={form.latitude}
                   lng={form.longitude}
@@ -209,14 +209,14 @@ export default function AdminCemiterios() {
                 />
               </div>
               {form.latitude != null && form.longitude != null && (
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-[var(--tema-zinc-400)]">
                   Lat {form.latitude.toFixed(6)} · Lng {form.longitude.toFixed(6)}
                 </p>
               )}
 
               {erro && <p className="text-red-400 text-sm">{erro}</p>}
 
-              <DialogFooter className="bg-transparent border-zinc-800 mt-4">
+              <DialogFooter className="bg-transparent border-[var(--tema-zinc-800)] mt-4">
                 <Button type="submit" disabled={salvando}>
                   {salvando ? 'Salvando...' : 'Salvar'}
                 </Button>
@@ -229,13 +229,13 @@ export default function AdminCemiterios() {
 
       {cemiterios.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-zinc-400">Nenhum cemitério cadastrado ainda.</p>
+          <p className="text-[var(--tema-zinc-400)]">Nenhum cemitério cadastrado ainda.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800">
+              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Nome</th>
                 <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Cidade/UF</th>
@@ -248,13 +248,13 @@ export default function AdminCemiterios() {
             </thead>
             <tbody>
               {cemiterios.map((c) => (
-                <tr key={c.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                <tr key={c.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">{c.nome}</td>
-                  <td className="py-3 px-4 text-zinc-300 capitalize">{c.tipo}</td>
-                  <td className="py-3 px-4 text-zinc-300">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)] capitalize">{c.tipo}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">
                     {[c.cidade, c.estado].filter(Boolean).join('/')}
                   </td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {c.latitude != null && c.longitude != null ? (
                       <Link href={`/admin/cemiterios/${c.id}/mapa`} className="text-blue-400 hover:underline">
                         ver no mapa
@@ -279,14 +279,14 @@ export default function AdminCemiterios() {
                     </Link>
                   </td>
                   <td className="py-3 px-4">
-                    <Link href={`/admin/cemiterios/${c.id}/lapides`} className="text-zinc-400 hover:text-white text-xs">
+                    <Link href={`/admin/cemiterios/${c.id}/lapides`} className="text-[var(--tema-zinc-400)] hover:text-white text-xs">
                       Lápides
                     </Link>
                   </td>
                   <td className="py-3 px-4">
                     <button
                       onClick={() => abrirEdicao(c)}
-                      className="text-zinc-400 hover:text-white text-xs"
+                      className="text-[var(--tema-zinc-400)] hover:text-white text-xs"
                     >
                       Editar
                     </button>

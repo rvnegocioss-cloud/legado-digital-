@@ -1344,8 +1344,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
-  if (carregando && !cemiterio) return <p className="text-zinc-400 text-sm">Carregando mapa...</p>
-  if (!cemiterio) return <p className="text-zinc-400 text-sm">Cemitério não encontrado.</p>
+  if (carregando && !cemiterio) return <p className="text-[var(--tema-zinc-400)] text-sm">Carregando mapa...</p>
+  if (!cemiterio) return <p className="text-[var(--tema-zinc-400)] text-sm">Cemitério não encontrado.</p>
 
   const desenhandoQuadra = desenho.ativo && desenho.modo === 'poligono'
   // Fileira E rua desenham como 'linha' -- diferenciadas por quadraAtivaParaFila
@@ -1356,7 +1356,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   return (
     <div>
       <div className="flex items-center gap-4 mb-4 flex-wrap">
-        <Link href="/admin/cemiterios" className="text-zinc-400 hover:text-white text-sm inline-block">
+        <Link href="/admin/cemiterios" className="text-[var(--tema-zinc-400)] hover:text-white text-sm inline-block">
           ← Voltar pra Cemitérios
         </Link>
         <Link href={`/admin/cemiterios/${cemiterioId}/lapides`} className="text-sm inline-block" style={{ color: '#C9A46A' }}>
@@ -1364,7 +1364,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         </Link>
       </div>
       <h1 className="text-2xl font-bold text-white mb-1">Mapa — {cemiterio.nome}</h1>
-      <p className="text-zinc-400 text-sm mb-2">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-2">
         {quadras.length} quadra(s) · {filas.length} fileira(s) · {ruas.length} rua(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
       </p>
       {!ortomosaico && (
@@ -1375,7 +1375,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
       <div className="grid lg:grid-cols-12 gap-4 mt-4">
         <div className="lg:col-span-8 lg:order-2">
-          <div className="rounded-xl border border-zinc-800 overflow-hidden" style={{ height: 'calc(100vh - 140px)', minHeight: 560 }}>
+          <div className="rounded-xl border border-[var(--tema-zinc-800)] overflow-hidden" style={{ height: 'calc(100vh - 140px)', minHeight: 560 }}>
             <MapGL
               ref={mapRef}
               onLoad={aoCarregarMapa}
@@ -1900,15 +1900,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
         <div className="lg:col-span-4 lg:order-1 lg:overflow-y-auto lg:pr-1" style={{ maxHeight: 'calc(100vh - 140px)' }}>
           {msg && (
-            <p className="text-xs text-zinc-300 mb-3 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">{msg}</p>
+            <p className="text-xs text-[var(--tema-zinc-300)] mb-3 bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] rounded-lg px-3 py-2">{msg}</p>
           )}
 
           {duplicacaoFila && (
-            <div className="rounded-xl bg-zinc-900 border border-sky-900/40 p-4 mb-4">
+            <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-sky-900/40 p-4 mb-4">
               <h2 className="text-sm font-semibold text-white mb-1">
                 Duplicar Fileira {duplicacaoFila.numeroOrigem} — Quadra {duplicacaoFila.quadraNumero}
               </h2>
-              <p className="text-xs text-zinc-500 mb-2">
+              <p className="text-xs text-[var(--tema-zinc-500)] mb-2">
                 Copia o formato da Fileira {duplicacaoFila.numeroOrigem} (eixo{copiarTumulosDuplicacao ? ' + túmulos' : ''}) deslocado pro lado, pra virar
                 uma fileira nova -- geometria nasce não revisada, precisa conferir/ajustar antes de travar.
               </p>
@@ -1919,20 +1919,20 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 <button
                   type="button"
                   onClick={() => setOffsetManualDuplicacao(null)}
-                  className="w-full text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800 mb-2"
+                  className="w-full text-xs px-2 py-1 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)] mb-2"
                 >
                   Resetar posição (volta pra distância medida/digitada)
                 </button>
               )}
 
-              <label className="block text-xs text-zinc-400 mb-1">Número da fileira destino</label>
+              <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Número da fileira destino</label>
               <input
                 type="number"
                 min={1}
                 max={999}
                 value={numeroDestinoInput}
                 onChange={(e) => setNumeroDestinoInput(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white mb-1"
+                className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-sm text-white mb-1"
                 placeholder="ex: 2"
               />
               {destinoOcupado && (
@@ -1943,7 +1943,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 <p className="text-xs text-sky-300 mb-2">Posição definida arrastando a alça no mapa -- distância/lado abaixo ficam sem efeito até você resetar.</p>
               ) : (
                 <>
-                  <p className="text-xs text-zinc-500 mb-1">
+                  <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
                     Distância perpendicular:{' '}
                     {medidaPassoDuplicacao?.medidoDeVerdade
                       ? `${medidaPassoDuplicacao.passoM.toFixed(2)} m -- mediana entre ${medidaPassoDuplicacao.amostras + 1} fileira(s) já desenhada(s) desta quadra.`
@@ -1955,13 +1955,13 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       inputMode="decimal"
                       value={passoManualInput}
                       onChange={(e) => setPassoManualInput(e.target.value)}
-                      className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
+                      className="flex-1 bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-sm text-white"
                       placeholder={`substituir (ex: ${(medidaPassoDuplicacao?.passoM ?? 7).toFixed(2)})`}
                     />
                     <button
                       type="button"
                       onClick={() => setLadoInvertido((v) => !v)}
-                      className={`shrink-0 text-xs px-2 py-1.5 rounded border ${ladoInvertido ? 'border-sky-600 text-sky-300 bg-sky-950' : 'border-zinc-700 text-zinc-300'}`}
+                      className={`shrink-0 text-xs px-2 py-1.5 rounded border ${ladoInvertido ? 'border-sky-600 text-sky-300 bg-sky-950' : 'border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)]'}`}
                     >
                       ⇄ Inverter lado
                     </button>
@@ -1969,13 +1969,13 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 </>
               )}
 
-              <label className="flex items-center gap-2 text-xs text-zinc-300 mb-2">
+              <label className="flex items-center gap-2 text-xs text-[var(--tema-zinc-300)] mb-2">
                 <input type="checkbox" checked={copiarTumulosDuplicacao} onChange={(e) => setCopiarTumulosDuplicacao(e.target.checked)} />
                 Copiar também os túmulos ({tumulosOrigemFrescos?.length ?? '...'})
               </label>
 
               {previewDuplicacao && (
-                <p className="text-xs text-zinc-500 mb-2">
+                <p className="text-xs text-[var(--tema-zinc-500)] mb-2">
                   Fileira nova: {comprimentoPolilinha(previewDuplicacao.eixoNovo).toFixed(1)} m
                   {copiarTumulosDuplicacao && previewDuplicacao.pontosNovos.length > 0 && `, ${previewDuplicacao.pontosNovos.length} túmulos (interpolados, precisam de revisão)`}.
                 </p>
@@ -1999,7 +1999,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     setLadoInvertido(false)
                     setOffsetManualDuplicacao(null)
                   }}
-                  className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                  className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
                 >
                   Cancelar
                 </button>
@@ -2008,15 +2008,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
           )}
 
           {dialogoFila && (
-            <div className="rounded-xl bg-zinc-900 border border-amber-900/40 p-4 mb-4">
+            <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-amber-900/40 p-4 mb-4">
               <h2 className="text-sm font-semibold text-white mb-1">
                 Gerar túmulos — Quadra {dialogoFila.quadraNumero}, Fileira {dialogoFila.filaNumero}
               </h2>
-              <p className="text-xs text-zinc-500 mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
+              <p className="text-xs text-[var(--tema-zinc-500)] mb-1">Comprimento da fileira: {(comprimentoAoVivo ?? dialogoFila.comprimentoM).toFixed(1)} m</p>
               {carregandoExistentes ? (
-                <p className="text-xs text-zinc-500 mb-1">Buscando os túmulos já confirmados dessa fileira...</p>
+                <p className="text-xs text-[var(--tema-zinc-500)] mb-1">Buscando os túmulos já confirmados dessa fileira...</p>
               ) : (
-                <p className="text-xs text-zinc-500 mb-1">
+                <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
                   {(existentesFrescos?.length ?? 0) >= 2
                     ? `${existentesFrescos?.length} já confirmado(s) -- distância real medida entre eles, dá pra usar "Preencher resto" abaixo.`
                     : (existentesFrescos?.length ?? 0) === 1
@@ -2025,7 +2025,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 </p>
               )}
               {medicao && !medicao.passouDoFim && (
-                <p className="text-xs text-zinc-500 mb-1">
+                <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
                   Restam ~{medicao.restanteM.toFixed(1)} m até o fim da fileira (~{sugestaoRestante ?? '?'} túmulos no espaçamento{' '}
                   {medicao.medidoDeVerdade ? 'medido' : 'padrão de 1,6m'}).
                 </p>
@@ -2046,7 +2046,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               <p className="text-xs mb-2" style={{ color: '#a3e635' }}>
                 ● Túmulo previsto -- bolinha verde (fica amarela depois de ajustada, clica nela pra desfazer). Arrasta cada uma pro centro real: os que ainda não foram tocados se reposicionam sozinhos usando a distância real que você acabou de fixar nos vizinhos.
               </p>
-              <label className="block text-xs text-zinc-400 mb-1">Quantidade deste lote</label>
+              <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Quantidade deste lote</label>
               <div className="flex items-center gap-2 mb-2">
                 <input
                   type="number"
@@ -2054,7 +2054,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   max={500}
                   value={quantidadeInput}
                   onChange={(e) => setQuantidadeInput(e.target.value)}
-                  className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-sm text-white"
+                  className="flex-1 bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-sm text-white"
                   placeholder="ex: 10"
                 />
                 {medicao?.medidoDeVerdade && sugestaoRestante != null && (
@@ -2069,7 +2069,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 )}
               </div>
               {espacamentoInfo && (
-                <p className={`text-xs mb-2 ${espacamentoInfo.ok ? 'text-zinc-400' : 'text-amber-400'}`}>
+                <p className={`text-xs mb-2 ${espacamentoInfo.ok ? 'text-[var(--tema-zinc-400)]' : 'text-amber-400'}`}>
                   {espacamentoInfo.espacamento.toFixed(2)} m entre túmulos (espaçamento usado no lote)
                   {espacamentoInfo.aviso && ` — ${espacamentoInfo.aviso}`}
                 </p>
@@ -2079,7 +2079,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   type="button"
                   disabled={salvando || !quantidadeNumerica || carregandoExistentes || sobreposicoes.length > 0}
                   onClick={gerarTumulos}
-                  className="text-xs px-3 py-1.5 rounded bg-amber-600 text-white hover:bg-amber-500 disabled:opacity-40"
+                  className="text-xs px-3 py-1.5 rounded bg-amber-600 text-branco-fixo hover:bg-amber-500 disabled:opacity-40"
                 >
                   Gerar {quantidadeNumerica || ''} túmulos
                 </button>
@@ -2089,7 +2089,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     setDialogoFila(null)
                     setAjustesPreview({})
                   }}
-                  className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                  className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
                 >
                   Cancelar
                 </button>
@@ -2097,7 +2097,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             </div>
           )}
 
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-4">
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-4">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-sm font-semibold text-white">Quadras e fileiras</h2>
               {editavel && (
@@ -2115,7 +2115,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 </button>
               )}
             </div>
-            <p className="text-xs text-zinc-500 mb-3">
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
               Desenha o contorno de cada quadra, numera a partir da entrada, depois desenha as fileiras dentro dela.
             </p>
 
@@ -2145,7 +2145,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             )}
 
             {quadras.length === 0 && !desenhandoQuadra && (
-              <p className="text-zinc-500 text-xs">Nenhuma quadra desenhada ainda.</p>
+              <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma quadra desenhada ainda.</p>
             )}
 
             {(() => {
@@ -2165,7 +2165,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               <button
                 type="button"
                 onClick={proporNumeracaoQuadras}
-                className="w-full text-xs text-center py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800 mb-2"
+                className="w-full text-xs text-center py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)] mb-2"
               >
                 Numerar quadras a partir da entrada
               </button>
@@ -2189,21 +2189,21 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   const filasDaQuadra = filas.filter((f) => f.quadra_id === q.id).sort((a, b) => a.numero - b.numero)
                   const expandida = !!quadraExpandida[q.id]
                   return (
-                    <li key={q.id} className="rounded border border-zinc-800">
+                    <li key={q.id} className="rounded border border-[var(--tema-zinc-800)]">
                       <button
                         type="button"
                         onClick={() => setQuadraExpandida((s) => ({ ...s, [q.id]: !s[q.id] }))}
-                        className="w-full flex items-center gap-1.5 text-left text-sm px-2 py-1.5 text-zinc-200 hover:bg-zinc-800"
+                        className="w-full flex items-center gap-1.5 text-left text-sm px-2 py-1.5 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
                       >
                         {expandida ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                         Quadra {q.numero}
-                        {q.nome && <span className="text-zinc-400 font-normal">— {q.nome}</span>}
+                        {q.nome && <span className="text-[var(--tema-zinc-400)] font-normal">— {q.nome}</span>}
                         {q.geometria_revisada && <span className="text-emerald-400 text-xs">🔒</span>}
-                        <span className="text-zinc-500 text-xs ml-auto">{filasDaQuadra.length} fileira(s)</span>
+                        <span className="text-[var(--tema-zinc-500)] text-xs ml-auto">{filasDaQuadra.length} fileira(s)</span>
                       </button>
 
                       {expandida && (
-                        <div className="px-3 pb-2 pt-1 border-t border-zinc-800">
+                        <div className="px-3 pb-2 pt-1 border-t border-[var(--tema-zinc-800)]">
                           {editavel && (
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
                               {renomeandoQuadraId === q.id ? (
@@ -2213,7 +2213,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                     value={nomeQuadraInput}
                                     onChange={(e) => setNomeQuadraInput(e.target.value)}
                                     placeholder="Nome real que o cemitério usa (ex: Setor A, Bloco Central)"
-                                    className="text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white flex-1 min-w-[180px]"
+                                    className="text-xs bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1 text-white flex-1 min-w-[180px]"
                                   />
                                   <button
                                     type="button"
@@ -2226,7 +2226,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                   >
                                     Salvar
                                   </button>
-                                  <button type="button" onClick={() => setRenomeandoQuadraId(null)} className="text-xs text-zinc-400 hover:text-zinc-200">
+                                  <button type="button" onClick={() => setRenomeandoQuadraId(null)} className="text-xs text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]">
                                     Cancelar
                                   </button>
                                 </>
@@ -2237,7 +2237,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                     setRenomeandoQuadraId(q.id)
                                     setNomeQuadraInput(q.nome || '')
                                   }}
-                                  className="text-xs text-zinc-400 hover:text-white"
+                                  className="text-xs text-[var(--tema-zinc-400)] hover:text-white"
                                 >
                                   ✎ Renomear quadra
                                 </button>
@@ -2264,7 +2264,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                   type="button"
                                   disabled={q.geometria_revisada}
                                   onClick={() => proporNumeracaoFilas(q)}
-                                  className="text-xs text-zinc-400 hover:text-zinc-200 disabled:opacity-40"
+                                  className="text-xs text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)] disabled:opacity-40"
                                 >
                                   Numerar fileiras
                                 </button>
@@ -2302,11 +2302,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           )}
 
                           {filasDaQuadra.length === 0 ? (
-                            <p className="text-zinc-500 text-xs">Nenhuma fileira desenhada.</p>
+                            <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma fileira desenhada.</p>
                           ) : (
                             <ul className="space-y-1">
                               {filasDaQuadra.map((f) => (
-                                <li key={f.id} className="flex items-center justify-between text-xs text-zinc-300">
+                                <li key={f.id} className="flex items-center justify-between text-xs text-[var(--tema-zinc-300)]">
                                   <span className="flex items-center gap-1.5">
                                     <span
                                       className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
@@ -2342,7 +2342,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                             Destravar
                                           </button>
                                         ) : (
-                                          <button type="button" disabled={salvando} onClick={() => travarFila(q.numero, f)} className="text-zinc-400 hover:text-zinc-200">
+                                          <button type="button" disabled={salvando} onClick={() => travarFila(q.numero, f)} className="text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]">
                                             🔒 Travar
                                           </button>
                                         ))}
@@ -2411,9 +2411,9 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
           />
 
           {quadraEmEdicao && (
-            <div className="rounded-xl bg-zinc-900 border border-blue-900/40 p-4 mb-4">
+            <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-blue-900/40 p-4 mb-4">
               <h2 className="text-sm font-semibold text-white mb-1">Editando Quadra {quadraEmEdicao.numero}</h2>
-              <p className="text-xs text-zinc-500 mb-1">{lapidesEdicao.length} túmulo(s) — bolinha dourada, arrasta pra reposicionar.</p>
+              <p className="text-xs text-[var(--tema-zinc-500)] mb-1">{lapidesEdicao.length} túmulo(s) — bolinha dourada, arrasta pra reposicionar.</p>
               <p className="text-xs mb-3" style={{ color: '#22d3ee' }}>
                 ◆ Cantos da quadra — losango ciano, arrasta pra ajustar a borda do contorno.
               </p>
@@ -2425,14 +2425,14 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   setReferenciaInsercao(null)
                 }}
                 className={`w-full text-xs px-3 py-1.5 rounded mb-2 flex items-center justify-center gap-1 ${
-                  modoAdicionarTumulo ? 'bg-emerald-700 text-white' : 'border border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                  modoAdicionarTumulo ? 'bg-emerald-700 text-branco-fixo' : 'border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]'
                 }`}
               >
                 <Plus size={12} strokeWidth={2} />
                 {modoAdicionarTumulo ? 'Clica no mapa pra adicionar (clica de novo pra sair)' : 'Adicionar túmulo (clicando no mapa)'}
               </button>
 
-              <p className="text-xs text-zinc-500 mb-1">Clica numa bolinha pra ver o código, apagar, ou marcar como referência de inserção.</p>
+              <p className="text-xs text-[var(--tema-zinc-500)] mb-1">Clica numa bolinha pra ver o código, apagar, ou marcar como referência de inserção.</p>
               {modoAdicionarTumulo && (
                 <div className="text-xs mb-3 flex items-center justify-between gap-2" style={{ color: referenciaInsercao ? '#34d399' : '#a1a1aa' }}>
                   <span>
@@ -2441,7 +2441,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       : 'Sem referência: próximo clique acrescenta no fim da fileira mais perto. Clica numa bolinha antes pra inserir no meio.'}
                   </span>
                   {referenciaInsercao && (
-                    <button type="button" onClick={() => setReferenciaInsercao(null)} className="text-zinc-400 hover:text-zinc-200 shrink-0">
+                    <button type="button" onClick={() => setReferenciaInsercao(null)} className="text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)] shrink-0">
                       Limpar
                     </button>
                   )}
@@ -2453,14 +2453,14 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   type="button"
                   disabled={salvando}
                   onClick={travarQuadra}
-                  className="flex-1 text-xs px-3 py-1.5 rounded bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40"
+                  className="flex-1 text-xs px-3 py-1.5 rounded bg-emerald-600 text-branco-fixo hover:bg-emerald-500 disabled:opacity-40"
                 >
                   🔒 Travar quadra (geometria confirmada)
                 </button>
                 <button
                   type="button"
                   onClick={sairModoEdicao}
-                  className="text-xs px-3 py-1.5 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                  className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
                 >
                   Sair
                 </button>
@@ -2469,9 +2469,9 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
           )}
 
           {editavel && (
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4">
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4">
             <h2 className="text-sm font-semibold text-white mb-1">Marcar túmulo avulso</h2>
-            <p className="text-xs text-zinc-500 mb-3">
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
               Pra lápide que já existe no cadastro mas ainda não tem coordenada (fora do fluxo de quadra/fileira acima).
             </p>
 
@@ -2493,7 +2493,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               </div>
             )}
 
-            <p className="text-xs text-zinc-500 mb-2">Pendentes ({lapidesSemCoordenada.length})</p>
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-2">Pendentes ({lapidesSemCoordenada.length})</p>
             <ul className="space-y-1 max-h-72 overflow-y-auto">
               {lapidesSemCoordenada.map((l) => (
                 <li key={l.id}>
@@ -2507,25 +2507,25 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       setLapideParaMarcar(l)
                     }}
                     className={`w-full text-left text-sm px-2 py-1.5 rounded flex items-center gap-2 ${
-                      lapideParaMarcar?.id === l.id ? 'bg-amber-900/40 text-amber-200' : 'text-zinc-300 hover:bg-zinc-800'
+                      lapideParaMarcar?.id === l.id ? 'bg-amber-900/40 text-amber-200' : 'text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]'
                     }`}
                   >
                     <Crosshair size={12} strokeWidth={1.5} />
                     {l.identificacao}
-                    {l.quadra && <span className="text-zinc-500">· Q{l.quadra}</span>}
+                    {l.quadra && <span className="text-[var(--tema-zinc-500)]">· Q{l.quadra}</span>}
                   </button>
                 </li>
               ))}
               {lapidesSemCoordenada.length === 0 && (
-                <li className="text-zinc-500 text-xs">Nenhuma lápide avulsa pendente.</li>
+                <li className="text-[var(--tema-zinc-500)] text-xs">Nenhuma lápide avulsa pendente.</li>
               )}
             </ul>
           </div>
           )}
 
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mt-4">
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mt-4">
             <h2 className="text-sm font-semibold text-white mb-2">Legenda</h2>
-            <div className="space-y-1.5 text-xs text-zinc-400">
+            <div className="space-y-1.5 text-xs text-[var(--tema-zinc-400)]">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ background: CORES_ORIGEM.ortomosaico }} />
                 Marcado/gerado no ortomosaico (preciso)
@@ -2549,9 +2549,9 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             </div>
           </div>
 
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mt-4">
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mt-4">
             <h2 className="text-sm font-semibold text-white mb-1">Entrada do cemitério</h2>
-            <p className="text-xs text-zinc-500 mb-3">
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
               {cemiterio.entrada_latitude != null
                 ? 'Marcada — é daqui que a rota até o túmulo começa na página pública, e as quadras/fileiras são numeradas a partir daqui.'
                 : 'Ainda não marcada — rota pública usa o centro genérico, e não dá pra numerar quadra/fileira sem uma âncora.'}
@@ -2573,7 +2573,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   setLapideParaMarcar(null)
                   desenho.cancelar()
                 }}
-                className="w-full text-left text-sm px-2 py-1.5 rounded flex items-center gap-2 text-zinc-300 hover:bg-zinc-800"
+                className="w-full text-left text-sm px-2 py-1.5 rounded flex items-center gap-2 text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
               >
                 <Flag size={12} strokeWidth={1.5} />
                 {cemiterio.entrada_latitude != null ? 'Remarcar entrada' : 'Marcar entrada do cemitério'}
@@ -2600,9 +2600,9 @@ function PainelNumeracaoProposta({
   onCancelar: () => void
 }) {
   return (
-    <div className="rounded-lg bg-zinc-800/60 border border-zinc-700 px-3 py-2 mb-3">
-      <p className="text-xs text-zinc-300 mb-1">{titulo}</p>
-      <ol className="text-xs text-zinc-400 list-decimal list-inside mb-2 max-h-32 overflow-y-auto">
+    <div className="rounded-lg bg-[var(--tema-zinc-800)]/60 border border-[var(--tema-zinc-700)] px-3 py-2 mb-3">
+      <p className="text-xs text-[var(--tema-zinc-300)] mb-1">{titulo}</p>
+      <ol className="text-xs text-[var(--tema-zinc-400)] list-decimal list-inside mb-2 max-h-32 overflow-y-auto">
         {itens.map((i) => (
           <li key={i.id}>
             {i.numero}. {i.label} {i.distancia != null && `— ${i.distancia.toFixed(0)}m da entrada`}
@@ -2615,10 +2615,10 @@ function PainelNumeracaoProposta({
         </p>
       )}
       <div className="flex items-center gap-2">
-        <button type="button" onClick={onConfirmar} className="text-xs px-2 py-1 rounded bg-amber-600 text-white hover:bg-amber-500">
+        <button type="button" onClick={onConfirmar} className="text-xs px-2 py-1 rounded bg-amber-600 text-branco-fixo hover:bg-amber-500">
           Confirmar numeração
         </button>
-        <button type="button" onClick={onCancelar} className="text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+        <button type="button" onClick={onCancelar} className="text-xs px-2 py-1 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]">
           Cancelar
         </button>
       </div>

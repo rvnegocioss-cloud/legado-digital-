@@ -39,20 +39,20 @@ export function TimelineEditor({
 
   return (
     <div>
-      <label className="block text-xs text-zinc-400 mb-2">
+      <label className="block text-xs text-[var(--tema-zinc-400)] mb-2">
         Linha do tempo ({value.length}/{LIMITE_EVENTOS})
       </label>
 
       {value.length === 0 && (
-        <p className="text-xs text-zinc-500 mb-2">Nenhum evento adicionado ainda.</p>
+        <p className="text-xs text-[var(--tema-zinc-500)] mb-2">Nenhum evento adicionado ainda.</p>
       )}
 
       <div className="space-y-3">
         {value.map((ev, i) => (
-          <div key={i} className="rounded-md border border-zinc-700 bg-zinc-800/50 p-3 space-y-2">
+          <div key={i} className="rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)]/50 p-3 space-y-2">
             <div className="flex items-start gap-3">
               <div className="w-20 shrink-0">
-                <label htmlFor={`tl-ano-${i}`} className="block text-[10px] text-zinc-400 mb-1">
+                <label htmlFor={`tl-ano-${i}`} className="block text-[10px] text-[var(--tema-zinc-400)] mb-1">
                   Ano
                 </label>
                 <input
@@ -61,11 +61,11 @@ export function TimelineEditor({
                   placeholder="1980"
                   value={ev.year}
                   onChange={(e) => atualizar(i, 'year', e.target.value)}
-                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-sm text-white placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-600"
+                  className="w-full rounded border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-2 py-1.5 text-sm text-white placeholder-[var(--tema-zinc-500)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tema-zinc-600)]"
                 />
               </div>
               <div className="flex-1">
-                <label htmlFor={`tl-titulo-${i}`} className="block text-[10px] text-zinc-400 mb-1">
+                <label htmlFor={`tl-titulo-${i}`} className="block text-[10px] text-[var(--tema-zinc-400)] mb-1">
                   Título do evento
                 </label>
                 <input
@@ -74,7 +74,7 @@ export function TimelineEditor({
                   placeholder="Nascimento"
                   value={ev.title}
                   onChange={(e) => atualizar(i, 'title', e.target.value)}
-                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-sm text-white placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-600"
+                  className="w-full rounded border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-2 py-1.5 text-sm text-white placeholder-[var(--tema-zinc-500)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tema-zinc-600)]"
                 />
               </div>
               <div className="flex items-center gap-1 shrink-0 mt-5">
@@ -83,7 +83,7 @@ export function TimelineEditor({
                   onClick={() => mover(i, -1)}
                   disabled={i === 0}
                   aria-label="Mover evento pra cima"
-                  className="w-6 h-6 flex items-center justify-center rounded text-zinc-500 hover:text-white hover:bg-zinc-700 disabled:opacity-30 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-600"
+                  className="w-6 h-6 flex items-center justify-center rounded text-[var(--tema-zinc-500)] hover:text-white hover:bg-[var(--tema-zinc-700)] disabled:opacity-30 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tema-zinc-600)]"
                 >
                   <ChevronUp size={14} strokeWidth={1.5} />
                 </button>
@@ -92,7 +92,7 @@ export function TimelineEditor({
                   onClick={() => mover(i, 1)}
                   disabled={i === value.length - 1}
                   aria-label="Mover evento pra baixo"
-                  className="w-6 h-6 flex items-center justify-center rounded text-zinc-500 hover:text-white hover:bg-zinc-700 disabled:opacity-30 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-600"
+                  className="w-6 h-6 flex items-center justify-center rounded text-[var(--tema-zinc-500)] hover:text-white hover:bg-[var(--tema-zinc-700)] disabled:opacity-30 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tema-zinc-600)]"
                 >
                   <ChevronDown size={14} strokeWidth={1.5} />
                 </button>
@@ -100,14 +100,14 @@ export function TimelineEditor({
                   type="button"
                   onClick={() => remover(i)}
                   aria-label="Remover evento"
-                  className="ml-1 text-xs text-zinc-500 hover:text-red-400"
+                  className="ml-1 text-xs text-[var(--tema-zinc-500)] hover:text-red-400"
                 >
                   Remover
                 </button>
               </div>
             </div>
             <div>
-              <label htmlFor={`tl-desc-${i}`} className="block text-[10px] text-zinc-400 mb-1">
+              <label htmlFor={`tl-desc-${i}`} className="block text-[10px] text-[var(--tema-zinc-400)] mb-1">
                 Descrição
               </label>
               <textarea
@@ -116,7 +116,7 @@ export function TimelineEditor({
                 placeholder="Detalhes desse momento"
                 value={ev.description}
                 onChange={(e) => atualizar(i, 'description', e.target.value)}
-                className="w-full rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-sm text-white placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-600"
+                className="w-full rounded border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-2 py-1.5 text-sm text-white placeholder-[var(--tema-zinc-500)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tema-zinc-600)]"
               />
             </div>
           </div>

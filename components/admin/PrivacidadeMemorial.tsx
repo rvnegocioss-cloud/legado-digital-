@@ -134,24 +134,24 @@ export function PrivacidadeMemorial({ memorialId }: { memorialId: string }) {
     await carregarEmails()
   }
 
-  if (carregando) return <p className="text-zinc-500 text-xs">Carregando...</p>
+  if (carregando) return <p className="text-[var(--tema-zinc-500)] text-xs">Carregando...</p>
 
   const oculto = modoGate === 'oculto'
 
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-zinc-400 text-xs font-medium mb-2">Por onde as pessoas chegam</p>
+        <p className="text-[var(--tema-zinc-400)] text-xs font-medium mb-2">Por onde as pessoas chegam</p>
         <div className={`space-y-2 ${oculto ? 'opacity-40 pointer-events-none' : ''}`}>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <label className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
             <input type="checkbox" checked={buscaHabilitada} onChange={(e) => setBuscaHabilitada(e.target.checked)} disabled={oculto} />
             Público — aparece na busca por nome
           </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <label className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
             <input type="checkbox" checked={linkHabilitado} onChange={(e) => setLinkHabilitado(e.target.checked)} disabled={oculto} />
             Acesso por link direto
           </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <label className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
             <input type="checkbox" checked={qrcodeHabilitado} onChange={(e) => setQrcodeHabilitado(e.target.checked)} disabled={oculto} />
             Acesso por QR Code
           </label>
@@ -159,10 +159,10 @@ export function PrivacidadeMemorial({ memorialId }: { memorialId: string }) {
       </div>
 
       <div>
-        <p className="text-zinc-400 text-xs font-medium mb-2">O que a pessoa precisa fazer pra ver</p>
+        <p className="text-[var(--tema-zinc-400)] text-xs font-medium mb-2">O que a pessoa precisa fazer pra ver</p>
         <div className="space-y-2">
           {MODOS_ORDEM.map((modo) => (
-            <label key={modo} className="flex items-start gap-2 text-sm text-zinc-300">
+            <label key={modo} className="flex items-start gap-2 text-sm text-[var(--tema-zinc-300)]">
               <input
                 type="radio"
                 name={`modo-gate-${memorialId}`}
@@ -172,7 +172,7 @@ export function PrivacidadeMemorial({ memorialId }: { memorialId: string }) {
               />
               <span>
                 {ROTULOS_MODO[modo].titulo}
-                <span className="block text-[11px] text-zinc-500">{ROTULOS_MODO[modo].descricao}</span>
+                <span className="block text-[11px] text-[var(--tema-zinc-500)]">{ROTULOS_MODO[modo].descricao}</span>
               </span>
             </label>
           ))}
@@ -183,53 +183,53 @@ export function PrivacidadeMemorial({ memorialId }: { memorialId: string }) {
         type="button"
         onClick={salvar}
         disabled={salvando}
-        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium disabled:opacity-50"
+        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-branco-fixo text-sm font-medium disabled:opacity-50"
       >
         {salvando ? 'Salvando...' : 'Salvar privacidade'}
       </button>
-      {msg && <p className="text-[11px] text-zinc-400">{msg}</p>}
+      {msg && <p className="text-[11px] text-[var(--tema-zinc-400)]">{msg}</p>}
 
       {modoGate === 'email' && (
-        <div className="pt-2 border-t border-zinc-800">
-          <p className="text-zinc-400 text-xs font-medium mb-2">Lista de e-mails autorizados ({emails.length})</p>
+        <div className="pt-2 border-t border-[var(--tema-zinc-800)]">
+          <p className="text-[var(--tema-zinc-400)] text-xs font-medium mb-2">Lista de e-mails autorizados ({emails.length})</p>
           <form onSubmit={adicionarEmail} className="flex gap-2 mb-2">
             <input
               type="email"
               value={novoEmail}
               onChange={(e) => setNovoEmail(e.target.value)}
               placeholder="email@exemplo.com"
-              className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm text-white"
+              className="flex-1 bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded-lg px-3 py-1.5 text-sm text-white"
             />
-            <button type="submit" disabled={salvandoEmail} className="px-3 py-1.5 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white text-sm">
+            <button type="submit" disabled={salvandoEmail} className="px-3 py-1.5 rounded-lg bg-[var(--tema-zinc-700)] hover:bg-[var(--tema-zinc-600)] text-white text-sm">
               Adicionar
             </button>
           </form>
           {emailMsg && <p className="text-[11px] text-red-400 mb-2">{emailMsg}</p>}
           <ul className="space-y-1 max-h-48 overflow-y-auto">
             {emails.map((e) => (
-              <li key={e.id} className="flex items-center justify-between text-sm text-zinc-300 bg-zinc-800/50 rounded px-2 py-1">
+              <li key={e.id} className="flex items-center justify-between text-sm text-[var(--tema-zinc-300)] bg-[var(--tema-zinc-800)]/50 rounded px-2 py-1">
                 <span>{e.email}</span>
                 <button type="button" onClick={() => removerEmail(e.id)} aria-label="Remover">
-                  <Trash2 size={14} strokeWidth={1.5} className="text-zinc-500 hover:text-red-400" />
+                  <Trash2 size={14} strokeWidth={1.5} className="text-[var(--tema-zinc-500)] hover:text-red-400" />
                 </button>
               </li>
             ))}
-            {emails.length === 0 && <li className="text-zinc-600 text-xs">Nenhum e-mail autorizado ainda.</li>}
+            {emails.length === 0 && <li className="text-[var(--tema-zinc-600)] text-xs">Nenhum e-mail autorizado ainda.</li>}
           </ul>
         </div>
       )}
 
       {modoGate === 'cadastro' && (
-        <div className="pt-2 border-t border-zinc-800">
-          <p className="text-zinc-400 text-xs font-medium mb-2">Visitantes identificados ({visitantes.length})</p>
+        <div className="pt-2 border-t border-[var(--tema-zinc-800)]">
+          <p className="text-[var(--tema-zinc-400)] text-xs font-medium mb-2">Visitantes identificados ({visitantes.length})</p>
           <ul className="space-y-1 max-h-48 overflow-y-auto">
             {visitantes.map((v) => (
-              <li key={v.id} className="text-sm text-zinc-300 bg-zinc-800/50 rounded px-2 py-1">
+              <li key={v.id} className="text-sm text-[var(--tema-zinc-300)] bg-[var(--tema-zinc-800)]/50 rounded px-2 py-1">
                 <span className="font-medium">{v.nome}</span>{' '}
-                <span className="text-zinc-500">{v.email}</span>
+                <span className="text-[var(--tema-zinc-500)]">{v.email}</span>
               </li>
             ))}
-            {visitantes.length === 0 && <li className="text-zinc-600 text-xs">Ninguém se identificou ainda.</li>}
+            {visitantes.length === 0 && <li className="text-[var(--tema-zinc-600)] text-xs">Ninguém se identificou ainda.</li>}
           </ul>
         </div>
       )}

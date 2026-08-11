@@ -21,14 +21,14 @@ export function BarraDesenho({
           type="button"
           disabled={!podeConcluir}
           onClick={onConcluir}
-          className="text-xs px-2 py-1 rounded bg-emerald-700 text-white hover:bg-emerald-600 disabled:opacity-40"
+          className="text-xs px-2 py-1 rounded bg-emerald-700 text-branco-fixo hover:bg-emerald-600 disabled:opacity-40"
         >
           Concluir
         </button>
-        <button type="button" onClick={onDesfazer} className="text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+        <button type="button" onClick={onDesfazer} className="text-xs px-2 py-1 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]">
           Desfazer ponto
         </button>
-        <button type="button" onClick={onCancelar} className="text-xs px-2 py-1 rounded border border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+        <button type="button" onClick={onCancelar} className="text-xs px-2 py-1 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]">
           Cancelar
         </button>
       </div>

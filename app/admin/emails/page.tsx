@@ -102,19 +102,19 @@ export default function AdminComunicacoes() {
     load()
   }, [load])
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-1">Central de Comunicações</h1>
-      <p className="text-zinc-400 text-sm mb-8">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-8">
         Contato de cada parceiro (e-mail e WhatsApp) e o contato oficial da família em cada
         memorial dele, tudo num lugar só — sem precisar abrir e-mail nenhum.
       </p>
 
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 divide-y divide-zinc-800 mb-10">
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] divide-y divide-[var(--tema-zinc-800)] mb-10">
         {parceiros.length === 0 ? (
-          <p className="text-zinc-400 text-sm p-6">Nenhum parceiro cadastrado ainda.</p>
+          <p className="text-[var(--tema-zinc-400)] text-sm p-6">Nenhum parceiro cadastrado ainda.</p>
         ) : (
           parceiros.map((p) => {
             const aberto = abertoId === p.id
@@ -122,14 +122,14 @@ export default function AdminComunicacoes() {
               <div key={p.id}>
                 <button
                   onClick={() => setAbertoId(aberto ? null : p.id)}
-                  className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/40 transition-colors"
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--tema-zinc-800)]/40 transition-colors"
                 >
                   <div>
                     <p className="text-white font-medium">
                       {p.nome_fantasia || p.razao_social}{' '}
-                      <span className="text-zinc-500 text-xs font-normal">· {textoAtividade(p.ultimaAtividade)}</span>
+                      <span className="text-[var(--tema-zinc-500)] text-xs font-normal">· {textoAtividade(p.ultimaAtividade)}</span>
                     </p>
-                    <p className="text-zinc-400 text-xs mt-1 flex items-center gap-2">
+                    <p className="text-[var(--tema-zinc-400)] text-xs mt-1 flex items-center gap-2">
                       <span>{p.email || 'sem e-mail cadastrado'}</span>
                       {linkWhatsApp(p.telefone) ? (
                         <a
@@ -147,18 +147,18 @@ export default function AdminComunicacoes() {
                       )}
                     </p>
                   </div>
-                  <span className="text-zinc-500 text-xs">
+                  <span className="text-[var(--tema-zinc-500)] text-xs">
                     {p.memoriais.length} memorial{p.memoriais.length === 1 ? '' : 'is'} {aberto ? '▲' : '▼'}
                   </span>
                 </button>
                 {aberto && (
                   <div className="px-4 pb-4">
                     {p.memoriais.length === 0 ? (
-                      <p className="text-zinc-500 text-xs">Nenhum memorial deste parceiro ainda.</p>
+                      <p className="text-[var(--tema-zinc-500)] text-xs">Nenhum memorial deste parceiro ainda.</p>
                     ) : (
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="text-zinc-500 text-xs">
+                          <tr className="text-[var(--tema-zinc-500)] text-xs">
                             <th className="text-left py-2 px-2">Memorial</th>
                             <th className="text-left py-2 px-2">Contato oficial da família</th>
                             <th className="text-left py-2 px-2">WhatsApp</th>
@@ -166,10 +166,10 @@ export default function AdminComunicacoes() {
                         </thead>
                         <tbody>
                           {p.memoriais.map((m) => (
-                            <tr key={m.id} className="border-t border-zinc-800/50">
+                            <tr key={m.id} className="border-t border-[var(--tema-zinc-800)]/50">
                               <td className="py-2 px-2 text-white">{m.nome_completo}</td>
-                              <td className="py-2 px-2 text-zinc-300">
-                                {m.familia_email || <span className="text-zinc-600">sem e-mail cadastrado</span>}
+                              <td className="py-2 px-2 text-[var(--tema-zinc-300)]">
+                                {m.familia_email || <span className="text-[var(--tema-zinc-600)]">sem e-mail cadastrado</span>}
                               </td>
                               <td className="py-2 px-2">
                                 {linkWhatsApp(m.familia_telefone) ? (
@@ -183,7 +183,7 @@ export default function AdminComunicacoes() {
                                     {m.familia_telefone}
                                   </a>
                                 ) : (
-                                  <span className="text-zinc-600">sem número</span>
+                                  <span className="text-[var(--tema-zinc-600)]">sem número</span>
                                 )}
                               </td>
                             </tr>
@@ -200,7 +200,7 @@ export default function AdminComunicacoes() {
       </div>
 
       <h2 className="text-lg font-medium text-white mb-1">Histórico de e-mails automáticos</h2>
-      <p className="text-zinc-400 text-sm mb-4">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-4">
         Todo e-mail que o sistema disparou — senha da família, confirmação de placa, envio ao
         fornecedor, convite de acesso ao parceiro.
       </p>
@@ -215,19 +215,19 @@ export default function AdminComunicacoes() {
             {emails[0].status === 'erro' ? '✕ Último e-mail falhou' : '✓ Último e-mail enviado com sucesso'} —{' '}
             {rotuloTipoEmail(emails[0].tipo)} pra {emails[0].destinatario}
           </span>
-          <span className="text-zinc-400 text-xs whitespace-nowrap ml-4">
+          <span className="text-[var(--tema-zinc-400)] text-xs whitespace-nowrap ml-4">
             {new Date(emails[0].created_at).toLocaleString('pt-BR')}
           </span>
         </div>
       )}
 
       {emails.length === 0 ? (
-        <p className="text-zinc-400">Nenhum e-mail disparado ainda.</p>
+        <p className="text-[var(--tema-zinc-400)]">Nenhum e-mail disparado ainda.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800">
+              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Memorial</th>
                 <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Destinatário</th>
@@ -237,17 +237,17 @@ export default function AdminComunicacoes() {
             </thead>
             <tbody>
               {emails.map((e) => (
-                <tr key={e.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                <tr key={e.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">{e.homenagens?.nome_completo || '—'}</td>
-                  <td className="py-3 px-4 text-zinc-300">{rotuloTipoEmail(e.tipo)}</td>
-                  <td className="py-3 px-4 text-zinc-300">{e.destinatario}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{rotuloTipoEmail(e.tipo)}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{e.destinatario}</td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-xs ${STATUS_STYLE[e.status] || 'bg-zinc-800 text-zinc-400'}`}>
+                    <span className={`px-2 py-1 rounded text-xs ${STATUS_STYLE[e.status] || 'bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-400)]'}`}>
                       {e.status}
                     </span>
-                    {e.erro_msg && <p className="text-xs text-zinc-500 mt-1">{e.erro_msg}</p>}
+                    {e.erro_msg && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">{e.erro_msg}</p>}
                   </td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(e.confirmado_em || e.created_at).toLocaleString('pt-BR')}
                   </td>
                 </tr>

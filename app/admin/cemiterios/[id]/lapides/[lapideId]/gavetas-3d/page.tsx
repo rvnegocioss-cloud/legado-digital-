@@ -49,15 +49,15 @@ export default function GavetasLapide3D() {
     load()
   }, [load])
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
 
   return (
     <div>
-      <Link href={`/admin/cemiterios/${id}/lapides`} className="text-zinc-400 hover:text-white text-sm mb-4 inline-block">
+      <Link href={`/admin/cemiterios/${id}/lapides`} className="text-[var(--tema-zinc-400)] hover:text-white text-sm mb-4 inline-block">
         ← Voltar pra Lápides
       </Link>
       <h1 className="text-2xl font-bold text-white mb-1">Jazigo Gavetas 3D — {lapideNome}</h1>
-      <p className="text-zinc-400 text-sm mb-6">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-6">
         Visualização real das gavetas cadastradas.{' '}
         <Link href={`/admin/cemiterios/${id}/lapides/${lapideId}/gavetas`} className="hover:underline" style={{ color: '#C9A46A' }}>
           Cadastrar/editar gavetas →
@@ -65,7 +65,7 @@ export default function GavetasLapide3D() {
       </p>
 
       {gavetas.length === 0 ? (
-        <p className="text-zinc-400">Nenhuma gaveta cadastrada nesse jazigo ainda.</p>
+        <p className="text-[var(--tema-zinc-400)]">Nenhuma gaveta cadastrada nesse jazigo ainda.</p>
       ) : (
         <JazigoGavetas3D gavetas={gavetas} />
       )}

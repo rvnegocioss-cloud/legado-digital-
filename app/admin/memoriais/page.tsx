@@ -89,7 +89,7 @@ export default function AdminMemoriais() {
   }
 
   if (loading) {
-    return <p className="text-zinc-400">Carregando...</p>
+    return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
   }
 
   return (
@@ -98,71 +98,71 @@ export default function AdminMemoriais() {
         <h1 className="text-2xl font-bold text-white">Memoriais</h1>
         <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
           <DialogTrigger render={<Button onClick={abrirNovo}>+ Novo Memorial</Button>} />
-          <DialogContent className="bg-zinc-900 text-white ring-zinc-800 sm:max-w-md">
+          <DialogContent className="bg-[var(--tema-zinc-900)] text-white ring-[var(--tema-zinc-800)] sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">Novo Memorial</DialogTitle>
             </DialogHeader>
             <form onSubmit={salvar} className="space-y-3">
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome completo</label>
                 <Input
                   placeholder="Nome completo do falecido"
                   required
                   value={form.nome_completo}
                   onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 mb-1">Data de nascimento</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Data de nascimento</label>
                   <Input
                     placeholder="DD/MM/AAAA"
                     value={form.data_nascimento}
                     onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 mb-1">Data de falecimento</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Data de falecimento</label>
                   <Input
                     placeholder="DD/MM/AAAA"
                     value={form.data_falecimento}
                     onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Cidade</label>
                 <Input
                   placeholder="Cidade onde viveu ou faleceu"
                   value={form.cidade}
                   onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Frase preferida</label>
                 <Input
                   placeholder="Uma frase marcante da pessoa"
                   value={form.frase_preferida}
                   onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Biografia</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Biografia</label>
                 <textarea
                   placeholder="Conte a história de vida da pessoa"
                   rows={3}
                   value={form.biografia}
                   onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-                  className="flex w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500"
+                  className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
                 />
               </div>
               {erro && <p className="text-red-400 text-sm">{erro}</p>}
-              <DialogFooter className="bg-transparent border-zinc-800 mt-4">
+              <DialogFooter className="bg-transparent border-[var(--tema-zinc-800)] mt-4">
                 <Button type="submit" disabled={salvando}>
                   {salvando ? 'Salvando...' : 'Salvar'}
                 </Button>
@@ -174,13 +174,13 @@ export default function AdminMemoriais() {
 
       {memoriais.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-zinc-400">Nenhum memorial cadastrado ainda.</p>
+          <p className="text-[var(--tema-zinc-400)]">Nenhum memorial cadastrado ainda.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800">
+              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Nome</th>
                 <th className="text-left py-3 px-4">Nascimento</th>
                 <th className="text-left py-3 px-4">Falecimento</th>
@@ -190,16 +190,16 @@ export default function AdminMemoriais() {
             </thead>
             <tbody>
               {memoriais.map((m) => (
-                <tr key={m.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                <tr key={m.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">
                     <Link href={`/admin/memoriais/${m.id}`} className="hover:text-blue-400 hover:underline">
                       {m.nome_completo}
                     </Link>
                   </td>
-                  <td className="py-3 px-4 text-zinc-300">{m.data_nascimento || '-'}</td>
-                  <td className="py-3 px-4 text-zinc-300">{m.data_falecimento || '-'}</td>
-                  <td className="py-3 px-4 text-zinc-300">{m.cidade || '-'}</td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{m.data_nascimento || '-'}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{m.data_falecimento || '-'}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{m.cidade || '-'}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(m.created_at).toLocaleDateString('pt-BR')}
                   </td>
                 </tr>

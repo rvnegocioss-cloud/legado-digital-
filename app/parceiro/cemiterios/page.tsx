@@ -15,7 +15,7 @@ interface Cemiterio {
 
 export default function CemiteriosParceiro() {
   return (
-    <Suspense fallback={<p className="text-zinc-400">Carregando...</p>}>
+    <Suspense fallback={<p className="text-[var(--tema-zinc-400)]">Carregando...</p>}>
       <CemiteriosParceiroInner />
     </Suspense>
   )
@@ -69,18 +69,18 @@ function CemiteriosParceiroInner() {
     setLoading(false)
   }
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-1">Cemitérios</h1>
-      <p className="text-zinc-400 text-sm mb-6">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-6">
         Mapa e organização de quadra/fileira/túmulo dos cemitérios onde você atua -- geometria mapeada e mantida pela Central Legado
         Digital, aqui você só visualiza.
       </p>
 
       {cemiterios.length === 0 ? (
-        <p className="text-zinc-500 text-sm">
+        <p className="text-[var(--tema-zinc-500)] text-sm">
           Nenhum cemitério vinculado ainda. Fale com a equipe Legado Digital pra sua funerária ser autorizada a ver um cemitério aqui.
         </p>
       ) : (
@@ -89,15 +89,15 @@ function CemiteriosParceiroInner() {
             <Link
               key={c.id}
               href={`/parceiro/cemiterios/${c.id}${parceiroIdParam ? `?parceiro_id=${parceiroIdParam}` : ''}`}
-              className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 hover:border-zinc-600 transition-colors"
+              className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 hover:border-[var(--tema-zinc-600)] transition-colors"
             >
               <h2 className="text-sm font-semibold text-white mb-1">{c.nome}</h2>
-              <p className="text-xs text-zinc-500 mb-3">
+              <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
                 {c.cidade}
                 {c.estado && `, ${c.estado}`}
               </p>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">{c.ortomosaico_url ? 'Ortomosaico de drone' : 'Satélite genérico'}</span>
+                <span className="text-[var(--tema-zinc-400)]">{c.ortomosaico_url ? 'Ortomosaico de drone' : 'Satélite genérico'}</span>
                 <span style={{ color: '#C9A46A' }}>{memoriaisPorCemiterio[c.id] || 0} meu(s) memorial(is)</span>
               </div>
             </Link>

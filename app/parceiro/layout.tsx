@@ -4,9 +4,10 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getParceiroUser, getAdminUser, signOut, supabase } from '@/lib/auth'
+import { useTema } from '@/lib/useTema'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 import TrocarSenhaObrigatoria from '@/components/TrocarSenhaObrigatoria'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Sun, Moon } from 'lucide-react'
 
 type ParceiroUser = {
   email: string
@@ -29,6 +30,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   const [semVinculo, setSemVinculo] = useState(false)
   const [precisaTrocarSenha, setPrecisaTrocarSenha] = useState(false)
   const [loading, setLoading] = useState(true)
+  const { tema, alternarTema } = useTema()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -94,8 +96,8 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-        <p className="text-zinc-400">Carregando...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--tema-zinc-950)]">
+        <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
       </div>
     )
   }
@@ -104,10 +106,10 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
 
   if (semVinculo) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--tema-zinc-950)] px-4">
         <div className="max-w-md text-center space-y-4">
           <p className="text-white text-lg font-medium">Sua conta ainda não está vinculada a nenhum parceiro.</p>
-          <p className="text-zinc-400 text-sm">
+          <p className="text-[var(--tema-zinc-400)] text-sm">
             O login <strong>{email}</strong> existe, mas nenhuma funerária/cemitério foi associado a ele ainda.
             Fale com a equipe Legado Digital pra concluir o vínculo.
           </p>
@@ -144,13 +146,13 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   ]
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-[var(--tema-zinc-950)] text-white">
       {modoStaff && (
         <div className="bg-yellow-900/40 text-yellow-300 text-xs text-center py-1.5">
           Visualizando como <strong>{nomeParceiro}</strong> — modo Central
         </div>
       )}
-      <nav className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
+      <nav className="border-b border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)]/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
@@ -162,8 +164,8 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`px-3 py-2 rounded-lg text-sm transition-colors ${
                       pathname === item.match
-                        ? 'bg-zinc-800 text-white'
-                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                        ? 'bg-[var(--tema-zinc-800)] text-white'
+                        : 'text-[var(--tema-zinc-400)] hover:text-white hover:bg-[var(--tema-zinc-800)]/50'
                     }`}
                   >
                     {item.label}
@@ -171,7 +173,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
                 ))}
                 <button
                   onClick={() => window.dispatchEvent(new Event('legadobot:abrir'))}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-zinc-800/50"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--tema-zinc-800)]/50"
                   style={{ color: '#C9A46A' }}
                 >
                   <MessageCircle size={16} className="shrink-0" />
@@ -180,10 +182,18 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-zinc-400">{email}</span>
+              <span className="text-sm text-[var(--tema-zinc-400)] hidden sm:inline">{email}</span>
+              <button
+                onClick={alternarTema}
+                className="text-[var(--tema-zinc-400)] hover:text-white transition-colors"
+                aria-label={tema === 'escuro' ? 'Mudar pro tema claro' : 'Mudar pro tema escuro'}
+                title={tema === 'escuro' ? 'Tema claro' : 'Tema escuro'}
+              >
+                {tema === 'escuro' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
               <button
                 onClick={handleLogout}
-                className="text-sm text-zinc-400 hover:text-white transition-colors"
+                className="text-sm text-[var(--tema-zinc-400)] hover:text-white transition-colors"
               >
                 {modoStaff ? 'Voltar pra Central' : 'Sair'}
               </button>

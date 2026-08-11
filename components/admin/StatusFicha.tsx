@@ -4,7 +4,7 @@ interface StatusChip {
 }
 
 const COR_PONTO: Record<NonNullable<StatusChip['tom']>, string> = {
-  neutro: 'bg-zinc-600',
+  neutro: 'bg-[var(--tema-zinc-600)]',
   verde: 'bg-green-500',
   amarelo: 'bg-yellow-500',
   vermelho: 'bg-red-500',
@@ -18,10 +18,10 @@ export function StatusFicha({ chips }: { chips: StatusChip[] }) {
       {chips.map((c) => (
         <span
           key={c.label}
-          className="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[11px] text-zinc-100"
+          className="inline-flex items-center gap-1.5 rounded-md border border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)] px-2.5 py-1 text-[11px] text-[var(--tema-zinc-100)]"
         >
           <span className={`w-1.5 h-1.5 rounded-full ${COR_PONTO[c.tom || 'neutro']}`} />
-          <span className="text-zinc-400">{c.label}</span>
+          <span className="text-[var(--tema-zinc-400)]">{c.label}</span>
         </span>
       ))}
     </div>

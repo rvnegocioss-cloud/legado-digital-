@@ -39,7 +39,7 @@ const STATUS_STYLE: Record<string, string> = {
 
 export default function ParceiroEmails() {
   return (
-    <Suspense fallback={<p className="text-zinc-400">Carregando...</p>}>
+    <Suspense fallback={<p className="text-[var(--tema-zinc-400)]">Carregando...</p>}>
       <ParceiroEmailsInner />
     </Suspense>
   )
@@ -98,27 +98,27 @@ function ParceiroEmailsInner() {
     setLoading(false)
   }
 
-  if (loading) return <p className="text-zinc-400">Carregando...</p>
+  if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-1">Central de E-mails</h1>
-      <p className="text-zinc-400 text-sm mb-8">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-8">
         E-mails disparados pros seus memoriais — confirme aqui se a família já aprovou a mensagem
         da placa, sem precisar abrir e-mail nenhum.
       </p>
 
       <h2 className="text-lg font-medium text-white mb-1">Contato das famílias</h2>
-      <p className="text-zinc-400 text-sm mb-4">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-4">
         Clica no WhatsApp pra abrir a conversa direto — não traz mensagem recebida pra cá, só facilita chamar.
       </p>
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 mb-10 overflow-x-auto">
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-10 overflow-x-auto">
         {familias.length === 0 ? (
-          <p className="text-zinc-500 text-sm">Nenhum memorial cadastrado ainda.</p>
+          <p className="text-[var(--tema-zinc-500)] text-sm">Nenhum memorial cadastrado ainda.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-500 text-xs">
+              <tr className="text-[var(--tema-zinc-500)] text-xs">
                 <th className="text-left py-2 px-2">Memorial</th>
                 <th className="text-left py-2 px-2">E-mail</th>
                 <th className="text-left py-2 px-2">WhatsApp</th>
@@ -126,10 +126,10 @@ function ParceiroEmailsInner() {
             </thead>
             <tbody>
               {familias.map((f) => (
-                <tr key={f.id} className="border-t border-zinc-800/50">
+                <tr key={f.id} className="border-t border-[var(--tema-zinc-800)]/50">
                   <td className="py-2 px-2 text-white">{f.nome_completo}</td>
-                  <td className="py-2 px-2 text-zinc-300">
-                    {f.familia_email || <span className="text-zinc-600">sem e-mail cadastrado</span>}
+                  <td className="py-2 px-2 text-[var(--tema-zinc-300)]">
+                    {f.familia_email || <span className="text-[var(--tema-zinc-600)]">sem e-mail cadastrado</span>}
                   </td>
                   <td className="py-2 px-2">
                     {linkWhatsApp(f.familia_telefone) ? (
@@ -143,7 +143,7 @@ function ParceiroEmailsInner() {
                         {f.familia_telefone}
                       </a>
                     ) : (
-                      <span className="text-zinc-600">sem número</span>
+                      <span className="text-[var(--tema-zinc-600)]">sem número</span>
                     )}
                   </td>
                 </tr>
@@ -154,15 +154,15 @@ function ParceiroEmailsInner() {
       </div>
 
       <h2 className="text-lg font-medium text-white mb-1">Histórico de e-mails automáticos</h2>
-      <p className="text-zinc-400 text-sm mb-4">Todo e-mail que o sistema disparou pros seus memoriais.</p>
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-4">Todo e-mail que o sistema disparou pros seus memoriais.</p>
 
       {emails.length === 0 ? (
-        <p className="text-zinc-400">Nenhum e-mail disparado ainda.</p>
+        <p className="text-[var(--tema-zinc-400)]">Nenhum e-mail disparado ainda.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800">
+              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Memorial</th>
                 <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Destinatário</th>
@@ -172,17 +172,17 @@ function ParceiroEmailsInner() {
             </thead>
             <tbody>
               {emails.map((e) => (
-                <tr key={e.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                <tr key={e.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">{e.homenagens?.nome_completo || '—'}</td>
-                  <td className="py-3 px-4 text-zinc-300">{TIPO_LABEL[e.tipo] || e.tipo}</td>
-                  <td className="py-3 px-4 text-zinc-300">{e.destinatario}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{TIPO_LABEL[e.tipo] || e.tipo}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{e.destinatario}</td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-xs ${STATUS_STYLE[e.status] || 'bg-zinc-800 text-zinc-400'}`}>
+                    <span className={`px-2 py-1 rounded text-xs ${STATUS_STYLE[e.status] || 'bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-400)]'}`}>
                       {e.status}
                     </span>
-                    {e.erro_msg && <p className="text-xs text-zinc-500 mt-1">{e.erro_msg}</p>}
+                    {e.erro_msg && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">{e.erro_msg}</p>}
                   </td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(e.confirmado_em || e.created_at).toLocaleString('pt-BR')}
                   </td>
                 </tr>

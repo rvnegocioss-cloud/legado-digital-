@@ -158,7 +158,7 @@ export default function AdminParceiros() {
   }
 
   if (loading) {
-    return <p className="text-zinc-400">Carregando...</p>
+    return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
   }
 
   return (
@@ -173,7 +173,7 @@ export default function AdminParceiros() {
               </Button>
             }
           />
-          <DialogContent className="bg-zinc-900 text-white ring-zinc-800 sm:max-w-md">
+          <DialogContent className="bg-[var(--tema-zinc-900)] text-white ring-[var(--tema-zinc-800)] sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {editando ? 'Editar Parceiro' : 'Novo Parceiro'}
@@ -182,30 +182,30 @@ export default function AdminParceiros() {
 
             <form onSubmit={salvar} className="space-y-3">
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Razão social</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Razão social</label>
                 <Input
                   placeholder="Nome jurídico completo"
                   required
                   value={form.razao_social}
                   onChange={(e) => setForm({ ...form, razao_social: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Nome fantasia</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome fantasia</label>
                 <Input
                   placeholder="Como o parceiro é conhecido"
                   value={form.nome_fantasia}
                   onChange={(e) => setForm({ ...form, nome_fantasia: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Tipo de parceiro</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Tipo de parceiro</label>
                 <select
                   value={form.tipo_parceiro}
                   onChange={(e) => setForm({ ...form, tipo_parceiro: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                  className="flex h-10 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white"
                 >
                   {TIPOS_PARCEIRO.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -215,32 +215,32 @@ export default function AdminParceiros() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">E-mail</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">E-mail</label>
                 <Input
                   type="email"
                   placeholder="contato@parceiro.com.br"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Telefone</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Telefone</label>
                 <Input
                   placeholder="(00) 00000-0000"
                   value={form.telefone}
                   onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">CNPJ</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">CNPJ</label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="00.000.000/0000-00"
                     value={form.cnpj}
                     onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white flex-1"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white flex-1"
                   />
                   <Button
                     type="button"
@@ -251,35 +251,35 @@ export default function AdminParceiros() {
                     {consultandoCnpj ? 'Consultando...' : 'Consultar Receita'}
                   </Button>
                 </div>
-                <p className="text-zinc-500 text-[11px] mt-1">
+                <p className="text-[var(--tema-zinc-500)] text-[11px] mt-1">
                   Preenche razão social, nome fantasia, e-mail, telefone, cidade e UF automaticamente — confira antes de salvar.
                 </p>
               </div>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Cidade</label>
                   <Input
                     placeholder="Cidade"
                     value={form.cidade}
                     onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">UF</label>
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">UF</label>
                   <Input
                     placeholder="UF"
                     maxLength={2}
                     value={form.estado}
                     onChange={(e) => setForm({ ...form, estado: e.target.value.toUpperCase() })}
-                    className="bg-zinc-800 border-zinc-700 text-white w-20"
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white w-20"
                   />
                 </div>
               </div>
 
               {erro && <p className="text-red-400 text-sm">{erro}</p>}
 
-              <DialogFooter className="bg-transparent border-zinc-800 mt-4">
+              <DialogFooter className="bg-transparent border-[var(--tema-zinc-800)] mt-4">
                 <Button type="submit" disabled={salvando}>
                   {salvando ? 'Salvando...' : 'Salvar'}
                 </Button>
@@ -291,13 +291,13 @@ export default function AdminParceiros() {
 
       {parceiros.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-zinc-400">Nenhum parceiro cadastrado ainda.</p>
+          <p className="text-[var(--tema-zinc-400)]">Nenhum parceiro cadastrado ainda.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-zinc-400 border-b border-zinc-800">
+              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Nome</th>
                 <th className="text-left py-3 px-4">Email</th>
                 <th className="text-left py-3 px-4">Tipo</th>
@@ -308,14 +308,14 @@ export default function AdminParceiros() {
             </thead>
             <tbody>
               {parceiros.map((p) => (
-                <tr key={p.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                <tr key={p.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">
                     <Link href={`/admin/parceiros/${p.id}`} className="hover:text-blue-400 hover:underline">
                       {p.nome_fantasia || p.razao_social}
                     </Link>
                   </td>
-                  <td className="py-3 px-4 text-zinc-300">{p.email}</td>
-                  <td className="py-3 px-4 text-zinc-300">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{p.email}</td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">
                     {TIPOS_PARCEIRO.find((t) => t.value === p.tipo_parceiro)?.label || p.tipo_parceiro}
                   </td>
                   <td className="py-3 px-4">
@@ -328,13 +328,13 @@ export default function AdminParceiros() {
                       {p.ativo ? 'Ativo' : 'Inativo'}
                     </button>
                   </td>
-                  <td className="py-3 px-4 text-zinc-400">
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(p.created_at).toLocaleDateString('pt-BR')}
                   </td>
                   <td className="py-3 px-4">
                     <button
                       onClick={() => abrirEdicao(p)}
-                      className="text-zinc-400 hover:text-white text-xs"
+                      className="text-[var(--tema-zinc-400)] hover:text-white text-xs"
                     >
                       Editar
                     </button>

@@ -84,10 +84,10 @@ export default function LegadoBotWidget() {
   return (
     <div className="fixed bottom-5 right-5 z-50">
       {aberto && (
-        <div className="mb-3 w-80 sm:w-96 h-[28rem] rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800" style={{ background: '#0B1D2A' }}>
+        <div className="mb-3 w-80 sm:w-96 h-[28rem] rounded-xl border border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)] shadow-2xl flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--tema-zinc-800)]" style={{ background: '#0B1D2A' }}>
             <span className="text-sm font-medium" style={{ color: '#C9A46A' }}>LegadoBot</span>
-            <button onClick={() => setAberto(false)} aria-label="Fechar" className="text-zinc-400 hover:text-white">
+            <button onClick={() => setAberto(false)} aria-label="Fechar" className="text-[var(--tema-zinc-400)] hover:text-white">
               <X size={16} strokeWidth={1.5} />
             </button>
           </div>
@@ -97,33 +97,33 @@ export default function LegadoBotWidget() {
               <div
                 key={i}
                 className={`text-sm rounded-lg px-3 py-2 max-w-[85%] ${
-                  m.role === 'user' ? 'ml-auto bg-zinc-800 text-white' : 'bg-zinc-800/50 text-zinc-200'
+                  m.role === 'user' ? 'ml-auto bg-[var(--tema-zinc-800)] text-white' : 'bg-[var(--tema-zinc-800)]/50 text-[var(--tema-zinc-200)]'
                 }`}
               >
                 {m.content}
               </div>
             ))}
             {carregando && (
-              <div className="flex items-center gap-2 text-zinc-500 text-xs">
+              <div className="flex items-center gap-2 text-[var(--tema-zinc-500)] text-xs">
                 <Loader2 size={14} className="animate-spin" strokeWidth={1.5} /> pensando...
               </div>
             )}
             <div ref={fimRef} />
           </div>
 
-          <div className="p-3 border-t border-zinc-800 flex items-center gap-2">
+          <div className="p-3 border-t border-[var(--tema-zinc-800)] flex items-center gap-2">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && enviar()}
               placeholder="Pergunte algo..."
-              className="flex-1 bg-zinc-800 text-sm text-white rounded-lg px-3 py-2 outline-none placeholder:text-zinc-500"
+              className="flex-1 bg-[var(--tema-zinc-800)] text-sm text-white rounded-lg px-3 py-2 outline-none placeholder:text-[var(--tema-zinc-500)]"
             />
             <button
               onClick={enviar}
               disabled={carregando}
               aria-label="Enviar"
-              className="text-zinc-400 hover:text-white disabled:opacity-40 shrink-0"
+              className="text-[var(--tema-zinc-400)] hover:text-white disabled:opacity-40 shrink-0"
             >
               <Send size={18} strokeWidth={1.5} />
             </button>
