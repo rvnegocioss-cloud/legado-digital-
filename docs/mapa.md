@@ -160,6 +160,20 @@ Pedido do Rafael: fileiras dentro de uma quadra costumam ser paralelas e regular
 
 **Escopo simplificado conscientemente** (documentado, não é gambiarra silenciosa): a translação é só deslocamento uniforme (sem rotação/escala) — a alça move o conjunto inteiro mas não gira nem estica. Cobre bem o caso comum (fileiras paralelas, mesmo não-adjacentes). Depois de criada, ajuste fino ponto-a-ponto usa as ferramentas que já existem (arrastar ponta da fileira, editar túmulos no mapa).
 
+## Ruas internas + rota real até o túmulo (2026-08-07, planejado com Opus)
+
+Pedido do Rafael: hoje a rota da página pública ("Como Chegar") é uma linha reta direto da coordenada geral do cemitério até o túmulo, ignorando os caminhos internos de verdade (asfalto/calçada) — pode cortar por cima de quadra. **"Rua" aqui é um conceito novo, não confundir com o rename antigo** (item "Rua → Fileira" acima, onde "rua" era o nome errado que o Rafael deu à fileira) — a rua desta feature é o caminho por onde a pessoa anda, existe no nível do cemitério (sem `quadra_id`, porque passa ENTRE quadras), desenhada com o mesmo sistema de linha da fileira.
+
+**Banco** (`supabase/migrations/20260807_ruas_cemiterio_e_rota.sql`): tabela `ruas_cemiterio` (numero, nome, eixo LineString, comprimento_m, situacao, geometria_revisada) com RLS staff-all + parceiro-select (via `pode_ver_cemiterio`); `obter_geojson_cemiterio` ganhou a chave `ruas`; RPC nova `obter_rede_ruas_memorial(p_slug)` (só service_role, mesmo padrão de `obter_localizacao_memorial`) devolve as ruas ativas do cemitério daquele memorial.
+
+**Algoritmo de rota** (`lib/rotaCemiterio.ts`, puro TS sem lib externa): as ruas são desenhadas independentes, sem marcar cruzamento na mão — `construirRede()` faz *noding* automático (índice espacial em grade + interseção por produto vetorial + detecção de encosto em T por projeção ponto-segmento com tolerância) pra montar o grafo sozinho. `dijkstra()` (heap binário próprio) acha o caminho mais curto; portaria e túmulo se ligam à rede por "última milha" (projeção no segmento mais próximo). `calcularRota()` **nunca lança erro** — sem rede, rede longe demais da portaria/túmulo, ou sem caminho conectado, cai sozinho na linha reta de sempre com um `motivo` explicando por quê (garantia: nenhum memorial existente quebra). `diagnosticarRede()` acha ruas desconectadas da portaria (pra avisar o staff antes de confiar na rota). Testado com script unitário temporário (T-junction, rede desconectada, todos os fallbacks) antes de integrar.
+
+**UI em Central** (`components/admin/MapaCemiterio.tsx` + `PainelRuas.tsx`, novo painel): desenha igual à fileira (clica os pontos, conclui) mas **quadrado roxo** no vértice em vez do laranja/ciano já usados (evita confundir visualmente) — diferenciado da fileira pelo mesmo fluxo de desenho (`modo:'linha'`) checando se tem quadra ativa (fileira sempre tem, rua nunca tem). Renomear/travar/destravar/apagar rua, editar vértice arrastando no mapa (só se não travada), painel de diagnóstico (rede conectada / lista de rua(s) desconectada(s)), botão "Testar rota" que calcula na hora até qualquer túmulo clicado e mostra a distância real vs linha reta.
+
+**Página pública** (`app/homenagem/[slug]/page.tsx` + `components/public/GuiaTumulo.tsx`, regra 17 respeitada — só a linha da rota mudou, resto do componente intocado, diff conferido): 4ª chamada em paralelo no `Promise.all` busca `obter_rede_ruas_memorial`, `calcularRota()` roda no servidor, `rotaCoordenadas` vira prop opcional de `GuiaTumulo` — com rede alcançando os 2 pontos, o mapa desenha o caminho real (curva pelas ruas); sem isso, continua exatamente a linha reta de sempre.
+
+**Não é usado ainda de verdade** — nenhum cemitério (incluindo José Lázaro) tem rua desenhada no banco ainda. A feature entra sozinha em modo fallback (linha reta) até o Rafael desenhar as ruas reais pela Central.
+
 ## Próximos passos
 
 - [x] Modo edição manual (drag/adicionar/apagar/travar)
@@ -180,6 +194,8 @@ Pedido do Rafael: fileiras dentro de uma quadra costumam ser paralelas e regular
 - [ ] Validação de sobreposição também no RPC (hoje só client-side)
 - [ ] Unificar `lapides`/`lapidesEdicao` numa fonte única de verdade (Camada 0 do plano do Opus)
 - [x] Arrastar a fileira duplicada inteira (eixo + túmulos) antes de confirmar
+- [x] Ruas internas (caminho real) + rota calculada pela rede em vez de linha reta (Central + página pública)
+- [ ] Rafael desenhar as ruas reais do José Lázaro pela Central (feature está no ar mas sem dado real ainda, roda em fallback linha reta)
 - [ ] Duplicar fileira com rotação/escala (fileira alvo não perfeitamente paralela em ângulo) -- hoje só translação uniforme
 - [ ] Corrigir `_agrupar_remover_harmonicos` (bug #2 acima) no código genérico
 - [ ] Implementar `--ancora`/`--ancora2` (âncora manual de 2 pontos) como comando real em `mapear-cemiterio.py`, não só script avulso de teste
