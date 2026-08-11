@@ -18,6 +18,7 @@ import { ResumoPoucasPalavras } from "@/components/public/ResumoPoucasPalavras";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
+import { calcularRota, type RuaMapeada } from "@/lib/rotaCemiterio";
 import {
   PALETAS_MEMORIAL,
   VAR_FUNDO_TOPO,
@@ -189,9 +190,9 @@ export default async function HomenagemPage({
   const videosGaleria = Array.isArray(m.videos_galeria) ? m.videos_galeria.filter(Boolean) : [];
   const paleta = PALETAS_MEMORIAL.find((p) => p.id === m.tema) ?? PALETAS_MEMORIAL[0];
 
-  // 3 consultas independentes (dependem só de m.id/slug) — rodam em paralelo
-  // em vez de em série, cortando 3 idas de rede pra 1.
-  const [{ data: condolenciasData }, { data: muralData }, { data: localizacaoData }] = await Promise.all([
+  // 4 consultas independentes (dependem só de m.id/slug) — rodam em paralelo
+  // em vez de em série, cortando 4 idas de rede pra 1.
+  const [{ data: condolenciasData }, { data: muralData }, { data: localizacaoData }, { data: ruasData }] = await Promise.all([
     supabase
       .from("condolencias")
       .select("id, visitor_name, message, created_at")
@@ -203,6 +204,10 @@ export default async function HomenagemPage({
       .eq("homenagem_id", m.id)
       .order("created_at", { ascending: false }),
     supabase.rpc("obter_localizacao_memorial", { p_slug: slug }).maybeSingle(),
+    // Ruas mapeadas do cemiterio desse memorial -- em paralelo com a
+    // localizacao (obter_localizacao_memorial nao devolve cemiterio_id, por
+    // isso essa RPC recebe o slug direto em vez de encadear depois).
+    supabase.rpc("obter_rede_ruas_memorial", { p_slug: slug }),
   ]);
 
   const condolencias = (condolenciasData || []) as Condolencia[];
@@ -221,6 +226,22 @@ export default async function HomenagemPage({
     orto_maxzoom: number | null;
     orto_bounds: number[] | null;
   } | null;
+
+  // Rota pelas ruas mapeadas do cemiterio, se existirem e a rede alcancar
+  // portaria+tumulo; calcularRota nunca lanca erro -- sem rede ou rede longe
+  // demais, cai sozinho no comportamento de sempre (linha reta), entao esse
+  // bloco so ADICIONA um caminho melhor, nunca pode quebrar a secao existente.
+  const rota =
+    localizacao?.cemiterio_lat != null &&
+    localizacao?.cemiterio_lng != null &&
+    localizacao?.lapide_lat != null &&
+    localizacao?.lapide_lng != null
+      ? calcularRota(
+          { lat: localizacao.cemiterio_lat, lng: localizacao.cemiterio_lng },
+          { lat: localizacao.lapide_lat, lng: localizacao.lapide_lng },
+          (ruasData as RuaMapeada[] | null) ?? []
+        )
+      : null;
 
   return (
     <div
@@ -448,6 +469,7 @@ export default async function HomenagemPage({
                 ortoMinzoom={localizacao.orto_minzoom}
                 ortoMaxzoom={localizacao.orto_maxzoom}
                 ortoBounds={localizacao.orto_bounds}
+                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
               />
             </div>
           </section>

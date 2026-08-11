@@ -43,6 +43,7 @@ interface Props {
   ortoMinzoom?: number | null
   ortoMaxzoom?: number | null
   ortoBounds?: number[] | null
+  rotaCoordenadas?: [number, number][] | null
 }
 
 function distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -74,6 +75,7 @@ export default function GuiaTumulo({
   ortoMinzoom,
   ortoMaxzoom,
   ortoBounds,
+  rotaCoordenadas,
 }: Props) {
   const [aberto, setAberto] = useState(false)
   const [minhaPos, setMinhaPos] = useState<{ lat: number; lng: number } | null>(null)
@@ -111,10 +113,18 @@ export default function GuiaTumulo({
   // Enquadra o portao e o tumulo na tela assim que o mapa carrega
   function aoCarregarMapa() {
     if (!temTumulo || !mapRef.current) return
+    const pontos: [number, number][] = temRotaReal
+      ? rotaCoordenadas!
+      : [
+          [cemiterioLng, cemiterioLat],
+          [lapideLng!, lapideLat!],
+        ]
+    const lngs = pontos.map((p) => p[0])
+    const lats = pontos.map((p) => p[1])
     mapRef.current.fitBounds(
       [
-        [Math.min(cemiterioLng, lapideLng!), Math.min(cemiterioLat, lapideLat!)],
-        [Math.max(cemiterioLng, lapideLng!), Math.max(cemiterioLat, lapideLat!)],
+        [Math.min(...lngs), Math.min(...lats)],
+        [Math.max(...lngs), Math.max(...lats)],
       ],
       { padding: 50, maxZoom: 20, duration: 0 }
     )
@@ -136,18 +146,23 @@ export default function GuiaTumulo({
   const distancia = minhaPos && temTumulo ? distanciaMetros(minhaPos.lat, minhaPos.lng, lapideLat!, lapideLng!) : null
 
   // Linha fixa: portao ate o tumulo (referencia estavel, nao muda com o GPS
-  // da pessoa). Ponto de partida ainda usa a coordenada geral do cemiterio -
-  // sabidamente impreciso (marcado no centro, nao na entrada de verdade),
-  // deixado assim de proposito por enquanto a pedido do Rafael.
+  // da pessoa). Quando o cemiterio tem ruas mapeadas e a rede alcanca os 2
+  // pontos, rotaCoordenadas traz o caminho real pelas ruas (calculado no
+  // servidor); sem isso, cai no comportamento de sempre -- linha reta direto
+  // da coordenada geral do cemiterio (sabidamente impreciso, deixado assim
+  // de proposito a pedido do Rafael).
+  const temRotaReal = !!rotaCoordenadas && rotaCoordenadas.length >= 2
   const linhaRota =
     temTumulo && {
       type: 'Feature' as const,
       geometry: {
         type: 'LineString' as const,
-        coordinates: [
-          [cemiterioLng, cemiterioLat],
-          [lapideLng!, lapideLat!],
-        ],
+        coordinates: temRotaReal
+          ? rotaCoordenadas!
+          : [
+              [cemiterioLng, cemiterioLat],
+              [lapideLng!, lapideLat!],
+            ],
       },
       properties: {},
     }
