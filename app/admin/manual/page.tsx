@@ -14,7 +14,7 @@ const SECOES: Secao[] = [
     path: '/',
     texto: [
       'Landing page pública — capta parceiros B2B (funerárias, cemitérios, prefeituras) e visitantes que querem buscar um memorial.',
-      'Integração: linka pra "Acesso Parceiros" (/parceiro/login), "Acesso Familiar" (/familia/login), "Acesso Legado Central" (/admin/login) e o botão de busca (/busca).',
+      'Integração: dropdown "Área Restrita" reúne os 3 acessos — Legado Central (/admin/login), Portal do Parceiro (/parceiro/login), Portal da Família (/familia/login) — mais o botão de busca (/busca).',
     ],
   },
   {

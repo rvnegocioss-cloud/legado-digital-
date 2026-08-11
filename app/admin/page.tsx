@@ -130,57 +130,57 @@ export default function AdminDashboard() {
   ]
 
   if (loading) {
-    return <p className="text-zinc-400">Carregando...</p>
+    return <p className="text-[var(--dash-fg-muted)]">Carregando...</p>
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-[var(--dash-fg)] mb-8">Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-        <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3">
-          <h2 className="text-xs font-medium text-zinc-400">Visitas nos memoriais</h2>
-          <p className="text-xl font-bold text-white mt-1">{totalVisualizacoes}</p>
-          <p className="text-zinc-500 text-[11px] mt-0.5">total acumulado desde que o contador entrou no ar</p>
+        <div className="rounded-lg bg-[var(--dash-bg)] border border-[var(--dash-border)] p-3">
+          <h2 className="text-xs font-medium text-[var(--dash-fg-muted)]">Visitas nos memoriais</h2>
+          <p className="text-xl font-bold text-[var(--dash-fg)] mt-1">{totalVisualizacoes}</p>
+          <p className="text-[var(--dash-fg-faint)] text-[11px] mt-0.5">total acumulado desde que o contador entrou no ar</p>
         </div>
-        <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3">
-          <h2 className="text-xs font-medium text-zinc-400">Novos memoriais</h2>
-          <p className="text-xl font-bold text-white mt-1">{novosMemoriais}</p>
-          <p className="text-zinc-500 text-[11px] mt-0.5">nos últimos 7 dias</p>
+        <div className="rounded-lg bg-[var(--dash-bg)] border border-[var(--dash-border)] p-3">
+          <h2 className="text-xs font-medium text-[var(--dash-fg-muted)]">Novos memoriais</h2>
+          <p className="text-xl font-bold text-[var(--dash-fg)] mt-1">{novosMemoriais}</p>
+          <p className="text-[var(--dash-fg-faint)] text-[11px] mt-0.5">nos últimos 7 dias</p>
         </div>
-        <div className="rounded-lg bg-zinc-900 border border-zinc-800 p-3">
-          <h2 className="text-xs font-medium text-zinc-400">Homenagens recentes</h2>
-          <p className="text-xl font-bold text-white mt-1">{homenagensRecentes}</p>
-          <p className="text-zinc-500 text-[11px] mt-0.5">condolências deixadas nos últimos 7 dias</p>
+        <div className="rounded-lg bg-[var(--dash-bg)] border border-[var(--dash-border)] p-3">
+          <h2 className="text-xs font-medium text-[var(--dash-fg-muted)]">Homenagens recentes</h2>
+          <p className="text-xl font-bold text-[var(--dash-fg)] mt-1">{homenagensRecentes}</p>
+          <p className="text-[var(--dash-fg-faint)] text-[11px] mt-0.5">condolências deixadas nos últimos 7 dias</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <h2 className="text-sm font-medium text-zinc-400 mb-3">Cemitérios com mais visita</h2>
+        <div className="rounded-xl bg-[var(--dash-bg)] border border-[var(--dash-border)] p-6">
+          <h2 className="text-sm font-medium text-[var(--dash-fg-muted)] mb-3">Cemitérios com mais visita</h2>
           {topCemiterios.length === 0 ? (
-            <p className="text-zinc-500 text-sm">Sem memorial vinculado a lápide/cemitério ainda.</p>
+            <p className="text-[var(--dash-fg-faint)] text-sm">Sem memorial vinculado a lápide/cemitério ainda.</p>
           ) : (
             <ul className="space-y-2">
               {topCemiterios.map((c) => (
                 <li key={c.nome} className="flex justify-between text-sm">
-                  <span className="text-zinc-300">{c.nome}</span>
-                  <span className="text-white font-medium">{c.visualizacoes}</span>
+                  <span className="text-[var(--dash-fg-muted)]">{c.nome}</span>
+                  <span className="text-[var(--dash-fg)] font-medium">{c.visualizacoes}</span>
                 </li>
               ))}
             </ul>
           )}
         </div>
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <h2 className="text-sm font-medium text-zinc-400 mb-3">Parceiros com mais visita</h2>
+        <div className="rounded-xl bg-[var(--dash-bg)] border border-[var(--dash-border)] p-6">
+          <h2 className="text-sm font-medium text-[var(--dash-fg-muted)] mb-3">Parceiros com mais visita</h2>
           {topParceiros.length === 0 ? (
-            <p className="text-zinc-500 text-sm">Sem memorial vinculado a parceiro ainda.</p>
+            <p className="text-[var(--dash-fg-faint)] text-sm">Sem memorial vinculado a parceiro ainda.</p>
           ) : (
             <ul className="space-y-2">
               {topParceiros.map((p) => (
                 <li key={p.nome} className="flex justify-between text-sm">
-                  <span className="text-zinc-300">{p.nome}</span>
-                  <span className="text-white font-medium">{p.visualizacoes}</span>
+                  <span className="text-[var(--dash-fg-muted)]">{p.nome}</span>
+                  <span className="text-[var(--dash-fg)] font-medium">{p.visualizacoes}</span>
                 </li>
               ))}
             </ul>
@@ -193,18 +193,18 @@ export default function AdminDashboard() {
           <Link
             key={card.href}
             href={card.href}
-            className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors"
+            className="flex items-center gap-3 p-3 rounded-lg bg-[var(--dash-bg)] border border-[var(--dash-border)] hover:border-[var(--dash-input-border)] transition-colors"
           >
-            <card.Icon className="text-zinc-400 shrink-0" size={20} strokeWidth={1.5} />
-            <h2 className="text-xs font-medium text-zinc-400 flex-1">{card.title}</h2>
-            <p className="text-lg font-bold text-white">{card.value}</p>
+            <card.Icon className="text-[var(--dash-fg-muted)] shrink-0" size={20} strokeWidth={1.5} />
+            <h2 className="text-xs font-medium text-[var(--dash-fg-muted)] flex-1">{card.title}</h2>
+            <p className="text-lg font-bold text-[var(--dash-fg)]">{card.value}</p>
           </Link>
         ))}
       </div>
 
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mt-8">
-        <h2 className="text-sm font-medium text-zinc-400 mb-1">E-mail do fornecedor de placas</h2>
-        <p className="text-zinc-500 text-xs mb-4">
+      <div className="rounded-xl bg-[var(--dash-bg)] border border-[var(--dash-border)] p-6 mt-8">
+        <h2 className="text-sm font-medium text-[var(--dash-fg-muted)] mb-1">E-mail do fornecedor de placas</h2>
+        <p className="text-[var(--dash-fg-faint)] text-xs mb-4">
           Toda vez que um QR Code é gerado (memorial criado ou editado), ele é encaminhado automaticamente pra esse e-mail — nome do homenageado, ID do memorial, link da página e o PNG do QR anexado.
         </p>
         <form onSubmit={salvarEmailFornecedor} className="flex gap-3 max-w-md">
@@ -213,24 +213,24 @@ export default function AdminDashboard() {
             placeholder="fornecedor@exemplo.com"
             value={emailFornecedor}
             onChange={(e) => setEmailFornecedor(e.target.value)}
-            className="bg-zinc-800 border-zinc-700 text-white flex-1"
+            className="bg-[var(--dash-input-bg)] border-[var(--dash-input-border)] text-[var(--dash-fg)] flex-1"
           />
           <Button type="submit" disabled={salvandoEmail}>
             {salvandoEmail ? 'Salvando...' : 'Salvar'}
           </Button>
         </form>
-        {emailMsg && <p className="text-xs text-zinc-400 mt-2">{emailMsg}</p>}
+        {emailMsg && <p className="text-xs text-[var(--dash-fg-muted)] mt-2">{emailMsg}</p>}
       </div>
 
-      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mt-6">
+      <div className="rounded-xl bg-[var(--dash-bg)] border border-[var(--dash-border)] p-6 mt-6">
         <SecaoRetratil titulo="Memoriais e QR Codes">
         {memoriaisQr.length === 0 ? (
-          <p className="text-zinc-400 text-sm">Nenhum memorial cadastrado ainda.</p>
+          <p className="text-[var(--dash-fg-muted)] text-sm">Nenhum memorial cadastrado ainda.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-zinc-400 border-b border-zinc-800">
+                <tr className="text-[var(--dash-fg-muted)] border-b border-[var(--dash-border)]">
                   <th className="text-left py-2 px-3">QR Code</th>
                   <th className="text-left py-2 px-3">Nome</th>
                   <th className="text-left py-2 px-3"></th>
@@ -239,16 +239,16 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {memoriaisQr.map((m) => (
-                  <tr key={m.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50">
+                  <tr key={m.id} className="border-b border-[var(--dash-border)] hover:bg-[var(--dash-bg-alt)]">
                     <td className="py-2 px-3">
                       {m.qr_code_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={m.qr_code_url} alt="" className="w-10 h-10 rounded bg-white p-0.5" />
                       ) : (
-                        <span className="text-zinc-600 text-xs">Sem QR ainda</span>
+                        <span className="text-[var(--dash-fg-faint)] text-xs">Sem QR ainda</span>
                       )}
                     </td>
-                    <td className="py-2 px-3 text-white">
+                    <td className="py-2 px-3 text-[var(--dash-fg)]">
                       <Link href={`/admin/memoriais/${m.id}`} className="hover:text-blue-400 hover:underline">
                         {m.nome_completo}
                       </Link>
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
                     </td>
                     <td className="py-2 px-3">
                       {m.slug && (
-                        <a href={`/homenagem/${m.slug}`} className="text-zinc-400 hover:text-white text-xs">
+                        <a href={`/homenagem/${m.slug}`} className="text-[var(--dash-fg-muted)] hover:text-[var(--dash-fg)] text-xs">
                           Ver página
                         </a>
                       )}

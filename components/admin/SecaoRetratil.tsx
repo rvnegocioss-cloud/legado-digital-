@@ -19,7 +19,7 @@ export default function SecaoRetratil({
       <button
         type="button"
         onClick={() => setAberto(!aberto)}
-        className="w-full flex items-center justify-between text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+        className="w-full flex items-center justify-between text-sm font-medium text-[color:var(--dash-fg-muted,var(--color-zinc-400))] hover:text-[color:var(--dash-fg,#fff)] transition-colors"
       >
         <span>{titulo}</span>
         {aberto ? <ChevronDown size={16} className="shrink-0" /> : <ChevronRight size={16} className="shrink-0" />}

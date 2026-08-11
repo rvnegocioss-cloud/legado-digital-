@@ -4,15 +4,21 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart } from 'lucide-react'
-import { getAdminUser, signOut } from '@/lib/auth'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart, Sun, Moon } from 'lucide-react'
+import { getAdminUser, signOut, supabase } from '@/lib/auth'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 
 const ALLOWED_ROLES = ['Admin Legado Digital', 'Operador Legado Digital']
+const TEMA_STORAGE_KEY = 'legado-central-tema'
 
 type AdminUser = {
   email: string
   usuarios_perfis: { perfis: { nome: string } | null }[]
+}
+
+type ParceiroResumo = {
+  id: string
+  nome: string
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +26,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true)
   const [menuAberto, setMenuAberto] = useState(false)
   const [sidebarAberta, setSidebarAberta] = useState(true)
+  const [tema, setTema] = useState<'escuro' | 'claro'>('escuro')
+  const [parceiros, setParceiros] = useState<ParceiroResumo[]>([])
+  const [parceirosAberto, setParceirosAberto] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -43,6 +52,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     checkAuth()
   }, [pathname, router])
+
+  // Tema do Dashboard: só afeta a área de conteúdo (data-tema-central no
+  // <main>), sidebar/header continuam sempre escuros -- persiste por staff
+  // via localStorage, não é preferência de conta (não há coluna pra isso).
+  useEffect(() => {
+    const salvo = localStorage.getItem(TEMA_STORAGE_KEY)
+    if (salvo === 'claro' || salvo === 'escuro') setTema(salvo)
+  }, [])
+
+  function alternarTema() {
+    const proximo = tema === 'escuro' ? 'claro' : 'escuro'
+    setTema(proximo)
+    localStorage.setItem(TEMA_STORAGE_KEY, proximo)
+  }
+
+  useEffect(() => {
+    supabase
+      .from('parceiros_b2b')
+      .select('id, nome')
+      .order('nome')
+      .then(({ data }) => setParceiros(data || []))
+  }, [])
 
   // Página de login não precisa do layout admin
   if (pathname === '/admin/login') return <>{children}</>
@@ -132,6 +163,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <Home size={18} />
             </Link>
+            <div
+              className="relative hidden sm:block"
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) setParceirosAberto(false)
+              }}
+            >
+              <button
+                onClick={() => setParceirosAberto(!parceirosAberto)}
+                className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                <Building2 size={16} />
+                Parceiros
+                <ChevronDown size={14} />
+              </button>
+              {parceirosAberto && (
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-zinc-800 bg-zinc-900 shadow-lg py-1 z-50 max-h-80 overflow-y-auto">
+                  {parceiros.length === 0 ? (
+                    <p className="px-4 py-2 text-xs text-zinc-500">Nenhum parceiro cadastrado ainda.</p>
+                  ) : (
+                    parceiros.map((p) => (
+                      <Link
+                        key={p.id}
+                        href={`/parceiro?parceiro_id=${p.id}`}
+                        onClick={() => setParceirosAberto(false)}
+                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800"
+                      >
+                        {p.nome}
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={alternarTema}
+              className="text-zinc-400 hover:text-white transition-colors"
+              aria-label={tema === 'escuro' ? 'Mudar pro tema claro' : 'Mudar pro tema escuro'}
+              title={tema === 'escuro' ? 'Tema claro' : 'Tema escuro'}
+            >
+              {tema === 'escuro' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <button className="text-zinc-400 hover:text-white transition-colors" aria-label="Alertas">
               <Bell size={18} />
             </button>
@@ -159,7 +231,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
         </header>
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+        {/* data-tema-central só entra na página Dashboard em si (pathname === '/admin')
+            -- pedido explícito do Rafael foi "a página do dashboard", não a Central
+            inteira. As outras páginas ainda usam classe zinc-* fixa (não os tokens
+            --dash-*), então aplicar o tema claro nelas deixaria fundo claro com
+            cards escuros por dentro -- ficaria quebrado, não é isso que foi pedido. */}
+        <main
+          data-tema-central={pathname === '/admin' ? tema : undefined}
+          className={`flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto ${pathname === '/admin' ? 'bg-[var(--dash-bg-alt)]' : ''}`}
+        >
           {children}
         </main>
       </div>

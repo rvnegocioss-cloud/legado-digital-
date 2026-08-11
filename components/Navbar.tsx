@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ChevronDown } from 'lucide-react'
 
 const navLinks = [
   { href: '#beneficios', label: 'Benefícios' },
@@ -12,8 +13,15 @@ const navLinks = [
   { href: '#faq', label: 'FAQ' },
 ]
 
+const areaRestritaLinks = [
+  { href: '/admin/login', label: 'Legado Central' },
+  { href: '/parceiro/login', label: 'Portal do Parceiro' },
+  { href: '/familia/login', label: 'Portal da Família' },
+]
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [areaAberta, setAreaAberta] = useState(false)
 
   return (
     <motion.nav
@@ -40,21 +48,43 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/parceiro/login"
-              className="text-sm text-white/60 hover:text-[#C9A46A] transition-colors"
+            <div
+              className="relative"
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) setAreaAberta(false)
+              }}
             >
-              Acesso Parceiros
-            </Link>
-            <Link
-              href="/familia/login"
-              className="text-sm text-white/60 hover:text-[#C9A46A] transition-colors"
-            >
-              Acesso Familiar
-            </Link>
-            <Button className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold px-6" asChild>
-              <Link href="/admin/login">Acesso Legado Central</Link>
-            </Button>
+              <Button
+                type="button"
+                onClick={() => setAreaAberta((v) => !v)}
+                className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold px-6 flex items-center gap-1.5"
+              >
+                Área Restrita
+                <ChevronDown size={14} strokeWidth={2} className={`transition-transform ${areaAberta ? 'rotate-180' : ''}`} />
+              </Button>
+              <AnimatePresence>
+                {areaAberta && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="absolute right-0 mt-2 w-56 rounded-lg overflow-hidden"
+                    style={{ background: '#0B1D2A', border: '1px solid rgba(201,168,76,0.2)' }}
+                  >
+                    {areaRestritaLinks.map((l) => (
+                      <Link
+                        key={l.href}
+                        href={l.href}
+                        onClick={() => setAreaAberta(false)}
+                        className="block px-4 py-3 text-sm text-white/70 hover:text-[#C9A46A] hover:bg-white/5 transition-colors"
+                      >
+                        {l.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Mobile toggle */}
@@ -94,23 +124,17 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/parceiro/login"
-                onClick={() => setIsOpen(false)}
-                className="block text-sm text-white/60 hover:text-[#C9A46A] transition-colors py-2"
-              >
-                Acesso Parceiros
-              </Link>
-              <Link
-                href="/familia/login"
-                onClick={() => setIsOpen(false)}
-                className="block text-sm text-white/60 hover:text-[#C9A46A] transition-colors py-2"
-              >
-                Acesso Familiar
-              </Link>
-              <Button className="w-full bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold" asChild>
-                <Link href="/admin/login">Acesso Legado Central</Link>
-              </Button>
+              <p className="text-xs uppercase tracking-wider text-white/40 pt-2">Área Restrita</p>
+              {areaRestritaLinks.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setIsOpen(false)}
+                  className="block text-sm text-white/60 hover:text-[#C9A46A] transition-colors py-2"
+                >
+                  {l.label}
+                </Link>
+              ))}
             </div>
           </motion.div>
         )}

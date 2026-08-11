@@ -37,6 +37,37 @@
   --color-blue-900: #4a3a21;
 }
 
+/* Tema claro/escuro do Dashboard da Central -- escopo deliberadamente restrito
+   (não é o tema do site inteiro): só o conteúdo de app/admin/page.tsx lê essas
+   variáveis hoje, via classe Tailwind com valor arbitrário (bg-[var(--dash-bg)]),
+   nunca sobrescrevendo zinc-*/blue-* acima (isso recoloriria Central inteira,
+   Portal do Parceiro e Portal da Família de uma vez). Escuro é o padrão --
+   valores aqui espelham exatamente a paleta zinc já usada, zero mudança visual
+   até o toggle (app/admin/layout.tsx) setar data-tema-central="claro".
+   Qualquer página nova do admin pode entrar no mesmo tema só usando os
+   tokens --dash-*, sem precisar deste bloco de novo. */
+:root {
+  --dash-bg: var(--color-zinc-900);
+  --dash-bg-alt: var(--color-zinc-950);
+  --dash-border: var(--color-zinc-800);
+  --dash-fg: #ffffff;
+  --dash-fg-muted: var(--color-zinc-400);
+  --dash-fg-faint: var(--color-zinc-500);
+  --dash-input-bg: var(--color-zinc-800);
+  --dash-input-border: var(--color-zinc-700);
+}
+
+[data-tema-central="claro"] {
+  --dash-bg: #ffffff;
+  --dash-bg-alt: #f4f4f5;
+  --dash-border: #e4e4e7;
+  --dash-fg: #18181b;
+  --dash-fg-muted: #52525b;
+  --dash-fg-faint: #71717a;
+  --dash-input-bg: #f4f4f5;
+  --dash-input-border: #d4d4d8;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--secondary) transparent;
