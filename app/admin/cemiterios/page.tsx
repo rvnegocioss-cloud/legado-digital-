@@ -249,7 +249,6 @@ export default function AdminCemiterios() {
                 <th className="text-left py-3 px-4">Lápides</th>
                 <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Cidade/UF</th>
-                <th className="text-left py-3 px-4">Localização</th>
                 <th className="text-left py-3 px-4">Status</th>
                 <th className="text-left py-3 px-4">Mapa público (Ligar/Desligar)</th>
                 <th className="text-left py-3 px-4"></th>
@@ -272,15 +271,6 @@ export default function AdminCemiterios() {
                   <td className="py-3 px-4 text-[var(--tema-zinc-300)] capitalize">{c.tipo}</td>
                   <td className="py-3 px-4 text-[var(--tema-zinc-300)]">
                     {[c.cidade, c.estado].filter(Boolean).join('/')}
-                  </td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
-                    {c.latitude != null && c.longitude != null ? (
-                      <Link href={`/admin/cemiterios/${c.id}/mapa`} className="text-blue-400 hover:underline">
-                        ver no mapa
-                      </Link>
-                    ) : (
-                      '—'
-                    )}
                   </td>
                   <td className="py-3 px-4">
                     <button
