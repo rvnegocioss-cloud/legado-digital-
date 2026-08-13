@@ -765,16 +765,23 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
-  async function onConcluirFila(pontos: [number, number][]) {
-    if (!quadraAtivaParaFila) return
+  async function onConcluirFila(pontos: [number, number][], quadra: Quadra) {
+    // "quadra" vem por parametro, nunca do estado "quadraAtivaParaFila" --
+    // o clique em "+ Nova fileira" faz setQuadraAtivaParaFila(q) e
+    // desenho.iniciar() no mesmo handler; a closure de onConcluirFila
+    // capturada por iniciar() e a do render ATUAL, antes do setState
+    // committar, entao ler o estado aqui sempre pegava o valor antigo (null
+    // na 1a fileira) -- fileira so "funcionava" na 2a tentativa, quando o
+    // estado do clique anterior ja tinha aplicado. Achado real 2026-08-13.
+    if (!quadra) return
     setSalvando(true)
     setMsg('')
-    const proximoNumero = filas.filter((f) => f.quadra_id === quadraAtivaParaFila.id).reduce((max, f) => Math.max(max, f.numero), 0) + 1
+    const proximoNumero = filas.filter((f) => f.quadra_id === quadra.id).reduce((max, f) => Math.max(max, f.numero), 0) + 1
     const { data, error } = await supabase
       .from('filas')
       .insert({
         cemiterio_id: cemiterioId,
-        quadra_id: quadraAtivaParaFila.id,
+        quadra_id: quadra.id,
         numero: proximoNumero,
         eixo: { type: 'LineString', coordinates: pontos },
       })
@@ -787,11 +794,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       return
     }
 
-    setMsg(`Fileira ${proximoNumero} da Quadra ${quadraAtivaParaFila.numero} criada — agora gera os túmulos.`)
+    setMsg(`Fileira ${proximoNumero} da Quadra ${quadra.numero} criada — agora gera os túmulos.`)
     await carregar()
     setDialogoFila({
       filaId: data.id,
-      quadraNumero: quadraAtivaParaFila.numero,
+      quadraNumero: quadra.numero,
       filaNumero: proximoNumero,
       comprimentoM: comprimentoPolilinha(pontos),
     })
@@ -2253,7 +2260,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                   setModoMarcarEntrada(false)
                                   setModoMarcar(false)
                                   setQuadraAtivaParaFila(q)
-                                  desenho.iniciar('linha', onConcluirFila)
+                                  desenho.iniciar('linha', (pontos) => onConcluirFila(pontos, q))
                                 }}
                                 className="text-xs flex items-center gap-1 text-amber-400 hover:text-amber-200 disabled:opacity-40"
                               >

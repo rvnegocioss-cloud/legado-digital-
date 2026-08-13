@@ -4,8 +4,25 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
 
+/**
+ * Traduz o motivo real que o Supabase devolve no link quebrado, em vez de
+ * cair sempre no genérico "pode ter expirado" — que escondia a causa de
+ * verdade (token de uso único já consumido antes do clique do usuário).
+ */
+function motivoDoLink(codigo: string | null, descricao: string | null): string {
+  if (codigo === 'otp_expired' || /expired/i.test(descricao || '')) {
+    return 'Esse link já foi usado ou passou da validade. Cada link de recuperação vale uma vez só — alguns provedores de e-mail (Gmail/Outlook) abrem o link sozinhos pra checar segurança e acabam gastando o seu antes de você clicar. Peça um novo e abra assim que chegar.'
+  }
+  if (codigo === 'access_denied') {
+    return 'O link não foi aceito pelo servidor de acesso. Peça um novo e abra o mais recente que chegar na caixa de entrada.'
+  }
+  return descricao || 'O link não pôde ser validado. Peça um novo e abra o mais recente que chegar na caixa de entrada.'
+}
+
 export default function RedefinirSenhaPage() {
-  const [pronto, setPronto] = useState(false)
+  const [estado, setEstado] = useState<'verificando' | 'pronto' | 'sem-link'>('verificando')
+  const [motivo, setMotivo] = useState('')
+  const [emailAlvo, setEmailAlvo] = useState('')
   const [senha, setSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -13,16 +30,94 @@ export default function RedefinirSenhaPage() {
   const [erro, setErro] = useState('')
 
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setPronto(true)
+    let ativo = true
+
+    function liberar(email?: string | null) {
+      if (!ativo) return
+      if (email) setEmailAlvo(email)
+      setEstado('pronto')
+      // Tira token/código da barra de endereço depois de consumido
+      if (window.location.hash || window.location.search) {
+        window.history.replaceState(window.history.state, '', window.location.pathname)
+      }
+    }
+
+    // O supabase-js também tenta processar a URL sozinho (detectSessionInUrl).
+    // Quem chegar primeiro ganha; esse listener cobre esse caminho.
+    const { data: listener } = supabase.auth.onAuthStateChange((evento, sessao) => {
+      if (!ativo) return
+      if (evento === 'PASSWORD_RECOVERY' || (evento === 'SIGNED_IN' && sessao)) {
+        liberar(sessao?.user?.email)
+      }
     })
 
-    // Se o link já processou a sessão antes desse componente montar
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setPronto(true)
-    })
+    async function preparar() {
+      // Parâmetros podem vir no hash (fluxo implicit: #access_token=...&type=recovery)
+      // ou na query (fluxo PKCE: ?code=... / template com ?token_hash=...).
+      // Lemos os dois pra não depender de qual formato o Supabase mandar.
+      const doHash = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+      const daQuery = new URLSearchParams(window.location.search)
+      const ler = (chave: string) => daQuery.get(chave) ?? doHash.get(chave)
 
-    return () => listener.subscription.unsubscribe()
+      // 1) Link já veio com erro do próprio Supabase (403 no /verify redireciona
+      //    pra cá com #error=...). Antes isso caía no texto genérico.
+      const erroLink = ler('error') || ler('error_description') || ler('error_code')
+      if (erroLink) {
+        if (!ativo) return
+        setMotivo(motivoDoLink(ler('error_code'), ler('error_description')))
+        setEstado('sem-link')
+        return
+      }
+
+      try {
+        // 2) Fluxo implicit — tokens no hash.
+        const accessToken = ler('access_token')
+        const refreshToken = ler('refresh_token')
+        if (accessToken && refreshToken) {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          if (!error && data.session) return liberar(data.session.user?.email)
+        }
+
+        // 3) Fluxo PKCE — código na query.
+        const code = ler('code')
+        if (code) {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+          if (!error && data.session) return liberar(data.session.user?.email)
+        }
+
+        // 4) Template com token_hash (não consome no clique do scanner de e-mail).
+        const tokenHash = ler('token_hash')
+        const tipo = ler('type')
+        if (tokenHash && (!tipo || tipo === 'recovery')) {
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: 'recovery',
+          })
+          if (!error && data.session) return liberar(data.session.user?.email)
+        }
+      } catch {
+        // cai na checagem de sessão abaixo
+      }
+
+      // 5) O supabase-js pode ter processado a URL antes da gente (e limpado o
+      //    hash). Nesse caso a sessão já existe.
+      const { data } = await supabase.auth.getSession()
+      if (!ativo) return
+      if (data.session) return liberar(data.session.user?.email)
+
+      setMotivo('')
+      setEstado('sem-link')
+    }
+
+    preparar()
+
+    return () => {
+      ativo = false
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   async function salvar(e: React.FormEvent) {
@@ -76,17 +171,27 @@ export default function RedefinirSenhaPage() {
               <Link href="/parceiro/login" className="text-blue-400 hover:underline">Parceiro</Link>
             </div>
           </div>
-        ) : !pronto ? (
-          <p className="text-zinc-400 text-sm text-center">
-            Abra essa página pelo link recebido por e-mail. Se você chegou aqui direto, o link
-            pode ter expirado — peça um novo em{' '}
-            <Link href="/recuperar-senha" className="text-blue-400 hover:underline">
-              recuperar senha
-            </Link>
-            .
-          </p>
+        ) : estado === 'verificando' ? (
+          <p className="text-zinc-400 text-sm text-center">Verificando o link...</p>
+        ) : estado === 'sem-link' ? (
+          <div className="space-y-3">
+            <p className="text-zinc-400 text-sm text-center">
+              {motivo ||
+                'Abra essa página pelo link recebido por e-mail. Se você chegou aqui direto, não há link nenhum pra validar.'}
+            </p>
+            <p className="text-center text-sm">
+              <Link href="/recuperar-senha" className="text-blue-400 hover:underline">
+                Pedir um novo link
+              </Link>
+            </p>
+          </div>
         ) : (
           <form onSubmit={salvar} className="space-y-4">
+            {emailAlvo && (
+              <p className="text-zinc-400 text-sm text-center">
+                Definindo nova senha para <span className="text-white">{emailAlvo}</span>
+              </p>
+            )}
             <div>
               <label className="block text-sm font-medium text-zinc-300">Nova senha</label>
               <input

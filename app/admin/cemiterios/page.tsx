@@ -245,13 +245,13 @@ export default function AdminCemiterios() {
             <thead>
               <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Nome</th>
+                <th className="text-left py-3 px-4">Mapa</th>
+                <th className="text-left py-3 px-4">Lápides</th>
                 <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Cidade/UF</th>
                 <th className="text-left py-3 px-4">Localização</th>
                 <th className="text-left py-3 px-4">Status</th>
                 <th className="text-left py-3 px-4">Mapa público (Ligar/Desligar)</th>
-                <th className="text-left py-3 px-4"></th>
-                <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
               </tr>
             </thead>
@@ -259,6 +259,16 @@ export default function AdminCemiterios() {
               {cemiterios.map((c) => (
                 <tr key={c.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
                   <td className="py-3 px-4 text-white">{c.nome}</td>
+                  <td className="py-3 px-4">
+                    <Link href={`/admin/cemiterios/${c.id}/mapa`} className="text-xs font-medium" style={{ color: '#C9A46A' }}>
+                      Mapa
+                    </Link>
+                  </td>
+                  <td className="py-3 px-4">
+                    <Link href={`/admin/cemiterios/${c.id}/lapides`} className="text-xs font-medium" style={{ color: '#C9A46A' }}>
+                      Lápides
+                    </Link>
+                  </td>
                   <td className="py-3 px-4 text-[var(--tema-zinc-300)] capitalize">{c.tipo}</td>
                   <td className="py-3 px-4 text-[var(--tema-zinc-300)]">
                     {[c.cidade, c.estado].filter(Boolean).join('/')}
@@ -291,16 +301,6 @@ export default function AdminCemiterios() {
                     >
                       {c.publico ? 'Visível em /cemiterios' : 'Oculto de /cemiterios'}
                     </button>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Link href={`/admin/cemiterios/${c.id}/mapa`} className="text-xs font-medium" style={{ color: '#C9A46A' }}>
-                      Mapa
-                    </Link>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Link href={`/admin/cemiterios/${c.id}/lapides`} className="text-[var(--tema-zinc-400)] hover:text-white text-xs">
-                      Lápides
-                    </Link>
                   </td>
                   <td className="py-3 px-4">
                     <button
