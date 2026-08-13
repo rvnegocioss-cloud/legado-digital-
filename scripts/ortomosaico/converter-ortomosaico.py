@@ -1,15 +1,31 @@
 #!/usr/bin/env python3
 """
-Converte um ortomosaico georreferenciado (GeoPackage raster, qualquer CRS)
-num arquivo PMTiles pronto pra servir no MapLibre GL JS via HTTP range
-requests, sem precisar de servidor de tiles.
+Converte um ortomosaico georreferenciado num arquivo PMTiles pronto pra
+servir no MapLibre GL JS via HTTP range requests, sem precisar de servidor
+de tiles. 2 modos de entrada:
 
-Pipeline: GeoPackage -> WarpedVRT alinhada a EPSG:3857 -> tiles WebP com
-alfa -> MBTiles (SQLite, esquema TMS) -> pmtiles.convert() -> .pmtiles
+  --src <arquivo.gpkg>   GeoPackage raster (qualquer CRS) -> WarpedVRT
+                         alinhada a EPSG:3857 -> tiles WebP com alfa.
+  --src-xyz <pasta.zip>  Pirâmide de tiles pronta em esquema XYZ (Google/
+                         slippy map), já em EPSG:3857 -- copia direto,
+                         sem reamostrar (mais rápido, sem perda extra).
+                         Achado 2026-08-13 (São Pedro): quando o
+                         processador do voo (Agisoft Metashape etc.) já
+                         entrega a pirâmide renderizada, é melhor
+                         reaproveitar os tiles nativos do que tentar
+                         remontar um raster único e rewarp -- ver
+                         docs/mapa.md.
 
-Uso:
+Ambos os modos terminam em: MBTiles (SQLite, esquema TMS) -> pmtiles.convert()
+-> .pmtiles
+
+Uso (GeoPackage):
   python converter-ortomosaico.py --src "C:\caminho\01.gpkg" --out "C:\tmp\orto"
       --minzoom 14 --maxzoom 22 --quality 78 --quality-overview 70
+
+Uso (pirâmide XYZ pronta):
+  python converter-ortomosaico.py --src-xyz "C:\caminho\mapa.zip" --out "C:\tmp\orto"
+      --minzoom 15 --maxzoom 23 --quality 55 --quality-overview 62
 
 Gera <out>.mbtiles e <out>.pmtiles. --resume retoma um job interrompido
 sem reprocessar tiles ja gravados.
@@ -18,8 +34,11 @@ sem reprocessar tiles ja gravados.
 import argparse
 import io
 import math
+import re
 import sqlite3
 import sys
+import zipfile
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -214,9 +233,95 @@ def gerar_overviews(con, zmax, zmin, extents, quality):
         print(f"[zoom {z}] fim — {gravados} tiles gravados")
 
 
+def tile2lonlat(x, y, z):
+    """Formula padrao slippy map: canto superior-esquerdo do tile x/y/z."""
+    n = 2 ** z
+    lon = x / n * 360 - 180
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
+    return lon, math.degrees(lat_rad)
+
+
+def indexar_piramide_xyz(zf):
+    """Varre o zip sem extrair -- devolve {z: [(x, y, arcname), ...]}."""
+    padrao = re.compile(r"^(\d+)/(\d+)/(\d+)\.png$")
+    por_zoom = defaultdict(list)
+    for nome in zf.namelist():
+        m = padrao.match(nome)
+        if not m:
+            continue
+        z, x, y = (int(g) for g in m.groups())
+        por_zoom[z].append((x, y, nome))
+    return por_zoom
+
+
+def processar_piramide_xyz(caminho_zip, con, minzoom, maxzoom, quality, quality_overview, resume):
+    """Copia uma piramide XYZ (ja em EPSG:3857, tipo Google/slippy map) direto
+    pro MBTiles -- sem rewarp, sem reamostragem: os tiles do zoom escolhido
+    ja vem prontos do processador do voo (gdal2tiles/Metashape/etc)."""
+    with zipfile.ZipFile(caminho_zip) as zf:
+        por_zoom = indexar_piramide_xyz(zf)
+        disponiveis = sorted(por_zoom)
+        if not disponiveis:
+            raise SystemExit(f"Nenhum tile z/x/y.png encontrado em {caminho_zip}")
+        print(f"Niveis disponiveis no zip: {disponiveis[0]}-{disponiveis[-1]}")
+
+        zmax_real = min(maxzoom, disponiveis[-1])
+        if zmax_real != maxzoom:
+            print(f"AVISO: --maxzoom {maxzoom} pedido, mas o zip so tem ate {zmax_real}. Usando {zmax_real}.")
+
+        # Bounds/center vem do range real de tiles no nivel mais fino usado --
+        # nao depende de nenhum manifesto externo, e sempre bate com o
+        # conteudo de verdade do zip.
+        xs = [t[0] for t in por_zoom[zmax_real]]
+        ys = [t[1] for t in por_zoom[zmax_real]]
+        xmin, xmax, ymin, ymax = min(xs), max(xs), min(ys), max(ys)
+        w, n = tile2lonlat(xmin, ymin, zmax_real)
+        e, s = tile2lonlat(xmax + 1, ymax + 1, zmax_real)
+        center = ((w + e) / 2, (s + n) / 2)
+        print(f"  bounds WGS84 (derivado dos tiles z{zmax_real}): {w:.6f},{s:.6f},{e:.6f},{n:.6f}")
+
+        for z in range(zmax_real, minzoom - 1, -1):
+            tiles = por_zoom.get(z)
+            if not tiles:
+                print(f"[zoom {z}] nenhum tile no zip -- pulando (buraco na piramide de origem)")
+                continue
+
+            q = quality if z == zmax_real else quality_overview
+            gravados = pulados_vazio = pulados_resume = 0
+            print(f"[zoom {z}] {len(tiles)} tiles no zip")
+
+            for i, (x, y, arcname) in enumerate(tiles, 1):
+                y_tms = (2 ** z - 1) - y
+                if resume and tile_existe(con, z, x, y_tms):
+                    pulados_resume += 1
+                    continue
+
+                with zf.open(arcname) as f:
+                    img = Image.open(io.BytesIO(f.read())).convert("RGBA")
+                if img.size != (256, 256):
+                    img = img.resize((256, 256), Image.LANCZOS)
+                arr = np.transpose(np.array(img), (2, 0, 1))
+
+                if gravar_tile(con, z, x, y, arr, q):
+                    gravados += 1
+                else:
+                    pulados_vazio += 1
+
+                if i % 1000 == 0:
+                    con.commit()
+                    print(f"  {i}/{len(tiles)} — gravados {gravados}, vazios {pulados_vazio}, retomados {pulados_resume}")
+
+            con.commit()
+            print(f"[zoom {z}] fim — gravados {gravados}, vazios {pulados_vazio}, retomados {pulados_resume}")
+
+    return w, s, e, n, center, zmax_real
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--src", required=True, help="Caminho do GeoPackage (.gpkg) de origem")
+    origem = ap.add_mutually_exclusive_group(required=True)
+    origem.add_argument("--src", help="Caminho do GeoPackage (.gpkg) de origem")
+    origem.add_argument("--src-xyz", help="Zip com piramide de tiles XYZ pronta (ja em EPSG:3857)")
     ap.add_argument("--out", required=True, help="Prefixo de saída (sem extensão)")
     ap.add_argument("--minzoom", type=int, default=14)
     ap.add_argument("--maxzoom", type=int, default=22)
@@ -230,24 +335,51 @@ def main():
 
     mbtiles_path = f"{args.out}.mbtiles"
     pmtiles_path = f"{args.out}.pmtiles"
+    zmax_final = args.maxzoom
 
-    print(f"Abrindo {args.src} ...")
-    with rasterio.open(args.src) as src:
-        print(f"  CRS origem: {src.crs}")
-        print(f"  dimensões: {src.width}x{src.height}, {src.count} bandas")
+    if args.src_xyz:
+        print(f"Abrindo piramide XYZ {args.src_xyz} ...")
+        # Bounds só são conhecidos depois de indexar o zip -- criar_mbtiles
+        # roda dentro de processar_piramide_xyz por causa disso, diferente
+        # do fluxo --src (que já sabe os bounds antes de começar).
+        con = None
 
-        w, s, e, n = bounds_wgs84(src)
+        with zipfile.ZipFile(args.src_xyz) as zf_peek:
+            por_zoom_peek = indexar_piramide_xyz(zf_peek)
+        if not por_zoom_peek:
+            raise SystemExit(f"Nenhum tile z/x/y.png encontrado em {args.src_xyz}")
+        zmax_final = min(args.maxzoom, max(por_zoom_peek))
+        xs = [t[0] for t in por_zoom_peek[zmax_final]]
+        ys = [t[1] for t in por_zoom_peek[zmax_final]]
+        w, n = tile2lonlat(min(xs), min(ys), zmax_final)
+        e, s = tile2lonlat(max(xs) + 1, max(ys) + 1, zmax_final)
         center = ((w + e) / 2, (s + n) / 2)
-        print(f"  bounds WGS84: {w:.6f},{s:.6f},{e:.6f},{n:.6f}")
 
         con = criar_mbtiles(
-            mbtiles_path, args.nome, (w, s, e, n), center, args.minzoom, args.maxzoom
+            mbtiles_path, args.nome, (w, s, e, n), center, args.minzoom, zmax_final
         )
-
-        extents = gerar_zoom_maximo(src, con, args.maxzoom, args.quality, args.resume)
-        gerar_overviews(con, args.maxzoom, args.minzoom, extents, args.quality_overview)
-
+        w, s, e, n, center, zmax_final = processar_piramide_xyz(
+            args.src_xyz, con, args.minzoom, args.maxzoom, args.quality, args.quality_overview, args.resume
+        )
         con.close()
+    else:
+        print(f"Abrindo {args.src} ...")
+        with rasterio.open(args.src) as src:
+            print(f"  CRS origem: {src.crs}")
+            print(f"  dimensões: {src.width}x{src.height}, {src.count} bandas")
+
+            w, s, e, n = bounds_wgs84(src)
+            center = ((w + e) / 2, (s + n) / 2)
+            print(f"  bounds WGS84: {w:.6f},{s:.6f},{e:.6f},{n:.6f}")
+
+            con = criar_mbtiles(
+                mbtiles_path, args.nome, (w, s, e, n), center, args.minzoom, args.maxzoom
+            )
+
+            extents = gerar_zoom_maximo(src, con, args.maxzoom, args.quality, args.resume)
+            gerar_overviews(con, args.maxzoom, args.minzoom, extents, args.quality_overview)
+
+            con.close()
 
     tamanho_mb = Path(mbtiles_path).stat().st_size / 1024 / 1024
     print(f"\nMBTiles pronto: {mbtiles_path} ({tamanho_mb:.1f} MB)")
@@ -255,12 +387,13 @@ def main():
     print("Convertendo pra PMTiles...")
     from pmtiles.convert import mbtiles_to_pmtiles
 
-    mbtiles_to_pmtiles(mbtiles_path, pmtiles_path, args.maxzoom)
+    mbtiles_to_pmtiles(mbtiles_path, pmtiles_path, zmax_final)
 
     tamanho_pm_mb = Path(pmtiles_path).stat().st_size / 1024 / 1024
     print(f"PMTiles pronto: {pmtiles_path} ({tamanho_pm_mb:.1f} MB)")
     print(f"\nbounds pra salvar no banco: [{w:.6f}, {s:.6f}, {e:.6f}, {n:.6f}]")
     print(f"center: {center[0]:.6f}, {center[1]:.6f}")
+    print(f"minzoom: {args.minzoom}  maxzoom: {zmax_final}")
 
 
 if __name__ == "__main__":
