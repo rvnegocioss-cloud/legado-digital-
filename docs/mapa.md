@@ -174,6 +174,10 @@ Pedido do Rafael: hoje a rota da página pública ("Como Chegar") é uma linha r
 
 **Não é usado ainda de verdade** — nenhum cemitério (incluindo José Lázaro) tem rua desenhada no banco ainda. A feature entra sozinha em modo fallback (linha reta) até o Rafael desenhar as ruas reais pela Central.
 
+## Mapa Público de Cemitérios (2026-08-13)
+
+Segundo consumidor da camada de ortomosaico (o primeiro é `GuiaTumulo.tsx`), agora sem login: `/cemiterios` (lista cidade) → `/cemiterios/[cidade]` (lista cemitério) → `/cemiterios/[cidade]/[cemiterio]` (mapa). Componente novo `components/public/MapaPublicoCemiterio.tsx` — não reaproveita `MapaCemiterio.tsx` (grande demais, cheio de escrita, arriscado expor ao público), reaproveita só `lib/ortomosaico.ts` + `lib/estiloSatelite.ts` (novo, extrai a técnica de camada empilhada satélite+ortomosaico de `GuiaTumulo.tsx`, que fica intocado). Pino de túmulo com memorial é `symbol` layer (ícone de cruz via `addImage`, nunca `<Marker>` por túmulo — mesma decisão de escala de sempre), hover mostra popup com nome/foto (só se o memorial tem `modo_gate='aberto'`). `cemiterios` ganhou `slug` + `publico` (governança: só a Central decide quem entra no diretório). Detalhe completo de decisão de privacidade/RPCs no `CLAUDE.md`, seção Fase Atual.
+
 ## Próximos passos
 
 - [x] Modo edição manual (drag/adicionar/apagar/travar)

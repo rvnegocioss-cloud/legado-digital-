@@ -79,6 +79,17 @@ const RATE_LIMIT_CONFIG: Record<string, RateLimitConfig> = {
     limit: 180,
     routePatterns: [],
   },
+  // Diretório público de cemitérios (/cemiterios/*) -- grade navegável de
+  // propósito (cidade -> cemitério -> memoriais publicados), decisão
+  // consciente de 2026-08-13. Limite mais apertado que 'pagina' porque
+  // varrer isso em sequência é justamente o vetor de raspagem que a
+  // decisão flagou -- generoso pra pessoa, apertado pra script.
+  mapa_publico: {
+    limit: 60,
+    // sem barra no fim -- startsWith('/cemiterios') cobre a exata '/cemiterios'
+    // (lista de cidades) e '/cemiterios/...' (cidade e mapa) na mesma checagem.
+    routePatterns: ['/cemiterios'],
+  },
 }
 
 /**
@@ -282,7 +293,9 @@ export async function proxy(request: NextRequest) {
   // (homenagem entrou pra cobrir a contagem de visualização, que roda dentro
   // do próprio SSR da página — sem isso ela nunca passava por rate limit
   // nenhum, já que só /api/* era coberto e a página em si não é uma API)
-  const protectedPaths = ['/api/', '/admin/', '/parceiro/', '/familia/', '/homenagem/']
+  // '/cemiterios' sem barra no fim -- cobre a lista de cidades (path exato)
+  // e '/cemiterios/...' (cidade e mapa) na mesma checagem startsWith.
+  const protectedPaths = ['/api/', '/admin/', '/parceiro/', '/familia/', '/homenagem/', '/cemiterios']
   const shouldRateLimit = protectedPaths.some((p) => pathname.startsWith(p))
 
   if (!shouldRateLimit) {

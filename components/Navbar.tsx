@@ -11,6 +11,7 @@ const navLinks = [
   { href: '#beneficios', label: 'Benefícios' },
   { href: '#como-funciona', label: 'Como Funciona' },
   { href: '#faq', label: 'FAQ' },
+  { href: '/cemiterios', label: 'Cemitérios' },
 ]
 
 const areaRestritaLinks = [

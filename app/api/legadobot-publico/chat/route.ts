@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     acao = match[1]
     resposta = resposta.replace(/\n?AÇÃO:\s*\/\S+\s*$/m, '').trim()
 
-    if (acao !== '/busca' && acao !== '/parceiro/login') acao = null
+    if (acao !== '/busca' && acao !== '/parceiro/login' && acao !== '/cemiterios') acao = null
 
     // Trava independente do modelo: só navega se a ÚLTIMA mensagem do visitante pedir isso de verdade
     const ultimaDoUsuario = [...mensagens].reverse().find((m) => m.role === 'user')?.content.toLowerCase() || ''
@@ -79,6 +79,9 @@ export async function POST(req: NextRequest) {
       acao = null
     }
     if (acao === '/parceiro/login' && !/parceir|funerári|minha conta|meu login|entrar na conta/.test(ultimaDoUsuario)) {
+      acao = null
+    }
+    if (acao === '/cemiterios' && !/cemit[ée]rio/.test(ultimaDoUsuario)) {
       acao = null
     }
   }

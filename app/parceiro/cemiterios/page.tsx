@@ -11,6 +11,7 @@ interface Cemiterio {
   cidade: string | null
   estado: string | null
   ortomosaico_url: string | null
+  publico: boolean
 }
 
 export default function CemiteriosParceiro() {
@@ -49,7 +50,7 @@ function CemiteriosParceiroInner() {
     // ver (cemiterios_parceiro_select / _junction) -- sem filtro manual aqui.
     const { data: cemiteriosData } = await supabase
       .from('cemiterios')
-      .select('id, nome, cidade, estado, ortomosaico_url')
+      .select('id, nome, cidade, estado, ortomosaico_url, publico')
       .order('nome')
     setCemiterios(cemiteriosData || [])
 
@@ -100,6 +101,9 @@ function CemiteriosParceiroInner() {
                 <span className="text-[var(--tema-zinc-400)]">{c.ortomosaico_url ? 'Ortomosaico de drone' : 'Satélite genérico'}</span>
                 <span style={{ color: '#C9A46A' }}>{memoriaisPorCemiterio[c.id] || 0} meu(s) memorial(is)</span>
               </div>
+              <p className="text-[10px] mt-2 text-[var(--tema-zinc-500)]">
+                {c.publico ? 'No mapa público (/cemiterios) — controlado pela Central' : 'Não aparece no mapa público — controlado pela Central'}
+              </p>
             </Link>
           ))}
         </div>

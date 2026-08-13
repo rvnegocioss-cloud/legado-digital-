@@ -32,6 +32,7 @@ interface Cemiterio {
   latitude: number | null
   longitude: number | null
   ativo: boolean
+  publico: boolean
   created_at: string
 }
 
@@ -120,6 +121,13 @@ export default function AdminCemiterios() {
 
   async function alternarAtivo(c: Cemiterio) {
     await supabase.from('cemiterios').update({ ativo: !c.ativo }).eq('id', c.id)
+    loadCemiterios()
+  }
+
+  // Chave de governança do mapa público (/cemiterios) -- só a Central liga,
+  // Parceiro só vê o chip de leitura (regra 22).
+  async function alternarPublico(c: Cemiterio) {
+    await supabase.from('cemiterios').update({ publico: !c.publico }).eq('id', c.id)
     loadCemiterios()
   }
 
@@ -241,6 +249,7 @@ export default function AdminCemiterios() {
                 <th className="text-left py-3 px-4">Cidade/UF</th>
                 <th className="text-left py-3 px-4">Localização</th>
                 <th className="text-left py-3 px-4">Status</th>
+                <th className="text-left py-3 px-4">Mapa público (Ligar/Desligar)</th>
                 <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
@@ -271,6 +280,16 @@ export default function AdminCemiterios() {
                       }`}
                     >
                       {c.ativo ? 'Ativo' : 'Inativo'}
+                    </button>
+                  </td>
+                  <td className="py-3 px-4">
+                    <button
+                      onClick={() => alternarPublico(c)}
+                      className={`px-2 py-1 rounded text-xs ${
+                        c.publico ? 'bg-blue-900/50 text-blue-400' : 'bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-400)]'
+                      }`}
+                    >
+                      {c.publico ? 'Visível em /cemiterios' : 'Oculto de /cemiterios'}
                     </button>
                   </td>
                   <td className="py-3 px-4">

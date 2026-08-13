@@ -145,7 +145,7 @@ export function PrivacidadeMemorial({ memorialId }: { memorialId: string }) {
         <div className={`space-y-2 ${oculto ? 'opacity-40 pointer-events-none' : ''}`}>
           <label className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
             <input type="checkbox" checked={buscaHabilitada} onChange={(e) => setBuscaHabilitada(e.target.checked)} disabled={oculto} />
-            Público — aparece na busca por nome
+            Público — aparece na busca por nome e no mapa público de cemitérios
           </label>
           <label className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
             <input type="checkbox" checked={linkHabilitado} onChange={(e) => setLinkHabilitado(e.target.checked)} disabled={oculto} />

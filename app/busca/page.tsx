@@ -20,6 +20,7 @@ export default function BuscaPage() {
       <footer style={tema.footer}>
         <span style={{ fontFamily: "Georgia, serif" }}>Legado Digital</span>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <a href="/cemiterios" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Cemitérios</a>
           <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>
           <a href="/termos-de-uso" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Termos</a>
         </div>
