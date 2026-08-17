@@ -290,6 +290,7 @@ Segundo consumidor da camada de ortomosaico (o primeiro é `GuiaTumulo.tsx`), ag
 - [ ] Numerar quadras/ruas a partir da entrada (depois que todas estiverem mapeadas)
 - [ ] Vistoria de campo (`/admin/cemiterios/[id]/vistoria`, mobile — ainda não construída) — staff confirma túmulo por túmulo andando no cemitério, foto de perto da face de cada um (`foto_face_url`)
 - [ ] Fase de nomes — vincular `homenagens.lapide_id` ao código do túmulo certo (self-service pela família ao cadastrar memorial, ou transcrição da foto de campo)
+- [x] 1º vínculo real de memorial no São Pedro (Carlos Saraiva, `Q36-R01-T011`, 2026-08-17) — ver seção no fim deste arquivo
 - [ ] Perguntar pro Rafael Rassi se o drone dele voa com câmera inclinada (não só reto pra baixo) — só isso resolveria ver nome gravado, altitude sozinha não resolve (ângulo é o que importa, não distância)
 - [x] Processar ortomosaico do São Pedro e subir (2026-08-13) — `--src-xyz` novo, `Sao Pedro map.zip`, z15-23, coordenada do cemitério corrigida (estava 373km errada)
 - [ ] Rafael conferir visualmente o mapa do São Pedro (`/admin/cemiterios/<id>/mapa`) antes de confiar
@@ -297,3 +298,45 @@ Segundo consumidor da camada de ortomosaico (o primeiro é `GuiaTumulo.tsx`), ag
 - [ ] Mapear São Pedro pelo fluxo manual (não usar o automático — fileiras coladas pioram os bugs conhecidos) — começar por 1 quadra, medir tempo real antes de comprometer o resto (~10-15 mil túmulos estimados)
 - [ ] Limpar `lapides` órfã "Jazigo Família Teste" do São Pedro antes de mapear pra valer
 - [ ] Pedir pro Rafael Rassi exportar o Tiled Model do Metashape (não o Model simples) em Cesium 3D Tiles, pro teste de 3D — material já processado, só falta o export certo
+
+## 1º memorial real do São Pedro (2026-08-17)
+
+Dado oficial de sepultamento (repassado pelo Rafael, veio do arquivo do cemitério):
+
+```
+Nome: CARLOS SARAIVA
+Filiação: GUMERCINDO SARAIVA KAPPEL
+Nascimento: 06/06/1922 · Falecimento: 10/04/1995
+Sepultamento: 11/04/1995 · Cemitério SAO PEDRO · Quadra 36 · Sepultura 11
+```
+
+Bateu exatamente com o túmulo que o Pedro fotografou em campo: `Q36-R01-T011`
+(id `7e4aaf81-da65-4a5a-8210-b4ca1bb2fed9`, -18.9137011, -48.2967196) — o único
+da Quadra 36 com `foto_face_url` preenchida. Memorial criado (`carlos-saraiva`,
+`origem_cadastro='mapa_cemiterio'`, `preenchido_por='familia'`), já vinculado.
+
+**Fecha o ciclo inteiro pela primeira vez:** numeração oficial da prefeitura →
+quadra desenhada no ortomosaico → túmulo interpolado na fileira → foto de campo
+conferindo o túmulo → memorial real vinculado → aparece no mapa público.
+
+### Achado: foto antiga não confirmava o túmulo
+
+A foto desse túmulo foi subida ANTES do deploy da regra "foto = conferido"
+(commit `b3014f7`), então ele continuava `situacao='nao_confirmada'` mesmo com
+foto. Backfill aplicado uma vez:
+
+```sql
+update lapides set situacao='confirmada', confirmada_em=coalesce(confirmada_em, now())
+where foto_face_url is not null and situacao <> 'confirmada';
+```
+
+1 linha afetada. Qualquer foto subida daqui pra frente já confirma sozinha.
+
+### Nome do memorial visível no painel de quadra
+
+Antes, saber quem estava em qual túmulo exigia passar o mouse chip a chip (o
+vínculo só existia como cor dourada + tooltip). Painel de Quadras do mapa
+(`MapaCemiterio.tsx`) e página de Lápides passaram a listar, embaixo de cada
+fileira, `Túmulo N — Nome do memorial` com link direto pra ficha. Só os túmulos
+que têm memorial entram na lista — fileira de 200 túmulos vazios não vira parede
+de texto.
