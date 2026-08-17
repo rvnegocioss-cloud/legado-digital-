@@ -13,7 +13,8 @@ import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
 import { BarraDesenho } from './mapa/BarraDesenho'
 import PainelRuas from './mapa/PainelRuas'
-import { centroide, comprimentoPolilinha, deMetrosLocal, projetarLocal } from '@/lib/geo'
+import { centroide, comprimentoPolilinha, deMetrosLocal, distanciaMetros, projetarLocal } from '@/lib/geo'
+import { lerCoordenada, ROTULO_ORIGEM_COORDENADA, type CoordenadaLida } from '@/lib/parseCoordenada'
 import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, medirPassoEntreFileiras, validarEspacamento } from '@/lib/enderecoTumulo'
 import { corDaFila } from '@/lib/coresFila'
 import { calcularRota, diagnosticarRede, type ResultadoRota, type RuaMapeada } from '@/lib/rotaCemiterio'
@@ -52,6 +53,7 @@ interface Cemiterio {
 interface Lapide {
   id: string
   identificacao: string
+  codigo: string | null
   quadra: string | null
   lote: string | null
   latitude: number | null
@@ -60,6 +62,8 @@ interface Lapide {
   fila_id: string | null
   numero: number | null
   foto_face_url: string | null
+  gps_referencia_latitude: number | null
+  gps_referencia_longitude: number | null
 }
 
 interface Homenagem {
@@ -158,6 +162,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [lapideParaMarcar, setLapideParaMarcar] = useState<Lapide | null>(null)
   const [modoMarcarEntrada, setModoMarcarEntrada] = useState(false)
   const [pontosRef, setPontosRef] = useState<PontoReferencia[]>([])
+  // Conferencia de coordenada de campo: staff cola o link/numero que alguem
+  // mandou do celular e o mapa mede a distancia ate o tumulo marcado no
+  // ortomosaico. Nada e sobrescrito sozinho -- staff decide.
+  const [textoCoordenada, setTextoCoordenada] = useState('')
+  const [coordRef, setCoordRef] = useState<CoordenadaLida | null>(null)
+  const [erroCoordenada, setErroCoordenada] = useState('')
   const [pontoRefParaMarcar, setPontoRefParaMarcar] = useState<string | null>(null)
   const [subindoFoto, setSubindoFoto] = useState<string | null>(null)
   // Menu de botao direito -- cadastrar memorial direto no tumulo, em campo,
@@ -272,7 +282,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .single(),
       supabase
         .from('lapides')
-        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero, foto_face_url')
+        .select('id, identificacao, codigo, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero, foto_face_url, gps_referencia_latitude, gps_referencia_longitude')
         .eq('cemiterio_id', cemiterioId)
         .limit(20000),
       supabase
@@ -967,6 +977,95 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       setMsg(e instanceof Error ? e.message : 'Erro ao enviar a foto.')
     }
     setSubindoFoto(null)
+  }
+
+  // ---- Conferencia de coordenada de campo (GPS de celular) ----------------
+
+  function lerCoordenadaColada() {
+    setErroCoordenada('')
+    const c = lerCoordenada(textoCoordenada)
+    if (!c) {
+      setCoordRef(null)
+      setErroCoordenada('Não reconheci nenhuma coordenada aí. Cola o link do Google Maps inteiro ou dois números (ex: -18.9136976, -48.2967242).')
+      return
+    }
+    setCoordRef(c)
+    const perto = tumuloMaisPertoDaRef(c)
+    if (perto) {
+      mapRef.current?.flyTo({ center: [c.lng, c.lat], zoom: 21, duration: 600 })
+      setMsg(`Coordenada lida (${ROTULO_ORIGEM_COORDENADA[c.origem]}). Túmulo mais perto: ${perto.rotulo}, a ${perto.metros.toFixed(2)} m.`)
+    } else {
+      mapRef.current?.flyTo({ center: [c.lng, c.lat], zoom: 20, duration: 600 })
+      setMsg('Coordenada lida, mas nenhum túmulo com coordenada neste cemitério pra comparar.')
+    }
+  }
+
+  function tumuloMaisPertoDaRef(c: CoordenadaLida) {
+    let melhor: { lapide: Lapide; metros: number; rotulo: string } | null = null
+    for (const l of lapides) {
+      if (l.latitude == null || l.longitude == null) continue
+      const m = distanciaMetros(c.lat, c.lng, l.latitude, l.longitude)
+      if (!melhor || m < melhor.metros) {
+        melhor = { lapide: l, metros: m, rotulo: l.codigo || l.identificacao || 'sem código' }
+      }
+    }
+    return melhor
+  }
+
+  async function salvarReferenciaGps(lapide: Lapide, c: CoordenadaLida) {
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase
+      .from('lapides')
+      .update({
+        gps_referencia_latitude: c.lat,
+        gps_referencia_longitude: c.lng,
+        gps_referencia_em: new Date().toISOString(),
+        gps_referencia_nota: ROTULO_ORIGEM_COORDENADA[c.origem],
+      })
+      .eq('id', lapide.id)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`Coordenada de campo guardada como referência de ${lapide.codigo || lapide.identificacao}. O ponto do ortomosaico continua sendo o oficial.`)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  async function moverTumuloParaRef(lapide: Lapide, c: CoordenadaLida) {
+    const metros = lapide.latitude != null && lapide.longitude != null
+      ? distanciaMetros(c.lat, c.lng, lapide.latitude, lapide.longitude)
+      : null
+    const ok = confirm(
+      `Mover ${lapide.codigo || lapide.identificacao} pra coordenada do GPS?
+
+` +
+        (metros != null ? `O ponto vai andar ${metros.toFixed(2)} m.
+
+` : '') +
+        'O ortomosaico costuma ser mais preciso que GPS de celular (2 cm/px contra alguns metros). Só faz isso se conferiu em campo que o ponto do mapa está no túmulo errado.'
+    )
+    if (!ok) return
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase
+      .from('lapides')
+      .update({
+        latitude: c.lat,
+        longitude: c.lng,
+        coordenada_origem: 'gps_celular',
+        gps_referencia_latitude: c.lat,
+        gps_referencia_longitude: c.lng,
+        gps_referencia_em: new Date().toISOString(),
+        gps_referencia_nota: ROTULO_ORIGEM_COORDENADA[c.origem],
+      })
+      .eq('id', lapide.id)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`${lapide.codigo || lapide.identificacao} movido pra coordenada do GPS.`)
+      await carregar()
+    }
+    setSalvando(false)
   }
 
   async function criarPontoRef(nome: string, lat: number, lng: number) {
@@ -1910,6 +2009,22 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   <div title="Entrada do cemitério">
                     <Flag size={22} strokeWidth={2} fill="#22c55e" style={{ color: '#0B1D2A' }} />
                   </div>
+                </Marker>
+              )}
+
+              {coordRef && (
+                <Marker longitude={coordRef.lng} latitude={coordRef.lat} anchor="center">
+                  <div
+                    title={`Coordenada de campo (${ROTULO_ORIGEM_COORDENADA[coordRef.origem]})`}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      background: 'rgba(249,115,22,0.35)',
+                      border: '2px solid #f97316',
+                      boxShadow: '0 0 8px rgba(249,115,22,.7)',
+                    }}
+                  />
                 </Marker>
               )}
 
@@ -3434,6 +3549,112 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 </button>
               </div>
             )}
+          </div>
+
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mt-4">
+            <h2 className="text-sm font-semibold text-white mb-1">Conferir com GPS de campo</h2>
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-2">
+              Cola aqui a coordenada que alguém mandou de dentro do cemitério. O mapa mede a distância até o túmulo marcado no
+              ortomosaico e mostra se bate. Nada é sobrescrito sozinho.
+            </p>
+
+            <div className="rounded-lg bg-[var(--tema-zinc-800)]/50 border border-[var(--tema-zinc-800)] px-3 py-2 mb-3">
+              <p className="text-[11px] text-[var(--tema-zinc-400)] font-medium mb-1">O que a pessoa faz no cemitério (passa isso pra ela):</p>
+              <ol className="text-[11px] text-[var(--tema-zinc-500)] list-decimal list-inside space-y-0.5">
+                <li>Ficar <strong>em pé em cima do túmulo</strong>, celular na mão, céu aberto (longe de parede/árvore).</li>
+                <li>Esperar uns 30 segundos parado — o GPS erra mais nos primeiros segundos.</li>
+                <li>Abrir o Google Maps, segurar o dedo no ponto exato até cair o pino vermelho.</li>
+                <li>Tocar no pino → Compartilhar → copiar o link.</li>
+                <li>Mandar o link + uma foto da lápide de perto.</li>
+              </ol>
+            </div>
+
+            <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Link do Google Maps ou coordenada</label>
+            <textarea
+              value={textoCoordenada}
+              onChange={(e) => setTextoCoordenada(e.target.value)}
+              rows={2}
+              placeholder="https://maps.app.goo.gl/... ou -18.9136976, -48.2967242"
+              className="w-full text-xs rounded bg-[var(--tema-zinc-950)] border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-200)] px-2 py-1.5 mb-2"
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={lerCoordenadaColada}
+                disabled={!textoCoordenada.trim()}
+                className="text-xs px-2 py-1 rounded border border-orange-900/50 text-orange-300 hover:bg-orange-950/40 disabled:opacity-40"
+              >
+                Ler coordenada
+              </button>
+              {coordRef && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCoordRef(null)
+                    setTextoCoordenada('')
+                    setErroCoordenada('')
+                  }}
+                  className="text-xs px-2 py-1 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-400)] hover:bg-[var(--tema-zinc-800)]"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+
+            {erroCoordenada && <p className="text-xs text-red-400 mt-2">{erroCoordenada}</p>}
+
+            {coordRef && (() => {
+              const perto = tumuloMaisPertoDaRef(coordRef)
+              if (!perto) return <p className="text-xs text-[var(--tema-zinc-500)] mt-2">Nenhum túmulo com coordenada neste cemitério pra comparar.</p>
+              const bate = perto.metros <= 3
+              return (
+                <div
+                  className="mt-3 rounded-lg px-3 py-2 border"
+                  style={{
+                    borderColor: bate ? 'rgba(34,197,94,.35)' : 'rgba(245,158,11,.35)',
+                    background: bate ? 'rgba(34,197,94,.08)' : 'rgba(245,158,11,.08)',
+                  }}
+                >
+                  <p className="text-xs" style={{ color: bate ? '#4ade80' : '#fbbf24' }}>
+                    {bate ? 'Bate com' : 'Mais perto de'} <strong>{perto.rotulo}</strong> — {perto.metros.toFixed(2)} m de diferença
+                  </p>
+                  <p className="text-[11px] text-[var(--tema-zinc-500)] mt-0.5">
+                    Lido do {ROTULO_ORIGEM_COORDENADA[coordRef.origem]}. GPS de celular erra 3 a 5 m, então diferença pequena é
+                    normal e não quer dizer que o mapa está errado.
+                  </p>
+                  {coordRef.origem === 'centro_mapa' && (
+                    <p className="text-[11px] text-amber-400 mt-0.5">
+                      Esse link não trazia o pino, só o centro da tela — peça pra pessoa tocar no pino e compartilhar de novo.
+                    </p>
+                  )}
+                  {editavel && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <button
+                        type="button"
+                        disabled={salvando}
+                        onClick={() => salvarReferenciaGps(perto.lapide, coordRef)}
+                        className="text-xs px-2 py-1 rounded border border-emerald-900/50 text-emerald-300 hover:bg-emerald-950/40 disabled:opacity-40"
+                      >
+                        Guardar como referência deste túmulo
+                      </button>
+                      <button
+                        type="button"
+                        disabled={salvando}
+                        onClick={() => moverTumuloParaRef(perto.lapide, coordRef)}
+                        className="text-xs px-2 py-1 rounded border border-red-900/50 text-red-300 hover:bg-red-950/40 disabled:opacity-40"
+                      >
+                        Mover túmulo pra cá
+                      </button>
+                    </div>
+                  )}
+                  {perto.lapide.gps_referencia_latitude != null && (
+                    <p className="text-[11px] text-[var(--tema-zinc-500)] mt-2">
+                      Esse túmulo já tinha uma coordenada de campo guardada.
+                    </p>
+                  )}
+                </div>
+              )
+            })()}
           </div>
         </div>
       </div>
