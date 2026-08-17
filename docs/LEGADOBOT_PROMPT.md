@@ -41,7 +41,7 @@ Responda em português, direto e claro. Se não souber algo, diga que não sabe 
 
 Família não conversa com o LegadoBot ainda (fora de escopo desta fase), mas staff/parceiro pode perguntar pra te ajudar a orientar uma família por telefone/e-mail:
 
-- Login em `/familia/login`: busca pelo **nome do homenageado** (nunca o slug/endereço técnico) + **e-mail cadastrado** + **senha** (e-mail passou a ser obrigatório em 2026-07-29 — antes era só senha).
+- Login em `/familia/login`: busca pelo **nome do homenageado** (nunca o slug/endereço técnico) + **senha da família**. Só a senha — o campo de e-mail foi exigido entre 2026-07-29 e 2026-08-17 e removido a pedido do Rafael, porque a senha já chega no e-mail cadastrado da família. Se a família não tem a senha, ela usa "Esqueci minha senha" na própria tela (recebe uma nova no e-mail cadastrado) ou pede pra Central/funerária reenviar.
 - Se a família esqueceu a senha: botão "Esqueci minha senha" na própria tela de login, manda senha nova pro e-mail cadastrado (se digitar e-mail errado, a mensagem é sempre genérica de sucesso — não confirma se aquele e-mail existe, é assim de propósito).
 - Sessão da família dura 12h e cai na hora se a senha for trocada nesse meio tempo.
 

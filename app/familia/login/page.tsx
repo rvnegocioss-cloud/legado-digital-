@@ -21,7 +21,6 @@ export default function FamiliaLoginPage() {
   const [buscando, setBuscando] = useState(false)
   const [resultados, setResultados] = useState<Resultado[] | null>(null)
   const [selecionado, setSelecionado] = useState<Resultado | null>(null)
-  const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [entrando, setEntrando] = useState(false)
   const [erro, setErro] = useState('')
@@ -54,7 +53,7 @@ export default function FamiliaLoginPage() {
     const res = await fetch('/api/familia-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selecionado.slug, email, senha }),
+      body: JSON.stringify({ slug: selecionado.slug, senha }),
     })
     const json = await res.json()
 
@@ -145,7 +144,7 @@ export default function FamiliaLoginPage() {
           <form onSubmit={entrar} className="space-y-3">
             <button
               type="button"
-              onClick={() => { setSelecionado(null); setEmail(''); setSenha(''); setErro('') }}
+              onClick={() => { setSelecionado(null); setSenha(''); setErro('') }}
               className="text-xs text-zinc-500 hover:text-white"
             >
               ← Buscar outro nome
@@ -160,26 +159,18 @@ export default function FamiliaLoginPage() {
               <div className="text-sm text-white">{selecionado.nome_completo}</div>
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">E-mail cadastrado</label>
-              <input
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-                className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
-              />
-            </div>
-            <div>
               <label className="block text-xs text-zinc-500 mb-1">Senha da família</label>
               <input
                 type="text"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
+                autoFocus
                 className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
               />
+              <p className="mt-1 text-[11px] text-zinc-600">
+                A senha foi enviada por e-mail quando o memorial foi cadastrado.
+              </p>
             </div>
             {erro && <p className="text-red-400 text-sm">{erro}</p>}
             <button

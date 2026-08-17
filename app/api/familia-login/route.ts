@@ -7,16 +7,16 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export async function POST(req: NextRequest) {
-  const { slug, email, senha } = await req.json()
-  if (!slug || !email || !senha) {
-    return NextResponse.json({ ok: false, error: 'Preencha o e-mail e a senha' }, { status: 400 })
+  const { slug, senha } = await req.json()
+  if (!slug || !senha) {
+    return NextResponse.json({ ok: false, error: 'Preencha a senha' }, { status: 400 })
   }
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
   const { data: homenagem } = await supabaseAdmin
     .from('homenagens')
-    .select('id, slug, familia_email')
+    .select('id, slug')
     .eq('slug', slug)
     .single()
 
@@ -34,16 +34,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Este memorial ainda não tem acesso de família configurado' }, { status: 404 })
   }
 
-  // E-mail junto da senha (2 fatores) — senha sozinha tem só 32 bits de
-  // entropia (randomBytes(4)), curta demais pra ser o único fator. Sempre
-  // roda os dois checks (não retorna cedo no e-mail) e devolve erro
-  // genérico, pra não virar oráculo de "esse e-mail existe nesse memorial".
-  const emailConfere =
-    !!homenagem.familia_email && email.trim().toLowerCase() === homenagem.familia_email.trim().toLowerCase()
+  // Só a senha (decisão do Rafael, 2026-08-17): a senha JA chega por e-mail no
+  // endereco cadastrado da familia, entao exigir o e-mail de novo na tela era
+  // repetir o mesmo fator e travava familia que nao lembrava qual e-mail foi
+  // cadastrado. Quem protege contra forca bruta aqui e o rate limit de login
+  // do proxy.ts (3/min por IP em /api/familia-login).
   const senhaCorreta = verificarSenhaMemorial(homenagem.id, senha, seguranca.senha_familia_hash)
 
-  if (!emailConfere || !senhaCorreta) {
-    return NextResponse.json({ ok: false, error: 'E-mail ou senha incorretos' }, { status: 401 })
+  if (!senhaCorreta) {
+    return NextResponse.json({ ok: false, error: 'Senha incorreta' }, { status: 401 })
   }
 
   const token = criarTokenFamilia(homenagem.id, seguranca.senha_familia_hash)
