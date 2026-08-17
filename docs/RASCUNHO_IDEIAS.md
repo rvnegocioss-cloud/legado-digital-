@@ -42,3 +42,42 @@ Arquivo separado do CLAUDE.md. Aqui fica **tudo que foi sugerido (por mim ou pel
 - **21st.dev Magic MCP** — pesquisado, nunca instalado (só o Firecrawl foi, com a chave que o Rafael passou).
 - **Pesquisar tutoriais do YouTube sobre integração de vídeo, transições 3D, frameworks e outras técnicas pro projeto (2026-07-15, Rafael pediu explicitamente pra não esquecer).** Fazer scrape/pesquisa de tutoriais reais quando for a vez de mexer em vídeo/3D de novo — ainda não pesquisado.
 - **Cemitério inteiro em 3D (2026-07-15, Rafael):** igual ao modelo do jazigo, mas pro cemitério inteiro. Pesquisado: **Google Earth Studio NÃO serve** (é só renderizador de vídeo cinematográfico offline, sem API de embed interativo). A API certa é a **"Photorealistic 3D Tiles" do Google Maps Platform** (`developers.google.com/maps/documentation/tile/3d-tiles`) — mesma fonte de dados 3D do Google Earth, acessível via chave de API, feita pra embutir e navegar em tempo real num visualizador 3D (three.js/Cesium/etc). É paga (Google Maps Platform, cobrança por uso). Nada decidido ainda — falta avaliar custo real e se a resolução do mesh cobre cemitérios específicos (qualidade varia por região, nem todo lugar tem captura de alta resolução).
+
+## Cartão de Sepultamento (2026-08-17, proposta pros sócios — não decidido)
+
+Entregar a localização do túmulo **no dia do sepultamento**, não semanas depois quando o memorial
+fica pronto. Nome, cemitério, quadra, fileira, túmulo e o caminho a pé — um link que a funerária
+manda pra família no mesmo dia e ela repassa pro grupo inteiro. Não exige biografia, foto antiga
+nem nada que dependa de tempo da família.
+
+**Não é produto novo nem preço novo:** a funerária já paga R$ 80-150 por ativação na tabela do
+Ricardo (deck "Estratégia de Precificação", 13 slides, recebido 2026-08-17). O Cartão vira a entrega
+dessa ativação — em vez de um link vazio esperando alguém preencher.
+
+**Custo real do mapeamento (número do Rafael, 2026-08-17):** ortomosaico do cemitério inteiro custou
+**R$ 800** em Tupaciguara e **R$ 500** em Uberlândia. Contra venda de R$ 5-15/jazigo (faixa B2G do
+deck), dá R$ 0,04/jazigo no São Pedro — margem de 99% sobre o voo. Libera voar ANTES de vender:
+chegar na prefeitura com o mapa dela pronto na tela vira custo de prospecção, não risco.
+
+**O que a funerária se compromete a fazer** (cláusula de contrato, decidido pelo Rafael): tirar a
+**foto da lápide** e **marcar a localização no GPS** — os mesmos 2 passos que o Pedro fez no São
+Pedro, com o celular dele, sem treinamento. O cemitério já chega mapeado, o funcionário não desenha
+nada.
+
+**Endereçamento é automatizável e já foi automatizado em parte** (posição do Rafael, confirmada pelo
+histórico): 186 túmulos em 10 ruas reconhecidos por visão computacional no José Lázaro, script
+genérico (`scripts/ortomosaico/mapear-cemiterio.py`). Falta rodar de ponta a ponta num cemitério
+grande — o São Pedro tem fileiras mais coladas, caso onde o algoritmo erra mais.
+
+**Relatório completo pros sócios:** https://claude.ai/code/artifact/7421c40a-daec-40e1-8c25-2d6039520dca
+
+**Pendências de decisão dos sócios:**
+- Contradição real: a ata de 16/07 diz que NÃO é venda direta pra família; o deck do Ricardo tem um
+  segmento B2C Direct inteiro (e-commerce + tráfego pago). Estratégias que competem entre si.
+- Preço fechado por voo pras próximas cidades (os 2 primeiros foram negociados caso a caso, e o menor
+  saiu mais caro).
+- Quantos sepultamentos/mês o São Pedro faz — denominador de toda a conta.
+
+**Nada construído.** As telas do fluxo (cadastro rápido de sepultamento, página enxuta de localização,
+botão de enviar pra família) não existem — só o mapa, o endereçamento e a conferência por GPS, que já
+estão no ar.
