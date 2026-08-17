@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
 import MapGL, { Source, Layer, Marker, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Cross, Flag, MapPin, Crosshair, X, ChevronDown, ChevronRight, Plus } from 'lucide-react'
+import { Cross, Flag, MapPin, Crosshair, X, ChevronDown, ChevronRight, Plus, Landmark } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
@@ -57,6 +57,7 @@ interface Lapide {
   coordenada_origem: string | null
   fila_id: string | null
   numero: number | null
+  foto_face_url: string | null
 }
 
 interface Homenagem {
@@ -66,6 +67,19 @@ interface Homenagem {
   slug: string | null
   lapide_id: string | null
 }
+
+// Ancoras visuais do mapa impresso da prefeitura (Capela, Administracao,
+// Sanitarios, Velorio...). Servem pra casar a numeracao oficial de quadra
+// com a geometria real do ortomosaico -- sem elas, so da pra inferir a
+// ordem das quadras, nunca conferir de verdade onde cada uma comeca.
+interface PontoReferencia {
+  id: string
+  nome: string
+  latitude: number
+  longitude: number
+}
+
+const PRESETS_PONTO_REF = ['Capela', 'Administração', 'Sanitários', 'Velório', 'Portão secundário']
 
 interface Quadra {
   id: string
@@ -139,6 +153,9 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [modoMarcar, setModoMarcar] = useState(false)
   const [lapideParaMarcar, setLapideParaMarcar] = useState<Lapide | null>(null)
   const [modoMarcarEntrada, setModoMarcarEntrada] = useState(false)
+  const [pontosRef, setPontosRef] = useState<PontoReferencia[]>([])
+  const [pontoRefParaMarcar, setPontoRefParaMarcar] = useState<string | null>(null)
+  const [subindoFoto, setSubindoFoto] = useState<string | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [msg, setMsg] = useState('')
   const mapRef = useRef<MapRef | null>(null)
@@ -231,7 +248,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
   async function carregar() {
     setCarregando(true)
-    const [{ data: c }, { data: l }, { data: h }, { data: geo }] = await Promise.all([
+    const [{ data: c }, { data: l }, { data: h }, { data: geo }, { data: pr }] = await Promise.all([
       supabase
         .from('cemiterios')
         .select('id, nome, latitude, longitude, ortomosaico_url, ortomosaico_minzoom, ortomosaico_maxzoom, ortomosaico_bounds, entrada_latitude, entrada_longitude')
@@ -239,7 +256,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .single(),
       supabase
         .from('lapides')
-        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero')
+        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero, foto_face_url')
         .eq('cemiterio_id', cemiterioId)
         .limit(20000),
       supabase
@@ -247,10 +264,16 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .select('id, nome_completo, foto_url, slug, lapide_id, lapides!inner(cemiterio_id)')
         .eq('lapides.cemiterio_id', cemiterioId),
       supabase.rpc('obter_geojson_cemiterio', { p_cemiterio_id: cemiterioId }),
+      supabase
+        .from('pontos_referencia_cemiterio')
+        .select('id, nome, latitude, longitude')
+        .eq('cemiterio_id', cemiterioId)
+        .order('nome'),
     ])
     setCemiterio(c)
     setLapides(l || [])
     setHomenagens(h || [])
+    setPontosRef(pr || [])
 
     const geoData = geo as {
       quadras?: { features: { properties: { id: string; numero: number; nome: string | null; situacao: string; geometria_revisada: boolean }; geometry: Quadra['poligono'] }[] }
@@ -634,6 +657,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       return
     }
 
+    if (pontoRefParaMarcar) {
+      await criarPontoRef(pontoRefParaMarcar, e.lngLat.lat, e.lngLat.lng)
+      return
+    }
+
     if (modoMarcar && lapideParaMarcar) {
       await salvarCoordenada(lapideParaMarcar.id, e.lngLat.lat, e.lngLat.lng)
       return
@@ -682,8 +710,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     const feature = e.features?.[0]
     if (feature?.properties?.lapideId) {
       const lapide = lapides.find((l) => l.id === feature.properties!.lapideId)
-      const ocupado = lapide && (homenagemPorLapide.get(lapide.id) || temMemorialGeo[lapide.id])
-      setLapideHover(ocupado ? lapide : null)
+      // Mostra o card quando ha memorial vinculado OU foto da face do tumulo
+      // (foto sozinha ja identifica o tumulo em campo, mesmo antes de existir
+      // memorial -- e o caso do mapeamento de quadra em andamento).
+      const temCard = lapide && (homenagemPorLapide.get(lapide.id) || temMemorialGeo[lapide.id] || lapide.foto_face_url)
+      setLapideHover(temCard ? lapide : null)
     } else {
       setLapideHover(null)
     }
@@ -713,6 +744,66 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       setModoMarcarEntrada(false)
       await carregar()
     }
+    setSalvando(false)
+  }
+
+  // Foto da face do tumulo (o que esta gravado na pedra) -- captura nadir de
+  // drone nunca mostra a face vertical, entao a unica forma de saber de quem
+  // e o tumulo sem OCR aereo e a foto tirada de perto, em campo. Cai no
+  // bucket "memoriais" que ja existe, em pasta propria.
+  async function subirFotoTumulo(lapideId: string, arquivo: File) {
+    setSubindoFoto(lapideId)
+    setMsg('')
+    try {
+      const caminho = `tumulos/${cemiterioId}/${lapideId}/${Date.now()}-${arquivo.name}`
+      const { error: erroUpload } = await supabase.storage.from('memoriais').upload(caminho, arquivo, { upsert: true })
+      if (erroUpload) throw erroUpload
+      const { data } = supabase.storage.from('memoriais').getPublicUrl(caminho)
+
+      const { error } = await supabase.from('lapides').update({ foto_face_url: data.publicUrl }).eq('id', lapideId)
+      if (error) throw error
+
+      setLapides((atual) => atual.map((l) => (l.id === lapideId ? { ...l, foto_face_url: data.publicUrl } : l)))
+      setLapideSelecionada((atual) => (atual && atual.id === lapideId ? { ...atual, foto_face_url: data.publicUrl } : atual))
+      setMsg('Foto do túmulo salva — aparece ao passar o mouse no pino.')
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Erro ao enviar a foto.')
+    }
+    setSubindoFoto(null)
+  }
+
+  async function criarPontoRef(nome: string, lat: number, lng: number) {
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase
+      .from('pontos_referencia_cemiterio')
+      .insert({ cemiterio_id: cemiterioId, nome, latitude: lat, longitude: lng })
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`"${nome}" marcado — arrasta o pino pra ajustar a posição exata.`)
+      setPontoRefParaMarcar(null)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  // Ajuste fino: arrastar o pino salva a posicao nova ao soltar (mesmo
+  // padrao do modo edicao de tumulo), sem precisar apagar e remarcar.
+  async function moverPontoRef(id: string, lat: number, lng: number) {
+    setPontosRef((atual) => atual.map((p) => (p.id === id ? { ...p, latitude: lat, longitude: lng } : p)))
+    const { error } = await supabase
+      .from('pontos_referencia_cemiterio')
+      .update({ latitude: lat, longitude: lng })
+      .eq('id', id)
+    if (error) setMsg(error.message)
+  }
+
+  async function apagarPontoRef(id: string, nome: string) {
+    if (!confirm(`Apagar o ponto de referência "${nome}"?`)) return
+    setSalvando(true)
+    const { error } = await supabase.from('pontos_referencia_cemiterio').delete().eq('id', id)
+    if (error) setMsg(error.message)
+    else await carregar()
     setSalvando(false)
   }
 
@@ -1399,7 +1490,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 width: '100%',
                 height: '100%',
                 cursor:
-                  modoMarcarEntrada || (modoMarcar && lapideParaMarcar) || desenho.ativo || modoAdicionarTumulo
+                  modoMarcarEntrada || pontoRefParaMarcar || (modoMarcar && lapideParaMarcar) || desenho.ativo || modoAdicionarTumulo
                     ? 'crosshair'
                     : undefined,
               }}
@@ -1552,6 +1643,39 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   </div>
                 </Marker>
               )}
+
+              {pontosRef.map((p) => (
+                <Marker
+                  key={`ref-${p.id}`}
+                  longitude={p.longitude}
+                  latitude={p.latitude}
+                  anchor="bottom"
+                  draggable={editavel}
+                  onDragEnd={(ev) => moverPontoRef(p.id, ev.lngLat.lat, ev.lngLat.lng)}
+                >
+                  <div
+                    title={editavel ? `${p.nome} — arrasta pra ajustar` : p.nome}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: editavel ? 'grab' : 'default' }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: '#fff',
+                        background: '#7c3aed',
+                        borderRadius: 4,
+                        padding: '1px 5px',
+                        marginBottom: 2,
+                        whiteSpace: 'nowrap',
+                        boxShadow: '0 1px 4px rgba(0,0,0,.4)',
+                      }}
+                    >
+                      {p.nome}
+                    </span>
+                    <Landmark size={20} strokeWidth={2} fill="#7c3aed" style={{ color: '#fff' }} />
+                  </div>
+                </Marker>
+              ))}
 
               {filasComBandeira.map((f) => {
                 const cor = corDaFila(f.numero)
@@ -1817,10 +1941,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           justifyContent: 'center',
                         }}
                       >
-                        {homenagemPorLapide.get(lapideHover.id)?.foto_url ? (
+                        {(homenagemPorLapide.get(lapideHover.id)?.foto_url || lapideHover.foto_face_url) ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={homenagemPorLapide.get(lapideHover.id)!.foto_url!}
+                            src={homenagemPorLapide.get(lapideHover.id)?.foto_url || lapideHover.foto_face_url!}
                             alt=""
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
@@ -1837,6 +1961,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           </p>
                           <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
                             {homenagemPorLapide.get(lapideHover.id)?.nome_completo}
+                          </p>
+                        </>
+                      ) : lapideHover.foto_face_url ? (
+                        <>
+                          <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
+                            Túmulo
+                          </p>
+                          <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
+                            {lapideHover.identificacao}
                           </p>
                         </>
                       ) : (
@@ -1871,6 +2004,36 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           ) : (
                             <p style={{ fontSize: 11, color: '#888', margin: '4px 0' }}>Sem memorial vinculado</p>
                           )}
+
+                          {lapideSelecionada.foto_face_url && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={lapideSelecionada.foto_face_url}
+                              alt=""
+                              style={{ width: '100%', maxWidth: 200, borderRadius: 6, margin: '6px 0', display: 'block' }}
+                            />
+                          )}
+                          {editavel && (
+                            <label style={{ fontSize: 11, color: '#0B5FFF', cursor: 'pointer', display: 'block', marginTop: 4 }}>
+                              {subindoFoto === lapideSelecionada.id
+                                ? 'Enviando foto...'
+                                : lapideSelecionada.foto_face_url
+                                  ? 'Trocar foto do túmulo'
+                                  : 'Adicionar foto do túmulo'}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                disabled={subindoFoto != null}
+                                onChange={(ev) => {
+                                  const f = ev.target.files?.[0]
+                                  if (f) subirFotoTumulo(lapideSelecionada.id, f)
+                                  ev.target.value = ''
+                                }}
+                              />
+                            </label>
+                          )}
+
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
                             {h && (
                               <a href={`/admin/memoriais/${h.id}`} style={{ fontSize: 12, color: '#0B5FFF' }}>
@@ -2585,6 +2748,81 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 <Flag size={12} strokeWidth={1.5} />
                 {cemiterio.entrada_latitude != null ? 'Remarcar entrada' : 'Marcar entrada do cemitério'}
               </button>
+            )}
+          </div>
+
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mt-4">
+            <h2 className="text-sm font-semibold text-white mb-1">Pontos de referência</h2>
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
+              Capela, Administração, Sanitários, Velório — as mesmas âncoras que aparecem no mapa impresso do cemitério. Servem
+              pra conferir se a numeração oficial de quadra bate com a geometria real. Arrasta o pino roxo pra ajustar.
+            </p>
+
+            {pontosRef.length > 0 && (
+              <div className="space-y-1 mb-3">
+                {pontosRef.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1.5 text-[var(--tema-zinc-300)]">
+                      <Landmark size={11} strokeWidth={1.5} style={{ color: '#a855f7' }} />
+                      {p.nome}
+                    </span>
+                    {editavel && (
+                      <button
+                        type="button"
+                        onClick={() => apagarPontoRef(p.id, p.nome)}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        Apagar
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!editavel ? null : pontoRefParaMarcar ? (
+              <div className="rounded-lg bg-purple-950/30 border border-purple-900/40 px-3 py-2 flex items-center justify-between">
+                <p className="text-xs text-purple-300">Clique no mapa em cima de &quot;{pontoRefParaMarcar}&quot;</p>
+                <button type="button" onClick={() => setPontoRefParaMarcar(null)} className="text-purple-400 hover:text-purple-200">
+                  <X size={14} strokeWidth={1.5} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {PRESETS_PONTO_REF.filter((n) => !pontosRef.some((p) => p.nome === n)).map((nome) => (
+                  <button
+                    key={nome}
+                    type="button"
+                    disabled={salvando}
+                    onClick={() => {
+                      setPontoRefParaMarcar(nome)
+                      setModoMarcarEntrada(false)
+                      setModoMarcar(false)
+                      setLapideParaMarcar(null)
+                      desenho.cancelar()
+                    }}
+                    className="text-xs px-2 py-1 rounded border border-purple-900/50 text-purple-300 hover:bg-purple-950/40 disabled:opacity-40"
+                  >
+                    + {nome}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  disabled={salvando}
+                  onClick={() => {
+                    const nome = prompt('Nome do ponto de referência:')?.trim()
+                    if (!nome) return
+                    setPontoRefParaMarcar(nome)
+                    setModoMarcarEntrada(false)
+                    setModoMarcar(false)
+                    setLapideParaMarcar(null)
+                    desenho.cancelar()
+                  }}
+                  className="text-xs px-2 py-1 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-400)] hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
+                >
+                  + Outro
+                </button>
+              </div>
             )}
           </div>
         </div>

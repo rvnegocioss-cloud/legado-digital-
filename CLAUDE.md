@@ -195,6 +195,8 @@ Tudo do checklist de Fase 1/2 abaixo está **feito** (schema, auth, CRUDs de Par
 
 - [x] **Ortomosaico do São Pedro processado e no ar** (2026-08-13, planejado com Opus, executado no mesmo dia) — segundo cemitério real com ortomosaico, primeiro usando o novo modo `--src-xyz` do `converter-ortomosaico.py` (pirâmide de tiles pronta em vez de GeoPackage, sem rewarp — achado: quando o processador do voo já entrega tiles renderizados, é melhor copiar direto que remontar raster e reamostrar de novo). **Achado crítico corrigido**: `cemiterios` do São Pedro estava com coordenada 373km errada (caindo em Goiás), já `publico=true` — o mapa público (`/cemiterios`) mostrava satélite vazio de lugar errado. Corrigido pra coordenada real tirada dos arquivos do drone. **Achado real sobre os arquivos entregues**: o formato óbvio (`.tif` soltos) era 16× pior que o real — o bom (`Sao Pedro map.zip`) só foi identificado inspecionando resolução de verdade, não pelo nome do arquivo. Resultado: São Pedro roda a **1,6cm/px** (2× mais nítido que o José Lázaro em produção, 3,5cm/px). Detalhe técnico completo, achado de escala (~10-15 mil túmulos estimados) e recomendação sobre o Tiled Model 3D do Metashape em `docs/mapa.md`.
 
+- [x] **Numeração oficial da prefeitura + pontos de referência + foto do túmulo** (2026-08-14) — achado de campo (Pedro foi ao São Pedro): o cemitério **já tem numeração própria de quadra**, com mapa impresso da Prefeitura de Uberlândia na portaria e letreiro de ferro em cada esquina. Orientação do impresso validada com 2 provas independentes (GPS em cima da Quadra 36 batendo em "coluna 8 de 8, linha 5 de 10"; e os 4 letreiros fotografados dando a fileira 5 inteira na ordem **60 → 32 → 34 → 36 → 82**, idêntica ao impresso). Limite: o impresso é esquemático, dá a ORDEM certa mas nunca o tamanho real — por isso entrou tabela nova `pontos_referencia_cemiterio` (Capela/Administração/Sanitários/Velório, pino roxo arrastável no mapa de Central, RLS staff-all/parceiro-select) pra ancorar a grade do impresso na geometria real. E `lapides.foto_face_url` (coluna que existia desde 05/08 como gancho, nunca usada) foi ligada: staff sobe a foto do túmulo tirada de perto pelo popup do pino, e o **hover passa a mostrar foto + identificação mesmo sem memorial vinculado** — resolve o problema de fundo de que captura nadir de drone nunca mostra o nome gravado na face vertical da lápide. Detalhe completo em `docs/mapa.md`.
+
 ## Portal do Parceiro B2B — como funciona
 Cada funerária/parceiro tem acesso próprio, fora da Central, vendo só os próprios memoriais.
 1. Papel **"Parceiro B2B"** semeado em `perfis`; tabela `parceiros_usuarios` (usuario_id, parceiro_id) permite mais de 1 pessoa por funerária
@@ -345,5 +347,5 @@ npm run start      # inicia servidor de produção
 
 ---
 
-**Last Updated**: 2026-08-13
+**Last Updated**: 2026-08-14
 **Histórico completo**: `Projects/Legado Digital - Historico Detalhado.md` (vault)

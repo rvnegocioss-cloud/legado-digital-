@@ -190,6 +190,31 @@ Primeiro cemitério a usar `converter-ortomosaico.py --src-xyz` (modo novo, ver 
 
 Quando o processador do voo já entrega uma pirâmide de tiles pronta em EPSG:3857 (esquema XYZ/slippy-map, tipo Google Maps — é o que exporta de Agisoft Metashape, DJI Terra, WebODM etc via "Export Tiled" ou similar), o script consegue copiar direto pro MBTiles/PMTiles **sem rewarp nem reamostragem** — o `WarpedVRT`+merge 2×2 do modo `--src` (GeoPackage) reamostra duas vezes; aqui os tiles já vêm renderizados no zoom nativo. `--src-xyz <arquivo.zip>` no lugar de `--src <arquivo.gpkg>`; bounds/centro são derivados direto do range de tiles presentes no zoom mais fino usado (fórmula padrão slippy-map, sem depender de nenhum manifesto externo). Uso real: `--src-xyz "mapa.zip" --minzoom 15 --maxzoom 23 --quality 48 --quality-overview 55`.
 
+## Numeração oficial da prefeitura vs. numeração própria (São Pedro, 2026-08-14)
+
+Achado de campo: o São Pedro **já tem numeração oficial de quadra** — mapa impresso entregue pela Prefeitura de Uberlândia na portaria (quadras 01-81 em grade de 10 linhas × 8 colunas, mais as perimetrais 82/83/84/85), e **letreiro de ferro em cada esquina de quadra** apontando pras vizinhas ("Quadra 36 / 82 →"). Ou seja: o número da quadra não é escolha nossa, tem que bater com o que o cemitério usa (`quadras.nome`, rename livre, já existia).
+
+**Orientação do mapa impresso, validada com dado real** (não é suposição):
+
+| Mapa impresso | Real |
+|---|---|
+| Capela (topo) | Oeste |
+| Av. Paes Leme (base) | Leste |
+| Quadra 82 (direita) | Norte |
+| Quadra 84 (esquerda) | Sul |
+
+Duas confirmações independentes: (1) coordenada GPS tirada em cima da Quadra 36 caiu a 17% da borda norte e 41% do oeste — bate com "coluna 8 de 8, linha 5 de 10"; (2) os 4 letreiros fotografados dão a fileira 5 inteira na ordem **60 → 32 → 34 → 36 → [Quadra 82]**, idêntica à linha 5 do impresso.
+
+**Limite conhecido:** o impresso é esquemático — quadra desenhada como caixinha de tamanho igual. Dá a ORDEM certa, nunca o tamanho/posição real. Por isso não dá pra derivar a geometria escalando o desenho; precisa de âncora física.
+
+### Pontos de referência (`pontos_referencia_cemiterio`, 2026-08-14)
+
+Tabela nova pra marcar as âncoras físicas do impresso (Capela, Administração, Sanitários, Velório, portão secundário) direto no ortomosaico: staff clica no mapa, pino roxo aparece, **arrasta pra ajustar** (salva ao soltar). RLS staff-all / parceiro-select via `pode_ver_cemiterio` (regra 22). Com Capela + Administração marcadas, a grade inteira do impresso fica conferível contra a geometria real, em vez de depender só do GPS de um túmulo.
+
+### Foto da face do túmulo (`lapides.foto_face_url`, ligada 2026-08-14)
+
+Coluna existia desde 05/08 como gancho, nunca usada. Agora: no popup do pino em Central, staff sobe a foto tirada de perto (bucket `memoriais`, pasta `tumulos/<cemiterio>/<lapide>/`), e **o hover do pino passa a mostrar a foto + identificação mesmo sem memorial vinculado** — antes o card só aparecia com memorial. É o que resolve o problema de fundo do projeto: captura nadir de drone nunca mostra a face vertical da lápide, então a única forma de saber de quem é o túmulo é a foto de campo.
+
 ## Mapa Público de Cemitérios (2026-08-13)
 
 Segundo consumidor da camada de ortomosaico (o primeiro é `GuiaTumulo.tsx`), agora sem login: `/cemiterios` (lista cidade) → `/cemiterios/[cidade]` (lista cemitério) → `/cemiterios/[cidade]/[cemiterio]` (mapa). Componente novo `components/public/MapaPublicoCemiterio.tsx` — não reaproveita `MapaCemiterio.tsx` (grande demais, cheio de escrita, arriscado expor ao público), reaproveita só `lib/ortomosaico.ts` + `lib/estiloSatelite.ts` (novo, extrai a técnica de camada empilhada satélite+ortomosaico de `GuiaTumulo.tsx`, que fica intocado). Pino de túmulo com memorial é `symbol` layer (ícone de cruz via `addImage`, nunca `<Marker>` por túmulo — mesma decisão de escala de sempre), hover mostra popup com nome/foto (só se o memorial tem `modo_gate='aberto'`). `cemiterios` ganhou `slug` + `publico` (governança: só a Central decide quem entra no diretório). Detalhe completo de decisão de privacidade/RPCs no `CLAUDE.md`, seção Fase Atual.

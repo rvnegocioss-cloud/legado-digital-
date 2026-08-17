@@ -86,10 +86,12 @@ async function backupViaApi() {
   }
 
   const tables = [
-    'usuarios', 'perfis', 'permissoes', 'usuarios_perfis', 'parceiros_b2b',
-    'parceiros_usuarios', 'cemiterios', 'lapides', 'gavetas', 'homenagens',
-    'homenagens_seguranca', 'condolencias', 'emails_enviados',
-    'configuracoes_sistema', 'mapa_sugestoes', 'parceiros_contatos'
+    'usuarios', 'perfis', 'permissoes', 'usuarios_perfis', 'perfis_permissoes', 'parceiros_b2b',
+    'parceiros_usuarios', 'parceiros_contatos', 'cemiterios', 'cemiterios_parceiros',
+    'quadras', 'filas', 'ruas_cemiterio', 'lapides', 'gavetas', 'homenagens',
+    'homenagens_seguranca', 'homenagens_emails_autorizados', 'memorial_email_codigos',
+    'memorial_visitantes', 'condolencias', 'mural_memorias', 'emails_enviados',
+    'configuracoes_sistema', 'mapa_sugestoes'
   ];
 
   const backupContent = [];
