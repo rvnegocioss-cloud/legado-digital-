@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { gerarSlugUnico } from '@/lib/gerarSlug'
 import MapGL, { Source, Layer, Marker, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Cross, Flag, MapPin, Crosshair, X, ChevronDown, ChevronRight, Plus, Landmark } from 'lucide-react'
@@ -156,6 +158,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [pontosRef, setPontosRef] = useState<PontoReferencia[]>([])
   const [pontoRefParaMarcar, setPontoRefParaMarcar] = useState<string | null>(null)
   const [subindoFoto, setSubindoFoto] = useState<string | null>(null)
+  // Menu de botao direito -- cadastrar memorial direto no tumulo, em campo,
+  // sem sair do mapa. lapide null = clicou em espaco vazio (cria avulso).
+  const router = useRouter()
+  const [menuContexto, setMenuContexto] = useState<{ x: number; y: number; lapide: Lapide | null; lat: number; lng: number } | null>(null)
+  const [cadastroMemorial, setCadastroMemorial] = useState<{ lapide: Lapide; nome: string; preenchidoPor: 'funeraria' | 'familia' } | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [msg, setMsg] = useState('')
   const mapRef = useRef<MapRef | null>(null)
@@ -742,6 +749,101 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     } else {
       setMsg('Entrada do cemitério marcada.')
       setModoMarcarEntrada(false)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  function aoBotaoDireitoMapa(e: MapLayerMouseEvent) {
+    if (!editavel) return
+    e.preventDefault?.()
+    const feature = e.features?.[0]
+    const lapide = feature?.properties?.lapideId
+      ? lapides.find((l) => l.id === feature.properties!.lapideId) ?? null
+      : null
+    setMenuContexto({ x: e.point.x, y: e.point.y, lapide, lat: e.lngLat.lat, lng: e.lngLat.lng })
+  }
+
+  // Cadastro minimo do memorial, feito em campo com o celular na mao: so o
+  // nome completo. Nasce ja vinculado ao tumulo clicado e com slug
+  // definitivo (nunca 'rascunho-', que a limpeza automatica de 2h apaga).
+  async function salvarCadastroMemorial() {
+    if (!cadastroMemorial) return
+    const nome = cadastroMemorial.nome.trim()
+    if (!nome) {
+      setMsg('Nome completo é obrigatório.')
+      return
+    }
+
+    setSalvando(true)
+    setMsg('')
+    const slug = await gerarSlugUnico(supabase, nome)
+    const { data, error } = await supabase
+      .from('homenagens')
+      .insert({
+        nome_completo: nome,
+        slug,
+        memorial_slug: slug,
+        lapide_id: cadastroMemorial.lapide.id,
+        preenchido_por: cadastroMemorial.preenchidoPor,
+        origem_cadastro: 'mapa_cemiterio',
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      setMsg(error.message)
+    } else {
+      setMsg(
+        `Memorial de ${nome} criado no túmulo ${cadastroMemorial.lapide.identificacao}. ` +
+          (cadastroMemorial.preenchidoPor === 'familia'
+            ? 'Aguardando a família preencher o resto.'
+            : 'Falta completar os dados — aparece no alerta do Dashboard.')
+      )
+      setCadastroMemorial(null)
+      await carregar()
+      if (data) router.push(`/admin/memoriais/${data.id}`)
+    }
+    setSalvando(false)
+  }
+
+  // Tumulo avulso: uma bolinha so, sem quadra/fileira. Serve pro caso real de
+  // campo -- achou o tumulo, quer marcar agora, a fileira dele ainda nao foi
+  // desenhada. Depois da pra vincular numa fileira pela tela de Lapides.
+  async function criarTumuloAvulso(lat: number, lng: number) {
+    const nome = prompt('Identificação do túmulo (ex: Q36 sepultura 11):')?.trim()
+    if (!nome) return
+
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase.from('lapides').insert({
+      cemiterio_id: cemiterioId,
+      identificacao: nome,
+      latitude: lat,
+      longitude: lng,
+      coordenada_origem: 'ortomosaico',
+      coordenada_precisao: 'exata',
+      situacao: 'nao_confirmada',
+    })
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`Túmulo avulso "${nome}" marcado. Botão direito nele pra cadastrar o memorial.`)
+      await carregar()
+    }
+    setSalvando(false)
+  }
+
+  async function apagarTumuloDoMenu(lapide: Lapide) {
+    if (homenagemPorLapide.get(lapide.id) || temMemorialGeo[lapide.id]) {
+      setMsg('Esse túmulo já tem memorial vinculado — não dá pra apagar por aqui.')
+      return
+    }
+    if (!confirm(`Apagar o túmulo "${lapide.identificacao}"? Isso não tem desfazer.`)) return
+    setSalvando(true)
+    const { error } = await supabase.from('lapides').delete().eq('id', lapide.id)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`Túmulo ${lapide.identificacao} apagado.`)
       await carregar()
     }
     setSalvando(false)
@@ -1546,6 +1648,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               }}
               interactiveLayerIds={['lapides-pinos']}
               onClick={aoClicarMapa}
+              onContextMenu={aoBotaoDireitoMapa}
               onMouseMove={aoMoverMouseMapa}
             >
               <NavigationControl showZoom position="top-right" />
@@ -2115,6 +2218,153 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 </Popup>
               )}
             </MapGL>
+
+            {menuContexto && (
+              <>
+                {/* Camada invisivel: qualquer clique fora fecha o menu */}
+                <div className="fixed inset-0 z-40" onClick={() => setMenuContexto(null)} onContextMenu={(e) => { e.preventDefault(); setMenuContexto(null) }} />
+                <div
+                  className="absolute z-50 rounded-lg border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-900)] shadow-xl py-1 min-w-[210px]"
+                  style={{ left: menuContexto.x, top: menuContexto.y }}
+                >
+                  {menuContexto.lapide ? (
+                    <>
+                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wide text-[var(--tema-zinc-500)] border-b border-[var(--tema-zinc-800)]">
+                        {menuContexto.lapide.identificacao}
+                      </p>
+                      {homenagemPorLapide.get(menuContexto.lapide.id) ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const h = homenagemPorLapide.get(menuContexto.lapide!.id)!
+                            setMenuContexto(null)
+                            router.push(`/admin/memoriais/${h.id}`)
+                          }}
+                          className="w-full text-left px-3 py-2 text-xs text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
+                        >
+                          Abrir memorial de {homenagemPorLapide.get(menuContexto.lapide.id)!.nome_completo}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCadastroMemorial({ lapide: menuContexto.lapide!, nome: '', preenchidoPor: 'familia' })
+                            setMenuContexto(null)
+                          }}
+                          className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-[var(--tema-zinc-800)]"
+                          style={{ color: '#C9A46A' }}
+                        >
+                          + Cadastrar memorial aqui
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLapideSelecionada(menuContexto.lapide)
+                          setMenuContexto(null)
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
+                      >
+                        Foto do túmulo / detalhes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setModoMarcar(true)
+                          setLapideParaMarcar(menuContexto.lapide)
+                          setMenuContexto(null)
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
+                      >
+                        Mover pino
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const l = menuContexto.lapide!
+                          setMenuContexto(null)
+                          apagarTumuloDoMenu(l)
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-[var(--tema-zinc-800)] border-t border-[var(--tema-zinc-800)]"
+                      >
+                        Apagar túmulo
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const { lat, lng } = menuContexto
+                        setMenuContexto(null)
+                        criarTumuloAvulso(lat, lng)
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-[var(--tema-zinc-800)]"
+                      style={{ color: '#C9A46A' }}
+                    >
+                      + Marcar túmulo avulso aqui
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+
+            {cadastroMemorial && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                <div className="w-full max-w-sm rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-700)] p-4">
+                  <h3 className="text-sm font-semibold text-white mb-1">Cadastrar memorial</h3>
+                  <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
+                    Túmulo {cadastroMemorial.lapide.identificacao}. Só o nome é obrigatório agora — o resto (datas, foto, história) você completa
+                    depois na ficha.
+                  </p>
+
+                  <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Nome completo do homenageado</label>
+                  <input
+                    autoFocus
+                    value={cadastroMemorial.nome}
+                    onChange={(e) => setCadastroMemorial({ ...cadastroMemorial, nome: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') salvarCadastroMemorial()
+                      if (e.key === 'Escape') setCadastroMemorial(null)
+                    }}
+                    placeholder="Ex: Maria de Souza Barbosa"
+                    className="w-full text-sm bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-white mb-3"
+                  />
+
+                  <label className="block text-xs text-[var(--tema-zinc-400)] mb-1">Quem preenche o resto do conteúdo</label>
+                  <div className="flex gap-3 mb-4">
+                    {(['familia', 'funeraria'] as const).map((v) => (
+                      <label key={v} className="flex items-center gap-1.5 text-xs text-[var(--tema-zinc-300)]">
+                        <input
+                          type="radio"
+                          name="preenchido-por-mapa"
+                          checked={cadastroMemorial.preenchidoPor === v}
+                          onChange={() => setCadastroMemorial({ ...cadastroMemorial, preenchidoPor: v })}
+                        />
+                        {v === 'familia' ? 'A família' : 'Nós / a funerária'}
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={salvando || !cadastroMemorial.nome.trim()}
+                      onClick={salvarCadastroMemorial}
+                      className="text-xs px-3 py-1.5 rounded bg-amber-600 text-branco-fixo hover:bg-amber-500 disabled:opacity-40"
+                    >
+                      {salvando ? 'Criando...' : 'Criar e abrir a ficha'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCadastroMemorial(null)}
+                      className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -2335,6 +2585,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 </button>
               )}
             </div>
+            {editavel && (
+              <p className="text-xs rounded-lg px-2.5 py-2 mb-3 border border-amber-900/40 bg-amber-950/20" style={{ color: '#fbbf24' }}>
+                <strong>Cadastro de memorial:</strong> clique com o <strong>botão direito</strong> do mouse no túmulo marcado da fileira (ou num
+                avulso). Botão direito num ponto vazio marca um túmulo avulso ali.
+              </p>
+            )}
             <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
               Desenha o contorno de cada quadra, numera a partir da entrada, depois desenha as fileiras dentro dela.
             </p>

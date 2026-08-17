@@ -211,6 +211,16 @@ Duas confirmações independentes: (1) coordenada GPS tirada em cima da Quadra 3
 
 Tabela nova pra marcar as âncoras físicas do impresso (Capela, Administração, Sanitários, Velório, portão secundário) direto no ortomosaico: staff clica no mapa, pino roxo aparece, **arrasta pra ajustar** (salva ao soltar). RLS staff-all / parceiro-select via `pode_ver_cemiterio` (regra 22). Com Capela + Administração marcadas, a grade inteira do impresso fica conferível contra a geometria real, em vez de depender só do GPS de um túmulo.
 
+### Cadastro de memorial direto no túmulo (botão direito, 2026-08-14)
+
+Fluxo de campo: staff está no cemitério, acha o túmulo, quer cadastrar na hora. **Botão direito no pino** abre menu com "Cadastrar memorial aqui" (ou "Abrir memorial de X" se já tiver), foto do túmulo, mover pino, apagar. **Botão direito num ponto vazio** marca um túmulo avulso ali (uma bolinha só, sem quadra/fileira — a fileira dele pode nem ter sido desenhada ainda).
+
+O cadastro exige **só o nome completo** — é o mínimo pra o memorial existir. Nasce com slug definitivo (nunca `rascunho-`, que a limpeza automática de 2h apagaria), vinculado ao túmulo, e abre a ficha completa em seguida. Escolhe também quem preenche o resto (`preenchido_por`: família ou funerária), que já existia.
+
+Coluna nova `homenagens.origem_cadastro` (`central`/`parceiro`/`mapa_cemiterio`/`familia`, nullable — memorial antigo fica null): sem ela não dá pra distinguir um memorial vazio que está esperando alguém de um que nasceu assim de propósito, em campo.
+
+**Alerta no Dashboard da Central**: card no topo listando os memoriais com dado faltando (data de falecimento, foto, história, contato da família), com link pra ficha, marca de "aguardando a família" quando `preenchido_por = familia`, e de "cadastrado no cemitério" quando veio do mapa.
+
 ### Renumerar quadra (`renumerar_quadra`, 2026-08-14)
 
 Nosso `quadras.numero` nasce da ordem em que a quadra é desenhada (1, 2, 3...), que **não** é o número real do cemitério. Botão "# Renumerar quadra" em Central chama a RPC, que faz 3 coisas numa transação só:
