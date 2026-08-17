@@ -7,7 +7,6 @@ import { Navigation, ChevronDown, ChevronRight, MapPin, Cross } from 'lucide-rea
 import { CORES } from '@/lib/publicTheme'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
-import { calcularRota, type RuaMapeada } from '@/lib/rotaCemiterio'
 
 registrarProtocoloPmtiles()
 
@@ -45,10 +44,6 @@ interface Props {
   ortoMaxzoom?: number | null
   ortoBounds?: number[] | null
   rotaCoordenadas?: [number, number][] | null
-  // Rede de ruas do cemiterio (mesma que gerou rotaCoordenadas no servidor).
-  // Vem pro cliente pra recalcular a rota a partir de ONDE A PESSOA ESTA,
-  // nao so da portaria. Sem ruas, tudo continua exatamente como era.
-  ruas?: RuaMapeada[] | null
 }
 
 function distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -81,15 +76,10 @@ export default function GuiaTumulo({
   ortoMaxzoom,
   ortoBounds,
   rotaCoordenadas,
-  ruas,
 }: Props) {
   const [aberto, setAberto] = useState(false)
   const [minhaPos, setMinhaPos] = useState<{ lat: number; lng: number } | null>(null)
   const [erroGps, setErroGps] = useState('')
-  const [precisaoGps, setPrecisaoGps] = useState<number | null>(null)
-  // Posicao "ancorada": so avanca quando a pessoa anda mais de 5 m. Evita
-  // recalcular Dijkstra a cada tremida do GPS parado.
-  const [posRota, setPosRota] = useState<{ lat: number; lng: number } | null>(null)
   const [navegando, setNavegando] = useState(false)
   const [mostrarCard, setMostrarCard] = useState(false)
   const watchId = useRef<number | null>(null)
@@ -147,30 +137,13 @@ export default function GuiaTumulo({
     }
     setNavegando(true)
     watchId.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        const p = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-        setMinhaPos(p)
-        setPrecisaoGps(typeof pos.coords.accuracy === 'number' ? pos.coords.accuracy : null)
-        setPosRota((atual) => (!atual || distanciaMetros(atual.lat, atual.lng, p.lat, p.lng) > 5 ? p : atual))
-      },
+      (pos) => setMinhaPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => setErroGps('Não consegui acessar sua localização — verifique a permissão do navegador.'),
       { enableHighAccuracy: true, maximumAge: 2000 }
     )
   }
 
   const distancia = minhaPos && temTumulo ? distanciaMetros(minhaPos.lat, minhaPos.lng, lapideLat!, lapideLng!) : null
-
-  // Rota VIVA: recalculada no navegador a partir da posicao da pessoa, pelas
-  // mesmas ruas mapeadas. calcularRota nunca lanca erro -- se a pessoa estiver
-  // longe demais da rede (ou nao houver rede), devolve usouRede=false e aqui
-  // vira null, entao a linha volta a ser a fixa portao->tumulo de sempre.
-  const rotaViva = useMemo(() => {
-    if (!temTumulo || !posRota || !ruas || ruas.length === 0) return null
-    const r = calcularRota(posRota, { lat: lapideLat!, lng: lapideLng! }, ruas)
-    return r.usouRede ? r : null
-  }, [posRota, ruas, lapideLat, lapideLng, temTumulo])
-
-  const gpsImpreciso = precisaoGps != null && precisaoGps > 25
 
   // Linha fixa: portao ate o tumulo (referencia estavel, nao muda com o GPS
   // da pessoa). Quando o cemiterio tem ruas mapeadas e a rede alcanca os 2
@@ -184,9 +157,7 @@ export default function GuiaTumulo({
       type: 'Feature' as const,
       geometry: {
         type: 'LineString' as const,
-        coordinates: rotaViva
-          ? rotaViva.coordenadas
-          : temRotaReal
+        coordinates: temRotaReal
           ? rotaCoordenadas!
           : [
               [cemiterioLng, cemiterioLat],
@@ -356,25 +327,9 @@ export default function GuiaTumulo({
                 ) : (
                   <div className="text-center">
                     {distancia != null ? (
-                      <>
-                        <p className="text-lg font-semibold" style={{ color: '#F5F2EB' }}>
-                          {distancia < 3
-                            ? 'Você chegou'
-                            : rotaViva
-                            ? `${Math.round(rotaViva.distanciaM)} m a pé até o túmulo`
-                            : `${Math.round(distancia)} m até o túmulo`}
-                        </p>
-                        {rotaViva && distancia >= 3 && (
-                          <p className="text-[11px] mt-0.5" style={{ color: '#C9A46A' }}>
-                            Caminho pelas alamedas do cemitério, a partir de onde você está
-                          </p>
-                        )}
-                        {gpsImpreciso && (
-                          <p className="text-[11px] mt-0.5" style={{ color: '#F5F2EB', opacity: 0.6 }}>
-                            Sinal de GPS fraco agora (± {Math.round(precisaoGps!)} m) — ande alguns passos a céu aberto.
-                          </p>
-                        )}
-                      </>
+                      <p className="text-lg font-semibold" style={{ color: '#F5F2EB' }}>
+                        {distancia < 1 ? 'Você chegou' : `${Math.round(distancia)} m até o túmulo`}
+                      </p>
                     ) : (
                       <p className="text-xs" style={{ color: '#F5F2EB', opacity: 0.6 }}>Buscando sua localização...</p>
                     )}

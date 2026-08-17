@@ -470,7 +470,6 @@ export default async function HomenagemPage({
                 ortoMaxzoom={localizacao.orto_maxzoom}
                 ortoBounds={localizacao.orto_bounds}
                 rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
-                ruas={(ruasData as RuaMapeada[] | null) ?? []}
               />
             </div>
           </section>
