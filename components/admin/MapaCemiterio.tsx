@@ -163,6 +163,13 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const router = useRouter()
   const [menuContexto, setMenuContexto] = useState<{ x: number; y: number; lapide: Lapide | null; lat: number; lng: number } | null>(null)
   const [cadastroMemorial, setCadastroMemorial] = useState<{ lapide: Lapide; nome: string; preenchidoPor: 'funeraria' | 'familia' } | null>(null)
+  // Vincular memorial que JA existe no cadastro a este tumulo -- busca por
+  // nome no banco (nao lista tudo em memoria: memorial e a tabela que mais
+  // cresce, e o cemiterio pode ter dezenas de milhares).
+  const [vincularEm, setVincularEm] = useState<Lapide | null>(null)
+  const [buscaVinculo, setBuscaVinculo] = useState('')
+  const [resultadosVinculo, setResultadosVinculo] = useState<{ id: string; nome_completo: string; lapide_id: string | null }[]>([])
+  const [buscandoVinculo, setBuscandoVinculo] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [msg, setMsg] = useState('')
   const mapRef = useRef<MapRef | null>(null)
@@ -456,6 +463,29 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     () => filas.filter((f) => f.eixo && quadrasComBandeiraDeFila.has(f.quadra_id)),
     [filas, quadrasComBandeiraDeFila]
   )
+
+  // Busca de memorial pra vincular -- debounce de 300ms pra nao disparar uma
+  // consulta por tecla digitada.
+  useEffect(() => {
+    if (!vincularEm) return
+    const termo = buscaVinculo.trim()
+    if (termo.length < 2) {
+      setResultadosVinculo([])
+      return
+    }
+    setBuscandoVinculo(true)
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from('homenagens')
+        .select('id, nome_completo, lapide_id')
+        .ilike('nome_completo', `%${termo}%`)
+        .order('nome_completo')
+        .limit(15)
+      setResultadosVinculo(data || [])
+      setBuscandoVinculo(false)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [buscaVinculo, vincularEm])
 
   const filaDoDialogo = dialogoFila ? filas.find((f) => f.id === dialogoFila.filaId) : null
   const quantidadeNumerica = parseInt(quantidadeInput, 10)
@@ -803,6 +833,29 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       setCadastroMemorial(null)
       await carregar()
       if (data) router.push(`/admin/memoriais/${data.id}`)
+    }
+    setSalvando(false)
+  }
+
+  async function vincularMemorial(memorialId: string, nomeMemorial: string, jaTinhaLapide: boolean) {
+    if (!vincularEm) return
+    if (
+      jaTinhaLapide &&
+      !confirm(`"${nomeMemorial}" já está vinculado a outro túmulo. Mover ele pra ${vincularEm.identificacao}?`)
+    ) {
+      return
+    }
+
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase.from('homenagens').update({ lapide_id: vincularEm.id }).eq('id', memorialId)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`"${nomeMemorial}" vinculado ao túmulo ${vincularEm.identificacao}.`)
+      setVincularEm(null)
+      setBuscaVinculo('')
+      setResultadosVinculo([])
+      await carregar()
     }
     setSalvando(false)
   }
@@ -2155,7 +2208,52 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           {h ? (
                             <p style={{ fontSize: 12, margin: '4px 0' }}>{h.nome_completo}</p>
                           ) : (
-                            <p style={{ fontSize: 11, color: '#888', margin: '4px 0' }}>Sem memorial vinculado</p>
+                            <>
+                              <p style={{ fontSize: 11, color: '#888', margin: '4px 0 6px' }}>Sem memorial vinculado</p>
+                              {editavel && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 4 }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCadastroMemorial({ lapide: lapideSelecionada, nome: '', preenchidoPor: 'familia' })
+                                      setLapideSelecionada(null)
+                                    }}
+                                    style={{
+                                      fontSize: 12,
+                                      fontWeight: 600,
+                                      color: '#a15c00',
+                                      background: 'none',
+                                      border: 'none',
+                                      padding: 0,
+                                      textAlign: 'left',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    + Criar memorial aqui
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setVincularEm(lapideSelecionada)
+                                      setBuscaVinculo('')
+                                      setResultadosVinculo([])
+                                      setLapideSelecionada(null)
+                                    }}
+                                    style={{
+                                      fontSize: 12,
+                                      color: '#0B5FFF',
+                                      background: 'none',
+                                      border: 'none',
+                                      padding: 0,
+                                      textAlign: 'left',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    Vincular memorial existente
+                                  </button>
+                                </div>
+                              )}
+                            </>
                           )}
 
                           {lapideSelecionada.foto_face_url && (
@@ -2245,17 +2343,31 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           Abrir memorial de {homenagemPorLapide.get(menuContexto.lapide.id)!.nome_completo}
                         </button>
                       ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCadastroMemorial({ lapide: menuContexto.lapide!, nome: '', preenchidoPor: 'familia' })
-                            setMenuContexto(null)
-                          }}
-                          className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-[var(--tema-zinc-800)]"
-                          style={{ color: '#C9A46A' }}
-                        >
-                          + Cadastrar memorial aqui
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCadastroMemorial({ lapide: menuContexto.lapide!, nome: '', preenchidoPor: 'familia' })
+                              setMenuContexto(null)
+                            }}
+                            className="w-full text-left px-3 py-2 text-xs font-medium hover:bg-[var(--tema-zinc-800)]"
+                            style={{ color: '#C9A46A' }}
+                          >
+                            + Criar memorial aqui
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVincularEm(menuContexto.lapide)
+                              setBuscaVinculo('')
+                              setResultadosVinculo([])
+                              setMenuContexto(null)
+                            }}
+                            className="w-full text-left px-3 py-2 text-xs text-blue-400 hover:bg-[var(--tema-zinc-800)]"
+                          >
+                            Vincular memorial existente
+                          </button>
+                        </>
                       )}
                       <button
                         type="button"
@@ -2306,6 +2418,68 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   )}
                 </div>
               </>
+            )}
+
+            {vincularEm && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                <div className="w-full max-w-sm rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-700)] p-4">
+                  <h3 className="text-sm font-semibold text-white mb-1">Vincular memorial existente</h3>
+                  <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
+                    Busca no cadastro pelo nome do homenageado e liga ele ao túmulo {vincularEm.identificacao}.
+                  </p>
+
+                  <input
+                    autoFocus
+                    value={buscaVinculo}
+                    onChange={(e) => setBuscaVinculo(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setVincularEm(null)
+                    }}
+                    placeholder="Digite o nome (mínimo 2 letras)"
+                    className="w-full text-sm bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1.5 text-white mb-2"
+                  />
+
+                  <div className="max-h-56 overflow-y-auto mb-3">
+                    {buscandoVinculo ? (
+                      <p className="text-xs text-[var(--tema-zinc-500)] py-2">Buscando...</p>
+                    ) : buscaVinculo.trim().length < 2 ? (
+                      <p className="text-xs text-[var(--tema-zinc-500)] py-2">Digite pelo menos 2 letras do nome.</p>
+                    ) : resultadosVinculo.length === 0 ? (
+                      <p className="text-xs text-[var(--tema-zinc-500)] py-2">
+                        Nenhum memorial com esse nome. Use &quot;Criar memorial aqui&quot; se ele ainda não existe.
+                      </p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {resultadosVinculo.map((m) => (
+                          <li key={m.id}>
+                            <button
+                              type="button"
+                              disabled={salvando}
+                              onClick={() => vincularMemorial(m.id, m.nome_completo, m.lapide_id != null)}
+                              className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
+                            >
+                              <span className="text-[var(--tema-zinc-200)]">{m.nome_completo}</span>
+                              {m.lapide_id && (
+                                <span className="block text-[10px]" style={{ color: '#fbbf24' }}>
+                                  já está em outro túmulo — vincular aqui vai movê-lo
+                                </span>
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setVincularEm(null)}
+                    className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             )}
 
             {cadastroMemorial && (

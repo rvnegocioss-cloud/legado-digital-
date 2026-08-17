@@ -215,6 +215,11 @@ Tabela nova pra marcar as âncoras físicas do impresso (Capela, Administração
 
 Fluxo de campo: staff está no cemitério, acha o túmulo, quer cadastrar na hora. **Botão direito no pino** abre menu com "Cadastrar memorial aqui" (ou "Abrir memorial de X" se já tiver), foto do túmulo, mover pino, apagar. **Botão direito num ponto vazio** marca um túmulo avulso ali (uma bolinha só, sem quadra/fileira — a fileira dele pode nem ter sido desenhada ainda).
 
+São **duas ações**, tanto no menu do botão direito quanto no popup do clique esquerdo (onde antes só aparecia o texto morto "Sem memorial vinculado"):
+
+- **Criar memorial aqui** — formulário mínimo, nasce vinculado ao túmulo, e depois aparece na lista de Memoriais como qualquer outro (mesma tabela `homenagens`, não é registro separado).
+- **Vincular memorial existente** — busca por nome direto no banco (`ilike`, debounce de 300ms, limite 15 — não carrega a tabela inteira em memória, é a que mais cresce). Se o memorial escolhido já estiver em outro túmulo, avisa que vai **mover**, não duplicar (`homenagens.lapide_id` é um só).
+
 O cadastro exige **só o nome completo** — é o mínimo pra o memorial existir. Nasce com slug definitivo (nunca `rascunho-`, que a limpeza automática de 2h apagaria), vinculado ao túmulo, e abre a ficha completa em seguida. Escolhe também quem preenche o resto (`preenchido_por`: família ou funerária), que já existia.
 
 Coluna nova `homenagens.origem_cadastro` (`central`/`parceiro`/`mapa_cemiterio`/`familia`, nullable — memorial antigo fica null): sem ela não dá pra distinguir um memorial vazio que está esperando alguém de um que nasceu assim de propósito, em campo.
