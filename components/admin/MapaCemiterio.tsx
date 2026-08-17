@@ -1297,6 +1297,56 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
+  // Renumera pro numero REAL do cemiterio. Regera o codigo de todo tumulo da
+  // quadra no banco (Q02-R01-T005 -> Q36-R01-T005) e, se o numero novo ja
+  // estiver ocupado, troca as duas quadras de lugar -- caso normal quando se
+  // esta corrigindo a numeracao inteira pro padrao oficial da prefeitura.
+  async function renumerarQuadra(quadraId: string, numeroAtual: number) {
+    const entrada = prompt(`Número real desta quadra no cemitério (hoje está como ${numeroAtual}):`)?.trim()
+    if (!entrada) return
+    const numeroNovo = parseInt(entrada, 10)
+    if (!numeroNovo || numeroNovo < 1) {
+      setMsg('Número inválido.')
+      return
+    }
+
+    setSalvando(true)
+    setMsg('')
+    let confirmar = false
+
+    for (let tentativa = 0; tentativa < 2; tentativa++) {
+      const { data, error } = await supabase.rpc('renumerar_quadra', {
+        p_quadra_id: quadraId,
+        p_numero_novo: numeroNovo,
+        p_confirmar_recodificacao: confirmar,
+      })
+
+      if (!error) {
+        const r = data as { trocou_com: number | null; lapides_recodificadas: number }
+        setMsg(
+          `Quadra ${numeroAtual} virou ${numeroNovo}` +
+            (r.trocou_com != null ? ` (trocou de número com a quadra que era ${numeroNovo})` : '') +
+            (r.lapides_recodificadas > 0 ? ` — ${r.lapides_recodificadas} túmulo(s) recodificado(s).` : '.')
+        )
+        await carregar()
+        break
+      }
+
+      // Túmulo com memorial vinculado muda de código: confirma e repete.
+      if (error.message?.includes('RECODIFICACAO_EXIGE_CONFIRMACAO') && !confirmar) {
+        const qtd = error.message.match(/: (\d+) tumulo/)?.[1] ?? 'alguns'
+        if (!confirm(`${qtd} túmulo(s) desta quadra já têm memorial vinculado e vão mudar de código. Continuar?`)) break
+        confirmar = true
+        continue
+      }
+
+      setMsg(error.message)
+      break
+    }
+
+    setSalvando(false)
+  }
+
   async function travarQuadra() {
     if (!quadraEmEdicao) return
     setSalvando(true)
@@ -2401,16 +2451,27 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                   </button>
                                 </>
                               ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setRenomeandoQuadraId(q.id)
-                                    setNomeQuadraInput(q.nome || '')
-                                  }}
-                                  className="text-xs text-[var(--tema-zinc-400)] hover:text-white"
-                                >
-                                  ✎ Renomear quadra
-                                </button>
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setRenomeandoQuadraId(q.id)
+                                      setNomeQuadraInput(q.nome || '')
+                                    }}
+                                    className="text-xs text-[var(--tema-zinc-400)] hover:text-white"
+                                  >
+                                    ✎ Renomear quadra
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={salvando}
+                                    onClick={() => renumerarQuadra(q.id, q.numero)}
+                                    className="text-xs text-[var(--tema-zinc-400)] hover:text-white disabled:opacity-40"
+                                    title="Troca o número da quadra pro número real do cemitério e regera o código de todos os túmulos dela"
+                                  >
+                                    # Renumerar quadra
+                                  </button>
+                                </>
                               )}
                             </div>
                           )}

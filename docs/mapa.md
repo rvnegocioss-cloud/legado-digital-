@@ -211,6 +211,16 @@ Duas confirmações independentes: (1) coordenada GPS tirada em cima da Quadra 3
 
 Tabela nova pra marcar as âncoras físicas do impresso (Capela, Administração, Sanitários, Velório, portão secundário) direto no ortomosaico: staff clica no mapa, pino roxo aparece, **arrasta pra ajustar** (salva ao soltar). RLS staff-all / parceiro-select via `pode_ver_cemiterio` (regra 22). Com Capela + Administração marcadas, a grade inteira do impresso fica conferível contra a geometria real, em vez de depender só do GPS de um túmulo.
 
+### Renumerar quadra (`renumerar_quadra`, 2026-08-14)
+
+Nosso `quadras.numero` nasce da ordem em que a quadra é desenhada (1, 2, 3...), que **não** é o número real do cemitério. Botão "# Renumerar quadra" em Central chama a RPC, que faz 3 coisas numa transação só:
+
+1. Troca `quadras.numero`. Se o número novo já estiver ocupado por outra quadra do mesmo cemitério, **troca as duas de lugar** (via número negativo temporário — `UNIQUE(cemiterio_id, numero)` existe e faria a operação falhar). É o caso normal ao corrigir a numeração inteira pro padrão oficial.
+2. **Regera o código de todo túmulo das quadras afetadas** (`Q02-R01-T005` → `Q36-R01-T005`), guardando o anterior em `codigo_anterior`. Sem isso o código ficaria mentindo. Lápide avulsa (sem fileira/número) não tem código derivado e fica intocada.
+3. Se algum túmulo afetado já tem memorial vinculado, **exige confirmação explícita** (`p_confirmar_recodificacao`, mesmo padrão de `gerar_lapides_fila`) — a UI mostra quantos e pergunta antes.
+
+`quadras.nome` (rename livre) continua existindo em paralelo, pra nome próprio ("Alameda dos Ipês") em vez de número.
+
 ### Foto da face do túmulo (`lapides.foto_face_url`, ligada 2026-08-14)
 
 Coluna existia desde 05/08 como gancho, nunca usada. Agora: no popup do pino em Central, staff sobe a foto tirada de perto (bucket `memoriais`, pasta `tumulos/<cemiterio>/<lapide>/`), e **o hover do pino passa a mostrar a foto + identificação mesmo sem memorial vinculado** — antes o card só aparecia com memorial. É o que resolve o problema de fundo do projeto: captura nadir de drone nunca mostra a face vertical da lápide, então a única forma de saber de quem é o túmulo é a foto de campo.
