@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
   // de privacidade atual, sem vazar hash de senha nenhum.
   const { data: seguranca } = await supabaseAdmin
     .from('homenagens_seguranca')
-    .select('modo_gate, busca_habilitada, link_habilitado, qrcode_habilitado')
+    .select('modo_gate, busca_habilitada, link_habilitado, qrcode_habilitado, senha_acesso_hash')
     .eq('homenagem_id', resultado.homenagem.id)
     .maybeSingle()
 
@@ -91,6 +91,8 @@ export async function GET(req: NextRequest) {
       buscaHabilitada: seguranca?.busca_habilitada ?? true,
       linkHabilitado: seguranca?.link_habilitado ?? true,
       qrcodeHabilitado: seguranca?.qrcode_habilitado ?? true,
+      // Só o booleano — o hash nunca sai daqui.
+      temSenhaAcesso: !!seguranca?.senha_acesso_hash,
     },
   })
 }

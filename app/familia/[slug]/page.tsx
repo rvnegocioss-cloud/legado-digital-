@@ -80,6 +80,7 @@ export default function FamiliaEdicaoPage() {
   const [buscaHabilitada, setBuscaHabilitada] = useState(true)
   const [linkHabilitado, setLinkHabilitado] = useState(true)
   const [qrcodeHabilitado, setQrcodeHabilitado] = useState(true)
+  const [temSenhaAcesso, setTemSenhaAcesso] = useState(false)
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -105,6 +106,7 @@ export default function FamiliaEdicaoPage() {
     setBuscaHabilitada(json.privacidade?.buscaHabilitada ?? true)
     setLinkHabilitado(json.privacidade?.linkHabilitado ?? true)
     setQrcodeHabilitado(json.privacidade?.qrcodeHabilitado ?? true)
+    setTemSenhaAcesso(!!json.privacidade?.temSenhaAcesso)
     fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
       .then((r) => r.json())
       .then((j) => setUsoStorageMB(Math.round((j.usageBytes || 0) / 1024 / 1024)))
@@ -391,6 +393,7 @@ export default function FamiliaEdicaoPage() {
                   buscaHabilitadaInicial={buscaHabilitada}
                   linkHabilitadoInicial={linkHabilitado}
                   qrcodeHabilitadoInicial={qrcodeHabilitado}
+                  temSenhaAcessoInicial={temSenhaAcesso}
                 />
               </div>
             )}
