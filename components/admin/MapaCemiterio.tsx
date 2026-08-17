@@ -79,6 +79,7 @@ interface PontoReferencia {
   nome: string
   latitude: number
   longitude: number
+  geometria_revisada: boolean
 }
 
 const PRESETS_PONTO_REF = ['Capela', 'Administração', 'Sanitários', 'Velório', 'Portão secundário']
@@ -126,6 +127,7 @@ type NumeracaoProposta = { tipo: 'quadras' | 'filas'; contexto: string; itens: I
 type DuplicacaoFila = { filaOrigemId: string; quadraId: string; quadraNumero: number; numeroOrigem: number }
 
 const CORES_ORIGEM: Record<string, string> = {
+  conferido: '#22c55e', // tem foto do tumulo -- alguem esteve la fisicamente
   ortomosaico: '#C9A46A',
   gps_celular: '#4285F4',
   mapa_satelite: '#4285F4',
@@ -280,7 +282,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       supabase.rpc('obter_geojson_cemiterio', { p_cemiterio_id: cemiterioId }),
       supabase
         .from('pontos_referencia_cemiterio')
-        .select('id, nome, latitude, longitude')
+        .select('id, nome, latitude, longitude, geometria_revisada')
         .eq('cemiterio_id', cemiterioId)
         .order('nome'),
     ])
@@ -377,7 +379,13 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .map((l) => ({
           type: 'Feature' as const,
           geometry: { type: 'Point' as const, coordinates: [l.longitude!, l.latitude!] },
-          properties: { lapideId: l.id, origem: l.coordenada_origem || 'desconhecida' },
+          properties: {
+            lapideId: l.id,
+            // Foto = alguem esteve no tumulo fisicamente. Vence a cor de
+            // origem: saber que foi conferido em campo importa mais do que
+            // saber de onde veio a coordenada.
+            origem: l.foto_face_url ? 'conferido' : l.coordenada_origem || 'desconhecida',
+          },
         })),
     }),
     [lapidesComCoordenada, idsEdicao]
@@ -915,12 +923,29 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       if (erroUpload) throw erroUpload
       const { data } = supabase.storage.from('memoriais').getPublicUrl(caminho)
 
-      const { error } = await supabase.from('lapides').update({ foto_face_url: data.publicUrl }).eq('id', lapideId)
+      // Foto de perto só existe se alguém esteve no túmulo fisicamente --
+      // então subir a foto CONFIRMA o túmulo (antes 'confirmada' era um
+      // estado que nada no sistema chegava a setar; ficava todo mundo em
+      // 'nao_confirmada' pra sempre e a borda sólida do chip da tela de
+      // Lápides nunca aparecia).
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      const { error } = await supabase
+        .from('lapides')
+        .update({
+          foto_face_url: data.publicUrl,
+          situacao: 'confirmada',
+          confirmada_em: new Date().toISOString(),
+          confirmada_por: session?.user?.id || null,
+        })
+        .eq('id', lapideId)
       if (error) throw error
 
       setLapides((atual) => atual.map((l) => (l.id === lapideId ? { ...l, foto_face_url: data.publicUrl } : l)))
       setLapideSelecionada((atual) => (atual && atual.id === lapideId ? { ...atual, foto_face_url: data.publicUrl } : atual))
-      setMsg('Foto do túmulo salva — aparece ao passar o mouse no pino.')
+      setMsg('Foto salva — túmulo marcado como conferido em campo.')
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Erro ao enviar a foto.')
     }
@@ -951,6 +976,25 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       .update({ latitude: lat, longitude: lng })
       .eq('id', id)
     if (error) setMsg(error.message)
+  }
+
+  // Trava por ponto: depois de posicionado direito, o pino para de aceitar
+  // arrasto -- senao desliza sozinho num clique acidental. Mesma regra de
+  // quadra/fileira/rua.
+  async function alternarTravaPontoRef(p: PontoReferencia) {
+    setSalvando(true)
+    const { error } = await supabase
+      .from('pontos_referencia_cemiterio')
+      .update({ geometria_revisada: !p.geometria_revisada })
+      .eq('id', p.id)
+    if (error) setMsg(error.message)
+    else {
+      setPontosRef((atual) =>
+        atual.map((x) => (x.id === p.id ? { ...x, geometria_revisada: !x.geometria_revisada } : x))
+      )
+      setMsg(p.geometria_revisada ? `"${p.nome}" destravado — dá pra arrastar de novo.` : `"${p.nome}" travado na posição.`)
+    }
+    setSalvando(false)
   }
 
   async function apagarPontoRef(id: string, nome: string) {
@@ -1828,6 +1872,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     'circle-color': [
                       'match',
                       ['get', 'origem'],
+                      'conferido',
+                      CORES_ORIGEM.conferido,
                       'ortomosaico',
                       CORES_ORIGEM.ortomosaico,
                       'gps_celular',
@@ -1856,12 +1902,23 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   longitude={p.longitude}
                   latitude={p.latitude}
                   anchor="bottom"
-                  draggable={editavel}
+                  draggable={editavel && !p.geometria_revisada}
                   onDragEnd={(ev) => moverPontoRef(p.id, ev.lngLat.lat, ev.lngLat.lng)}
                 >
                   <div
-                    title={editavel ? `${p.nome} — arrasta pra ajustar` : p.nome}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: editavel ? 'grab' : 'default' }}
+                    title={
+                      p.geometria_revisada
+                        ? `${p.nome} — travado`
+                        : editavel
+                          ? `${p.nome} — arrasta pra ajustar`
+                          : p.nome
+                    }
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      cursor: editavel && !p.geometria_revisada ? 'grab' : 'default',
+                    }}
                   >
                     <span
                       style={{
@@ -1876,6 +1933,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                         boxShadow: '0 1px 4px rgba(0,0,0,.4)',
                       }}
                     >
+                      {p.geometria_revisada && '🔒 '}
                       {p.nome}
                     </span>
                     <Landmark size={20} strokeWidth={2} fill="#7c3aed" style={{ color: '#fff' }} />
@@ -2760,10 +2818,17 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               )}
             </div>
             {editavel && (
-              <p className="text-xs rounded-lg px-2.5 py-2 mb-3 border border-amber-900/40 bg-amber-950/20" style={{ color: '#fbbf24' }}>
-                <strong>Cadastro de memorial:</strong> clique com o <strong>botão direito</strong> do mouse no túmulo marcado da fileira (ou num
-                avulso). Botão direito num ponto vazio marca um túmulo avulso ali.
-              </p>
+              <div className="text-xs rounded-lg px-2.5 py-2 mb-3 border border-amber-900/40 bg-amber-950/20 space-y-1.5" style={{ color: '#fbbf24' }}>
+                <p>
+                  <strong>Cadastrar memorial:</strong> clique com o <strong>botão direito</strong> do mouse no túmulo marcado da fileira (ou num
+                  avulso) — dá pra criar um novo ali ou vincular um que já existe no cadastro. Botão direito num ponto vazio marca um túmulo avulso.
+                </p>
+                <p>
+                  <strong>Marcar o túmulo como conferido:</strong> clique no pino e suba a <strong>foto do túmulo</strong>. Só quem esteve lá tem
+                  essa foto — por isso ela é o que confirma. Depois disso o quadradinho dele na tela de <strong>Lápides</strong> fica com contorno
+                  sólido e bolinha verde, e a foto aparece ao passar o mouse no pino.
+                </p>
+              </div>
             )}
             <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
               Desenha o contorno de cada quadra, numera a partir da entrada, depois desenha as fileiras dentro dela.
@@ -3188,6 +3253,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             <h2 className="text-sm font-semibold text-white mb-2">Legenda</h2>
             <div className="space-y-1.5 text-xs text-[var(--tema-zinc-400)]">
               <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full inline-block" style={{ background: CORES_ORIGEM.conferido }} />
+                <strong className="text-emerald-400">Verde = conferido em campo</strong> (tem foto do túmulo)
+              </div>
+              <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ background: CORES_ORIGEM.ortomosaico }} />
                 Marcado/gerado no ortomosaico (preciso)
               </div>
@@ -3256,15 +3325,30 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     <span className="flex items-center gap-1.5 text-[var(--tema-zinc-300)]">
                       <Landmark size={11} strokeWidth={1.5} style={{ color: '#a855f7' }} />
                       {p.nome}
+                      {p.geometria_revisada && <span className="text-emerald-400">🔒</span>}
                     </span>
                     {editavel && (
-                      <button
-                        type="button"
-                        onClick={() => apagarPontoRef(p.id, p.nome)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        Apagar
-                      </button>
+                      <span className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={salvando}
+                          onClick={() => alternarTravaPontoRef(p)}
+                          className={
+                            p.geometria_revisada
+                              ? 'text-emerald-400 hover:text-emerald-200 disabled:opacity-40'
+                              : 'text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)] disabled:opacity-40'
+                          }
+                        >
+                          {p.geometria_revisada ? 'Destravar' : '🔒 Travar'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => apagarPontoRef(p.id, p.nome)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          Apagar
+                        </button>
+                      </span>
                     )}
                   </div>
                 ))}

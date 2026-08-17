@@ -236,6 +236,21 @@ Nosso `quadras.numero` nasce da ordem em que a quadra é desenhada (1, 2, 3...),
 
 `quadras.nome` (rename livre) continua existindo em paralelo, pra nome próprio ("Alameda dos Ipês") em vez de número.
 
+### Foto = túmulo conferido em campo (2026-08-14)
+
+`lapides.situacao` tinha o estado `'confirmada'` desde 05/08 e a tela de Lápides já pintava contorno sólido pra ele — mas **nada no sistema nunca setava esse valor**: os 132 túmulos do banco estavam todos `nao_confirmada`, e a regra visual nunca disparava. Achado real quando o Rafael subiu uma foto e o quadradinho não mudou.
+
+Regra adotada: **subir a foto do túmulo confirma o túmulo** (`situacao='confirmada'` + `confirmada_em` + `confirmada_por`, colunas que também já existiam sem uso). É a leitura honesta — foto de perto só existe se alguém esteve lá fisicamente; captura de drone nunca produz isso.
+
+Efeito nos dois lados:
+- **Mapa**: pino fica **verde** (`CORES_ORIGEM.conferido`, vence a cor de origem da coordenada — saber que foi conferido importa mais que saber de onde veio o ponto).
+- **Lápides**: quadradinho ganha contorno sólido + bolinha verde no canto; contador por fileira mostra "N de M conferido(s) em campo"; popup do túmulo mostra a foto e traduz o código (`Q36-R05-T011` → "Quadra 36 · Fileira 5 · Túmulo 11", que o código sozinho não comunica).
+- Legenda explicando os 4 estados do quadradinho, e o passo a passo de como conferir, escritos na própria tela (nos dois lugares) — sem isso ninguém descobre a regra sozinho.
+
+### Trava dos pontos de referência (2026-08-14)
+
+`pontos_referencia_cemiterio.geometria_revisada` — mesmo nome de coluna de quadras/filas/ruas de propósito, pra régua ser a mesma no mapa inteiro. Sem a trava o pino desliza sozinho num arrasto acidental depois de já estar posicionado certo.
+
 ### Foto da face do túmulo (`lapides.foto_face_url`, ligada 2026-08-14)
 
 Coluna existia desde 05/08 como gancho, nunca usada. Agora: no popup do pino em Central, staff sobe a foto tirada de perto (bucket `memoriais`, pasta `tumulos/<cemiterio>/<lapide>/`), e **o hover do pino passa a mostrar a foto + identificação mesmo sem memorial vinculado** — antes o card só aparecia com memorial. É o que resolve o problema de fundo do projeto: captura nadir de drone nunca mostra a face vertical da lápide, então a única forma de saber de quem é o túmulo é a foto de campo.

@@ -39,6 +39,7 @@ interface LapideChip {
   numero: number | null
   situacao: string
   coordenada_precisao: string | null
+  foto_face_url: string | null
   homenagens: HomenagemLink[]
 }
 
@@ -115,7 +116,7 @@ export default function LapidesCemiterio() {
       setCarregandoFila(filaId)
       const { data } = await supabase
         .from('lapides')
-        .select('id, codigo, numero, situacao, coordenada_precisao, homenagens(id, nome_completo)')
+        .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens(id, nome_completo)')
         .eq('fila_id', filaId)
         .order('numero', { ascending: true })
       setTumulosPorFila((s) => ({ ...s, [filaId]: (data as any) || [] }))
@@ -131,7 +132,7 @@ export default function LapidesCemiterio() {
     }
     const { data } = await supabase
       .from('lapides')
-      .select('id, codigo, numero, situacao, coordenada_precisao, homenagens(id, nome_completo)')
+      .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens(id, nome_completo)')
       .eq('cemiterio_id', id)
       .not('codigo', 'is', null)
       .ilike('codigo', `%${termo.trim()}%`)
@@ -208,9 +209,52 @@ export default function LapidesCemiterio() {
           Mapa (marcar túmulos)
         </Link>
       </div>
-      <p className="text-[var(--tema-zinc-400)] text-sm mb-4">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-3">
         Organizado por Quadra → Fileira → Túmulo, do jeito que foi mapeado. Clica numa fileira pra ver os túmulos dela.
       </p>
+
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-6">
+        <h2 className="text-sm font-semibold text-white mb-1">Como ler os quadradinhos</h2>
+        <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
+          O número dentro do quadradinho é o túmulo dentro da fileira. O contorno e a cor dizem em que pé está cada um.
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
+            <span className="text-[10px] px-1.5 py-1 rounded shrink-0" style={{ border: '1px dashed #52525b', color: '#a1a1aa' }}>7</span>
+            Só interpolado — ninguém conferiu no local ainda
+          </div>
+          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
+            <span className="relative text-[10px] px-1.5 py-1 rounded shrink-0" style={{ border: '1px solid #3f3f46', color: '#a1a1aa' }}>
+              7
+              <span className="absolute rounded-full" style={{ top: -2, right: -2, width: 6, height: 6, background: '#22c55e' }} />
+            </span>
+            Conferido em campo — tem foto do túmulo
+          </div>
+          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
+            <span
+              className="text-[10px] px-1.5 py-1 rounded shrink-0"
+              style={{ border: '1px dashed #52525b', background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
+            >
+              7
+            </span>
+            Tem memorial vinculado (fundo dourado)
+          </div>
+          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
+            <span
+              className="text-[10px] px-1.5 py-1 rounded shrink-0"
+              style={{ border: '1px solid #3f3f46', background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
+            >
+              7⚠
+            </span>
+            ⚠ = mais de um memorial no mesmo túmulo (conferir)
+          </div>
+        </div>
+        <p className="text-xs mt-3 pt-3 border-t border-[var(--tema-zinc-800)]" style={{ color: '#fbbf24' }}>
+          <strong>Como um túmulo vira &quot;conferido&quot;:</strong> vá no <strong>Mapa</strong>, clique no pino do túmulo e suba a{' '}
+          <strong>foto dele</strong>. Só quem esteve lá fisicamente tem essa foto — por isso ela é o que marca o túmulo como conferido. A foto
+          também passa a aparecer ao passar o mouse no pino do mapa.
+        </p>
+      </div>
 
       {msg && <p className="text-xs text-[var(--tema-zinc-300)] mb-4 bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] rounded-lg px-3 py-2">{msg}</p>}
 
@@ -284,24 +328,44 @@ export default function LapidesCemiterio() {
                               ) : (tumulosPorFila[f.id]?.length ?? 0) === 0 ? (
                                 <p className="text-xs text-[var(--tema-zinc-500)]">Sem túmulos ainda.</p>
                               ) : (
+                                <>
                                 <div className="flex flex-wrap gap-1">
-                                  {tumulosPorFila[f.id]!.map((l) => (
-                                    <button
-                                      key={l.id}
-                                      onClick={() => setTumuloSelecionado(l)}
-                                      title={l.codigo || `#${l.numero}`}
-                                      className="text-[10px] px-1.5 py-1 rounded"
-                                      style={{
-                                        border: l.situacao === 'confirmada' ? '1px solid #3f3f46' : '1px dashed #52525b',
-                                        background: l.homenagens.length > 0 ? 'rgba(201,164,106,0.15)' : 'transparent',
-                                        color: l.homenagens.length > 0 ? '#C9A46A' : '#a1a1aa',
-                                      }}
-                                    >
-                                      {l.numero ?? '?'}
-                                      {l.homenagens.length > 1 && '⚠'}
-                                    </button>
-                                  ))}
+                                  {tumulosPorFila[f.id]!.map((l) => {
+                                    const conferido = !!l.foto_face_url || l.situacao === 'confirmada'
+                                    return (
+                                      <button
+                                        key={l.id}
+                                        onClick={() => setTumuloSelecionado(l)}
+                                        title={
+                                          `${l.codigo || `#${l.numero}`}` +
+                                          (conferido ? ' · conferido em campo' : ' · não conferido') +
+                                          (l.homenagens.length > 0 ? ` · ${l.homenagens.map((h) => h.nome_completo).join(', ')}` : ' · sem memorial')
+                                        }
+                                        className="relative text-[10px] px-1.5 py-1 rounded"
+                                        style={{
+                                          border: conferido ? '1px solid #3f3f46' : '1px dashed #52525b',
+                                          background: l.homenagens.length > 0 ? 'rgba(201,164,106,0.15)' : 'transparent',
+                                          color: l.homenagens.length > 0 ? '#C9A46A' : '#a1a1aa',
+                                        }}
+                                      >
+                                        {l.numero ?? '?'}
+                                        {l.homenagens.length > 1 && '⚠'}
+                                        {l.foto_face_url && (
+                                          <span
+                                            aria-hidden
+                                            className="absolute rounded-full"
+                                            style={{ top: -2, right: -2, width: 6, height: 6, background: '#22c55e' }}
+                                          />
+                                        )}
+                                      </button>
+                                    )
+                                  })}
                                 </div>
+                                <p className="text-[10px] text-[var(--tema-zinc-600)] mt-1.5">
+                                  {tumulosPorFila[f.id]!.filter((l) => l.foto_face_url || l.situacao === 'confirmada').length} de{' '}
+                                  {tumulosPorFila[f.id]!.length} conferido(s) em campo
+                                </p>
+                                </>
                               )}
                             </div>
                           )}
@@ -466,9 +530,35 @@ export default function LapidesCemiterio() {
                 <X size={16} />
               </button>
             </div>
-            <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
-              Situação: {tumuloSelecionado.situacao} · Precisão: {tumuloSelecionado.coordenada_precisao || '—'}
+            {(() => {
+              // Q36-R05-T011 -> "Quadra 36 · Fileira 5 · Túmulo 11". O código
+              // sozinho é ilegível pra quem não decorou o padrão.
+              const m = tumuloSelecionado.codigo?.match(/^Q(\d+)-R(\d+)-T(\d+)$/)
+              return m ? (
+                <p className="text-xs text-[var(--tema-zinc-300)] mb-1">
+                  Quadra {Number(m[1])} · Fileira {Number(m[2])} · Túmulo {Number(m[3])}
+                </p>
+              ) : null
+            })()}
+            <p className="text-xs text-[var(--tema-zinc-500)] mb-2">
+              {tumuloSelecionado.foto_face_url || tumuloSelecionado.situacao === 'confirmada' ? (
+                <span className="text-emerald-400">✓ Conferido em campo</span>
+              ) : (
+                'Ainda não conferido em campo (sem foto do túmulo)'
+              )}{' '}
+              · Precisão: {tumuloSelecionado.coordenada_precisao || '—'}
             </p>
+
+            {tumuloSelecionado.foto_face_url && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={tumuloSelecionado.foto_face_url}
+                alt=""
+                className="w-full rounded-lg mb-3"
+                style={{ maxHeight: 220, objectFit: 'cover' }}
+              />
+            )}
+
             <p className="text-xs text-[var(--tema-zinc-400)] mb-3">
               {tumuloSelecionado.homenagens.length === 0
                 ? 'Nenhum memorial vinculado.'
