@@ -206,11 +206,22 @@ export default function GuiaTumulo({
 
                 {linhaRota && (
                   <Source id="linha-rota" type="geojson" data={linhaRota}>
+                    {/* Duas camadas: contorno branco embaixo + azul forte em
+                        cima. Cor sozinha some sobre foto aérea (telhado claro,
+                        cascalho, grama seca) -- o contorno é o que garante a
+                        leitura em qualquer fundo, mesmo padrão de rota do
+                        Google Maps/Waze. */}
+                    <Layer
+                      id="linha-rota-contorno"
+                      type="line"
+                      paint={{ 'line-color': '#FFFFFF', 'line-width': 9, 'line-opacity': 0.95 }}
+                      layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                    />
                     <Layer
                       id="linha-rota-layer"
                       type="line"
-                      paint={{ 'line-color': '#C9A46A', 'line-width': 4, 'line-dasharray': [2, 3] }}
-                      layout={{ 'line-cap': 'round' }}
+                      paint={{ 'line-color': '#1D4ED8', 'line-width': 5 }}
+                      layout={{ 'line-cap': 'round', 'line-join': 'round' }}
                     />
                   </Source>
                 )}
@@ -301,7 +312,17 @@ export default function GuiaTumulo({
 
                 {minhaPos && (
                   <Marker longitude={minhaPos.lng} latitude={minhaPos.lat} anchor="center">
-                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#4285F4', border: '3px solid white', boxShadow: '0 0 6px rgba(0,0,0,0.4)' }} />
+                    <div
+                      title="Você está aqui"
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: '50%',
+                        background: '#1D4ED8',
+                        border: '4px solid white',
+                        boxShadow: '0 0 0 2px rgba(29,78,216,0.45), 0 2px 8px rgba(0,0,0,0.55)',
+                      }}
+                    />
                   </Marker>
                 )}
               </Map>
