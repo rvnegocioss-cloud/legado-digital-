@@ -340,3 +340,43 @@ vínculo só existia como cor dourada + tooltip). Painel de Quadras do mapa
 fileira, `Túmulo N — Nome do memorial` com link direto pra ficha. Só os túmulos
 que têm memorial entram na lista — fileira de 200 túmulos vazios não vira parede
 de texto.
+
+
+## Conferência por GPS de campo (2026-08-17)
+
+Painel "Conferir com GPS de campo" no mapa do cemitério (Central). Staff cola o
+link/coordenada que alguém mandou de dentro do cemitério; cai um pino laranja e o
+painel diz qual túmulo está mais perto e a quantos metros.
+
+`lib/parseCoordenada.ts` lê, nesta ordem de prioridade:
+
+1. `!3d<lat>!4d<lng>` — o **pino real** do link do Google Maps
+2. `?q=`/`&query=`/`&destination=` — coordenada do link do app
+3. `@lat,lng,zoom` — **centro da tela**, não o pino (avisa na UI que é menos preciso)
+4. Grau/minuto/segundo (`18°54'49.3"S 48°17'48.2"W`)
+5. Dois números soltos
+
+A ordem importa: num mesmo link do Google, `@` e `!3d/!4d` são pontos diferentes
+— o `@` é onde a câmera estava, o `!3d/!4d` é o pino. Pegar o errado introduz
+alguns metros de erro silencioso.
+
+Colunas novas em `lapides`: `gps_referencia_latitude`, `gps_referencia_longitude`,
+`gps_referencia_em`, `gps_referencia_nota`. Guardam a medição de campo **sem**
+mexer em `latitude`/`longitude` (que continuam vindo do ortomosaico). Existe botão
+"Mover túmulo pra cá", mas com aviso: ortomosaico é 2,2 cm/px, GPS de celular erra
+3-5 m — mover só se a conferência em campo provar que o ponto do mapa está errado.
+
+### Primeira validação real
+
+Ponto medido pelo Pedro no São Pedro contra o marcado no ortomosaico:
+
+| Túmulo | Distância do ponto do Pedro |
+|---|---|
+| **Q36-R01-T011 (Carlos Saraiva)** | **0,62 m** |
+| Q36-R01-T012 | 1,35 m |
+| Q36-R01-T010 | 2,25 m |
+
+Bateu — mas o GPS **sozinho** não provaria nada: o vizinho está a 1,35 m e o erro
+do aparelho é maior que isso. A certeza vem do cruzamento de 4 fontes
+independentes: registro oficial da prefeitura (Quadra 36, Sepultura 11), contagem
+na fileira do ortomosaico, foto do túmulo tirada em campo e o GPS.
