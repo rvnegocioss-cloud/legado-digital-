@@ -65,6 +65,10 @@ export default function PainelRuas({
 }) {
   const [renomeandoId, setRenomeandoId] = useState<string | null>(null)
   const [nomeInput, setNomeInput] = useState('')
+  // Lista retratil -- com muita rua desenhada o painel empurrava o resto do
+  // menu pra fora da tela. Diagnostico e "Testar rota" ficam SEMPRE visiveis
+  // (sao o que se olha o tempo todo); so a lista item-a-item recolhe.
+  const [listaAberta, setListaAberta] = useState(false)
 
   return (
     <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-4">
@@ -137,6 +141,24 @@ export default function PainelRuas({
       {ruas.length === 0 ? (
         <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma rua desenhada ainda.</p>
       ) : (
+        <>
+        <button
+          type="button"
+          disabled={!!ruaEmEdicao}
+          onClick={() => setListaAberta((v) => !v)}
+          className="w-full flex items-center gap-1 text-xs text-[var(--tema-zinc-400)] hover:text-white mb-1 disabled:opacity-60"
+        >
+          {listaAberta || ruaEmEdicao ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          {ruaEmEdicao
+            ? `Editando a Rua ${ruaEmEdicao.numero} no mapa`
+            : listaAberta
+              ? 'Esconder lista de ruas'
+              : `Editar / renomear ruas (${ruas.length})`}
+        </button>
+
+        {/* Rua em edicao abre a lista sozinha -- senao o botao "Sair da
+            edicao" ficaria escondido e o modo travaria sem saida visivel. */}
+        {(listaAberta || ruaEmEdicao) && (
         <ul className="space-y-1">
           {ruas
             .slice()
@@ -215,6 +237,8 @@ export default function PainelRuas({
               </li>
             ))}
         </ul>
+        )}
+        </>
       )}
     </div>
   )
