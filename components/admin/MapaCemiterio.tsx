@@ -369,6 +369,23 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const lapidesSemCoordenada = lapides.filter((l) => l.latitude == null || l.longitude == null)
   const homenagemPorLapide = new Map(homenagens.map((h) => [h.lapide_id, h]))
 
+  // Memoriais ja vinculados, agrupados por fileira -- o painel da quadra passa a
+  // mostrar "Tumulo 11 -- Carlos Saraiva" em vez de so a contagem de tumulos.
+  const memoriaisPorFila = useMemo(() => {
+    const porLapide = new Map(homenagens.map((h) => [h.lapide_id, h]))
+    const mapa = new Map<string, { lapideId: string; numero: number | null; memorial: Homenagem }[]>()
+    for (const l of lapides) {
+      if (!l.fila_id) continue
+      const h = porLapide.get(l.id)
+      if (!h) continue
+      const lista = mapa.get(l.fila_id) || []
+      lista.push({ lapideId: l.id, numero: l.numero, memorial: h })
+      mapa.set(l.fila_id, lista)
+    }
+    for (const lista of mapa.values()) lista.sort((a, b) => (a.numero ?? 0) - (b.numero ?? 0))
+    return mapa
+  }, [lapides, homenagens])
+
   const idsEdicao = useMemo(() => new Set(lapidesEdicao.map((l) => l.id)), [lapidesEdicao])
 
   const geojsonPinos = useMemo(
@@ -3032,7 +3049,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           ) : (
                             <ul className="space-y-1">
                               {filasDaQuadra.map((f) => (
-                                <li key={f.id} className="flex items-center justify-between text-xs text-[var(--tema-zinc-300)]">
+                                <li key={f.id} className="text-xs text-[var(--tema-zinc-300)]">
+                                  <div className="flex items-center justify-between">
                                   <span className="flex items-center gap-1.5">
                                     <span
                                       className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
@@ -3093,6 +3111,23 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                         Apagar
                                       </button>
                                     </span>
+                                  )}
+                                  </div>
+                                  {(memoriaisPorFila.get(f.id) || []).length > 0 && (
+                                    <ul className="mt-1 ml-4 space-y-0.5 border-l border-[var(--tema-zinc-800)] pl-2">
+                                      {(memoriaisPorFila.get(f.id) || []).map((m) => (
+                                        <li key={m.lapideId} className="flex items-center gap-1.5 text-[11px]">
+                                          <span className="text-[var(--tema-zinc-500)] shrink-0">Túmulo {m.numero ?? '?'}</span>
+                                          <Link
+                                            href={`/admin/memoriais/${m.memorial.id}`}
+                                            className="text-[#C9A46A] hover:underline truncate"
+                                            title={`Abrir memorial de ${m.memorial.nome_completo}`}
+                                          >
+                                            {m.memorial.nome_completo}
+                                          </Link>
+                                        </li>
+                                      ))}
+                                    </ul>
                                   )}
                                 </li>
                               ))}

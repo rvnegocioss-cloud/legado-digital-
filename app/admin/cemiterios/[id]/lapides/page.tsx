@@ -365,6 +365,27 @@ export default function LapidesCemiterio() {
                                   {tumulosPorFila[f.id]!.filter((l) => l.foto_face_url || l.situacao === 'confirmada').length} de{' '}
                                   {tumulosPorFila[f.id]!.length} conferido(s) em campo
                                 </p>
+                                {tumulosPorFila[f.id]!.some((l) => l.homenagens.length > 0) && (
+                                  <ul className="mt-1.5 pt-1.5 border-t border-[var(--tema-zinc-800)] space-y-0.5">
+                                    {tumulosPorFila[f.id]!
+                                      .filter((l) => l.homenagens.length > 0)
+                                      .map((l) => (
+                                        <li key={`mem-${l.id}`} className="flex items-center gap-1.5 text-[11px]">
+                                          <span className="text-[var(--tema-zinc-500)] shrink-0">Túmulo {l.numero ?? '?'}</span>
+                                          {l.homenagens.map((h) => (
+                                            <Link
+                                              key={h.id}
+                                              href={`/admin/memoriais/${h.id}`}
+                                              className="text-[#C9A46A] hover:underline truncate"
+                                              title={`Abrir memorial de ${h.nome_completo}`}
+                                            >
+                                              {h.nome_completo}
+                                            </Link>
+                                          ))}
+                                        </li>
+                                      ))}
+                                  </ul>
+                                )}
                                 </>
                               )}
                             </div>
