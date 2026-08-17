@@ -278,8 +278,8 @@ export default function FamiliaEdicaoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 py-10 px-4">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
         <Link href="/familia/login" className="text-sm text-zinc-400 hover:text-white">
           ← Sair
         </Link>
@@ -301,21 +301,8 @@ export default function FamiliaEdicaoPage() {
           </p>
         )}
 
-        {memorialId && (
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 mb-4">
-            <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
-            <PrivacidadeFamilia
-              memorialId={memorialId}
-              modoGateInicial={modoGate}
-              buscaHabilitadaInicial={buscaHabilitada}
-              linkHabilitadoInicial={linkHabilitado}
-              qrcodeHabilitadoInicial={qrcodeHabilitado}
-            />
-          </div>
-        )}
-
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-          <form onSubmit={salvar} className="space-y-3">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <form onSubmit={salvar} className="lg:col-span-7 rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-3">
             <div>
               <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
               <input
@@ -380,133 +367,6 @@ export default function FamiliaEdicaoPage() {
               />
             </div>
 
-            <div className="pb-4 border-b border-zinc-800 mb-4">
-              <p className="text-xs text-zinc-500">Armazenamento: {usoStorageMB}MB / 500MB</p>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${
-                      usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
-                    }`}
-                    style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
-              <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
-              {fotoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover mb-2" />
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFotoChange}
-                disabled={enviandoFoto}
-                className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-              />
-              {enviandoFoto && <p className="text-xs text-zinc-500 mt-1">Enviando foto...</p>}
-            </div>
-
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
-              <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
-              {videoUrl && <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />}
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleVideoChange}
-                disabled={enviandoVideo}
-                className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
-              />
-              {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
-            </div>
-
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">
-                Galeria de vídeos ({videosGaleria.length}/{LIMITE_VIDEOS})
-              </label>
-              <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_VIDEOS} vídeos além do vídeo principal, máx 100MB cada</p>
-              {videosGaleria.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  {videosGaleria.map((url) => (
-                    <div key={url} className="relative group">
-                      <video src={url} controls className="w-full h-24 object-cover rounded bg-black" />
-                      <button
-                        type="button"
-                        onClick={() => removerVideoGaleria(url)}
-                        className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <input
-                type="file"
-                accept="video/*"
-                multiple
-                onChange={handleVideosGaleriaChange}
-                disabled={enviandoVideosGaleria || videosGaleria.length >= LIMITE_VIDEOS}
-                className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
-              />
-              {enviandoVideosGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando vídeos...</p>}
-            </div>
-
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Tema da página pública</label>
-              <p className="text-xs text-zinc-400 mb-2">Cor de fundo e detalhes dourados da página do memorial</p>
-              <div className="flex gap-2">
-                {PALETAS_MEMORIAL.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setTema(p.id)}
-                    title={p.nome}
-                    className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
-                    style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">
-                Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
-              </label>
-              <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
-              {galeria.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 mb-2">
-                  {galeria.map((url) => (
-                    <div key={url} className="relative group">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt="" className="w-full h-16 object-cover rounded" />
-                      <button
-                        type="button"
-                        onClick={() => removerFoto(url)}
-                        className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleGaleriaChange}
-                disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
-                className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
-              />
-              {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
-            </div>
-
             <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
 
             {erro && <p className="text-red-400 text-sm">{erro}</p>}
@@ -520,6 +380,151 @@ export default function FamiliaEdicaoPage() {
               {salvando ? 'Salvando...' : 'Salvar alterações'}
             </button>
           </form>
+
+          <div className="lg:col-span-5 space-y-4">
+            {memorialId && (
+              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
+                <PrivacidadeFamilia
+                  memorialId={memorialId}
+                  modoGateInicial={modoGate}
+                  buscaHabilitadaInicial={buscaHabilitada}
+                  linkHabilitadoInicial={linkHabilitado}
+                  qrcodeHabilitadoInicial={qrcodeHabilitado}
+                />
+              </div>
+            )}
+
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-4">
+              <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Fotos, vídeos e aparência</h2>
+          <div className="pb-4 border-b border-zinc-800 mb-4">
+            <p className="text-xs text-zinc-500">Armazenamento: {usoStorageMB}MB / 500MB</p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${
+                    usoStorageMB < 250 ? 'bg-green-500' : usoStorageMB < 400 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{ width: `${Math.min(100, (usoStorageMB / 500) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
+            <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
+            {fotoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover mb-2" />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFotoChange}
+              disabled={enviandoFoto}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+            />
+            {enviandoFoto && <p className="text-xs text-zinc-500 mt-1">Enviando foto...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
+            <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
+            {videoUrl && <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />}
+            <input
+              type="file"
+              accept="video/*"
+              onChange={handleVideoChange}
+              disabled={enviandoVideo}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600"
+            />
+            {enviandoVideo && <p className="text-xs text-zinc-500 mt-1">Enviando vídeo...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">
+              Galeria de vídeos ({videosGaleria.length}/{LIMITE_VIDEOS})
+            </label>
+            <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_VIDEOS} vídeos além do vídeo principal, máx 100MB cada</p>
+            {videosGaleria.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {videosGaleria.map((url) => (
+                  <div key={url} className="relative group">
+                    <video src={url} controls className="w-full h-24 object-cover rounded bg-black" />
+                    <button
+                      type="button"
+                      onClick={() => removerVideoGaleria(url)}
+                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              type="file"
+              accept="video/*"
+              multiple
+              onChange={handleVideosGaleriaChange}
+              disabled={enviandoVideosGaleria || videosGaleria.length >= LIMITE_VIDEOS}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+            />
+            {enviandoVideosGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando vídeos...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Tema da página pública</label>
+            <p className="text-xs text-zinc-400 mb-2">Cor de fundo e detalhes dourados da página do memorial</p>
+            <div className="flex gap-2">
+              {PALETAS_MEMORIAL.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setTema(p.id)}
+                  title={p.nome}
+                  className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
+                  style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">
+              Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
+            </label>
+            <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
+            {galeria.length > 0 && (
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                {galeria.map((url) => (
+                  <div key={url} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                    <button
+                      type="button"
+                      onClick={() => removerFoto(url)}
+                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleGaleriaChange}
+              disabled={enviandoGaleria || galeria.length >= LIMITE_FOTOS}
+              className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
+            />
+            {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
+          </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
