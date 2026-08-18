@@ -115,7 +115,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description: periodo ? `Em memória de ${data.nome_completo} (${periodo})` : `Em memória de ${data.nome_completo}`,
     openGraph: {
       title: data.nome_completo,
-      images: data.foto_url ? [data.foto_url] : undefined,
+      // Imagem de compartilhamento também pelo portão -- o balde é privado, e
+      // esse bloco só roda em memorial aberto (o protegido sai antes, acima).
+      images: data.foto_url ? [urlMidiaProtegida(data.foto_url) as string] : undefined,
     },
   };
 }
