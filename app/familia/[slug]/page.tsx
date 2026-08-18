@@ -115,6 +115,9 @@ export default function FamiliaEdicaoPage() {
   const [salvando, setSalvando] = useState(false)
   const [salvo, setSalvo] = useState(false)
   const [salvoEm, setSalvoEm] = useState<Date | null>(null)
+  // Conflito pendente: para o auto-save e mostra as duas versoes pra pessoa
+  // escolher. Nunca sobrescreve sozinho nem descarta o que ela escreveu.
+  const [conflito, setConflito] = useState<{ campos: string[]; doServidor: Record<string, unknown> } | null>(null)
   // Trava simples pra nao disparar duas gravacoes ao mesmo tempo (o auto-save
   // e o clique no botao brigando seria conflito criado por nos mesmos).
   const salvandoRef = useRef(false)
@@ -259,7 +262,7 @@ export default function FamiliaEdicaoPage() {
   // problema de raiz: nada fica pendente esperando o botao, entao nao existe
   // janela pra conflito, nem pra perder texto por aba fechada ou queda.
   useEffect(() => {
-    if (carregando || sessaoInvalida || erroCarregar) return
+    if (carregando || sessaoInvalida || erroCarregar || conflito) return
     if (primeiroRenderRef.current) {
       primeiroRenderRef.current = false
       return
@@ -270,6 +273,53 @@ export default function FamiliaEdicaoPage() {
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, tema, vinculos, timelineEventos, fotoUrl, videoUrl, galeria, videosGaleria])
+
+  const ROTULO_CAMPO: Record<string, string> = {
+    nome_completo: 'Nome completo',
+    data_nascimento: 'Data de nascimento',
+    data_falecimento: 'Data de falecimento',
+    cidade: 'Cidade',
+    frase_preferida: 'Frase preferida',
+    biografia: 'Biografia',
+    timeline: 'Linha do tempo',
+    vinculos: 'Vínculo/papel',
+    tema: 'Tema da página',
+    foto_url: 'Foto do homenageado',
+    video_url: 'Vídeo',
+    galeria_fotos: 'Galeria de fotos',
+    videos_galeria: 'Galeria de vídeos',
+  }
+
+  // Mantém o texto da família e passa a considerar a versão do servidor como
+  // base -- o próximo salvamento grava o dela por cima, com consentimento.
+  function manterMeuTexto() {
+    if (!conflito) return
+    setValoresBase((b) => ({ ...b, ...conflito.doServidor }))
+    setConflito(null)
+    setTimeout(() => salvar(undefined, true), 100)
+  }
+
+  // Descarta o que a família escreveu NAQUELE campo e adota o do servidor.
+  function usarVersaoDoServidor() {
+    if (!conflito) return
+    const s = conflito.doServidor as Record<string, any>
+    setForm((f) => ({
+      ...f,
+      ...(('biografia' in s) ? { biografia: (s.biografia as string) || '' } : {}),
+      ...(('nome_completo' in s) ? { nome_completo: (s.nome_completo as string) || '' } : {}),
+      ...(('cidade' in s) ? { cidade: (s.cidade as string) || '' } : {}),
+      ...(('frase_preferida' in s) ? { frase_preferida: (s.frase_preferida as string) || '' } : {}),
+      ...(('data_nascimento' in s) ? { data_nascimento: (s.data_nascimento as string) || '' } : {}),
+      ...(('data_falecimento' in s) ? { data_falecimento: (s.data_falecimento as string) || '' } : {}),
+    }))
+    if ('timeline' in s) setTimelineEventos((s.timeline as TimelineEvento[]) || [])
+    if ('vinculos' in s) setVinculos((s.vinculos as string[]) || [])
+    if ('tema' in s) setTema((s.tema as string) || 'navy')
+    if ('galeria_fotos' in s) setGaleria((s.galeria_fotos as string[]) || [])
+    if ('videos_galeria' in s) setVideosGaleria((s.videos_galeria as string[]) || [])
+    setValoresBase((b) => ({ ...b, ...conflito.doServidor }))
+    setConflito(null)
+  }
 
   function descartarRascunho() {
     try {
@@ -309,7 +359,26 @@ export default function FamiliaEdicaoPage() {
 
     if (!res.ok) {
       if (res.status === 401) setSessaoInvalida(true)
-      setErro(json.error || 'Erro ao salvar')
+
+      // Conflito de verdade: busca a versao do servidor e mostra as duas, em
+      // vez de deixar a pessoa presa numa mensagem vermelha sem saida.
+      if (res.status === 409 && Array.isArray(json.camposEmConflito)) {
+        try {
+          const atual = await fetch(`/api/familia-memorial?slug=${params.slug}`)
+          const dadosAtuais = await atual.json()
+          const doServidor: Record<string, unknown> = {}
+          for (const campo of json.camposEmConflito) {
+            doServidor[campo] = (dadosAtuais.memorial as Record<string, unknown>)?.[campo]
+          }
+          setConflito({ campos: json.camposEmConflito, doServidor })
+          setErro('')
+        } catch {
+          setErro(json.error || 'Erro ao salvar')
+        }
+      } else {
+        setErro(json.error || 'Erro ao salvar')
+      }
+
       setSalvando(false)
       salvandoRef.current = false
       return
@@ -341,6 +410,8 @@ export default function FamiliaEdicaoPage() {
     salvandoRef.current = false
     setSalvoEm(new Date())
     setSalvo(true)
+    setErro('')
+    setConflito(null)
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -590,6 +661,34 @@ export default function FamiliaEdicaoPage() {
             </div>
 
             <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
+
+            {conflito && (
+              <div className="rounded-lg border border-amber-800/60 bg-amber-950/30 px-4 py-3 space-y-2">
+                <p className="text-sm text-amber-200 font-medium">
+                  {conflito.campos.map((c) => ROTULO_CAMPO[c] || c).join(', ')}: outra pessoa mudou isso enquanto
+                  você escrevia.
+                </p>
+                <p className="text-[11px] text-amber-200/70">
+                  Nada foi perdido — o que você escreveu continua aqui na tela. Escolha o que fica:
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={manterMeuTexto}
+                    className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+                  >
+                    Manter o meu e salvar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={usarVersaoDoServidor}
+                    className="px-3 py-1.5 rounded-lg border border-amber-800/60 text-amber-200 hover:bg-amber-900/30 text-sm"
+                  >
+                    Ver e usar a versão que está salva
+                  </button>
+                </div>
+              </div>
+            )}
 
             {erro && <p className="text-red-400 text-sm">{erro}</p>}
             <p className="text-xs text-zinc-500">
