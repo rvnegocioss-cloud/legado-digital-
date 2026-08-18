@@ -566,12 +566,35 @@ export default function DetalheMemorial() {
     }
   }
 
+  // Remove de verdade: tira do memorial E apaga o arquivo do servidor. Antes so
+  // sumia o link da tela -- arquivo seguia ocupando a cota de 500 MB e aberto
+  // pra quem tivesse a URL.
+  async function removerMidiaDoServidor(tipo: 'foto' | 'video' | 'galeria' | 'videos_galeria', url?: string) {
+    if (!memorial?.slug) return
+    const res = await fetch('/api/memorial-remover-midia', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
+      },
+      body: JSON.stringify({ slug: memorial.slug, tipo, url }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) return
+    if (tipo === 'foto') setFotoUrl('')
+    if (tipo === 'video') setVideoUrl('')
+    if (json.galeria) setGaleria(json.galeria)
+    if (json.videosGaleria) setVideosGaleria(json.videosGaleria)
+  }
+
   function removerFotoPrincipal() {
     setFotoUrl('')
+    removerMidiaDoServidor('foto')
   }
 
   function removerVideo() {
     setVideoUrl('')
+    removerMidiaDoServidor('video')
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -631,6 +654,7 @@ export default function DetalheMemorial() {
 
   function removerVideoGaleria(url: string) {
     setVideosGaleria((atual) => atual.filter((u) => u !== url))
+    removerMidiaDoServidor('videos_galeria', url)
   }
 
   async function handleGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -662,6 +686,7 @@ export default function DetalheMemorial() {
 
   function removerFoto(url: string) {
     setGaleria((atual) => atual.filter((u) => u !== url))
+    removerMidiaDoServidor('galeria', url)
   }
 
   if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>

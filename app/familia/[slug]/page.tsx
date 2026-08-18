@@ -483,8 +483,36 @@ export default function FamiliaEdicaoPage() {
     e.target.value = ''
   }
 
+  // Remove de verdade: some da tela, sai do memorial no banco e o arquivo e
+  // apagado do servidor (nao fica ocupando cota nem acessivel por URL).
+  async function removerMidia(tipo: 'foto' | 'video' | 'galeria' | 'videos_galeria', url?: string) {
+    setErro('')
+    const res = await fetch('/api/memorial-remover-midia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug: params.slug, tipo, url }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      setErro(json.error || 'Não consegui remover o arquivo.')
+      return
+    }
+    if (tipo === 'foto') setFotoUrl('')
+    if (tipo === 'video') setVideoUrl('')
+    if (json.galeria) setGaleria(json.galeria)
+    if (json.videosGaleria) setVideosGaleria(json.videosGaleria)
+    if (json.updatedAt) setUpdatedAtCarregado(json.updatedAt)
+    setValoresBase((b) => ({
+      ...b,
+      foto_url: json.foto_url ?? b.foto_url,
+      video_url: json.video_url ?? b.video_url,
+      galeria_fotos: json.galeria ?? b.galeria_fotos,
+      videos_galeria: json.videosGaleria ?? b.videos_galeria,
+    }))
+  }
+
   function removerVideoGaleria(url: string) {
-    setVideosGaleria((atual) => atual.filter((u) => u !== url))
+    removerMidia('videos_galeria', url)
   }
 
   async function handleGaleriaChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -516,7 +544,7 @@ export default function FamiliaEdicaoPage() {
   }
 
   function removerFoto(url: string) {
-    setGaleria((atual) => atual.filter((u) => u !== url))
+    removerMidia('galeria', url)
   }
 
   if (carregando) {
