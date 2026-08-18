@@ -30,6 +30,7 @@ import { PrivacidadeMemorial } from '@/components/admin/PrivacidadeMemorial'
 import { StatusFicha } from '@/components/admin/StatusFicha'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface Memorial {
   id: string
@@ -167,6 +168,18 @@ function FichaMemorialParceiroInner() {
   const [mensagemPlacaMsg, setMensagemPlacaMsg] = useState('')
   const [mensagemPlacaConfirmada, setMensagemPlacaConfirmada] = useState(false)
   const [envioFornecedorStatus, setEnvioFornecedorStatus] = useState<'enviado' | 'erro' | null>(null)
+
+  // Passe de mídia: a tag <img> não manda credencial, então memorial protegido
+  // apareceria quebrado aqui. A página troca a sessão por um cookie curto.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return
+      fetch('/api/midia-sessao', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => {})
+    })
+  }, [])
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -792,7 +805,7 @@ function FichaMemorialParceiroInner() {
                       <div className="w-16 h-16 rounded-full bg-[var(--tema-zinc-800)] overflow-hidden shrink-0">
                         {fotoUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={fotoUrl} alt="" className="w-full h-full object-cover" />
+                          <img src={urlMidiaProtegida(fotoUrl) || fotoUrl} alt="" className="w-full h-full object-cover" />
                         )}
                       </div>
                       <div className="flex flex-col gap-1">
@@ -989,7 +1002,7 @@ function FichaMemorialParceiroInner() {
                         {galeria.map((url) => (
                           <div key={url} className="relative group aspect-square">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={url} alt="" className="w-full h-full object-cover rounded" />
+                            <img src={urlMidiaProtegida(url) || url} alt="" className="w-full h-full object-cover rounded" />
                             <button
                               type="button"
                               onClick={() => removerFoto(url)}
@@ -1015,7 +1028,7 @@ function FichaMemorialParceiroInner() {
                   <CampoFicha label="Vídeo (máx 100MB)">
                     {videoUrl && (
                       <div className="mb-2">
-                        <video src={videoUrl} controls className="w-full rounded-md max-h-40 bg-black" />
+                        <video src={urlMidiaProtegida(videoUrl) || videoUrl} controls className="w-full rounded-md max-h-40 bg-black" />
                         <button type="button" onClick={removerVideo} className="text-[11px] text-[var(--tema-zinc-500)] hover:text-red-400 mt-1">
                           Remover vídeo
                         </button>
@@ -1035,7 +1048,7 @@ function FichaMemorialParceiroInner() {
                       <div className="grid grid-cols-2 @lg:grid-cols-4 gap-2 mb-2">
                         {videosGaleria.map((url) => (
                           <div key={url} className="relative group">
-                            <video src={url} controls className="w-full h-20 object-cover rounded bg-black" />
+                            <video src={urlMidiaProtegida(url) || url} controls className="w-full h-20 object-cover rounded bg-black" />
                             <button
                               type="button"
                               onClick={() => removerVideoGaleria(url)}

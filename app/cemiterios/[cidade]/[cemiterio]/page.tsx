@@ -4,6 +4,7 @@ import { tema, CORES } from "@/lib/publicTheme";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
 import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
+import { urlMidiaProtegida } from "@/lib/urlMidia";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,18 @@ export default async function CemiterioMapaPage({
   // o mapa e olhar a requisicao.
   const ortoAssinado = await assinarOrtomosaico(c.ortomosaico_url);
 
+  // Foto do memorial no card do mapa também vai assinada -- balde privado.
+  // Foto do memorial no card do mapa também vai assinada -- balde privado.
+  const memoriaisAssinados = {
+    ...memoriais,
+    features: await Promise.all(
+      (memoriais?.features || []).map(async (f) => ({
+        ...f,
+        properties: { ...f.properties, foto_url: urlMidiaProtegida(f.properties?.foto_url) },
+      }))
+    ),
+  } as typeof memoriais;
+
   return (
     <div style={tema.page}>
       <header style={tema.hero}>
@@ -84,7 +97,7 @@ export default async function CemiterioMapaPage({
           ortoMinzoom={c.ortomosaico_minzoom}
           ortoMaxzoom={c.ortomosaico_maxzoom}
           ortoBounds={c.ortomosaico_bounds}
-          memoriais={memoriais}
+          memoriais={memoriaisAssinados}
         />
       </main>
 

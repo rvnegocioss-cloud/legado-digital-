@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { tema, periodoTexto, CORES } from '@/lib/publicTheme'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface Resultado {
   id: string
@@ -115,7 +116,7 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
                   <div style={tema.placaAnelInner}>
                     {r.foto_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={r.foto_url} alt={r.nome_completo} style={tema.placaFoto} />
+                      <img src={urlMidiaProtegida(r.foto_url) || r.foto_url} alt={r.nome_completo} style={tema.placaFoto} />
                     ) : (
                       <span style={{ color: CORES.textoFraco, fontSize: 10 }}>Sem foto</span>
                     )}

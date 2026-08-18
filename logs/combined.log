@@ -2369,3 +2369,15 @@
 2026-08-17 19:25:09.054 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
 2026-08-17 19:25:09.057 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
 2026-08-17 19:25:09.130 [info]: Listing available tools
+2026-08-18 12:01:51.305 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
+2026-08-18 12:01:51.307 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
+2026-08-18 12:01:51.354 [info]: Listing available tools
+2026-08-18 12:07:00.876 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
+2026-08-18 12:07:00.878 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
+2026-08-18 12:07:00.930 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 12:07:00.936 [info]: Listing available tools
+2026-08-18 12:08:00.899 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 12:09:00.907 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 12:10:00.908 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 12:11:00.922 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 12:12:00.923 [error]: LM Studio health check failed {"error":{"cause":{}}}

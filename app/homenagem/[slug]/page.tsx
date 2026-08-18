@@ -20,6 +20,7 @@ import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
 import { calcularRota, type RuaMapeada } from "@/lib/rotaCemiterio";
 import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
+import { urlMidiaProtegida, urlsMidiaProtegidas } from "@/lib/urlMidia";
 import {
   PALETAS_MEMORIAL,
   VAR_FUNDO_TOPO,
@@ -187,8 +188,12 @@ export default async function HomenagemPage({
 
   const anos = anosDestaque(m.data_nascimento, m.data_falecimento);
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
-  const galeria = Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : [];
-  const videosGaleria = Array.isArray(m.videos_galeria) ? m.videos_galeria.filter(Boolean) : [];
+  // Mídia com URL assinada: o balde é privado, então foto de memorial com
+  // senha (ou oculto) deixa de ficar aberta pra quem tiver o link direto.
+  const galeria = urlsMidiaProtegidas(Array.isArray(m.galeria_fotos) ? m.galeria_fotos.filter(Boolean) : []);
+  const videosGaleria = urlsMidiaProtegidas(Array.isArray(m.videos_galeria) ? m.videos_galeria.filter(Boolean) : []);
+  const fotoAssinada = urlMidiaProtegida(m.foto_url);
+  const videoAssinado = isYoutube(m.video_url || "") ? m.video_url : urlMidiaProtegida(m.video_url);
   const paleta = PALETAS_MEMORIAL.find((p) => p.id === m.tema) ?? PALETAS_MEMORIAL[0];
 
   // 4 consultas independentes (dependem só de m.id/slug) — rodam em paralelo
@@ -283,9 +288,9 @@ export default async function HomenagemPage({
           <div style={estilos.fotoGlow} />
           <div style={estilos.fotoRing}>
             <div style={estilos.fotoInner}>
-              {m.foto_url ? (
+              {fotoAssinada ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.foto_url} alt={m.nome_completo} style={estilos.foto} />
+                <img src={fotoAssinada} alt={m.nome_completo} style={estilos.foto} />
               ) : (
                 <span style={estilos.monograma}>
                   {m.nome_completo
@@ -365,13 +370,13 @@ export default async function HomenagemPage({
           </div>
         </section>
 
-        {m.video_url && (
+        {videoAssinado && (
           <section style={{ marginTop: 56 }}>
             <SecaoTitulo texto="Vídeo" />
             <div style={estilos.videoFrame}>
-              {isYoutube(m.video_url) ? (
+              {isYoutube(m.video_url || "") ? (
                 <iframe
-                  src={getEmbedUrl(m.video_url)}
+                  src={getEmbedUrl(m.video_url || "")}
                   style={{ width: "100%", height: "100%", border: 0 }}
                   allowFullScreen
                   loading="lazy"
@@ -380,10 +385,10 @@ export default async function HomenagemPage({
               ) : (
                 // eslint-disable-next-line jsx-a11y/media-has-caption
                 <video
-                  src={m.video_url}
+                  src={videoAssinado || undefined}
                   controls
                   preload="metadata"
-                  poster={m.foto_url || undefined}
+                  poster={fotoAssinada || undefined}
                   style={{ width: "100%", height: "100%", background: "#000" }}
                 />
               )}

@@ -9,6 +9,7 @@ import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 import { supabase } from '@/lib/auth'
 import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 import type { ModoGate } from '@/lib/modosPrivacidade'
 
 interface Memorial {
@@ -780,7 +781,7 @@ export default function FamiliaEdicaoPage() {
             <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
             {fotoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover mb-2" />
+              <img src={urlMidiaProtegida(fotoUrl) || fotoUrl} alt="" className="w-24 h-24 rounded-full object-cover mb-2" />
             )}
             <input
               type="file"
@@ -795,7 +796,7 @@ export default function FamiliaEdicaoPage() {
           <div>
             <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
             <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
-            {videoUrl && <video src={videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />}
+            {videoUrl && <video src={urlMidiaProtegida(videoUrl) || videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />}
             <input
               type="file"
               accept="video/*"
@@ -815,7 +816,7 @@ export default function FamiliaEdicaoPage() {
               <div className="grid grid-cols-2 gap-2 mb-2">
                 {videosGaleria.map((url) => (
                   <div key={url} className="relative group">
-                    <video src={url} controls className="w-full h-24 object-cover rounded bg-black" />
+                    <video src={urlMidiaProtegida(url) || url} controls className="w-full h-24 object-cover rounded bg-black" />
                     <button
                       type="button"
                       onClick={() => removerVideoGaleria(url)}
@@ -865,7 +866,7 @@ export default function FamiliaEdicaoPage() {
                 {galeria.map((url) => (
                   <div key={url} className="relative group">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                    <img src={urlMidiaProtegida(url) || url} alt="" className="w-full h-16 object-cover rounded" />
                     <button
                       type="button"
                       onClick={() => removerFoto(url)}
