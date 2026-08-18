@@ -122,13 +122,28 @@ export async function POST(req: NextRequest) {
   // servidor desde que a tela carregou. Editar a biografia enquanto alguém
   // vinculou uma foto deixou de ser conflito, porque não é.
   if (valoresBase && typeof valoresBase === 'object') {
+    const base = valoresBase as Record<string, unknown>
     const mesmoValor = (a: unknown, b: unknown) =>
       JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
 
+    // A tela manda o formulário inteiro, mas quase sempre a pessoa mexeu em um
+    // campo só. Campo que continua igual ao que ela carregou é DESCARTADO aqui:
+    // não entra na checagem de conflito nem na escrita.
+    //
+    // Sem isso, a família mandava de volta o valor velho de galeria_fotos que
+    // a equipe tinha acabado de mudar -- e a checagem acusava conflito num
+    // campo que ela nem tocou. Achado numa simulação de 5 cenários; era o bug
+    // que ainda derrubava o caso real do Pedro mesmo depois da 1ª correção.
+    for (const campo of Object.keys(payload)) {
+      if (campo in base && mesmoValor(base[campo], payload[campo])) {
+        delete payload[campo]
+      }
+    }
+
     const conflitos = Object.keys(payload).filter(
       (campo) =>
-        campo in (valoresBase as Record<string, unknown>) &&
-        !mesmoValor((valoresBase as Record<string, unknown>)[campo], (resultado.homenagem as Record<string, unknown>)[campo])
+        campo in base &&
+        !mesmoValor(base[campo], (resultado.homenagem as Record<string, unknown>)[campo])
     )
 
     if (conflitos.length > 0) {
@@ -146,6 +161,12 @@ export async function POST(req: NextRequest) {
       { error: 'Esse memorial foi alterado por outra pessoa enquanto você editava. Recarregue a página antes de salvar.' },
       { status: 409 }
     )
+  }
+
+  // Nada mudou de verdade -- não escreve (e não carimba updated_at à toa,
+  // que era justamente o que disparava conflito na tela dos outros).
+  if (Object.keys(payload).length === 0) {
+    return NextResponse.json({ ok: true, updatedAt: resultado.homenagem.updated_at, semMudanca: true })
   }
 
   const { data: atualizado, error } = await supabaseAdmin
