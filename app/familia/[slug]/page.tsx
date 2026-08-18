@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
@@ -114,6 +114,11 @@ export default function FamiliaEdicaoPage() {
 
   const [salvando, setSalvando] = useState(false)
   const [salvo, setSalvo] = useState(false)
+  const [salvoEm, setSalvoEm] = useState<Date | null>(null)
+  // Trava simples pra nao disparar duas gravacoes ao mesmo tempo (o auto-save
+  // e o clique no botao brigando seria conflito criado por nos mesmos).
+  const salvandoRef = useRef(false)
+  const primeiroRenderRef = useRef(true)
   const [erro, setErro] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   const [enviandoVideo, setEnviandoVideo] = useState(false)
@@ -250,6 +255,22 @@ export default function FamiliaEdicaoPage() {
     }
   }, [form, tema, vinculos, timelineEventos, carregando, sessaoInvalida, params.slug])
 
+  // Salva sozinho 2,5s depois que a pessoa para de digitar. E o que fecha o
+  // problema de raiz: nada fica pendente esperando o botao, entao nao existe
+  // janela pra conflito, nem pra perder texto por aba fechada ou queda.
+  useEffect(() => {
+    if (carregando || sessaoInvalida || erroCarregar) return
+    if (primeiroRenderRef.current) {
+      primeiroRenderRef.current = false
+      return
+    }
+    const t = setTimeout(() => {
+      salvar(undefined, true)
+    }, 2500)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, tema, vinculos, timelineEventos, fotoUrl, videoUrl, galeria, videosGaleria])
+
   function descartarRascunho() {
     try {
       localStorage.removeItem(chaveRascunho(params.slug))
@@ -258,9 +279,11 @@ export default function FamiliaEdicaoPage() {
     carregar(params.slug)
   }
 
-  async function salvar(e: React.FormEvent) {
-    e.preventDefault()
-    setSalvando(true)
+  async function salvar(e?: React.FormEvent, silencioso = false) {
+    e?.preventDefault()
+    if (salvandoRef.current) return
+    salvandoRef.current = true
+    if (!silencioso) setSalvando(true)
     setErro('')
     setSalvo(false)
 
@@ -288,6 +311,7 @@ export default function FamiliaEdicaoPage() {
       if (res.status === 401) setSessaoInvalida(true)
       setErro(json.error || 'Erro ao salvar')
       setSalvando(false)
+      salvandoRef.current = false
       return
     }
 
@@ -314,6 +338,8 @@ export default function FamiliaEdicaoPage() {
     } catch {}
     setRascunhoRestaurado(false)
     setSalvando(false)
+    salvandoRef.current = false
+    setSalvoEm(new Date())
     setSalvo(true)
   }
 
@@ -566,6 +592,13 @@ export default function FamiliaEdicaoPage() {
             <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
 
             {erro && <p className="text-red-400 text-sm">{erro}</p>}
+            <p className="text-xs text-zinc-500">
+              {salvando
+                ? 'Salvando...'
+                : salvoEm
+                  ? `Salvo automaticamente às ${salvoEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+                  : 'As alterações são salvas sozinhas enquanto você escreve.'}
+            </p>
             {salvo && <p className="text-green-400 text-sm">Salvo.</p>}
 
             <button
