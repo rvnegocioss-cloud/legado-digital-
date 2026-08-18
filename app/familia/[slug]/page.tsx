@@ -7,6 +7,7 @@ import { TimelineEditor, type TimelineEvento } from '@/components/admin/Timeline
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
+import { supabase } from '@/lib/auth'
 import type { ModoGate } from '@/lib/modosPrivacidade'
 
 interface Memorial {
@@ -32,15 +33,56 @@ interface Memorial {
 const LIMITE_FOTOS = 4
 const LIMITE_VIDEOS = 4
 
-async function subirArquivoFamilia(slug: string, pasta: 'foto' | 'video' | 'galeria' | 'videos_galeria', file: File) {
-  const formData = new FormData()
-  formData.append('slug', slug)
-  formData.append('pasta', pasta)
-  formData.append('file', file)
-  const res = await fetch('/api/familia-upload', { method: 'POST', body: formData })
-  const json = await res.json()
-  if (!res.ok) throw new Error(json.error || 'Erro ao enviar arquivo')
-  return json.url as string
+interface ResultadoUpload {
+  url: string
+  updatedAt?: string
+  galeria?: string[]
+  videosGaleria?: string[]
+}
+
+// Resposta de erro nem sempre e JSON: quando a plataforma corta a requisicao
+// (arquivo grande demais, gateway), o corpo vem em texto puro e o JSON.parse
+// estourava com "Unexpected token 'R'" na cara da familia.
+async function lerResposta(res: Response) {
+  const texto = await res.text()
+  try {
+    return JSON.parse(texto)
+  } catch {
+    if (res.status === 413) return { error: 'Arquivo grande demais para enviar.' }
+    return { error: texto.slice(0, 120) || `Falha na conexão (código ${res.status}).` }
+  }
+}
+
+async function subirArquivoFamilia(
+  slug: string,
+  pasta: 'foto' | 'video' | 'galeria' | 'videos_galeria',
+  file: File
+): Promise<ResultadoUpload> {
+  // Etapa 1: pede permissao e uma URL assinada (requisicao minuscula, so JSON)
+  const resPrep = await fetch('/api/familia-upload/preparar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug, pasta, tamanho: file.size, nome: file.name }),
+  })
+  const prep = await lerResposta(resPrep)
+  if (!resPrep.ok) throw new Error(prep.error || 'Não consegui preparar o envio.')
+
+  // Etapa 2: o arquivo vai DIRETO pro Storage, sem limite de tamanho da Vercel
+  const { error: erroUpload } = await supabase.storage
+    .from('memoriais')
+    .uploadToSignedUrl(prep.caminho, prep.token, file)
+  if (erroUpload) throw new Error('Falha ao enviar o arquivo. Verifique sua conexão e tente de novo.')
+
+  // Etapa 3: confere o arquivo de verdade e ja grava no memorial
+  const resConf = await fetch('/api/familia-upload/confirmar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug, pasta, caminho: prep.caminho }),
+  })
+  const conf = await lerResposta(resConf)
+  if (!resConf.ok) throw new Error(conf.error || 'Erro ao salvar o arquivo no memorial.')
+
+  return conf as ResultadoUpload
 }
 
 export default function FamiliaEdicaoPage() {
@@ -178,7 +220,11 @@ export default function FamiliaEdicaoPage() {
     setEnviandoFoto(true)
     setErro('')
     try {
-      setFotoUrl(await subirArquivoFamilia(params.slug, 'foto', file))
+      const r = await subirArquivoFamilia(params.slug, 'foto', file)
+      setFotoUrl(r.url)
+      // O arquivo ja foi gravado no memorial pela rota de confirmar -- sincronizar
+      // o updated_at aqui evita o falso "outra pessoa alterou" no proximo Salvar.
+      if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
     } catch (err: any) {
       setErro(err.message)
     }
@@ -191,7 +237,9 @@ export default function FamiliaEdicaoPage() {
     setEnviandoVideo(true)
     setErro('')
     try {
-      setVideoUrl(await subirArquivoFamilia(params.slug, 'video', file))
+      const r = await subirArquivoFamilia(params.slug, 'video', file)
+      setVideoUrl(r.url)
+      if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
     } catch (err: any) {
       setErro(err.message)
     }
@@ -211,8 +259,11 @@ export default function FamiliaEdicaoPage() {
     setEnviandoVideosGaleria(true)
     setErro('')
     try {
-      const urls = await Promise.all(selecionados.map((f) => subirArquivoFamilia(params.slug, 'videos_galeria', f)))
-      setVideosGaleria((atual) => [...atual, ...urls])
+      for (const f of selecionados) {
+        const r = await subirArquivoFamilia(params.slug, 'videos_galeria', f)
+        if (r.videosGaleria) setVideosGaleria(r.videosGaleria)
+        if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
+      }
     } catch (err: any) {
       setErro(err.message)
     }
@@ -237,8 +288,11 @@ export default function FamiliaEdicaoPage() {
     setEnviandoGaleria(true)
     setErro('')
     try {
-      const urls = await Promise.all(selecionados.map((f) => subirArquivoFamilia(params.slug, 'galeria', f)))
-      setGaleria((atual) => [...atual, ...urls])
+      for (const f of selecionados) {
+        const r = await subirArquivoFamilia(params.slug, 'galeria', f)
+        if (r.galeria) setGaleria(r.galeria)
+        if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
+      }
     } catch (err: any) {
       setErro(err.message)
     }

@@ -2357,3 +2357,15 @@
 2026-08-17 12:05:19.222 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
 2026-08-17 12:05:19.291 [info]: Listing available tools
 2026-08-17 12:05:19.295 [info]: Listing available tools
+2026-08-17 16:59:19.773 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
+2026-08-17 16:59:19.777 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
+2026-08-17 16:59:19.840 [info]: Listing available tools
+2026-08-17 16:59:19.786 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
+2026-08-17 16:59:19.789 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
+2026-08-17 16:59:19.846 [info]: Listing available tools
+2026-08-17 19:13:52.717 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
+2026-08-17 19:13:52.719 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
+2026-08-17 19:13:52.771 [info]: Listing available tools
+2026-08-17 19:25:09.054 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
+2026-08-17 19:25:09.057 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
+2026-08-17 19:25:09.130 [info]: Listing available tools
