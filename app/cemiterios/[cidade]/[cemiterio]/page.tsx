@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { tema, CORES } from "@/lib/publicTheme";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
+import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,11 @@ export default async function CemiterioMapaPage({
 
   const { cemiterio: c, memoriais } = data as MapaPublico;
 
+  // URL assinada e de vida curta: o balde dos mapas e privado, pra ninguem
+  // baixar o ortomosaico inteiro (o ativo mais caro do projeto) so por abrir
+  // o mapa e olhar a requisicao.
+  const ortoAssinado = await assinarOrtomosaico(c.ortomosaico_url);
+
   return (
     <div style={tema.page}>
       <header style={tema.hero}>
@@ -74,7 +80,7 @@ export default async function CemiterioMapaPage({
           estado={c.estado}
           latitude={c.latitude}
           longitude={c.longitude}
-          ortoUrl={c.ortomosaico_url}
+          ortoUrl={ortoAssinado}
           ortoMinzoom={c.ortomosaico_minzoom}
           ortoMaxzoom={c.ortomosaico_maxzoom}
           ortoBounds={c.ortomosaico_bounds}

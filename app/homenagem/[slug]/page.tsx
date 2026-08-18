@@ -19,6 +19,7 @@ import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
 import { calcularRota, type RuaMapeada } from "@/lib/rotaCemiterio";
+import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
 import {
   PALETAS_MEMORIAL,
   VAR_FUNDO_TOPO,
@@ -243,6 +244,8 @@ export default async function HomenagemPage({
         )
       : null;
 
+  const ortoAssinado = await assinarOrtomosaico(localizacao?.orto_url);
+
   return (
     <div
       style={
@@ -465,7 +468,7 @@ export default async function HomenagemPage({
                 lote={localizacao.lote}
                 nomeCompleto={m.nome_completo}
                 fotoUrl={m.foto_url}
-                ortoUrl={localizacao.orto_url}
+                ortoUrl={ortoAssinado}
                 ortoMinzoom={localizacao.orto_minzoom}
                 ortoMaxzoom={localizacao.orto_maxzoom}
                 ortoBounds={localizacao.orto_bounds}

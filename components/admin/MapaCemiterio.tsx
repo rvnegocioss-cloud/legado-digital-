@@ -162,6 +162,9 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [lapideParaMarcar, setLapideParaMarcar] = useState<Lapide | null>(null)
   const [modoMarcarEntrada, setModoMarcarEntrada] = useState(false)
   const [pontosRef, setPontosRef] = useState<PontoReferencia[]>([])
+  // O balde dos mapas e privado (ninguem baixa o ortomosaico inteiro por
+  // abrir a tela) -- a URL vem assinada por rota autenticada.
+  const [ortoUrlAssinada, setOrtoUrlAssinada] = useState<string | null>(null)
   // Conferencia de coordenada de campo: staff cola o link/numero que alguem
   // mandou do celular e o mapa mede a distancia ate o tumulo marcado no
   // ortomosaico. Nada e sobrescrito sozinho -- staff decide.
@@ -210,6 +213,24 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [modoAdicionarTumulo, setModoAdicionarTumulo] = useState(false)
   const [tumuloSelecionadoEdicao, setTumuloSelecionadoEdicao] = useState<string | null>(null)
   const [referenciaInsercao, setReferenciaInsercao] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelado = false
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return
+      fetch(`/api/ortomosaico-assinado?cemiterioId=${cemiterioId}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (!cancelado && j?.url) setOrtoUrlAssinada(j.url)
+        })
+        .catch(() => {})
+    })
+    return () => {
+      cancelado = true
+    }
+  }, [cemiterioId])
 
   useEffect(() => {
     carregar()
@@ -357,7 +378,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     () =>
       cemiterio
         ? normalizarOrtomosaico({
-            url: cemiterio.ortomosaico_url,
+            url: ortoUrlAssinada || cemiterio.ortomosaico_url,
             minzoom: cemiterio.ortomosaico_minzoom,
             maxzoom: cemiterio.ortomosaico_maxzoom,
             bounds: cemiterio.ortomosaico_bounds,
