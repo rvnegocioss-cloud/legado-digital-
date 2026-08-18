@@ -35,7 +35,6 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ caminho: st
   // Foto de túmulo (pasta 'tumulos/...') é operacional da equipe, não mídia de
   // família — não tem gate de memorial, então segue o fluxo antigo.
   const ehTumulo = memorialId === 'tumulos' || memorialId === 'qrcodes'
-  let memorialProtegido = false
 
   if (!ehTumulo) {
     const { data: memorial } = await supabaseAdmin
@@ -53,7 +52,6 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ caminho: st
       .maybeSingle()
 
     const modo = seguranca?.modo_gate ?? 'aberto'
-    memorialProtegido = modo !== 'aberto'
 
     if (modo !== 'aberto') {
       const cookieAcesso = req.cookies.get(`mem_acesso_${memorial.slug}`)?.value
@@ -93,11 +91,19 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ caminho: st
       // checada a cada requisição não vale nada se a resposta fica guardada.
       //
       // Memorial aberto pode cachear (é público mesmo), e aí ganha velocidade.
-      'Cache-Control': memorialProtegido
-        ? 'private, no-store, no-cache, must-revalidate, max-age=0'
-        : 'public, max-age=600, stale-while-revalidate=60',
+      // Sem cache, para memorial nenhum.
+      //
+      // Testei as duas alternativas e as duas vazam: com `private, max-age` a
+      // borda da Vercel guardou assim mesmo (servia arquivo já apagado), e com
+      // cache só pro memorial aberto sobrava uma janela — a família tranca o
+      // memorial e a foto segue sendo entregue até o cache expirar.
+      //
+      // Privacidade que depende de quando o cache vence não é privacidade.
+      // O custo é uma ida ao servidor por imagem; o ganho é a decisão da
+      // família valendo no mesmo segundo.
+      'Cache-Control': 'private, no-store, no-cache, must-revalidate, max-age=0',
       'Content-Disposition': 'inline',
-      ...(memorialProtegido ? { Vary: 'Cookie' } : {}),
+      Vary: 'Cookie',
     },
   })
 }
