@@ -39,7 +39,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ caminho: st
   if (!ehTumulo) {
     const { data: memorial } = await supabaseAdmin
       .from('homenagens')
-      .select('id, slug')
+      .select('id, slug, foto_url, video_url, galeria_fotos, videos_galeria')
       .eq('id', memorialId)
       .maybeSingle()
 
@@ -75,14 +75,73 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ caminho: st
         return NextResponse.json({ error: 'Não encontrado' }, { status: 404 })
       }
     }
+
+    // O arquivo ainda pertence ao memorial?
+    //
+    // Deixar passar qualquer caminho embaixo do id do memorial significa que
+    // foto removida da página continua sendo entregue pra quem guardou a URL —
+    // e que arquivo órfão (subido e nunca vinculado) também. A remoção tira a
+    // mídia do banco ANTES de apagar o arquivo, então essa checagem faz a
+    // decisão da família valer no mesmo instante, sem depender de o arquivo já
+    // ter sumido do Storage nem de cache nenhum expirar.
+    //
+    // Equipe e família passam sem isso de propósito: na Central e no Portal do
+    // Parceiro a foto vai pro Storage e só entra no banco quando alguém clica
+    // em Salvar — exigir vínculo aqui deixaria a prévia quebrada antes do save.
+    const ehEquipeAqui = verificarPasseMidiaEquipe(req.cookies.get(COOKIE_MIDIA_EQUIPE)?.value)
+    const ehFamiliaAqui = verificarTokenFamilia(
+      req.cookies.get(`familia_${memorial.id}`)?.value,
+      memorial.id,
+      seguranca?.senha_familia_hash
+    )
+
+    if (!ehEquipeAqui && !ehFamiliaAqui) {
+      const referenciadas = new Set(
+        [
+          memorial.foto_url,
+          memorial.video_url,
+          ...(memorial.galeria_fotos ?? []),
+          ...(memorial.videos_galeria ?? []),
+        ]
+          .filter((u): u is string => typeof u === 'string' && u.length > 0)
+          .map((u) => {
+            const bruto = u.split('/memoriais/')[1] ?? u
+            try {
+              return decodeURIComponent(bruto.split('?')[0])
+            } catch {
+              return bruto.split('?')[0]
+            }
+          })
+      )
+
+      if (!referenciadas.has(objeto)) {
+        return NextResponse.json({ error: 'Não encontrado' }, { status: 404 })
+      }
+    }
   }
 
-  const { data, error } = await supabaseAdmin.storage.from('memoriais').download(objeto)
-  if (error || !data) return NextResponse.json({ error: 'Não encontrado' }, { status: 404 })
+  // Busca com cache-buster, e não pelo SDK.
+  //
+  // Achado testando (18/08): o CDN do Supabase (plano Free, sem invalidação
+  // automática) responde HIT pra objeto JÁ APAGADO, e ignora `Cache-Control:
+  // no-cache` tanto na resposta quanto no pedido. Só query nova faz BYPASS e
+  // mostra a verdade (400/404). Sem isso, arquivo apagado seguia sendo servido
+  // pelo nosso portão por até uma hora — o portão está certo, o andar de baixo
+  // é que mentia pra ele.
+  const resposta = await fetch(
+    `${supabaseUrl}/storage/v1/object/memoriais/${encodeURI(objeto)}?v=${Date.now()}`,
+    {
+      headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` },
+      cache: 'no-store',
+    }
+  )
+  if (!resposta.ok) return NextResponse.json({ error: 'Não encontrado' }, { status: 404 })
+
+  const data = await resposta.arrayBuffer()
 
   return new NextResponse(data, {
     headers: {
-      'Content-Type': data.type || 'application/octet-stream',
+      'Content-Type': resposta.headers.get('content-type') || 'application/octet-stream',
       // Memorial protegido NUNCA é cacheado.
       //
       // Achado testando de verdade (18/08): com `private, max-age=3600` a borda
