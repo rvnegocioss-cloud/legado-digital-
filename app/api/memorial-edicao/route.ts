@@ -54,7 +54,19 @@ export async function POST(req: NextRequest) {
 
   // Limpa presença morta antes de responder — senão o aviso ficaria preso
   // mostrando alguém que fechou o navegador ontem.
-  await supabaseAdmin.from('memorial_edicao_sessoes').delete().lt('ultimo_sinal', limite)
+  //
+  // Escopo: só ESTE memorial no caminho quente. A faxina global roda de vez em
+  // quando (1 em cada 20 batidas) -- com muitos memoriais abertos, varrer a
+  // tabela inteira a cada 30s por editor seria trabalho repetido à toa.
+  await supabaseAdmin
+    .from('memorial_edicao_sessoes')
+    .delete()
+    .eq('homenagem_id', homenagem.id)
+    .lt('ultimo_sinal', limite)
+
+  if (Math.random() < 0.05) {
+    await supabaseAdmin.from('memorial_edicao_sessoes').delete().lt('ultimo_sinal', limite)
+  }
 
   const { data: outros } = await supabaseAdmin
     .from('memorial_edicao_sessoes')

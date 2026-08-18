@@ -122,6 +122,7 @@ export default function FamiliaEdicaoPage() {
   // e o clique no botao brigando seria conflito criado por nos mesmos).
   const salvandoRef = useRef(false)
   const primeiroRenderRef = useRef(true)
+  const ultimoSalvoRef = useRef(0)
   const [erro, setErro] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
   const [enviandoVideo, setEnviandoVideo] = useState(false)
@@ -267,9 +268,15 @@ export default function FamiliaEdicaoPage() {
       primeiroRenderRef.current = false
       return
     }
+    const desdeUltimo = Date.now() - ultimoSalvoRef.current
+    // Espera 3s parado; se acabou de gravar, espera completar 8s -- digitação
+    // em rajada não pode virar dezenas de gravações por minuto (estoura rate
+    // limit e escreve no banco à toa).
+    const espera = Math.max(3000, 8000 - desdeUltimo)
     const t = setTimeout(() => {
+      ultimoSalvoRef.current = Date.now()
       salvar(undefined, true)
-    }, 2500)
+    }, espera)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, tema, vinculos, timelineEventos, fotoUrl, videoUrl, galeria, videosGaleria])

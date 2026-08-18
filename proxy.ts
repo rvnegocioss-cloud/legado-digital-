@@ -60,6 +60,18 @@ const RATE_LIMIT_CONFIG: Record<string, RateLimitConfig> = {
       '/api/familia-upload',
     ],
   },
+  // Edição do memorial pela família e presença de quem está editando.
+  //
+  // Precisa de teto próprio: desde que o Portal da Família passou a salvar
+  // sozinho (2,5s depois que a pessoa para de digitar), quem escreve em
+  // rajadas curtas gera dezenas de gravações por minuto -- e sob o limite
+  // genérico de /api (30/min) a própria escrita da família começaria a levar
+  // 429 no meio do texto. Sessão autenticada por cookie, então o vetor de
+  // abuso aqui é baixo.
+  edicao_familia: {
+    limit: 90,
+    routePatterns: ['/api/familia-memorial', '/api/memorial-edicao'],
+  },
   api: {
     limit: 30,
     routePatterns: [
