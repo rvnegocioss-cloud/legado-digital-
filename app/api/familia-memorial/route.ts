@@ -99,26 +99,53 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { slug, updatedAtEsperado, ...campos } = body
+  const { slug, updatedAtEsperado, valoresBase, ...campos } = body
   if (!slug) return NextResponse.json({ error: 'slug obrigatório' }, { status: 400 })
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
   const resultado = await buscarMemorialEValidar(supabaseAdmin, slug, req)
   if ('erro' in resultado) return NextResponse.json({ error: resultado.erro }, { status: resultado.status })
 
-  // Checa se a Central ou o Parceiro mexeu nesse memorial desde que a família
-  // abriu a tela — sem isso, o salvar da família sobrescreve silenciosamente
-  // qualquer alteração feita em paralelo do outro lado.
-  if (updatedAtEsperado && resultado.homenagem.updated_at !== updatedAtEsperado) {
-    return NextResponse.json(
-      { error: 'Esse memorial foi alterado por outra pessoa (funerária ou equipe) enquanto você editava. Recarregue a página antes de salvar, pra não sobrescrever a mudança dela.' },
-      { status: 409 }
-    )
-  }
-
   const payload: Record<string, unknown> = {}
   for (const campo of CAMPOS_EDITAVEIS) {
     if (campo in campos) payload[campo] = campos[campo]
+  }
+
+  // Conflito é POR CAMPO, não pela linha inteira.
+  //
+  // A trava antiga comparava `updated_at`: qualquer escrita no memorial —
+  // inclusive o upload da própria família, ou a equipe cadastrando o e-mail do
+  // responsável — invalidava o salvar e a família perdia tudo o que digitou.
+  // Aconteceu de verdade com a família Saraiva, duas vezes no mesmo dia.
+  //
+  // Agora só bloqueia se o MESMO campo que ela está mandando tiver mudado no
+  // servidor desde que a tela carregou. Editar a biografia enquanto alguém
+  // vinculou uma foto deixou de ser conflito, porque não é.
+  if (valoresBase && typeof valoresBase === 'object') {
+    const mesmoValor = (a: unknown, b: unknown) =>
+      JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
+
+    const conflitos = Object.keys(payload).filter(
+      (campo) =>
+        campo in (valoresBase as Record<string, unknown>) &&
+        !mesmoValor((valoresBase as Record<string, unknown>)[campo], (resultado.homenagem as Record<string, unknown>)[campo])
+    )
+
+    if (conflitos.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Outra pessoa mudou este mesmo conteúdo enquanto você editava. Recarregue a página pra ver a versão atual antes de salvar.',
+          camposEmConflito: conflitos,
+        },
+        { status: 409 }
+      )
+    }
+  } else if (updatedAtEsperado && resultado.homenagem.updated_at !== updatedAtEsperado) {
+    // Compatibilidade: tela antiga (sem valoresBase) mantém a trava por linha.
+    return NextResponse.json(
+      { error: 'Esse memorial foi alterado por outra pessoa enquanto você editava. Recarregue a página antes de salvar.' },
+      { status: 409 }
+    )
   }
 
   const { data: atualizado, error } = await supabaseAdmin

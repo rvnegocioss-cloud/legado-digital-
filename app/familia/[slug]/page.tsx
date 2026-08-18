@@ -85,6 +85,10 @@ async function subirArquivoFamilia(
   return conf as ResultadoUpload
 }
 
+function chaveRascunho(slug: string) {
+  return `legado-rascunho-familia-${slug}`
+}
+
 export default function FamiliaEdicaoPage() {
   const params = useParams<{ slug: string }>()
   const [carregando, setCarregando] = useState(true)
@@ -115,6 +119,14 @@ export default function FamiliaEdicaoPage() {
   const [enviandoVideosGaleria, setEnviandoVideosGaleria] = useState(false)
   const [enviandoGaleria, setEnviandoGaleria] = useState(false)
   const [updatedAtCarregado, setUpdatedAtCarregado] = useState('')
+  // Valores como estavam no servidor quando a tela carregou. O salvar manda
+  // isso junto pro servidor comparar CAMPO A CAMPO -- sem isso, qualquer
+  // escrita no memorial (ate o upload da propria familia) bloqueava tudo.
+  const [valoresBase, setValoresBase] = useState<Record<string, unknown>>({})
+  // Rede de protecao: tudo o que a familia digita e guardado no proprio
+  // navegador a cada tecla. Se o salvar falhar, se cair a internet ou se ela
+  // fechar a aba sem querer, o texto continua la quando voltar.
+  const [rascunhoRestaurado, setRascunhoRestaurado] = useState(false)
   const [usoStorageMB, setUsoStorageMB] = useState(0)
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia' | null>(null)
   const [memorialId, setMemorialId] = useState('')
@@ -174,7 +186,72 @@ export default function FamiliaEdicaoPage() {
         description: ev.description || '',
       }))
     )
+    // Rascunho local sempre vence o que veio do servidor na EXIBICAO -- e o
+    // trabalho mais recente da familia. A base de comparacao continua sendo o
+    // servidor, entao o salvar segue detectando conflito de verdade.
+    try {
+      const bruto = localStorage.getItem(chaveRascunho(params.slug))
+      if (bruto) {
+        const r = JSON.parse(bruto)
+        if (r?.dados) {
+          setForm({
+            nome_completo: r.dados.nome_completo ?? m.nome_completo ?? '',
+            data_nascimento: r.dados.data_nascimento ?? m.data_nascimento ?? '',
+            data_falecimento: r.dados.data_falecimento ?? m.data_falecimento ?? '',
+            cidade: r.dados.cidade ?? m.cidade ?? '',
+            frase_preferida: r.dados.frase_preferida ?? m.frase_preferida ?? '',
+            biografia: r.dados.biografia ?? m.biografia ?? '',
+          })
+          if (Array.isArray(r.dados.timeline)) setTimelineEventos(r.dados.timeline)
+          if (Array.isArray(r.dados.vinculos)) setVinculos(r.dados.vinculos)
+          if (r.dados.tema) setTema(r.dados.tema)
+          setRascunhoRestaurado(true)
+        }
+      }
+    } catch {}
+
+    setValoresBase({
+      nome_completo: m.nome_completo,
+      data_nascimento: m.data_nascimento,
+      data_falecimento: m.data_falecimento,
+      cidade: m.cidade,
+      frase_preferida: m.frase_preferida,
+      biografia: m.biografia,
+      foto_url: m.foto_url,
+      video_url: m.video_url,
+      videos_galeria: m.videos_galeria,
+      galeria_fotos: m.galeria_fotos,
+      timeline: m.timeline,
+      vinculos: m.vinculos,
+      tema: m.tema,
+    })
     setCarregando(false)
+  }
+
+  // Guarda o que esta na tela no proprio navegador. Nao substitui o salvar --
+  // e a rede pra que texto digitado nunca se perca por conflito, queda de
+  // internet ou aba fechada sem querer.
+  useEffect(() => {
+    if (carregando || sessaoInvalida) return
+    try {
+      localStorage.setItem(
+        chaveRascunho(params.slug),
+        JSON.stringify({
+          salvoEm: new Date().toISOString(),
+          dados: { ...form, tema, vinculos, timeline: timelineEventos },
+        })
+      )
+    } catch {
+      // navegador sem espaco ou em modo privado -- rascunho e bonus, nunca bloqueia
+    }
+  }, [form, tema, vinculos, timelineEventos, carregando, sessaoInvalida, params.slug])
+
+  function descartarRascunho() {
+    try {
+      localStorage.removeItem(chaveRascunho(params.slug))
+    } catch {}
+    setRascunhoRestaurado(false)
+    carregar(params.slug)
   }
 
   async function salvar(e: React.FormEvent) {
@@ -189,6 +266,7 @@ export default function FamiliaEdicaoPage() {
       body: JSON.stringify({
         slug: params.slug,
         updatedAtEsperado: updatedAtCarregado,
+        valoresBase,
         ...form,
         foto_url: fotoUrl || null,
         video_url: videoUrl || null,
@@ -210,6 +288,27 @@ export default function FamiliaEdicaoPage() {
     }
 
     if (json.updatedAt) setUpdatedAtCarregado(json.updatedAt)
+    // O que acabou de ser gravado vira a nova base de comparacao -- senao o
+    // segundo salvar seguido acusaria conflito com a propria alteracao.
+    setValoresBase({
+      nome_completo: form.nome_completo,
+      data_nascimento: form.data_nascimento,
+      data_falecimento: form.data_falecimento,
+      cidade: form.cidade,
+      frase_preferida: form.frase_preferida,
+      biografia: form.biografia,
+      foto_url: fotoUrl || null,
+      video_url: videoUrl || null,
+      videos_galeria: videosGaleria,
+      galeria_fotos: galeria,
+      timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
+      vinculos: vinculos.length > 0 ? vinculos : null,
+      tema,
+    })
+    try {
+      localStorage.removeItem(chaveRascunho(params.slug))
+    } catch {}
+    setRascunhoRestaurado(false)
     setSalvando(false)
     setSalvo(true)
   }
@@ -222,6 +321,7 @@ export default function FamiliaEdicaoPage() {
     try {
       const r = await subirArquivoFamilia(params.slug, 'foto', file)
       setFotoUrl(r.url)
+      setValoresBase((b) => ({ ...b, foto_url: r.url }))
       // O arquivo ja foi gravado no memorial pela rota de confirmar -- sincronizar
       // o updated_at aqui evita o falso "outra pessoa alterou" no proximo Salvar.
       if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
@@ -239,6 +339,7 @@ export default function FamiliaEdicaoPage() {
     try {
       const r = await subirArquivoFamilia(params.slug, 'video', file)
       setVideoUrl(r.url)
+      setValoresBase((b) => ({ ...b, video_url: r.url }))
       if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
     } catch (err: any) {
       setErro(err.message)
@@ -261,7 +362,10 @@ export default function FamiliaEdicaoPage() {
     try {
       for (const f of selecionados) {
         const r = await subirArquivoFamilia(params.slug, 'videos_galeria', f)
-        if (r.videosGaleria) setVideosGaleria(r.videosGaleria)
+        if (r.videosGaleria) {
+          setVideosGaleria(r.videosGaleria)
+          setValoresBase((b) => ({ ...b, videos_galeria: r.videosGaleria }))
+        }
         if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
       }
     } catch (err: any) {
@@ -290,7 +394,10 @@ export default function FamiliaEdicaoPage() {
     try {
       for (const f of selecionados) {
         const r = await subirArquivoFamilia(params.slug, 'galeria', f)
-        if (r.galeria) setGaleria(r.galeria)
+        if (r.galeria) {
+          setGaleria(r.galeria)
+          setValoresBase((b) => ({ ...b, galeria_fotos: r.galeria }))
+        }
         if (r.updatedAt) setUpdatedAtCarregado(r.updatedAt)
       }
     } catch (err: any) {
@@ -355,6 +462,22 @@ export default function FamiliaEdicaoPage() {
             A funerária está preenchendo esse memorial por você. Você ainda pode editar aqui a
             qualquer momento se preferir.
           </p>
+        )}
+
+        {rascunhoRestaurado && (
+          <div className="mb-4 rounded-lg border border-amber-900/40 bg-amber-900/15 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-amber-200">
+              Recuperei o que você tinha escrito e ainda não estava salvo. Confira e clique em
+              &quot;Salvar alterações&quot;.
+            </p>
+            <button
+              type="button"
+              onClick={descartarRascunho}
+              className="text-xs px-2 py-1 rounded border border-amber-900/50 text-amber-200 hover:bg-amber-900/30"
+            >
+              Descartar e usar a versão salva
+            </button>
+          </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
