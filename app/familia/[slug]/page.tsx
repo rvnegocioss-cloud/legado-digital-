@@ -302,9 +302,13 @@ export default function FamiliaEdicaoPage() {
   // base -- o próximo salvamento grava o dela por cima, com consentimento.
   function manterMeuTexto() {
     if (!conflito) return
-    setValoresBase((b) => ({ ...b, ...conflito.doServidor }))
+    // Passa a base nova DIRETO pro salvar: depender do estado aqui nao funciona,
+    // porque a funcao que roda logo em seguida ainda enxerga o valor antigo --
+    // e o conflito se repetia pra sempre (bug pego testando na tela, 18/08).
+    const baseNova = { ...valoresBase, ...conflito.doServidor }
+    setValoresBase(baseNova)
     setConflito(null)
-    setTimeout(() => salvar(undefined, true), 100)
+    salvar(undefined, false, baseNova)
   }
 
   // Descarta o que a família escreveu NAQUELE campo e adota o do servidor.
@@ -337,7 +341,7 @@ export default function FamiliaEdicaoPage() {
     carregar(params.slug)
   }
 
-  async function salvar(e?: React.FormEvent, silencioso = false) {
+  async function salvar(e?: React.FormEvent, silencioso = false, baseOverride?: Record<string, unknown>) {
     e?.preventDefault()
     if (salvandoRef.current) return
     salvandoRef.current = true
@@ -351,7 +355,7 @@ export default function FamiliaEdicaoPage() {
       body: JSON.stringify({
         slug: params.slug,
         updatedAtEsperado: updatedAtCarregado,
-        valoresBase,
+        valoresBase: baseOverride ?? valoresBase,
         ...form,
         foto_url: fotoUrl || null,
         video_url: videoUrl || null,
