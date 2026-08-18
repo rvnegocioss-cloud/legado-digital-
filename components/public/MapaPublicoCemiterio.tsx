@@ -9,6 +9,7 @@ import { CORES } from '@/lib/publicTheme'
 import { normalizarOrtomosaico } from '@/lib/ortomosaico'
 import { estiloComOrtomosaico } from '@/lib/estiloSatelite'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 registrarProtocoloPmtiles()
 
@@ -147,7 +148,7 @@ export default function MapaPublicoCemiterio({
               >
                 {hover.props.foto_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={hover.props.foto_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={urlMidiaProtegida(hover.props.foto_url) || hover.props.foto_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <span style={{ color: CORES.dourado, fontSize: 18 }}>+</span>
                 )}

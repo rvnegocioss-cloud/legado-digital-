@@ -18,6 +18,7 @@ import { lerCoordenada, ROTULO_ORIGEM_COORDENADA, type CoordenadaLida } from '@/
 import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, medirPassoEntreFileiras, validarEspacamento } from '@/lib/enderecoTumulo'
 import { corDaFila } from '@/lib/coresFila'
 import { calcularRota, diagnosticarRede, type ResultadoRota, type RuaMapeada } from '@/lib/rotaCemiterio'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 const JANELA_VAOS_CONTINUACAO = 6
 
@@ -2361,7 +2362,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                         {(homenagemPorLapide.get(lapideHover.id)?.foto_url || lapideHover.foto_face_url) ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={homenagemPorLapide.get(lapideHover.id)?.foto_url || lapideHover.foto_face_url!}
+                            src={urlMidiaProtegida(homenagemPorLapide.get(lapideHover.id)?.foto_url) || lapideHover.foto_face_url!}
                             alt=""
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />

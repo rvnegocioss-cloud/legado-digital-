@@ -472,7 +472,7 @@ export default async function HomenagemPage({
                 quadra={localizacao.quadra}
                 lote={localizacao.lote}
                 nomeCompleto={m.nome_completo}
-                fotoUrl={m.foto_url}
+                fotoUrl={fotoAssinada}
                 ortoUrl={ortoAssinado}
                 ortoMinzoom={localizacao.orto_minzoom}
                 ortoMaxzoom={localizacao.orto_maxzoom}

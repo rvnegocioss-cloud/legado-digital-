@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Heart } from 'lucide-react'
 import { CORES, dataPtBr } from '@/lib/publicTheme'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface MemoriaMural {
   id: string
@@ -124,7 +125,7 @@ export function MuralMemorias({ memorialId, memoriasIniciais }: { memorialId: st
               {m.foto_url && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={m.foto_url}
+                  src={urlMidiaProtegida(m.foto_url) || m.foto_url}
                   alt=""
                   loading="lazy"
                   style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: 6, marginBottom: 10 }}

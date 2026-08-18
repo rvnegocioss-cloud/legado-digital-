@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface Resultado {
   id: string
@@ -127,7 +128,7 @@ export default function FamiliaLoginPage() {
                   >
                     {r.foto_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={r.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                      <img src={urlMidiaProtegida(r.foto_url) || r.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
                     ) : (
                       <div className="w-9 h-9 rounded-full bg-zinc-800" />
                     )}
@@ -152,7 +153,7 @@ export default function FamiliaLoginPage() {
             <div className="flex items-center gap-3 p-2 rounded-lg bg-zinc-900 border border-zinc-800">
               {selecionado.foto_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={selecionado.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                <img src={urlMidiaProtegida(selecionado.foto_url) || selecionado.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-zinc-800" />
               )}
