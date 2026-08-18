@@ -2542,3 +2542,23 @@
 2026-08-18 14:51:02.148 [error]: LM Studio health check failed {"error":{"cause":{}}}
 2026-08-18 14:52:02.151 [error]: LM Studio health check failed {"error":{"cause":{}}}
 2026-08-18 14:53:02.153 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:54:02.164 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:55:02.167 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:56:02.179 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:57:02.192 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:58:02.200 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:59:02.200 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:59:51.101 [info]: MCP Server started successfully {"name":"LMStudio","version":"1.0.0","lmStudioUrl":"http://localhost:1235"}
+2026-08-18 14:59:51.103 [info]: Available tools: generate_docs, summarize, extract_tags, analyze_code, refactor_suggestions, generate_tests, process_markdown, summarize_markdown, tag_markdown, analyze_markdown
+2026-08-18 14:59:51.149 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 14:59:51.154 [info]: Listing available tools
+2026-08-18 15:00:02.207 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:00:51.113 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:01:02.211 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:01:51.114 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:02:02.219 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:02:51.124 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:03:02.224 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:03:51.131 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:04:02.230 [error]: LM Studio health check failed {"error":{"cause":{}}}
+2026-08-18 15:04:51.134 [error]: LM Studio health check failed {"error":{"cause":{}}}

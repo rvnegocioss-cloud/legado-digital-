@@ -209,11 +209,17 @@ function checkRateLimit(
   // Determinar limite baseado na config
   let limit = RATE_LIMIT_CONFIG[routeType]?.limit || 30
 
-  // Override: uploads de staff têm limite maior
+  // Override: uploads de staff têm limite maior.
+  //
+  // Desde que o upload virou 2 etapas (preparar → arquivo vai direto pro
+  // Storage → confirmar), CADA arquivo gasta 2 requisições aqui. Com o teto
+  // antigo de 5, a família era bloqueada na 3ª foto — bug real pego na bateria
+  // de cenários (18/08). O limite por arquivo de verdade vive em
+  // lib/uploadFamilia.ts (10/min); este aqui é só a rede de proteção de borda.
   if (routeType === 'upload' && isStaffUpload) {
-    limit = 10
+    limit = 40
   } else if (routeType === 'upload') {
-    limit = 5
+    limit = 24
   }
 
   const count = entry.timestamps.length
