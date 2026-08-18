@@ -12,6 +12,7 @@ import SecaoRetratil from '@/components/admin/SecaoRetratil'
 import { PrivacidadeMemorial } from '@/components/admin/PrivacidadeMemorial'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
+import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
 
 interface Memorial {
   id: string
@@ -87,6 +88,9 @@ export default function DetalheMemorial() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const [memorial, setMemorial] = useState<Memorial | null>(null)
+  // Presenca ao vivo -- staff ve quando a familia esta editando o mesmo
+  // memorial naquele instante, e vice-versa.
+  const { outros: outrosEditando, temOutroEditando } = useTravaEdicao(memorial?.slug, undefined, 'staff')
   const [parceiro, setParceiro] = useState<Parceiro | null>(null)
   const [form, setForm] = useState({
     nome_completo: '',
@@ -697,6 +701,17 @@ export default function DetalheMemorial() {
           </div>
         )}
       </div>
+
+      {temOutroEditando && (
+        <div className="mb-4 rounded-lg border border-red-900/50 bg-red-950/30 px-4 py-3">
+          <p className="text-sm text-red-200 font-medium">
+            {rotuloPapel(outrosEditando[0].papel)} está editando este memorial agora.
+          </p>
+          <p className="text-xs text-red-300/80 mt-1">
+            Evite salvar por cima — combine antes, ou espere ela terminar.
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">

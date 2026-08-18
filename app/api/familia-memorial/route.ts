@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { verificarTokenFamilia } from '@/lib/familiaSessao'
+import { resolverConflito } from '@/lib/conflitoEdicao'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -121,42 +122,24 @@ export async function POST(req: NextRequest) {
   // Agora só bloqueia se o MESMO campo que ela está mandando tiver mudado no
   // servidor desde que a tela carregou. Editar a biografia enquanto alguém
   // vinculou uma foto deixou de ser conflito, porque não é.
-  if (valoresBase && typeof valoresBase === 'object') {
-    const base = valoresBase as Record<string, unknown>
-    const mesmoValor = (a: unknown, b: unknown) =>
-      JSON.stringify(a ?? null) === JSON.stringify(b ?? null)
+  const { paraGravar, conflitos } = resolverConflito(
+    payload,
+    valoresBase as Record<string, unknown> | null,
+    resultado.homenagem as unknown as Record<string, unknown>
+  )
 
-    // A tela manda o formulário inteiro, mas quase sempre a pessoa mexeu em um
-    // campo só. Campo que continua igual ao que ela carregou é DESCARTADO aqui:
-    // não entra na checagem de conflito nem na escrita.
-    //
-    // Sem isso, a família mandava de volta o valor velho de galeria_fotos que
-    // a equipe tinha acabado de mudar -- e a checagem acusava conflito num
-    // campo que ela nem tocou. Achado numa simulação de 5 cenários; era o bug
-    // que ainda derrubava o caso real do Pedro mesmo depois da 1ª correção.
-    for (const campo of Object.keys(payload)) {
-      if (campo in base && mesmoValor(base[campo], payload[campo])) {
-        delete payload[campo]
-      }
-    }
-
-    const conflitos = Object.keys(payload).filter(
-      (campo) =>
-        campo in base &&
-        !mesmoValor(base[campo], (resultado.homenagem as Record<string, unknown>)[campo])
+  if (conflitos.length > 0) {
+    return NextResponse.json(
+      {
+        error: 'Outra pessoa mudou este mesmo conteúdo enquanto você editava. Recarregue a página pra ver a versão atual antes de salvar.',
+        camposEmConflito: conflitos,
+      },
+      { status: 409 }
     )
+  }
 
-    if (conflitos.length > 0) {
-      return NextResponse.json(
-        {
-          error: 'Outra pessoa mudou este mesmo conteúdo enquanto você editava. Recarregue a página pra ver a versão atual antes de salvar.',
-          camposEmConflito: conflitos,
-        },
-        { status: 409 }
-      )
-    }
-  } else if (updatedAtEsperado && resultado.homenagem.updated_at !== updatedAtEsperado) {
-    // Compatibilidade: tela antiga (sem valoresBase) mantém a trava por linha.
+  // Compatibilidade: tela antiga (sem valoresBase) mantém a trava por linha.
+  if (!valoresBase && updatedAtEsperado && resultado.homenagem.updated_at !== updatedAtEsperado) {
     return NextResponse.json(
       { error: 'Esse memorial foi alterado por outra pessoa enquanto você editava. Recarregue a página antes de salvar.' },
       { status: 409 }
@@ -165,13 +148,13 @@ export async function POST(req: NextRequest) {
 
   // Nada mudou de verdade -- não escreve (e não carimba updated_at à toa,
   // que era justamente o que disparava conflito na tela dos outros).
-  if (Object.keys(payload).length === 0) {
+  if (Object.keys(paraGravar).length === 0) {
     return NextResponse.json({ ok: true, updatedAt: resultado.homenagem.updated_at, semMudanca: true })
   }
 
   const { data: atualizado, error } = await supabaseAdmin
     .from('homenagens')
-    .update(payload)
+    .update(paraGravar)
     .eq('id', resultado.homenagem.id)
     .select('updated_at')
     .single()

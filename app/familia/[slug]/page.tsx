@@ -8,6 +8,7 @@ import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 import { supabase } from '@/lib/auth'
+import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
 import type { ModoGate } from '@/lib/modosPrivacidade'
 
 interface Memorial {
@@ -127,6 +128,9 @@ export default function FamiliaEdicaoPage() {
   // navegador a cada tecla. Se o salvar falhar, se cair a internet ou se ela
   // fechar a aba sem querer, o texto continua la quando voltar.
   const [rascunhoRestaurado, setRascunhoRestaurado] = useState(false)
+  // Presenca ao vivo: avisa NA HORA se alguem mais esta no mesmo memorial,
+  // em vez de a pessoa descobrir so no Salvar, meia hora de texto depois.
+  const { outros, temOutroEditando } = useTravaEdicao(params.slug)
   const [usoStorageMB, setUsoStorageMB] = useState(0)
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia' | null>(null)
   const [memorialId, setMemorialId] = useState('')
@@ -462,6 +466,19 @@ export default function FamiliaEdicaoPage() {
             A funerária está preenchendo esse memorial por você. Você ainda pode editar aqui a
             qualquer momento se preferir.
           </p>
+        )}
+
+        {temOutroEditando && (
+          <div className="mb-4 rounded-lg border border-red-900/50 bg-red-950/30 px-4 py-3">
+            <p className="text-sm text-red-200 font-medium">
+              {rotuloPapel(outros[0].papel)} está editando este memorial agora
+              {outros[0].quem ? ` (${outros[0].quem})` : ''}.
+            </p>
+            <p className="text-xs text-red-300/80 mt-1">
+              Evite mexer no mesmo campo ao mesmo tempo. O que você escrever fica guardado aqui no seu
+              navegador, mas quem salvar por último pode esbarrar no outro.
+            </p>
+          </div>
         )}
 
         {rascunhoRestaurado && (
