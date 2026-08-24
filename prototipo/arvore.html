@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Legado Digital — conceito Árvore no Portal</title>
+<style>
+  :root {
+    --navy: #0B1D2A;
+    --gold: #C9A46A;
+    --gold-dark: #a8834a;
+    --stone: #58616B;
+    --warm-white: #F5F2EB;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--navy);
+    color: var(--warm-white);
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(6px); }
+
+  /* ===== NAVBAR ===== */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,29,42,0.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(201,164,106,0.15);
+  }
+  nav .container { display: flex; align-items: center; justify-content: space-between; height: 74px; }
+  nav .marca-wrap { display: flex; align-items: center; gap: 12px; }
+  nav img { height: 34px; }
+  nav .marca { font-size: 1rem; letter-spacing: 0.08em; font-weight: 700; }
+  nav .links { display: flex; align-items: center; gap: 26px; font-size: 0.92rem; }
+  nav .links a { color: rgba(245,242,235,0.6); text-decoration: none; }
+  nav .links a:hover { color: var(--gold); }
+  .nav-restrita {
+    border: 1px solid rgba(201,164,106,0.35); color: var(--gold);
+    padding: 8px 16px; border-radius: 6px; font-size: 0.9rem; cursor: pointer;
+    background: transparent; font-family: Georgia, serif;
+  }
+
+  /* ===== HERO ===== */
+  .hero { padding: 72px 24px 40px; text-align: center; }
+  .hero h1 { font-size: clamp(2.3rem, 5.5vw, 4.4rem); font-weight: 700; line-height: 1.1; margin: 0 0 20px; }
+  .hero h1 .gold { color: var(--gold); }
+  .hero p.sub { color: rgba(245,242,235,0.5); font-size: 1.12rem; max-width: 560px; margin: 0 auto 30px; }
+  .btn {
+    display: inline-block; padding: 15px 34px; border-radius: 6px; border: none;
+    font-weight: 600; font-size: 1rem; font-family: Georgia, serif; cursor: pointer; text-decoration: none;
+  }
+  .btn-gold { background: var(--gold); color: var(--navy); }
+  .btn-gold:hover { background: var(--gold-dark); }
+  .btn-outline { border: 1px solid rgba(255,255,255,0.2); color: var(--warm-white); background: transparent; }
+
+  /* busca embutida no hero (mesma que já existe na landing) */
+  .busca-wrap { max-width: 480px; margin: 28px auto 0; }
+  .busca-campo {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(201,164,106,0.25);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .busca-campo input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--warm-white); font-family: Georgia, serif; font-size: 0.98rem;
+  }
+  .busca-campo input::placeholder { color: rgba(245,242,235,0.35); }
+  .busca-campo button {
+    background: var(--gold); color: var(--navy); border: none; border-radius: 6px;
+    padding: 9px 18px; font-family: Georgia, serif; font-weight: 600; cursor: pointer;
+  }
+  .busca-legenda { color: rgba(245,242,235,0.35); font-size: 0.82rem; margin-top: 8px; }
+
+  /* ===== CENA DA ÁRVORE ===== */
+  .arvore-cena { max-width: 700px; margin: 48px auto 0; }
+  .arvore-cena svg { width: 100%; height: auto; display: block; }
+  .legenda-cena {
+    text-align: center; color: rgba(245,242,235,0.35);
+    font-size: 0.9rem; margin-top: 12px; font-style: italic;
+  }
+
+  .hero-stats {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 32px;
+    max-width: 560px; margin: 52px auto 0;
+  }
+  .hero-stats .num { color: var(--gold); font-size: 1.8rem; font-weight: 700; }
+  .hero-stats .lbl { color: rgba(245,242,235,0.4); font-size: 0.85rem; margin-top: 4px; }
+
+  /* ===== SEÇÕES ===== */
+  section { padding: 92px 24px; }
+  .fundo-suave { background: rgba(11,29,42,0.5); }
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto 52px; }
+  .badge {
+    display: inline-block; background: rgba(201,164,106,0.1); color: var(--gold);
+    border: 1px solid rgba(201,164,106,0.3); border-radius: 999px; padding: 6px 16px;
+    font-size: 0.8rem; margin-bottom: 16px;
+  }
+  .section-head h2 { font-size: clamp(1.8rem,4vw,2.8rem); margin: 0 0 12px; }
+  .section-head h2 .gold { color: var(--gold); }
+  .section-head p { color: rgba(245,242,235,0.5); }
+
+  .beneficios-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(290px,1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(201,164,106,0.15); border-radius: 12px; padding: 28px; }
+  .card:hover { border-color: rgba(201,164,106,0.35); }
+  .card .ico { color: var(--gold); margin-bottom: 12px; display: block; }
+  .card h3 { margin: 0 0 8px; font-size: 1.12rem; }
+  .card p { margin: 0; color: rgba(245,242,235,0.5); font-size: 0.92rem; line-height: 1.5; }
+  .card-demo {
+    grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; padding: 34px;
+  }
+
+  /* ===== COMO FUNCIONA ===== */
+  .passos { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 32px; max-width: 1200px; margin: 0 auto; text-align: center; }
+  .passo .ico { color: var(--gold); margin-bottom: 14px; display: block; }
+  .passo .num { color: var(--gold); font-family: monospace; font-size: 0.8rem; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .passo h3 { margin: 0 0 6px; font-size: 1.05rem; }
+  .passo p { margin: 0; color: rgba(245,242,235,0.4); font-size: 0.88rem; }
+  .conector { display: flex; justify-content: center; gap: 16px; margin-top: 34px; }
+  .conector span { width: 32px; height: 2px; background: linear-gradient(to right, rgba(201,164,106,0.5), transparent); }
+
+  /* ===== FAQ ===== */
+  .faq-list { max-width: 720px; margin: 0 auto; }
+  details { background: rgba(255,255,255,0.03); border: 1px solid rgba(201,164,106,0.15); border-radius: 8px; margin-bottom: 14px; }
+  summary { padding: 18px 20px; cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; }
+  summary::-webkit-details-marker { display: none; }
+  details p { margin: 0; padding: 0 20px 18px; color: rgba(245,242,235,0.5); font-size: 0.92rem; }
+
+  /* ===== CTA ===== */
+  .cta-final {
+    max-width: 800px; margin: 0 auto; text-align: center;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(201,164,106,0.2);
+    border-radius: 20px; padding: 68px 40px;
+  }
+  .cta-final h2 { font-size: clamp(1.8rem,4vw,2.8rem); margin: 0 0 16px; }
+  .cta-final p { color: rgba(245,242,235,0.5); max-width: 480px; margin: 0 auto 28px; }
+  .cta-final .row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* ===== FOOTER ===== */
+  footer { border-top: 1px solid rgba(201,164,106,0.15); padding: 48px 24px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; max-width: 1200px; margin: 0 auto 44px; }
+  .footer-grid img { height: 76px; margin-bottom: 16px; }
+  .footer-grid .desc { color: rgba(245,242,235,0.4); font-size: 0.88rem; max-width: 420px; margin: 0; }
+  .footer-grid h4 { margin: 0 0 14px; font-size: 0.98rem; }
+  .footer-grid a, .footer-grid .lnk {
+    display: block; color: rgba(245,242,235,0.4); font-size: 0.88rem;
+    text-decoration: none; margin-bottom: 8px; cursor: pointer;
+  }
+  .footer-grid a:hover, .footer-grid .lnk:hover { color: var(--gold); }
+  .footer-base {
+    border-top: 1px solid rgba(201,164,106,0.1); padding-top: 28px;
+    text-align: center; color: rgba(245,242,235,0.3); font-size: 0.78rem;
+    max-width: 1200px; margin: 0 auto;
+  }
+
+  /* ===== WIDGET DO BOT ===== */
+  .bot-widget {
+    position: fixed; right: 24px; bottom: 24px; z-index: 60;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--gold); color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45); cursor: pointer; border: none;
+  }
+
+  @media (max-width: 860px) {
+    nav .links { display: none; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="marca-wrap">
+      <img src="img/icone.png" alt="" />
+      <span class="marca">LEGADO DIGITAL</span>
+    </div>
+    <div class="links">
+      <a href="#beneficios">Benefícios</a>
+      <a href="#como-funciona">Como Funciona</a>
+      <a href="#faq">FAQ</a>
+      <a href="#">Cemitérios</a>
+      <button class="nav-restrita">Área Restrita ▾</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1><span class="gold">Toda Família</span><br>Tem Uma História</h1>
+  <p class="sub">Um espaço permanente para preservar a história de quem se foi. Sua funerária oferece memoriais digitais com QR Code às famílias que atende.</p>
+  <button class="btn btn-gold">Começar Agora</button>
+
+  <!-- busca de memorial embutida (a mesma que já existe hoje na landing) -->
+  <div class="busca-wrap">
+    <div class="busca-campo">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" placeholder="Buscar um memorial pelo nome…" />
+      <button>Buscar</button>
+    </div>
+    <p class="busca-legenda">Digite o nome do homenageado para encontrar a homenagem.</p>
+  </div>
+
+  <div class="arvore-cena">
+    <svg viewBox="0 0 800 920" role="img" aria-label="Árvore da família dentro do portal da marca">
+      <defs>
+        <radialGradient id="brilho" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#FFE9B8" stop-opacity="0.95" />
+          <stop offset="45%" stop-color="#C9A46A" stop-opacity="0.45" />
+          <stop offset="100%" stop-color="#C9A46A" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="ouro" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#E4C795" />
+          <stop offset="55%"  stop-color="#C9A46A" />
+          <stop offset="100%" stop-color="#9C7B49" />
+        </linearGradient>
+      </defs>
+
+      <!-- ===== ARCO (o portal da logo) ===== -->
+      <path d="M 158,800 L 158,330 Q 158,142 400,58 Q 642,142 642,330 L 642,800"
+            fill="none" stroke="url(#ouro)" stroke-width="13" stroke-linecap="round" />
+      <path d="M 196,800 L 196,346 Q 196,180 400,104 Q 604,180 604,346 L 604,800"
+            fill="none" stroke="url(#ouro)" stroke-width="7" stroke-linecap="round" opacity="0.75" />
+
+      <!-- ===== LUZ NO TOPO (a chama da logo) ===== -->
+      <circle cx="400" cy="252" r="82" fill="url(#brilho)" />
+      <circle cx="400" cy="252" r="17" fill="#F7E2B4" />
+
+      <!-- ===== ÁRVORE (a planta da logo, crescida) ===== -->
+      <!-- escala a partir da base do tronco, pra árvore ocupar o arco -->
+      <g transform="translate(400,796) scale(1.1) translate(-400,-796)">
+      <!-- tronco, do livro até a forquilha -->
+      <path d="M 385,796 C 387,690 391,568 395,430 L 405,430 C 409,568 413,690 415,796 Z" fill="url(#ouro)" />
+
+      <!-- caule central: sobe da forquilha e encosta na luz
+           (forma preenchida, com leve conicidade — linha 100% vertical
+           com gradiente tem bounding box de largura zero e não pinta) -->
+      <path d="M 396.5,432 L 398.6,317 L 401.4,317 L 403.5,432 Z" fill="url(#ouro)" />
+
+      <!-- galhos -->
+      <g fill="none" stroke="url(#ouro)" stroke-width="5.5" stroke-linecap="round">
+        <path d="M 398,455 C 362,412 322,386 280,370" />
+        <path d="M 402,445 C 438,404 478,380 520,366" />
+        <path d="M 398,545 C 360,516 318,502 276,494" />
+        <path d="M 402,560 C 440,532 482,520 524,512" />
+      </g>
+      <g fill="none" stroke="url(#ouro)" stroke-width="4" stroke-linecap="round">
+        <path d="M 399,500 C 374,474 348,462 326,454" />
+        <path d="M 401,490 C 426,465 452,453 474,445" />
+      </g>
+
+      <!-- folhas (mesmo formato de folha da logo) -->
+      <g fill="url(#ouro)" opacity="0.92">
+        <path d="M -20,0 Q 0,-12 20,0 Q 0,12 -20,0 Z" transform="translate(332,396) rotate(-22)" />
+        <path d="M -20,0 Q 0,-12 20,0 Q 0,12 -20,0 Z" transform="translate(470,392) rotate(22)" />
+        <path d="M -18,0 Q 0,-11 18,0 Q 0,11 -18,0 Z" transform="translate(332,516) rotate(-16)" />
+        <path d="M -18,0 Q 0,-11 18,0 Q 0,11 -18,0 Z" transform="translate(468,532) rotate(16)" />
+        <path d="M -17,0 Q 0,-10 17,0 Q 0,10 -17,0 Z" transform="translate(374,382) rotate(-42)" />
+        <path d="M -17,0 Q 0,-10 17,0 Q 0,10 -17,0 Z" transform="translate(426,378) rotate(42)" />
+      </g>
+
+      <!-- ===== RETRATOS PENDURADOS (cada pessoa homenageada) ===== -->
+      <g>
+        <line x1="280" y1="370" x2="280" y2="386" stroke="#C9A46A" stroke-width="2.5" />
+        <circle cx="280" cy="419" r="33" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
+        <circle cx="280" cy="409" r="10" fill="#C9A46A" opacity="0.55" />
+        <path d="M 264,439 Q 266,423 280,423 Q 294,423 296,439 Z" fill="#C9A46A" opacity="0.55" />
+
+        <line x1="520" y1="366" x2="520" y2="382" stroke="#C9A46A" stroke-width="2.5" />
+        <circle cx="520" cy="415" r="33" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
+        <circle cx="520" cy="405" r="10" fill="#C9A46A" opacity="0.55" />
+        <path d="M 504,435 Q 506,419 520,419 Q 534,419 536,435 Z" fill="#C9A46A" opacity="0.55" />
+
+        <line x1="276" y1="494" x2="276" y2="510" stroke="#C9A46A" stroke-width="2.5" />
+        <circle cx="276" cy="541" r="31" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
+        <circle cx="276" cy="532" r="9" fill="#C9A46A" opacity="0.55" />
+        <path d="M 262,560 Q 264,545 276,545 Q 288,545 290,560 Z" fill="#C9A46A" opacity="0.55" />
+
+        <line x1="524" y1="512" x2="524" y2="528" stroke="#C9A46A" stroke-width="2.5" />
+        <circle cx="524" cy="559" r="31" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
+        <circle cx="524" cy="550" r="9" fill="#C9A46A" opacity="0.55" />
+        <path d="M 510,578 Q 512,563 524,563 Q 536,563 538,578 Z" fill="#C9A46A" opacity="0.55" />
+
+        <line x1="326" y1="454" x2="326" y2="468" stroke="#C9A46A" stroke-width="2.5" />
+        <circle cx="326" cy="494" r="26" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="2.5" />
+        <circle cx="326" cy="487" r="8" fill="#C9A46A" opacity="0.55" />
+        <path d="M 314,509 Q 315,496 326,496 Q 337,496 338,509 Z" fill="#C9A46A" opacity="0.55" />
+
+        <line x1="474" y1="445" x2="474" y2="459" stroke="#C9A46A" stroke-width="2.5" />
+        <circle cx="474" cy="485" r="26" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="2.5" />
+        <circle cx="474" cy="478" r="8" fill="#C9A46A" opacity="0.55" />
+        <path d="M 462,500 Q 463,487 474,487 Q 485,487 486,500 Z" fill="#C9A46A" opacity="0.55" />
+      </g>
+      </g>
+
+      <!-- ===== LIVRO ABERTO NA BASE (o livro da logo) ===== -->
+      <g fill="url(#ouro)">
+        <path d="M 400,790 C 330,762 226,750 122,756 L 122,786 C 226,780 330,792 400,820 Z" />
+        <path d="M 400,790 C 470,762 574,750 678,756 L 678,786 C 574,780 470,792 400,820 Z" />
+      </g>
+      <g fill="url(#ouro)" opacity="0.55">
+        <path d="M 400,812 C 330,786 226,776 122,782 L 122,802 C 226,798 330,810 400,838 Z" />
+        <path d="M 400,812 C 470,786 574,776 678,782 L 678,802 C 574,798 470,810 400,838 Z" />
+      </g>
+      <g fill="url(#ouro)" opacity="0.3">
+        <path d="M 400,832 C 330,808 226,800 122,806 L 122,822 C 226,818 330,830 400,856 Z" />
+        <path d="M 400,832 C 470,808 574,800 678,806 L 678,822 C 574,818 470,830 400,856 Z" />
+      </g>
+    </svg>
+  </div>
+  <p class="legenda-cena">Cada história preservada é um ramo que continua.</p>
+
+  <div class="hero-stats">
+    <div><div class="num">4</div><div class="lbl">Níveis de Acesso</div></div>
+    <div><div class="num">100%</div><div class="lbl">Online</div></div>
+    <div><div class="num">100%</div><div class="lbl">Privacidade Total</div></div>
+  </div>
+</section>
+
+<section id="beneficios">
+  <div class="section-head">
+    <div class="badge">Por que Legado Digital?</div>
+    <h2><span class="gold">Diferenciais</span> que Transformam</h2>
+    <p>Sua funerária se destaca com um serviço que une tecnologia e emoção.</p>
+  </div>
+  <div class="beneficios-grid">
+    <div class="card">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+      <h3>QR Code na Placa</h3><p>Um QR Code único e discreto instalado na placa memorial. Qualquer visitante escaneia e acessa a homenagem.</p>
+    </div>
+    <div class="card">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <h3>Privacidade Total</h3><p>A família controla quem acessa: público, privado ou com senha. O respeito ao falecido é prioridade.</p>
+    </div>
+    <div class="card">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+      <h3>Memorial Elegante</h3><p>Design moderno com fotos, vídeos, biografia e linha do tempo. Uma verdadeira homenagem digital.</p>
+    </div>
+    <div class="card">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+      <h3>Livro de Condolências</h3><p>Visitantes deixam mensagens de carinho. A família pode ver e moderar cada homenagem.</p>
+    </div>
+    <div class="card">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <h3>Família Participa</h3><p>Parentes recebem acesso para editar, adicionar fotos e personalizar o memorial do ente querido.</p>
+    </div>
+    <div class="card">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      <h3>Gestão Completa</h3><p>Dashboard para funerária gerenciar todos os memoriais em um só lugar. Simples e intuitivo.</p>
+    </div>
+    <div class="card">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+      <h3>Ver Demonstração</h3><p>Veja um exemplo real de como fica um memorial digital. Clique para acessar uma homenagem de demonstração.</p>
+    </div>
+    <div class="card card-demo">
+      <button class="btn btn-gold">Ver Memorial de Demonstração</button>
+    </div>
+  </div>
+</section>
+
+<section id="como-funciona" class="fundo-suave">
+  <div class="section-head">
+    <div class="badge">Simples e Rápido</div>
+    <h2>Como <span class="gold">Funciona</span></h2>
+  </div>
+  <div class="passos">
+    <div class="passo">
+      <svg class="ico" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+      <div class="num">01</div><h3>Funerária Cadastra</h3><p>Cadastre o falecido na plataforma em 2 minutos.</p>
+    </div>
+    <div class="passo">
+      <svg class="ico" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <div class="num">02</div><h3>Família Personaliza</h3><p>Parentes recebem acesso e montam o memorial.</p>
+    </div>
+    <div class="passo">
+      <svg class="ico" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+      <div class="num">03</div><h3>QR Code Gerado</h3><p>QR Code único é gerado e instalado na placa.</p>
+    </div>
+    <div class="passo">
+      <svg class="ico" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+      <div class="num">04</div><h3>Homenagens Chegam</h3><p>Visitantes escaneiam e deixam condolências.</p>
+    </div>
+  </div>
+  <div class="conector"><span></span><span></span><span></span></div>
+</section>
+
+<section id="faq" class="fundo-suave">
+  <div class="section-head">
+    <div class="badge">Dúvidas Frequentes</div>
+    <h2>Perguntas <span class="gold">Frequentes</span></h2>
+  </div>
+  <div class="faq-list">
+    <details><summary>Como minha funerária começa a usar? <span style="color:var(--gold)">▾</span></summary><p>Basta criar uma conta, escolher um plano e começar a cadastrar os memoriais. Em menos de 5 minutos você já pode gerar o primeiro QR Code.</p></details>
+    <details><summary>A família precisa pagar algo? <span style="color:var(--gold)">▾</span></summary><p>Não! O memorial digital é um serviço oferecido pela funerária. A família só precisa personalizar o conteúdo.</p></details>
+    <details><summary>O QR Code é único para cada falecido? <span style="color:var(--gold)">▾</span></summary><p>Sim! Cada memorial gera um QR Code exclusivo que leva diretamente à página de homenagem daquele ente querido.</p></details>
+    <details><summary>Como funciona a privacidade com senha? <span style="color:var(--gold)">▾</span></summary><p>A família define uma senha no painel de controle. Apenas quem tem a senha consegue acessar o memorial.</p></details>
+    <details><summary>Posso cancelar quando quiser? <span style="color:var(--gold)">▾</span></summary><p>Sim! Sem multas ou taxas de cancelamento. Você pode cancelar a qualquer momento.</p></details>
+  </div>
+</section>
+
+<section>
+  <div class="cta-final">
+    <h2>Pronto para <span class="gold">Transformar</span> seu Negócio?</h2>
+    <p>Junte-se às funerárias que já oferecem memoriais digitais e se destacam no mercado.</p>
+    <div class="row">
+      <button class="btn btn-gold">Começar Grátis por 7 Dias</button>
+      <button class="btn btn-outline">Falar com Consultor</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <img src="img/logo-2400.png" alt="Legado Digital" />
+      <p class="desc">Um espaço permanente para preservar histórias. Memoriais digitais com QR Code para o setor funerário.</p>
+    </div>
+    <div>
+      <h4>Produto</h4>
+      <span class="lnk">Benefícios</span>
+      <span class="lnk">Como Funciona</span>
+      <span class="lnk">FAQ</span>
+    </div>
+    <div>
+      <h4>Empresa</h4>
+      <span class="lnk">Sobre</span>
+      <a href="mailto:contato@legadodigital.net">contato@legadodigital.net</a>
+      <a href="#">Privacidade</a>
+      <a href="#">Termos</a>
+    </div>
+  </div>
+  <div class="footer-base">
+    © 2026 Legado Digital. Todos os direitos reservados.
+    <br />
+    <span style="display:block;margin-top:6px">Preservando histórias hoje para que continuem inspirando amanhã.</span>
+  </div>
+</footer>
+
+<button class="bot-widget" aria-label="Falar com o LegadoBot">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+</button>
+
+</body>
+</html>
