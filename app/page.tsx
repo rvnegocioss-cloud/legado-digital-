@@ -1,382 +1,268 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import Navbar from '@/components/Navbar'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
+/**
+ * Landing "O Fio da Vida".
+ *
+ * A marcação e o CSS vieram do protótipo HTML validado
+ * (Desktop\Cerebro Claude - Legado Digital\prototipo-fio-da-vida) e entram aqui
+ * byte a byte de propósito: o efeito depende de detalhes calibrados na mão
+ * (chama por sprite, blend no div e não no canvas, orbe seguindo a altura do
+ * scroll). Converter pra JSX atributo por atributo arriscaria quebrar isso sem
+ * ninguém perceber, então a marcação é injetada e o script roda intacto a
+ * partir de /fio-da-vida/anima.js.
+ *
+ * A landing anterior está preservada em app/page_fio_antiga.tsx.
+ */
+
+import Script from 'next/script'
 import LegadoBotPublicoWidget from '@/components/LegadoBotPublicoWidget'
-import { BuscaMemorial } from '@/components/public/BuscaMemorial'
-import { QrCode, Lock, Sparkles, BookOpen, Users, LayoutDashboard, Eye, Building2, MessageCircle } from 'lucide-react'
+import './fio-da-vida.css'
 
-const HeroBackground = dynamic(() => import('@/components/Hero3D'), { ssr: false })
+const MARCACAO = `<nav class="navbar">
+  <div class="inner">
+    <a href="/" class="logo-link" aria-label="Legado Digital - Home"><img class="logo-sm" src="/logo-legado-digital.svg" alt="Legado Digital" /></a>
+    <div class="links">
+      <a href="#beneficios">Benefícios</a>
+      <a href="#como-funciona">Como Funciona</a>
+      <a href="#faq">FAQ</a>
+      <a href="/cemiterios">Cemitérios</a>
+    </div>
+    <div class="area-restrita">
+      <button class="cta" type="button" id="btnArea" aria-expanded="false">Área Restrita
+        <svg class="chev-area" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="menu-area" id="menuArea">
+        <a href="/admin/login">Legado Central</a>
+        <a href="/parceiro/login">Portal do Parceiro</a>
+        <a href="/familia/login">Portal da Família</a>
+      </div>
+    </div>
+  </div>
+</nav>
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 40 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6 },
-}
+<div class="hero-zone">
+  <div class="mega-backdrop"></div>
+  <header class="intro">
+    <div class="portal-bg"></div>
+    <div class="portal-veu"></div>
+    <div class="beam"></div>
+    <div class="beam-linger"></div>
+    <div class="glow"></div>
+    <h1><span class="word" style="animation-delay:1.45s">Toda</span> <span class="word" style="animation-delay:1.55s">Família</span><br><em><span class="word" style="animation-delay:1.68s">Tem</span> <span class="word" style="animation-delay:1.76s">Uma</span> <span class="word" style="animation-delay:1.86s">História</span></em></h1>
+    <p class="sub">Legado Digital é o memorial digital que sua funerária oferece à família: uma página com fotos, vídeos e histórias reais, acessada por QR Code na lápide. Cada memorial é um ponto de luz — sozinho no começo, depois interligado a todos os outros, numa constelação viva.</p>
+    <div class="dica-rolar" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+  </header>
+</div>
 
-const stagger = {
-  initial: { opacity: 0 },
-  whileInView: { opacity: 1 },
-  viewport: { once: true },
-  transition: { staggerChildren: 0.1 },
-}
+<div class="side-glow">
+  <div class="blob" style="left:4%;  top:14%; width:210px; height:210px; --sd:15s; --sx:22px;  --sy:-24px; background-image:url('/fio-da-vida/bolha-teia.png');"></div>
+  <div class="blob" style="right:4%; top:42%; width:230px; height:230px; --sd:18s; --sx:-20px; --sy:26px;  background-image:url('/fio-da-vida/bolha-velas.png');"></div>
+  <div class="blob" style="left:3%;  top:70%; width:200px; height:200px; --sd:13s; --sx:24px;  --sy:22px;  background-image:url('/fio-da-vida/bolha-celular.png');"></div>
+
+  <div class="petal l" style="top:2%;  --pin:80px;  --pf:14s; --pdelay:0s;   --pdx:60px;"></div>
+  <div class="petal l" style="top:7%;  --pin:230px; --pf:15.2s; --pdelay:10s; --pdx:-35px;"></div>
+  <div class="petal l" style="top:9%;  --pin:180px; --pf:16s; --pdelay:4s;   --pdx:-50px;"></div>
+  <div class="petal l" style="top:14%; --pin:95px;  --pf:13.8s; --pdelay:11s; --pdx:40px;"></div>
+  <div class="petal l" style="top:18%; --pin:280px; --pf:13s; --pdelay:1s;   --pdx:60px;"></div>
+  <div class="petal l" style="top:23%; --pin:150px; --pf:16.8s; --pdelay:12s; --pdx:-45px;"></div>
+  <div class="petal l" style="top:27%; --pin:120px; --pf:17s; --pdelay:6s;   --pdx:-40px;"></div>
+  <div class="petal l" style="top:32%; --pin:260px; --pf:14.2s; --pdelay:0.5s; --pdx:50px;"></div>
+  <div class="petal l" style="top:36%; --pin:220px; --pf:14.5s; --pdelay:3s; --pdx:55px;"></div>
+  <div class="petal l" style="top:41%; --pin:105px; --pf:15.8s; --pdelay:7.5s; --pdx:-40px;"></div>
+  <div class="petal l" style="top:46%; --pin:320px; --pf:15.5s; --pdelay:8s; --pdx:-60px;"></div>
+  <div class="petal l" style="top:51%; --pin:190px; --pf:13.2s; --pdelay:2.5s; --pdx:45px;"></div>
+  <div class="petal l" style="top:55%; --pin:100px; --pf:13.5s; --pdelay:2s; --pdx:45px;"></div>
+  <div class="petal l" style="top:60%; --pin:270px; --pf:16.2s; --pdelay:9.5s; --pdx:-55px;"></div>
+  <div class="petal l" style="top:64%; --pin:200px; --pf:16.5s; --pdelay:5s; --pdx:-55px;"></div>
+  <div class="petal l" style="top:69%; --pin:130px; --pf:14.8s; --pdelay:1.5s; --pdx:35px;"></div>
+  <div class="petal l" style="top:73%; --pin:300px; --pf:14s;   --pdelay:9s; --pdx:60px;"></div>
+  <div class="petal l" style="top:78%; --pin:170px; --pf:15.4s; --pdelay:6.5s; --pdx:-50px;"></div>
+  <div class="petal l" style="top:82%; --pin:150px; --pf:15s;   --pdelay:1s; --pdx:-45px;"></div>
+  <div class="petal l" style="top:87%; --pin:240px; --pf:13.6s; --pdelay:4.5s; --pdx:40px;"></div>
+  <div class="petal l" style="top:91%; --pin:250px; --pf:16s;   --pdelay:6s; --pdx:50px;"></div>
+
+  <div class="petal r" style="top:5%;  --pin:80px;  --pf:15s; --pdelay:2s;  --pdx:-65px;"></div>
+  <div class="petal r" style="top:10%; --pin:250px; --pf:14.4s; --pdelay:11s; --pdx:40px;"></div>
+  <div class="petal r" style="top:14%; --pin:200px; --pf:14s; --pdelay:7s;  --pdx:55px;"></div>
+  <div class="petal r" style="top:19%; --pin:100px; --pf:16.4s; --pdelay:0.5s; --pdx:-40px;"></div>
+  <div class="petal r" style="top:23%; --pin:120px; --pf:16.5s; --pdelay:0s;--pdx:-50px;"></div>
+  <div class="petal r" style="top:28%; --pin:280px; --pf:13.4s; --pdelay:8.5s; --pdx:45px;"></div>
+  <div class="petal r" style="top:32%; --pin:300px; --pf:13.5s; --pdelay:4s;--pdx:45px;"></div>
+  <div class="petal r" style="top:37%; --pin:150px; --pf:15.6s; --pdelay:2.5s; --pdx:-35px;"></div>
+  <div class="petal r" style="top:41%; --pin:160px; --pf:15.5s; --pdelay:9s;--pdx:-60px;"></div>
+  <div class="petal r" style="top:46%; --pin:220px; --pf:14.6s; --pdelay:6.5s; --pdx:50px;"></div>
+  <div class="petal r" style="top:50%; --pin:260px; --pf:14.5s; --pdelay:3s;--pdx:50px;"></div>
+  <div class="petal r" style="top:55%; --pin:95px;  --pf:16.6s; --pdelay:10.5s; --pdx:-40px;"></div>
+  <div class="petal r" style="top:59%; --pin:100px; --pf:16s;   --pdelay:6s;--pdx:-45px;"></div>
+  <div class="petal r" style="top:64%; --pin:310px; --pf:13.8s; --pdelay:1.5s; --pdx:55px;"></div>
+  <div class="petal r" style="top:68%; --pin:220px; --pf:13.5s; --pdelay:1s;--pdx:55px;"></div>
+  <div class="petal r" style="top:73%; --pin:170px; --pf:15.2s; --pdelay:5.5s; --pdx:-45px;"></div>
+  <div class="petal r" style="top:77%; --pin:320px; --pf:15s;   --pdelay:8s;--pdx:-50px;"></div>
+  <div class="petal r" style="top:82%; --pin:130px; --pf:14.2s; --pdelay:3.5s; --pdx:40px;"></div>
+  <div class="petal r" style="top:86%; --pin:140px; --pf:14.5s; --pdelay:5s;--pdx:60px;"></div>
+  <div class="petal r" style="top:91%; --pin:240px; --pf:16.2s; --pdelay:7.5s; --pdx:-40px;"></div>
+  <div class="petal r" style="top:95%; --pin:240px; --pf:16s;   --pdelay:2s;--pdx:-40px;"></div>
+
+<section class="thread-stage" id="stage">
+  <canvas id="constCanvas" width="800" height="3760"></canvas>
+  <canvas id="meshCanvas" width="800" height="3760"></canvas>
+
+  <svg viewBox="0 0 800 3900" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <mask id="threadMask" maskUnits="userSpaceOnUse" x="0" y="0" width="800" height="3760">
+        <rect x="0" y="0" width="800" height="3760" fill="#fff" />
+        <g id="maskHoles"></g>
+      </mask>
+      <linearGradient id="threadGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#dfc08a" />
+        <stop offset="50%" stop-color="#C9A46A" />
+        <stop offset="100%" stop-color="#a8834a" />
+      </linearGradient>
+    </defs>
+    <g id="fiosDNA" mask="url(#threadMask)"></g>
+    <path class="thread-main" id="threadPath" d="" mask="url(#threadMask)" />
+    <path class="thread-stub" id="stub1" mask="url(#threadMask)" d="M400,1440 C 470,1470 540,1500 556,1520" />
+    <path class="thread-stub" id="stub2" mask="url(#threadMask)" d="M400,3220 C 330,3245 260,3265 244,3280" />
+  </svg>
+
+  <div class="tip" id="tip" style="opacity:0;"></div>
+
+  <div class="node dot"   data-x="460" data-y="150"  data-t="0.06"></div>
+
+  <div class="node photo" data-x="330" data-y="300" data-t="0.092">
+    <div class="ring"><img src="/fio-da-vida/nodes/casa-toda-1.png" class="node-img node-img-a" style="--reveza-atraso:0.0s" alt="Família reunida na sala vendo o memorial" /><img src="/fio-da-vida/nodes/casa-toda-2.png" class="node-img node-img-b" style="--reveza-atraso:0.0s" alt="Família reunida na sala vendo o memorial" /></div>
+    <div class="cap side-right"><b>A casa toda em volta</b>As histórias voltam a ser contadas na sala, como sempre foram.</div>
+  </div>
+
+  <div class="node dot"   data-x="520" data-y="780"  data-t="0.19"></div>
+
+    <div id="beneficios" class="node info texto" data-x="400" data-y="655" data-t="0.166">
+      <div class="tit"><span class="grad">Diferenciais</span> que Transformam</div>
+      <div class="linha"><b>QR Code na Placa</b><span>Um QR Code único e discreto instalado na placa memorial. Qualquer visitante escaneia e acessa a homenagem.</span></div>
+      <div class="linha"><b>Privacidade Total</b><span>A família controla quem acessa: público, privado ou com senha. O respeito ao falecido é prioridade.</span></div>
+      <div class="linha"><b>Memorial Elegante</b><span>Design moderno com fotos, vídeos, biografia e linha do tempo. Uma verdadeira homenagem digital.</span></div>
+    </div>
+
+    <div class="node info texto" data-x="400" data-y="1585" data-t="0.359">
+      <div class="tit"><span class="grad">Diferenciais</span> que Transformam</div>
+      <div class="linha"><b>Livro de Condolências</b><span>Visitantes deixam mensagens de carinho. A família pode ver e moderar cada homenagem.</span></div>
+      <div class="linha"><b>Família Participa</b><span>Parentes recebem acesso para editar, adicionar fotos e personalizar o memorial do ente querido.</span></div>
+      <div class="linha"><b>Gestão Completa</b><span>Dashboard para funerária gerenciar todos os memoriais em um só lugar. Simples e intuitivo.</span></div>
+    </div>
+
+    <div id="como-funciona" class="node info texto" data-x="400" data-y="2515" data-t="0.552">
+      <div class="tit">Como <span class="grad">Funciona</span></div>
+      <div class="linha"><b>01 Funerária Cadastra</b><span>Cadastre o falecido na plataforma em 2 minutos.</span></div>
+      <div class="linha"><b>02 Família Personaliza</b><span>Parentes recebem acesso e montam o memorial.</span></div>
+      <div class="linha"><b>03 QR Code Gerado</b><span>QR Code único é gerado e instalado na placa.</span></div>
+      <div class="linha"><b>04 Homenagens Chegam</b><span>Visitantes escaneiam e deixam condolências.</span></div>
+    </div>
+
+
+
+  <div class="node photo" data-x="340" data-y="1387" data-t="0.318">
+    <div class="ring"><img src="/fio-da-vida/nodes/encontro-diario-1.png" class="node-img node-img-a" style="--reveza-atraso:0.8s" alt="Senhora vendo o memorial no tablet, luz da tarde" /><img src="/fio-da-vida/nodes/encontro-diario-2.png" class="node-img node-img-b" style="--reveza-atraso:0.8s" alt="Senhora vendo o memorial no tablet, luz da tarde" /></div>
+    <div class="cap side-right"><b>Um encontro de todo dia</b>Ela abre o memorial e passa um tempo com ele. Nem sempre precisa de motivo.</div>
+  </div>
+
+  <div class="node dot" data-x="560" data-y="1780" data-t="0.399"></div>
+
+  <div class="node photo" data-x="320" data-y="2473" data-t="0.543">
+    <div class="ring"><img src="/fio-da-vida/nodes/constelacao-1.png" class="node-img node-img-a" style="--reveza-atraso:1.6s" alt="Retratos e velas formando uma constelação" /><img src="/fio-da-vida/nodes/constelacao-2.png" class="node-img node-img-b" style="--reveza-atraso:1.6s" alt="Retratos e velas formando uma constelação" /></div>
+    <div class="cap side-right"><b>Ninguém se apaga</b>Cada memorial acende um ponto de luz que a família mantém aceso.</div>
+  </div>
+
+  <div class="node dot" data-x="500" data-y="2420" data-t="0.532"></div>
+
+  <div class="node dot" data-x="300" data-y="2620" data-t="0.574"></div>
+
+
+
+  <div class="node photo" data-x="480" data-y="3559" data-t="0.769">
+    <div class="ring"><img src="/fio-da-vida/nodes/de-onde-estiver-1.png" class="node-img node-img-a node-4fotos" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-2.png" class="node-img node-img-b" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-3.png" class="node-img node-img-c" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-4.png" class="node-img node-img-d" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /></div>
+    <div class="cap side-left"><b>De onde você estiver</b>O neto que mora longe também tem para onde voltar.</div>
+  </div>
+
+  <div class="node dot" data-x="400" data-y="3559" data-t="0.769"></div>
+
+</section>
+</div>
+
+<section class="faq" id="faq">
+  <div class="head">
+    <h2>Perguntas <span class="grad">Frequentes</span></h2>
+  </div>
+  <div class="body">
+    <div class="list">
+      <details class="item" open>
+        <summary>Como minha funerária começa a usar?<span class="chev">▼</span></summary>
+        <p class="ans">Basta criar uma conta, escolher um plano e começar a cadastrar os memoriais. Em menos de 5 minutos você já pode gerar o primeiro QR Code.</p>
+      </details>
+      <details class="item">
+        <summary>A família precisa pagar algo?<span class="chev">▼</span></summary>
+        <p class="ans">Não. O memorial digital é um serviço oferecido pela funerária. A família só precisa personalizar o conteúdo.</p>
+      </details>
+      <details class="item">
+        <summary>O QR Code é único para cada falecido?<span class="chev">▼</span></summary>
+        <p class="ans">Sim. Cada memorial gera um QR Code exclusivo que leva diretamente à página de homenagem daquele ente querido.</p>
+      </details>
+      <details class="item">
+        <summary>Como funciona a privacidade com senha?<span class="chev">▼</span></summary>
+        <p class="ans">A família define no painel: aberta, com senha, com identificação, lista de e-mails autorizados ou totalmente oculta.</p>
+      </details>
+      <details class="item">
+        <summary>Posso cancelar quando quiser?<span class="chev">▼</span></summary>
+        <p class="ans">Sim. Sem multas ou taxas de cancelamento — pode cancelar a qualquer momento.</p>
+      </details>
+</div>
+  </div>
+</section>
+
+
+
+<section class="closing" id="closing">
+  <div class="veil" style="background-image:url('/fio-da-vida/cena-velas.png');"></div>
+  <div class="chamas"><canvas id="cvChamas"></canvas></div>
+  <div class="flame"></div>
+  <p>Cada memorial acende o próprio ponto de luz. Juntos, viram uma constelação que não apaga.</p>
+</section>
+
+<footer class="site">
+  <div class="inner">
+    <div class="cols">
+      <div class="brand-col">
+        <img class="logo-sm" src="/logo-legado-digital.svg" alt="Legado Digital" />
+        <p>Um espaço permanente para preservar histórias. Memoriais digitais com QR Code para o setor funerário.</p>
+      </div>
+      <div class="col">
+        <h4>Produto</h4>
+        <a href="#beneficios">Benefícios</a>
+        <a href="#como-funciona">Como Funciona</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="col">
+        <h4>Empresa</h4>
+        <span>Sobre</span>
+        <a href="mailto:contato@legadodigital.net">contato@legadodigital.net</a>
+        <a href="/politica-de-privacidade">Privacidade</a>
+        <a href="/termos-de-uso">Termos de Uso</a>
+      </div>
+    </div>
+    <div class="bottom">
+      © 2026 Legado Digital. Todos os direitos reservados.<br>
+      Preservando histórias hoje para que continuem inspirando amanhã.
+    </div>
+  </div>
+</footer>`
 
 export default function Home() {
   return (
-    <div style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-      <Navbar />
-      <HeroBackground />
-
-      {/* ===== HERO ===== */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 pt-20">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-tight"
-          >
-            <span className="gradient-text">Toda Família</span>
-            <br />
-            <span className="text-white/90">Tem Uma História</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            className="mt-6 text-lg md:text-xl text-white/50 max-w-2xl mx-auto"
-          >
-            Um espaço permanente para preservar a história de quem se foi.
-            Sua funerária oferece memoriais digitais com QR Code às famílias que atende.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <Button size="lg" className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold text-base px-8 h-14">
-              Começar Agora
-            </Button>
-          </motion.div>
-
-          {/* Busca embutida — antes era só um botão que levava pra /busca */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.05 }}
-            className="mt-8 flex justify-center"
-          >
-            <div className="w-full max-w-[480px]">
-              <BuscaMemorial />
-            </div>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.2 }}
-            className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto"
-          >
-            {[
-              { num: '4', label: 'Níveis de Acesso' },
-              { num: '100%', label: 'Online' },
-              { num: '100%', label: 'Privacidade Total' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-[#C9A46A]">{stat.num}</div>
-                <div className="text-sm text-white/40 mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ===== BENEFÍCIOS ===== */}
-      <section id="beneficios" className="py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
-              Por que Legado Digital?
-            </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold">
-              <span className="gradient-text">Diferenciais</span> que Transformam
-            </h2>
-            <p className="mt-4 text-white/50 max-w-2xl mx-auto">
-              Sua funerária se destaca com um serviço que une tecnologia e emoção.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                Icon: QrCode,
-                title: 'QR Code na Placa',
-                desc: 'Um QR Code único e discreto instalado na placa memorial. Qualquer visitante escaneia e acessa a homenagem.',
-              },
-              {
-                Icon: Lock,
-                title: 'Privacidade Total',
-                desc: 'A família controla quem acessa: público, privado ou com senha. O respeito ao falecido é prioridade.',
-              },
-              {
-                Icon: Sparkles,
-                title: 'Memorial Elegante',
-                desc: 'Design moderno com fotos, vídeos, biografia e linha do tempo. Uma verdadeira homenagem digital.',
-              },
-              {
-                Icon: BookOpen,
-                title: 'Livro de Condolências',
-                desc: 'Visitantes deixam mensagens de carinho. A família pode ver e moderar cada homenagem.',
-              },
-              {
-                Icon: Users,
-                title: 'Família Participa',
-                desc: 'Parentes recebem acesso para editar, adicionar fotos e personalizar o memorial do ente querido.',
-              },
-              {
-                Icon: LayoutDashboard,
-                title: 'Gestão Completa',
-                desc: 'Dashboard para funerária gerenciar todos os memoriais em um só lugar. Simples e intuitivo.',
-              },
-              {
-                Icon: Eye,
-                title: 'Ver Demonstração',
-                desc: 'Veja um exemplo real de como fica um memorial digital. Clique para acessar uma homenagem de demonstração.',
-              },
-            ].map((benefit, idx) => (
-              <motion.div
-                key={benefit.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-              >
-                <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#C9A46A]/30 transition-all h-full">
-                  <CardHeader>
-                    <benefit.Icon className="mb-2 text-[#C9A46A]" size={36} strokeWidth={1.5} />
-                    <CardTitle className="text-white text-lg">{benefit.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-white/50">{benefit.desc}</CardDescription>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-
-            {/* Demo Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="md:col-span-3"
-            >
-              <Card className="glass border-[rgba(201,168,76,0.15)] hover:border-[#C9A46A]/30 transition-all h-full">
-                <CardContent className="flex items-center justify-center p-8">
-                  <Button
-                    size="lg"
-                    className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold text-base px-8 h-14"
-                    asChild
-                  >
-                    <Link href="/homenagem">
-                      Ver Memorial de Demonstração
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== COMO FUNCIONA ===== */}
-      <section id="como-funciona" className="py-24 px-4 bg-[#0B1D2A]/50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
-              Simples e Rápido
-            </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold">
-              Como <span className="gradient-text">Funciona</span>
-            </h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {[
-              { step: '01', Icon: Building2, title: 'Funerária Cadastra', desc: 'Cadastre o falecido na plataforma em 2 minutos.' },
-              { step: '02', Icon: Users, title: 'Família Personaliza', desc: 'Parentes recebem acesso e montam o memorial.' },
-              { step: '03', Icon: QrCode, title: 'QR Code Gerado', desc: 'QR Code único é gerado e instalado na placa.' },
-              { step: '04', Icon: MessageCircle, title: 'Homenagens Chegam', desc: 'Visitantes escaneiam e deixam condolências.' },
-            ].map((item, idx) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className="text-center"
-              >
-                <item.Icon className="mx-auto mb-4 text-[#C9A46A]" size={40} strokeWidth={1.5} />
-                <div className="text-[#C9A46A] text-sm font-mono mb-2">{item.step}</div>
-                <h3 className="text-white font-semibold mb-2">{item.title}</h3>
-                <p className="text-white/40 text-sm">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Arrow connector */}
-          <div className="hidden md:flex justify-center mt-8 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="w-8 h-0.5 bg-gradient-to-r from-[#C9A46A]/50 to-transparent" />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== FAQ ===== */}
-      <section id="faq" className="py-24 px-4 bg-[#0B1D2A]/50">
-        <div className="max-w-3xl mx-auto">
-          <motion.div {...fadeInUp} className="text-center mb-16">
-            <Badge className="mb-4 bg-[#C9A46A]/10 text-[#C9A46A] border-[#C9A46A]/30">
-              Dúvidas Frequentes
-            </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold">
-              Perguntas <span className="gradient-text">Frequentes</span>
-            </h2>
-          </motion.div>
-
-          <div className="space-y-4">
-            {[
-              {
-                q: 'Como minha funerária começa a usar?',
-                a: 'Basta criar uma conta, escolher um plano e começar a cadastrar os memoriais. Em menos de 5 minutos você já pode gerar o primeiro QR Code.',
-              },
-              {
-                q: 'A família precisa pagar algo?',
-                a: 'Não! O memorial digital é um serviço oferecido pela funerária. A família só precisa personalizar o conteúdo.',
-              },
-              {
-                q: 'O QR Code é único para cada falecido?',
-                a: 'Sim! Cada memorial gera um QR Code exclusivo que leva diretamente à página de homenagem daquele ente querido.',
-              },
-              {
-                q: 'Como funciona a privacidade com senha?',
-                a: 'A família define uma senha no painel de controle. Apenas quem tem a senha consegue acessar o memorial.',
-              },
-              {
-                q: 'Posso cancelar quando quiser?',
-                a: 'Sim! Sem multas ou taxas de cancelamento. Você pode cancelar a qualquer momento.',
-              },
-            ].map((faq, idx) => (
-              <motion.div
-                key={faq.q}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-              >
-                <details className="group glass border border-[rgba(201,168,76,0.15)] rounded-lg overflow-hidden">
-                  <summary className="flex items-center justify-between p-5 cursor-pointer text-white font-medium hover:text-[#C9A46A] transition-colors">
-                    {faq.q}
-                    <span className="text-[#C9A46A] group-open:rotate-180 transition-transform text-xl">▼</span>
-                  </summary>
-                  <div className="px-5 pb-5 text-white/50 text-sm leading-relaxed">
-                    {faq.a}
-                  </div>
-                </details>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== CTA ===== */}
-      <section className="py-24 px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto text-center glass border border-[#C9A46A]/20 rounded-2xl p-12 md:p-20"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Pronto para <span className="gradient-text">Transformar</span> seu Negócio?
-          </h2>
-          <p className="text-white/50 max-w-xl mx-auto mb-8">
-            Junte-se às funerárias que já oferecem memoriais digitais e se destacam no mercado.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-[#C9A46A] hover:bg-[#a8834a] text-[#0B1D2A] font-semibold text-base px-10 h-14">
-              Começar Grátis por 7 Dias
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white/20 text-white hover:bg-white/5 text-base px-10 h-14"
-            >
-              Falar com Consultor
-            </Button>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ===== FOOTER ===== */}
-      <footer className="border-t border-[rgba(201,168,76,0.15)] py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
-            <div className="md:col-span-2">
-              <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={240} height={96} className="h-20 w-auto object-contain mb-4" />
-              <p className="text-white/40 text-sm max-w-md">
-                Um espaço permanente para preservar histórias. Memoriais digitais
-                com QR Code para o setor funerário.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Produto</h4>
-              <div className="space-y-2 text-sm">
-                {['Benefícios', 'Como Funciona', 'FAQ'].map((link) => (
-                  <div key={link} className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
-                    {link}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Empresa</h4>
-              <div className="space-y-2 text-sm">
-                <div className="text-white/40 hover:text-[#C9A46A] cursor-pointer transition-colors">
-                  Sobre
-                </div>
-                <a href="mailto:contato@legadodigital.net" className="block text-white/40 hover:text-[#C9A46A] transition-colors">
-                  contato@legadodigital.net
-                </a>
-                <Link href="/politica-de-privacidade" className="block text-white/40 hover:text-[#C9A46A] transition-colors">
-                  Privacidade
-                </Link>
-                <Link href="/termos-de-uso" className="block text-white/40 hover:text-[#C9A46A] transition-colors">
-                  Termos
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-[rgba(201,168,76,0.1)] pt-8 text-center text-white/30 text-xs">
-            © 2026 Legado Digital. Todos os direitos reservados.
-            <br />
-            <span className="mt-1 block">Preservando histórias hoje para que continuem inspirando amanhã.</span>
-          </div>
-        </div>
-      </footer>
+    <>
+      <div className="fio-da-vida" dangerouslySetInnerHTML={{ __html: MARCACAO }} />
+      <Script src="/fio-da-vida/anima.js" strategy="afterInteractive" />
       <LegadoBotPublicoWidget />
-    </div>
+    </>
   )
 }

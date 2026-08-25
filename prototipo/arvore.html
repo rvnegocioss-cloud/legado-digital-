@@ -43,7 +43,37 @@
   }
 
   /* ===== HERO ===== */
-  .hero { padding: 72px 24px 40px; text-align: center; }
+  .hero {
+    position: relative;
+    min-height: 145vh;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    padding: 90px 24px 40px; text-align: center;
+    overflow: hidden;
+  }
+  .hero-foto {
+    position: absolute; inset: 0; z-index: 0;
+    background: var(--navy);
+    overflow: hidden;
+  }
+  .hero-foto .fundo-desfocado {
+    position: absolute; inset: -30px;
+    background-image: url('img/hero-familia-portal.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    filter: blur(38px) saturate(1.15) brightness(0.55);
+    transform: scale(1.15);
+  }
+  .hero-foto img {
+    position: relative;
+    width: 100%; height: 100%; object-fit: contain; object-position: center top;
+    display: block;
+  }
+  .hero-foto::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(11,29,42,0.88) 0%, rgba(11,29,42,0.35) 32%, rgba(11,29,42,0.55) 68%, var(--navy) 100%);
+  }
+  .hero > *:not(.hero-foto) { position: relative; z-index: 1; }
   .hero h1 { font-size: clamp(2.3rem, 5.5vw, 4.4rem); font-weight: 700; line-height: 1.1; margin: 0 0 20px; }
   .hero h1 .gold { color: var(--gold); }
   .hero p.sub { color: rgba(245,242,235,0.5); font-size: 1.12rem; max-width: 560px; margin: 0 auto 30px; }
@@ -188,128 +218,12 @@
 </nav>
 
 <section class="hero">
+  <div class="hero-foto">
+    <div class="fundo-desfocado"></div>
+    <img src="img/hero-familia-portal.jpg" alt="" />
+  </div>
   <h1><span class="gold">Toda Família</span><br>Tem Uma História</h1>
   <p class="sub">Um espaço permanente para preservar a história de quem se foi. Sua funerária oferece memoriais digitais com QR Code às famílias que atende.</p>
-  <button class="btn btn-gold">Começar Agora</button>
-
-  <!-- busca de memorial embutida (a mesma que já existe hoje na landing) -->
-  <div class="busca-wrap">
-    <div class="busca-campo">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="text" placeholder="Buscar um memorial pelo nome…" />
-      <button>Buscar</button>
-    </div>
-    <p class="busca-legenda">Digite o nome do homenageado para encontrar a homenagem.</p>
-  </div>
-
-  <div class="arvore-cena">
-    <svg viewBox="0 0 800 920" role="img" aria-label="Árvore da família dentro do portal da marca">
-      <defs>
-        <radialGradient id="brilho" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"  stop-color="#FFE9B8" stop-opacity="0.95" />
-          <stop offset="45%" stop-color="#C9A46A" stop-opacity="0.45" />
-          <stop offset="100%" stop-color="#C9A46A" stop-opacity="0" />
-        </radialGradient>
-        <linearGradient id="ouro" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#E4C795" />
-          <stop offset="55%"  stop-color="#C9A46A" />
-          <stop offset="100%" stop-color="#9C7B49" />
-        </linearGradient>
-      </defs>
-
-      <!-- ===== ARCO (o portal da logo) ===== -->
-      <path d="M 158,800 L 158,330 Q 158,142 400,58 Q 642,142 642,330 L 642,800"
-            fill="none" stroke="url(#ouro)" stroke-width="13" stroke-linecap="round" />
-      <path d="M 196,800 L 196,346 Q 196,180 400,104 Q 604,180 604,346 L 604,800"
-            fill="none" stroke="url(#ouro)" stroke-width="7" stroke-linecap="round" opacity="0.75" />
-
-      <!-- ===== LUZ NO TOPO (a chama da logo) ===== -->
-      <circle cx="400" cy="252" r="82" fill="url(#brilho)" />
-      <circle cx="400" cy="252" r="17" fill="#F7E2B4" />
-
-      <!-- ===== ÁRVORE (a planta da logo, crescida) ===== -->
-      <!-- escala a partir da base do tronco, pra árvore ocupar o arco -->
-      <g transform="translate(400,796) scale(1.1) translate(-400,-796)">
-      <!-- tronco, do livro até a forquilha -->
-      <path d="M 385,796 C 387,690 391,568 395,430 L 405,430 C 409,568 413,690 415,796 Z" fill="url(#ouro)" />
-
-      <!-- caule central: sobe da forquilha e encosta na luz
-           (forma preenchida, com leve conicidade — linha 100% vertical
-           com gradiente tem bounding box de largura zero e não pinta) -->
-      <path d="M 396.5,432 L 398.6,317 L 401.4,317 L 403.5,432 Z" fill="url(#ouro)" />
-
-      <!-- galhos -->
-      <g fill="none" stroke="url(#ouro)" stroke-width="5.5" stroke-linecap="round">
-        <path d="M 398,455 C 362,412 322,386 280,370" />
-        <path d="M 402,445 C 438,404 478,380 520,366" />
-        <path d="M 398,545 C 360,516 318,502 276,494" />
-        <path d="M 402,560 C 440,532 482,520 524,512" />
-      </g>
-      <g fill="none" stroke="url(#ouro)" stroke-width="4" stroke-linecap="round">
-        <path d="M 399,500 C 374,474 348,462 326,454" />
-        <path d="M 401,490 C 426,465 452,453 474,445" />
-      </g>
-
-      <!-- folhas (mesmo formato de folha da logo) -->
-      <g fill="url(#ouro)" opacity="0.92">
-        <path d="M -20,0 Q 0,-12 20,0 Q 0,12 -20,0 Z" transform="translate(332,396) rotate(-22)" />
-        <path d="M -20,0 Q 0,-12 20,0 Q 0,12 -20,0 Z" transform="translate(470,392) rotate(22)" />
-        <path d="M -18,0 Q 0,-11 18,0 Q 0,11 -18,0 Z" transform="translate(332,516) rotate(-16)" />
-        <path d="M -18,0 Q 0,-11 18,0 Q 0,11 -18,0 Z" transform="translate(468,532) rotate(16)" />
-        <path d="M -17,0 Q 0,-10 17,0 Q 0,10 -17,0 Z" transform="translate(374,382) rotate(-42)" />
-        <path d="M -17,0 Q 0,-10 17,0 Q 0,10 -17,0 Z" transform="translate(426,378) rotate(42)" />
-      </g>
-
-      <!-- ===== RETRATOS PENDURADOS (cada pessoa homenageada) ===== -->
-      <g>
-        <line x1="280" y1="370" x2="280" y2="386" stroke="#C9A46A" stroke-width="2.5" />
-        <circle cx="280" cy="419" r="33" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
-        <circle cx="280" cy="409" r="10" fill="#C9A46A" opacity="0.55" />
-        <path d="M 264,439 Q 266,423 280,423 Q 294,423 296,439 Z" fill="#C9A46A" opacity="0.55" />
-
-        <line x1="520" y1="366" x2="520" y2="382" stroke="#C9A46A" stroke-width="2.5" />
-        <circle cx="520" cy="415" r="33" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
-        <circle cx="520" cy="405" r="10" fill="#C9A46A" opacity="0.55" />
-        <path d="M 504,435 Q 506,419 520,419 Q 534,419 536,435 Z" fill="#C9A46A" opacity="0.55" />
-
-        <line x1="276" y1="494" x2="276" y2="510" stroke="#C9A46A" stroke-width="2.5" />
-        <circle cx="276" cy="541" r="31" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
-        <circle cx="276" cy="532" r="9" fill="#C9A46A" opacity="0.55" />
-        <path d="M 262,560 Q 264,545 276,545 Q 288,545 290,560 Z" fill="#C9A46A" opacity="0.55" />
-
-        <line x1="524" y1="512" x2="524" y2="528" stroke="#C9A46A" stroke-width="2.5" />
-        <circle cx="524" cy="559" r="31" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="3" />
-        <circle cx="524" cy="550" r="9" fill="#C9A46A" opacity="0.55" />
-        <path d="M 510,578 Q 512,563 524,563 Q 536,563 538,578 Z" fill="#C9A46A" opacity="0.55" />
-
-        <line x1="326" y1="454" x2="326" y2="468" stroke="#C9A46A" stroke-width="2.5" />
-        <circle cx="326" cy="494" r="26" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="2.5" />
-        <circle cx="326" cy="487" r="8" fill="#C9A46A" opacity="0.55" />
-        <path d="M 314,509 Q 315,496 326,496 Q 337,496 338,509 Z" fill="#C9A46A" opacity="0.55" />
-
-        <line x1="474" y1="445" x2="474" y2="459" stroke="#C9A46A" stroke-width="2.5" />
-        <circle cx="474" cy="485" r="26" fill="#0B1D2A" stroke="url(#ouro)" stroke-width="2.5" />
-        <circle cx="474" cy="478" r="8" fill="#C9A46A" opacity="0.55" />
-        <path d="M 462,500 Q 463,487 474,487 Q 485,487 486,500 Z" fill="#C9A46A" opacity="0.55" />
-      </g>
-      </g>
-
-      <!-- ===== LIVRO ABERTO NA BASE (o livro da logo) ===== -->
-      <g fill="url(#ouro)">
-        <path d="M 400,790 C 330,762 226,750 122,756 L 122,786 C 226,780 330,792 400,820 Z" />
-        <path d="M 400,790 C 470,762 574,750 678,756 L 678,786 C 574,780 470,792 400,820 Z" />
-      </g>
-      <g fill="url(#ouro)" opacity="0.55">
-        <path d="M 400,812 C 330,786 226,776 122,782 L 122,802 C 226,798 330,810 400,838 Z" />
-        <path d="M 400,812 C 470,786 574,776 678,782 L 678,802 C 574,798 470,810 400,838 Z" />
-      </g>
-      <g fill="url(#ouro)" opacity="0.3">
-        <path d="M 400,832 C 330,808 226,800 122,806 L 122,822 C 226,818 330,830 400,856 Z" />
-        <path d="M 400,832 C 470,808 574,800 678,806 L 678,822 C 574,818 470,830 400,856 Z" />
-      </g>
-    </svg>
-  </div>
-  <p class="legenda-cena">Cada história preservada é um ramo que continua.</p>
 
   <div class="hero-stats">
     <div><div class="num">4</div><div class="lbl">Níveis de Acesso</div></div>

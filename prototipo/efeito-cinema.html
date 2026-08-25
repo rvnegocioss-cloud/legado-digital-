@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Legado Digital — arco abrindo (efeito cinema)</title>
+<style>
+  :root {
+    --navy: #0B1D2A;
+    --gold: #E8C989;
+    --gold-deep: #C9A46A;
+    --warm-white: #F5F2EB;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--navy); color: var(--warm-white);
+    font-family: Georgia, 'Times New Roman', serif;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .palco {
+    position: relative;
+    width: 640px; max-width: 92vw; aspect-ratio: 4/5;
+    perspective: 1800px;
+  }
+  .foto {
+    position: absolute; inset: 0; overflow: hidden; border-radius: 4px;
+  }
+  .foto img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: 52% 40%;
+  }
+  .foto::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 42%, rgba(11,29,42,0) 0%, rgba(11,29,42,.15) 60%, rgba(11,29,42,.55) 100%);
+  }
+
+  /* ===== os 2 batentes do portao (arco real, traçado do PNG) ===== */
+  .palco { transform-style: preserve-3d; }
+  .batente {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    backface-visibility: hidden;
+    transition: transform 2.2s cubic-bezier(.32,.72,.18,1), opacity 1.6s ease 1.1s;
+  }
+  .batente svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .esq { transform-origin: 0% 50%; transform: rotateY(0deg) translateZ(0); }
+  .dir { transform-origin: 100% 50%; transform: rotateY(0deg) translateZ(0); }
+  .palco.aberto .esq { transform: rotateY(-86deg) translateZ(-40px); opacity: 0; }
+  .palco.aberto .dir { transform: rotateY(86deg) translateZ(-40px); opacity: 0; }
+
+  /* ===== chama central: aparece so depois do portao abrir ===== */
+  .chama {
+    position: absolute; left: 50%; top: 8%; width: 46px; height: 46px;
+    transform: translate(-50%,-50%) scale(.4); border-radius: 50%;
+    background: radial-gradient(circle, #FFF3D6 0%, var(--gold) 45%, rgba(232,201,137,0) 75%);
+    opacity: 0; filter: blur(.5px);
+    transition: opacity 1.4s ease .9s, transform 1.6s cubic-bezier(.22,1.6,.36,1) .9s;
+  }
+  .palco.aberto .chama { opacity: 1; transform: translate(-50%,-50%) scale(1); animation: respira 3.6s ease-in-out 2.3s infinite; }
+  @keyframes respira { 0%,100%{ filter: drop-shadow(0 0 10px rgba(232,201,137,.6)); } 50%{ filter: drop-shadow(0 0 22px rgba(232,201,137,.95)); } }
+
+  /* ===== cards de retrato saindo do lugar das folhas ===== */
+  .card {
+    position: absolute; width: 46px; height: 46px; border-radius: 50%;
+    background: var(--navy); border: 2px solid var(--gold);
+    box-shadow: 0 6px 18px rgba(0,0,0,.45);
+    opacity: 0; transform: translateY(14px) scale(.5);
+    transition: opacity .9s ease, transform .9s cubic-bezier(.22,1.4,.36,1);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card svg { width: 55%; height: 55%; opacity: .8; }
+  .palco.aberto .card { opacity: 1; transform: translateY(0) scale(1); }
+  .c1 { left: 32%; top: 68%; transition-delay: 1.5s; }
+  .c2 { left: 44%; top: 60%; transition-delay: 1.65s; }
+  .c3 { left: 56%; top: 60%; transition-delay: 1.8s; }
+  .c4 { left: 68%; top: 68%; transition-delay: 1.95s; }
+  .c5 { left: 38%; top: 78%; transition-delay: 2.1s; }
+  .c6 { left: 62%; top: 78%; transition-delay: 2.25s; }
+
+  .legenda { position: absolute; bottom: -46px; left: 0; right: 0; text-align: center; color: rgba(245,242,235,.4); font-size: 13px; font-style: italic; }
+  .rebobinar {
+    position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+    background: transparent; border: 1px solid rgba(232,201,137,.4); color: var(--gold);
+    padding: 8px 18px; border-radius: 4px; font-family: Georgia, serif; cursor: pointer; font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="palco" id="palco">
+  <button class="rebobinar" id="rebobinar">↺ Ver de novo</button>
+
+  <div class="foto"><img src="img/hero-familia-portal.jpg" alt="" /></div>
+
+  <div class="batente esq">
+    <svg viewBox="0 0 732 952" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="ouroClaro" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#FFF3D6" />
+          <stop offset="45%" stop-color="#E8C989" />
+          <stop offset="100%" stop-color="#C9A46A" />
+        </linearGradient>
+      </defs>
+      <path d="M 366.0,0.0 C 354.9,2.9 308.6,13.0 292.0,19.0 C 275.4,25.0 266.4,33.9 255.0,40.0 C 243.6,46.1 226.1,54.0 216.0,60.0 C 205.9,66.0 194.6,74.0 188.0,80.0 C 181.4,86.0 178.2,94.0 172.0,100.0 C 165.8,106.0 153.8,113.7 147.0,120.0 C 140.2,126.3 131.8,135.2 127.0,142.0 C 122.2,148.8 119.2,157.8 115.0,165.0 C 110.8,172.2 103.2,183.4 99.0,190.0 C 94.8,196.6 90.0,201.5 87.0,209.0 C 84.0,216.5 82.0,231.6 79.0,240.0 C 76.0,248.4 68.8,258.2 67.0,265.0 C 65.2,271.8 67.6,276.8 67.0,285.0 C 66.4,293.2 63.6,308.6 63.0,320.0 C 62.4,331.4 63.0,343.4 63.0,361.0 C 63.0,378.6 63.0,414.1 63.0,437.0 C 63.0,459.9 63.0,502.4 63.0,514.0 L 63,952 L 366,952 Z"
+        fill="url(#ouroClaro)" opacity=".97" />
+    </svg>
+  </div>
+
+  <div class="batente dir">
+    <svg viewBox="0 0 732 952" preserveAspectRatio="xMidYMid slice">
+      <path d="M 366.0,0.0 C 377.1,2.9 423.4,13.0 440.0,19.0 C 456.6,25.0 465.6,33.9 477.0,40.0 C 488.4,46.1 505.9,54.0 516.0,60.0 C 526.1,66.0 537.4,74.0 544.0,80.0 C 550.6,86.0 553.8,94.0 560.0,100.0 C 566.2,106.0 578.2,113.7 585.0,120.0 C 591.8,126.3 600.2,135.2 605.0,142.0 C 609.8,148.8 612.8,157.8 617.0,165.0 C 621.2,172.2 628.8,183.4 633.0,190.0 C 637.2,196.6 642.0,201.5 645.0,209.0 C 648.0,216.5 650.0,231.6 653.0,240.0 C 656.0,248.4 663.2,258.2 665.0,265.0 C 666.8,271.8 664.4,276.8 665.0,285.0 C 665.6,293.2 668.4,308.6 669.0,320.0 C 669.6,331.4 669.0,343.4 669.0,361.0 C 669.0,378.6 669.0,414.1 669.0,437.0 C 669.0,459.9 669.0,502.4 669.0,514.0 L 669,952 L 366,952 Z"
+        fill="url(#ouroClaro)" opacity=".97" />
+    </svg>
+  </div>
+
+  <div class="chama"></div>
+
+  <div class="card c1"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+  <div class="card c2"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+  <div class="card c3"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+  <div class="card c4"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+  <div class="card c5"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+  <div class="card c6"><svg viewBox="0 0 24 24" fill="none" stroke="#C9A46A" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+
+  <p class="legenda">O arco se abre revelando quem se foi — cada retrato, uma vida preservada.</p>
+</div>
+
+<script>
+  var palco = document.getElementById('palco');
+  var btn = document.getElementById('rebobinar');
+  function abrir() { requestAnimationFrame(function(){ palco.classList.add('aberto'); }); }
+  btn.addEventListener('click', function () {
+    palco.classList.remove('aberto');
+    void palco.offsetWidth;
+    setTimeout(abrir, 300);
+  });
+  setTimeout(abrir, 500);
+</script>
+
+</body>
+</html>

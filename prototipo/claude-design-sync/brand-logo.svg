@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <linearGradient id="ouro" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DFC390"/>
+      <stop offset="50%" stop-color="#C9A46A"/>
+      <stop offset="100%" stop-color="#A8834A"/>
+    </linearGradient>
+  </defs>
+
+  <image href="icone-arco-chama-planta.png" x="332" y="8" width="136" height="177" preserveAspectRatio="xMidYMid meet"/>
+
+  <text
+    x="400" y="270"
+    text-anchor="middle"
+    font-family="'Playfair Display', Georgia, 'Times New Roman', serif"
+    font-size="64"
+    font-weight="600"
+    letter-spacing="10"
+    fill="#F5F2EB"
+  >LEGADO DIGITAL</text>
+
+  <text
+    x="400" y="305"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="17"
+    font-weight="400"
+    letter-spacing="6"
+    fill="url(#ouro)"
+  >PRESERVANDO HISTÓRIAS</text>
+</svg>
