@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
+import { gerarSlugUnico } from '@/lib/gerarSlug'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -24,6 +25,7 @@ interface Parceiro {
   cnpj: string | null
   cidade: string | null
   estado: string | null
+  slug: string | null
   ativo: boolean
   created_at: string
 }
@@ -102,7 +104,23 @@ export default function AdminParceiros() {
     setSalvando(true)
     setErro('')
 
-    const payload = { ...form, updated_at: new Date().toISOString() }
+    const payload: Record<string, unknown> = { ...form, updated_at: new Date().toISOString() }
+
+    // Sem slug a pagina publica do parceiro fica bloqueada ("rode a migracao de
+    // backfill"). Gera no cadastro e tambem conserta parceiro antigo que ficou
+    // sem, em vez de depender de alguem rodar migracao na mao.
+    const precisaSlug = !editando || !editando.slug
+    if (precisaSlug) {
+      const nomeParaSlug = form.nome_fantasia?.trim() || form.razao_social?.trim()
+      if (nomeParaSlug) {
+        payload.slug = await gerarSlugUnico(
+          supabase,
+          nomeParaSlug,
+          editando?.id,
+          'parceiros_b2b'
+        )
+      }
+    }
 
     const { error } = editando
       ? await supabase.from('parceiros_b2b').update(payload).eq('id', editando.id)

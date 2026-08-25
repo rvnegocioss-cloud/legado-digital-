@@ -18,14 +18,19 @@ export function gerarSlug(nome: string) {
 export async function gerarSlugUnico(
   supabase: SupabaseClient,
   nome: string,
-  idParaIgnorar?: string
+  idParaIgnorar?: string,
+  // `parceiros_b2b` tambem tem slug (a pagina publica do parceiro). Antes esta
+  // funcao so olhava `homenagens`, entao a criacao de parceiro nao tinha como
+  // usa-la e nascia sem slug — a pagina publica ficava bloqueada pedindo uma
+  // "migracao de backfill" que ninguem rodava.
+  tabela: 'homenagens' | 'parceiros_b2b' = 'homenagens'
 ): Promise<string> {
   const base = gerarSlug(nome)
   let candidato = base
   let tentativa = 1
 
   while (true) {
-    let query = supabase.from('homenagens').select('id').eq('slug', candidato).limit(1)
+    let query = supabase.from(tabela).select('id').eq('slug', candidato).limit(1)
     if (idParaIgnorar) query = query.neq('id', idParaIgnorar)
     const { data } = await query
     if (!data || data.length === 0) return candidato
