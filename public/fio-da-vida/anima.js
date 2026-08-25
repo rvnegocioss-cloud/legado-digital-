@@ -789,8 +789,9 @@ setTimeout(function () {
        da tela (rodape a vista, todas acesas). Curso de ~0.7 tela — o orbe
        tem espaco para descer sem precisar esticar a secao. */
     var r = sec.getBoundingClientRect(), vh = window.innerHeight;
-    var ini = vh * 1.44;             /* base da faixa ainda fora da tela */
-    var fim = vh * 0.55;             /* base da faixa no meio da tela */
+    var ini = vh * 1.22;             /* comeca quando as VELAS entram na tela */
+    var fim = vh * 0.66;             /* base da faixa perto do rodape: a cena
+                                        maior comeu o curso que existia antes */
     var q = (ini - r.bottom) / (ini - fim);
     return q < 0 ? 0 : (q > 1 ? 1 : q);
   }
@@ -812,7 +813,7 @@ setTimeout(function () {
     var N = VELAS.length;
     var ENTRA = 0.10, SAI = 0.99;
     var caminho = (p - ENTRA) / (SAI - ENTRA);
-    var DESCIDA = 0.16, FIM_ANDA = 0.68, FIM_SOBE = 0.86;
+    var DESCIDA = 0.12, FIM_ANDA = 0.78, FIM_SOBE = 0.90;
 
     /* onde cada estrela mora, na parte escura do ceu (coordenada da imagem) */
     /* uma estrela por vela. 3o valor = tamanho proprio (constelacao nao tem

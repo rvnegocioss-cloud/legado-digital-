@@ -450,7 +450,7 @@ footer.site .bottom {
 .connector.lit path { stroke-dashoffset: 0; }
 
 .closing {
-  aspect-ratio: 2 / 1; max-height: 86vh; min-height: 0; width: min(100%, 1560px); margin: 0 auto;
+  aspect-ratio: 2 / 1; max-height: 86vh; min-height: 0; width: min(100%, 1560px); margin: 0 auto 22vh;
   border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
   text-align: center; padding: 3.2% 24px 0; position: relative; overflow: hidden;
 }
