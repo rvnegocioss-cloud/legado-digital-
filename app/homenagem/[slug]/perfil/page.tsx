@@ -17,7 +17,7 @@ import { SeletorTema } from "@/components/public/SeletorTema";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { RailVida, type MarcoVida } from "@/components/public/RailVida";
-import { CORES, anosDestaque, dataPtBr } from "@/lib/publicTheme";
+import { anosDestaque, dataPtBr } from "@/lib/publicTheme";
 import { lerParagrafos } from "@/lib/textoRico";
 import { calcularRota, type RuaMapeada } from "@/lib/rotaCemiterio";
 import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
@@ -47,8 +47,6 @@ import {
 // Componentes reaproveitados sem UMA alteração: AcenderVela (regra 20),
 // GuiaTumulo (regra 17), GaleriaFotos, MuralMemorias, FormularioCondolencia,
 // SeletorTema, BotaoCompartilhar.
-
-const v = (nomeVar: string, valorPadrao: string) => `var(${nomeVar}, ${valorPadrao})`;
 
 export const dynamic = "force-dynamic";
 
@@ -286,33 +284,31 @@ export default async function PerfilMemorialPage({
     .map((p) => p[0])
     .join("");
 
-  const dourado = v(VAR_DOURADO, paleta.dourado);
 
   return (
-    <div
-      className="perfil-page"
-      style={
-        {
-          minHeight: "100vh",
-          background: `linear-gradient(180deg, ${v(VAR_FUNDO_TOPO, paleta.fundoTopo)} 0%, ${v(
-            VAR_FUNDO_BASE,
-            paleta.fundoBase
-          )} 100%)`,
-          color: CORES.textoForte,
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          lineHeight: 1.6,
-          [VAR_FUNDO_TOPO]: paleta.fundoTopo,
-          [VAR_FUNDO_BASE]: paleta.fundoBase,
-          [VAR_FUNDO_PROFUNDO]: paleta.fundoProfundo,
-          [VAR_DOURADO]: paleta.dourado,
-          [VAR_DOURADO_CLARO]: paleta.douradoClaro,
-          [VAR_DOURADO_ESCURO]: paleta.douradoEscuro,
-          // A variante usa --perfil-dourado no CSS pra nao depender do nome
-          // interno do tema; segue o SeletorTema em runtime pelo var() abaixo.
-          "--perfil-dourado": dourado,
-        } as React.CSSProperties
-      }
-    >
+    <div className="perfil-page">
+      {/* As variaveis do tema vao pra :root numa folha de estilo, NAO inline no
+          container.
+          
+          Por que isso importa: o SeletorTema escreve em
+          document.documentElement.style. Variavel declarada no proprio elemento
+          tapa a que vem da raiz -- entao com as vars inline aqui, o container
+          sempre venceria e os 3 circulos nunca mudariam nada. E exatamente o
+          que acontece na pagina base ate hoje: medido em producao, o fundo
+          continua rgb(15,36,54) depois do clique, com a raiz ja em #262628.
+          
+          Regra inline no documentElement vence regra de folha em :root, entao
+          desta forma o inicial vem do servidor (sem piscar) e o clique vence
+          o inicial. */}
+      <style>{`:root{
+        ${VAR_FUNDO_TOPO}:${paleta.fundoTopo};
+        ${VAR_FUNDO_BASE}:${paleta.fundoBase};
+        ${VAR_FUNDO_PROFUNDO}:${paleta.fundoProfundo};
+        ${VAR_DOURADO}:${paleta.dourado};
+        ${VAR_DOURADO_CLARO}:${paleta.douradoClaro};
+        ${VAR_DOURADO_ESCURO}:${paleta.douradoEscuro};
+      }`}</style>
+
       <SeletorTema temaInicial={m.tema} />
 
       {/* ---- Capa + identificação ------------------------------------------
