@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usaReducaoMovimento } from '@/lib/usaReducaoMovimento'
 
 // A regua da vida: os anos vividos como uma barra vertical, com um ponto pra
 // cada marco da linha do tempo. Marca onde a pessoa esta enquanto rola e leva
@@ -33,12 +34,8 @@ export function RailVida({
   anoFim: string | null
 }) {
   const [ativo, setAtivo] = useState<string | null>(null)
-  const [reduzMovimento, setReduzMovimento] = useState(false)
+  const reduzMovimento = usaReducaoMovimento()
   const observador = useRef<IntersectionObserver | null>(null)
-
-  useEffect(() => {
-    setReduzMovimento(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  }, [])
 
   useEffect(() => {
     if (marcos.length === 0) return

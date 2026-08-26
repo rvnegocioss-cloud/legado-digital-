@@ -1,0 +1,268 @@
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { usaReducaoMovimento } from '@/lib/usaReducaoMovimento'
+import './livro-assinaturas.css'
+
+// Livro de assinaturas de verdade: livro aberto, a pessoa digita o nome, uma
+// pena escreve no papel, o nome acende em dourado e a pagina vira.
+//
+// Por que a escrita e feita com clip-path e nao com tracado de SVG: o nome e
+// digitado pelo visitante, entao nao existe caminho vetorial pronto pra ele --
+// tracado de SVG exige um path por letra, feito a mao. Revelar da esquerda pra
+// direita com a pena acompanhando a borda da revelacao da a mesma leitura e
+// funciona pra qualquer texto. Referencia: css-tricks.com/how-to-get-
+// handwriting-animation-with-irregular-svg-strokes (a secao sobre mascara,
+// que e o caminho recomendado justamente pra caligrafia de traco irregular).
+//
+// A fonte cursiva (Caveat) ja estava no projeto pelo next/font -- nenhum
+// @import externo novo (restricao registrada em lib/publicTheme.ts).
+
+export interface Assinatura {
+  id: string
+  visitor_name: string
+  message: string
+  created_at: string
+}
+
+const POR_PAGINA = 2
+
+function dataCurta(iso: string) {
+  try {
+    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+  } catch {
+    return ''
+  }
+}
+
+function Folha({
+  itens,
+  lado,
+  escrevendoId,
+  vazio,
+}: {
+  itens: Assinatura[]
+  lado: 'esq' | 'dir'
+  escrevendoId: string | null
+  vazio: string
+}) {
+  return (
+    <div className={`livro-pagina livro-pagina-${lado}`}>
+      <div className="livro-margem" aria-hidden="true" />
+      <div className="livro-conteudo">
+        {itens.length === 0 ? (
+          <p className="livro-vazio">{vazio}</p>
+        ) : (
+          itens.map((a) => {
+            const escrevendo = escrevendoId === a.id
+            return (
+              <figure key={a.id} className={`livro-registro${escrevendo ? ' livro-registro-novo' : ''}`}>
+                <blockquote className="livro-mensagem">{a.message}</blockquote>
+                <figcaption className="livro-assinatura-linha">
+                  <span className={`livro-nome${escrevendo ? ' livro-nome-escrevendo' : ''}`}>
+                    <span className="livro-nome-texto">{a.visitor_name}</span>
+                    {escrevendo && <span className="livro-pena" aria-hidden="true" />}
+                  </span>
+                  <span className="livro-data">{dataCurta(a.created_at)}</span>
+                </figcaption>
+              </figure>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function LivroAssinaturas({
+  memorialId,
+  assinaturasIniciais,
+  nomeHomenageado,
+}: {
+  memorialId: string
+  assinaturasIniciais: Assinatura[]
+  nomeHomenageado: string
+}) {
+  // Mais antigas primeiro: livro se lê do começo, e assinatura nova entra no
+  // fim, que é onde a pena vai escrever.
+  const [assinaturas, setAssinaturas] = useState<Assinatura[]>(() =>
+    [...assinaturasIniciais].sort((a, b) => a.created_at.localeCompare(b.created_at))
+  )
+  const [spread, setSpread] = useState(0)
+  const [virando, setVirando] = useState<'frente' | 'tras' | null>(null)
+  const [escrevendoId, setEscrevendoId] = useState<string | null>(null)
+
+  const [nome, setNome] = useState('')
+  const [mensagem, setMensagem] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState('')
+  const reduzMovimento = usaReducaoMovimento()
+
+  const temporizadores = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    // Copia a lista pra dentro do efeito: no cleanup, temporizadores.current
+    // ja pode apontar pra outra coisa.
+    const lista = temporizadores.current
+    return () => lista.forEach(clearTimeout)
+  }, [])
+
+  const totalSpreads = Math.max(1, Math.ceil(assinaturas.length / (POR_PAGINA * 2)))
+
+  const paginas = useMemo(() => {
+    const base = spread * POR_PAGINA * 2
+    return {
+      esquerda: assinaturas.slice(base, base + POR_PAGINA),
+      direita: assinaturas.slice(base + POR_PAGINA, base + POR_PAGINA * 2),
+    }
+  }, [assinaturas, spread])
+
+  function agendar(fn: () => void, ms: number) {
+    temporizadores.current.push(setTimeout(fn, ms))
+  }
+
+  function virar(direcao: 'frente' | 'tras') {
+    if (virando) return
+    const proximo = direcao === 'frente' ? spread + 1 : spread - 1
+    if (proximo < 0 || proximo >= totalSpreads) return
+
+    if (reduzMovimento) {
+      setSpread(proximo)
+      return
+    }
+
+    setVirando(direcao)
+    agendar(() => {
+      setSpread(proximo)
+      setVirando(null)
+    }, 720)
+  }
+
+  async function assinar(e: React.FormEvent) {
+    e.preventDefault()
+    if (!nome.trim() || !mensagem.trim() || enviando) return
+    setEnviando(true)
+    setErro('')
+
+    const res = await fetch('/api/memorial-condolencia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memorialId, nome: nome.trim(), mensagem: mensagem.trim() }),
+    })
+
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      setErro(json.error || 'Não foi possível registrar agora. Tenta de novo em instantes.')
+      setEnviando(false)
+      return
+    }
+
+    const nova: Assinatura = {
+      id: `nova-${Date.now()}`,
+      visitor_name: nome.trim(),
+      message: mensagem.trim(),
+      created_at: new Date().toISOString(),
+    }
+
+    const lista = [...assinaturas, nova]
+    setAssinaturas(lista)
+    setSpread(Math.floor((lista.length - 1) / (POR_PAGINA * 2)))
+    setNome('')
+    setMensagem('')
+    setEnviando(false)
+
+    if (!reduzMovimento) {
+      setEscrevendoId(nova.id)
+      // 2400ms = a escrita + a pausa do brilho. Depois disso a assinatura vira
+      // uma igual as outras.
+      agendar(() => setEscrevendoId(null), 2600)
+    }
+  }
+
+  return (
+    <div className="livro-bloco">
+      <div className="livro-cena">
+        <div className={`livro${virando ? ` livro-virando-${virando}` : ''}`}>
+          <Folha
+            itens={paginas.esquerda}
+            lado="esq"
+            escrevendoId={escrevendoId}
+            vazio={
+              assinaturas.length === 0
+                ? `Ninguém assinou ainda. Seja o primeiro a deixar uma palavra para ${nomeHomenageado}.`
+                : ''
+            }
+          />
+          <span className="livro-lombada" aria-hidden="true" />
+          <Folha itens={paginas.direita} lado="dir" escrevendoId={escrevendoId} vazio="" />
+          {virando && <span className="livro-folha-solta" aria-hidden="true" />}
+        </div>
+      </div>
+
+      <div className="livro-controles">
+        <button
+          type="button"
+          className="livro-seta"
+          onClick={() => virar('tras')}
+          disabled={spread === 0 || !!virando}
+          aria-label="Página anterior do livro"
+        >
+          ←
+        </button>
+        <span className="livro-folio">
+          {assinaturas.length === 0
+            ? 'Livro em branco'
+            : `Página ${spread + 1} de ${totalSpreads} · ${assinaturas.length} ${
+                assinaturas.length === 1 ? 'assinatura' : 'assinaturas'
+              }`}
+        </span>
+        <button
+          type="button"
+          className="livro-seta"
+          onClick={() => virar('frente')}
+          disabled={spread >= totalSpreads - 1 || !!virando}
+          aria-label="Próxima página do livro"
+        >
+          →
+        </button>
+      </div>
+
+      <form className="livro-form" onSubmit={assinar}>
+        <div className="livro-campo">
+          <label htmlFor="livro-nome">Seu nome</label>
+          <input
+            id="livro-nome"
+            type="text"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            maxLength={80}
+            required
+            autoComplete="name"
+          />
+        </div>
+
+        <div className="livro-campo">
+          <label htmlFor="livro-mensagem">Sua mensagem</label>
+          <textarea
+            id="livro-mensagem"
+            value={mensagem}
+            onChange={(e) => setMensagem(e.target.value)}
+            maxLength={500}
+            rows={3}
+            required
+          />
+        </div>
+
+        {erro && (
+          <p className="livro-erro" role="alert">
+            {erro}
+          </p>
+        )}
+
+        <button type="submit" className="livro-botao" disabled={enviando}>
+          {enviando ? 'Registrando...' : 'Assinar o livro'}
+        </button>
+      </form>
+    </div>
+  )
+}
