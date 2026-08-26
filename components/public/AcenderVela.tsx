@@ -2,14 +2,8 @@
 
 import { useRef, useState } from 'react'
 import { CORES } from '@/lib/publicTheme'
-
-const TAMANHO_PAREDE = 45
-
-// Seed determinística por índice (nunca Math.random() no render — evita
-// descompasso entre servidor e cliente na hidratação do componente).
-function seedPorIndice(i: number) {
-  return ((i * 47 + 13) % 100) / 100
-}
+import { MuralVelasVotivas, type MuralVelasVotivasHandle } from './MuralVelasVotivas'
+import { MURAL_TOTAL, slotFisicoDaOrdem } from '@/lib/muralVelas'
 
 interface Voo {
   top: number
@@ -24,51 +18,55 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   const [contagem, setContagem] = useState(velasIniciais)
   // Módulo, não Math.min — depois que a parede já deu uma volta completa (mais de
   // 45 no total), ela reflete só o progresso da volta atual, não fica sempre cheia.
-  const [paredeAcesas, setParedeAcesas] = useState(() => velasIniciais % TAMANHO_PAREDE)
-  const [indiceRecemAceso, setIndiceRecemAceso] = useState<number | null>(null)
+  const [paredeAcesas, setParedeAcesas] = useState(() => velasIniciais % MURAL_TOTAL)
+  // Slot FÍSICO (posição real no mural, depois do embaralho) que acabou de
+  // acender — o mural usa isso pro pulso de luz.
+  const [slotRecemAceso, setSlotRecemAceso] = useState<number | null>(null)
   const [voo, setVoo] = useState<Voo | null>(null)
   const [principalAcesa, setPrincipalAcesa] = useState(false)
 
   const secaoRef = useRef<HTMLDivElement | null>(null)
   const chamaPrincipalRef = useRef<HTMLDivElement | null>(null)
-  const paredeRefs = useRef<Record<number, HTMLDivElement | null>>({})
-  // Próximo slot da parede a "reacender" — depois que os 45 já estão acesos,
-  // continua em loop pelos mesmos índices (a chama sempre voa em algum lugar).
-  const proximoIndiceRef = useRef(velasIniciais % TAMANHO_PAREDE)
+  const muralRef = useRef<MuralVelasVotivasHandle | null>(null)
+  // Próxima POSIÇÃO NA ORDEM de acendimento (0..34) — não é o slot físico
+  // direto; o mural embaralha ordem de acendimento x posição na parede pra
+  // não encher da esquerda pra direita como barra de progresso. Depois que
+  // os 35 já estão acesos, continua em loop (a chama sempre voa em algum lugar).
+  const proximoIndiceRef = useRef(velasIniciais % MURAL_TOTAL)
 
   function acenderEApagarPrincipal(duracaoMs: number) {
     setPrincipalAcesa(true)
     setTimeout(() => setPrincipalAcesa(false), duracaoMs)
   }
 
-  function acenderSlotDaParede(indiceAlvo: number) {
-    setParedeAcesas((p) => Math.max(p, indiceAlvo + 1))
-    setIndiceRecemAceso(indiceAlvo)
-    setTimeout(() => setIndiceRecemAceso(null), 700)
+  function acenderSlotDaParede(posicaoNaOrdem: number) {
+    setParedeAcesas((p) => Math.max(p, posicaoNaOrdem + 1))
+    const slotFisico = slotFisicoDaOrdem(posicaoNaOrdem)
+    setSlotRecemAceso(slotFisico)
+    setTimeout(() => setSlotRecemAceso(null), 700)
 
     // Parede completou a volta (acendeu a última) — apaga tudo depois de um
     // instante e recomeça do zero no próximo clique (pedido do Rafael, 2026-07-24).
-    if (indiceAlvo === TAMANHO_PAREDE - 1) {
+    if (posicaoNaOrdem === MURAL_TOTAL - 1) {
       setTimeout(() => setParedeAcesas(0), 1200)
     }
   }
 
-  function iniciarVoo(indiceAlvo: number) {
+  function iniciarVoo(posicaoNaOrdem: number) {
     const secao = secaoRef.current
     const origem = chamaPrincipalRef.current
-    const destino = paredeRefs.current[indiceAlvo]
+    const posDestino = muralRef.current?.obterPosicaoDoSlot(slotFisicoDaOrdem(posicaoNaOrdem)) ?? null
 
     acenderEApagarPrincipal(1300)
 
-    if (!secao || !origem || !destino) {
+    if (!secao || !origem || !posDestino) {
       // Sem medida possível (refs ainda não montaram) — acende direto, sem animação de voo.
-      acenderSlotDaParede(indiceAlvo)
+      acenderSlotDaParede(posicaoNaOrdem)
       return
     }
 
     const rSecao = secao.getBoundingClientRect()
     const rOrigem = origem.getBoundingClientRect()
-    const rDestino = destino.getBoundingClientRect()
 
     setVoo({
       top: rOrigem.top - rSecao.top,
@@ -78,15 +76,15 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
 
     setTimeout(() => {
       setVoo({
-        top: rDestino.top - rSecao.top,
-        left: rDestino.left - rSecao.left + rDestino.width / 2,
+        top: posDestino.top - rSecao.top,
+        left: posDestino.left - rSecao.left,
         fase: 'fim',
       })
     }, 20)
 
     setTimeout(() => {
       setVoo(null)
-      acenderSlotDaParede(indiceAlvo)
+      acenderSlotDaParede(posicaoNaOrdem)
     }, 900)
   }
 
@@ -105,83 +103,15 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
     setContagem(novoTotal)
 
     const alvo = proximoIndiceRef.current
-    proximoIndiceRef.current = (alvo + 1) % TAMANHO_PAREDE
+    proximoIndiceRef.current = (alvo + 1) % MURAL_TOTAL
     iniciarVoo(alvo)
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, position: 'relative' }} ref={secaoRef}>
-      {/* Mural de velas votivas — velas já acesas por quem visitou antes */}
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 420,
-          padding: '18px 10px',
-          borderRadius: 10,
-          background: 'radial-gradient(ellipse at center 35%, rgba(201,164,106,0.09), rgba(201,164,106,0.02) 72%)',
-          border: `1px solid ${CORES.douradoBorda}`,
-          marginBottom: 8,
-        }}
-      >
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px 6px' }}>
-          {Array.from({ length: TAMANHO_PAREDE }, (_, i) => {
-            const estaAcesa = i < paredeAcesas
-            const seed = seedPorIndice(i)
-            const acabouDeAcender = i === indiceRecemAceso
-            return (
-              <div
-                key={i}
-                ref={(el) => {
-                  paredeRefs.current[i] = el
-                }}
-                style={{ position: 'relative', width: 28, height: 44, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-              >
-                {/* Copo/cuia da vela votiva */}
-                <div
-                  style={{
-                    width: 15,
-                    height: 18,
-                    borderRadius: '2px 2px 6px 6px',
-                    background: 'linear-gradient(180deg, rgba(201,164,106,0.15), rgba(160,124,72,0.32))',
-                    border: `1px solid ${CORES.douradoBorda}`,
-                  }}
-                />
-                {/* Glow atrás da chama */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: 11,
-                    left: '50%',
-                    width: 24,
-                    height: 24,
-                    transform: 'translateX(-50%)',
-                    background: 'radial-gradient(circle, rgba(255,196,120,0.55), transparent 70%)',
-                    opacity: estaAcesa ? 0.85 : 0,
-                    transition: 'opacity 0.6s ease',
-                    pointerEvents: 'none',
-                  }}
-                />
-                {/* Pavio */}
-                <div style={{ position: 'absolute', bottom: 16, left: '50%', width: 2, height: 5, background: '#4a3a28', transform: 'translateX(-50%)' }} />
-                {estaAcesa && (
-                  <div
-                    className={`vela-flame${acabouDeAcender ? ' vela-parede-acender' : ''}`}
-                    style={{
-                      position: 'absolute',
-                      bottom: 18,
-                      left: '50%',
-                      width: 7,
-                      height: 11,
-                      animationDuration: `${(2 + seed * 1.4).toFixed(2)}s`,
-                      animationDelay: `${(-seed * 2).toFixed(2)}s`,
-                    }}
-                  />
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      {/* Mural de velas votivas — canvas com fundo fotográfico (altar), migrado
+          do protótipo aprovado pelo Rafael. */}
+      <MuralVelasVotivas ref={muralRef} acesas={paredeAcesas} slotRecemAceso={slotRecemAceso} />
 
       {/* Chama voando da vela principal até a vela da parede recém-acesa */}
       {voo && (

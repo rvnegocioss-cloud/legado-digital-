@@ -299,6 +299,26 @@ html {
   }
 }
 
+/* ===== Mural de velas votivas — migrado do protótipo aprovado pelo Rafael
+   (Desktop\Cerebro Claude - Legado Digital\prototipo-parede-velas\).
+   O fundo (altar: madeira + veludo + flores) é CSS aqui; o canvas por cima
+   (MuralVelasVotivas.tsx) só desenha vidro/brilho/chama, transparente. ===== */
+.mural-velas-votivas {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background-image:
+    radial-gradient(ellipse 62% 52% at 50% 58%, rgba(255,178,96,0.14), rgba(255,178,96,0) 74%),
+    radial-gradient(ellipse 96% 64% at 50% 98%, rgba(255,186,110,0.10), rgba(255,186,110,0) 72%),
+    url('/parede-velas-fundo.webp');
+  background-size: cover, cover, cover;
+  background-position: center, center, center;
+}
+
+
 /* Popup do pino do túmulo no mapa "Como Chegar" — sobrescreve o card branco
    padrão do MapLibre pra seguir o tema navy+dourado do resto da página. */
 .guia-tumulo-popup .maplibregl-popup-content {
