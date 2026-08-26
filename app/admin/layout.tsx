@@ -19,7 +19,14 @@ type AdminUser = {
 
 type ParceiroResumo = {
   id: string
-  nome: string
+  nome_fantasia: string | null
+  razao_social: string | null
+}
+
+// parceiros_b2b nao tem coluna "nome" -- tem nome_fantasia e razao_social, e
+// funeraria cadastrada so pela razao social deixa nome_fantasia vazio.
+function nomeDoParceiro(p: ParceiroResumo) {
+  return p.nome_fantasia?.trim() || p.razao_social?.trim() || 'Parceiro sem nome'
 }
 
 type AlertaComunicacao = {
@@ -77,11 +84,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [pathname, router])
 
   useEffect(() => {
+    // Pedia a coluna 'nome', que nunca existiu nessa tabela: o select falhava,
+    // data vinha null e o dropdown dizia "Nenhum parceiro cadastrado ainda"
+    // mesmo com parceiros cadastrados -- erro silencioso, nada no console da
+    // tela indicava a causa.
     supabase
       .from('parceiros_b2b')
-      .select('id, nome')
-      .order('nome')
-      .then(({ data }) => setParceiros(data || []))
+      .select('id, nome_fantasia, razao_social')
+      .order('razao_social')
+      .then(({ data, error }) => {
+        if (error) console.error('Falha ao carregar parceiros do header:', error.message)
+        setParceiros(data || [])
+      })
   }, [])
 
   // Alerta = feed das comunicações que o sistema já registra (emails_enviados,
@@ -212,7 +226,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         onClick={() => setParceirosAberto(false)}
                         className="block px-4 py-2 text-sm text-[var(--tema-zinc-300)] hover:text-white hover:bg-[var(--tema-zinc-800)]"
                       >
-                        {p.nome}
+                        {nomeDoParceiro(p)}
                       </Link>
                     ))
                   )}

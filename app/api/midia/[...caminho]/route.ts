@@ -32,11 +32,19 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ caminho: st
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
-  // Foto de túmulo (pasta 'tumulos/...') é operacional da equipe, não mídia de
-  // família — não tem gate de memorial, então segue o fluxo antigo.
-  const ehTumulo = memorialId === 'tumulos' || memorialId === 'qrcodes'
+  // Pastas que NÃO são mídia de família: foto de túmulo e QR Code (operacionais
+  // da equipe) e logo de parceiro (identidade comercial, aparece na página
+  // pública da funerária). Nenhuma delas pertence a um memorial, então não tem
+  // gate de memorial pra aplicar.
+  //
+  // 'parceiro-logos' entrou aqui em 26/08: quando o balde virou privado (18/08),
+  // o logo continuou sendo montado com getPublicUrl e passou a responder 400 --
+  // ou seja, sumiu de todas as telas sem ninguém perceber, porque nenhum teste
+  // olhava pra ele.
+  const ehArquivoSemMemorial =
+    memorialId === 'tumulos' || memorialId === 'qrcodes' || memorialId === 'parceiro-logos'
 
-  if (!ehTumulo) {
+  if (!ehArquivoSemMemorial) {
     const { data: memorial } = await supabaseAdmin
       .from('homenagens')
       .select('id, slug, foto_url, video_url, galeria_fotos, videos_galeria')

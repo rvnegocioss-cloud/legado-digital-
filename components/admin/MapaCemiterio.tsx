@@ -174,6 +174,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [erroCoordenada, setErroCoordenada] = useState('')
   const [pontoRefParaMarcar, setPontoRefParaMarcar] = useState<string | null>(null)
   const [subindoFoto, setSubindoFoto] = useState<string | null>(null)
+  const [removendoFoto, setRemovendoFoto] = useState<string | null>(null)
   // Menu de botao direito -- cadastrar memorial direto no tumulo, em campo,
   // sem sair do mapa. lapide null = clicou em espaco vazio (cria avulso).
   const router = useRouter()
@@ -375,6 +376,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setCarregando(false)
   }
 
+  // ortoUrlAssinada PRECISA estar nas dependencias: ela chega numa segunda
+  // requisicao, sempre depois do cemiterio. Sem ela na lista o memo nunca
+  // recalculava, o mapa ficava preso na URL publica gravada no banco -- e
+  // desde que o balde 'mapas' virou privado (18/08) essa URL responde 400.
+  // Efeito: satelite e pinos apareciam, ortomosaico nunca. Silencioso, porque
+  // tile que falha nao levanta erro na tela.
   const ortomosaico = useMemo(
     () =>
       cemiterio
@@ -385,7 +392,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             bounds: cemiterio.ortomosaico_bounds,
           })
         : null,
-    [cemiterio]
+    [cemiterio, ortoUrlAssinada]
   )
 
   const estiloMapa = useMemo(() => {
@@ -999,6 +1006,38 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       setMsg(e instanceof Error ? e.message : 'Erro ao enviar a foto.')
     }
     setSubindoFoto(null)
+  }
+
+  // Tira a foto do tumulo E apaga o arquivo do servidor. Como a foto e a unica
+  // prova de que alguem esteve la em campo, tirar ela devolve o tumulo pra
+  // 'nao_confirmada' (quem decide isso e a rota, numa transacao so) -- senao o
+  // mapa continuaria mostrando pino verde de "conferido" sem nada sustentando.
+  async function removerFotoTumulo(lapideId: string) {
+    setRemovendoFoto(lapideId)
+    setMsg('')
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      const res = await fetch('/api/remover-arquivo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token || ''}`,
+        },
+        body: JSON.stringify({ recurso: 'foto_tumulo', id: lapideId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Nao foi possivel remover a foto')
+
+      setLapides((atual) => atual.map((l) => (l.id === lapideId ? { ...l, foto_face_url: null } : l)))
+      setLapideSelecionada((atual) => (atual && atual.id === lapideId ? { ...atual, foto_face_url: null } : atual))
+      setMsg('Foto removida — o túmulo voltou para "não conferido".')
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Erro ao remover a foto.')
+    }
+    setRemovendoFoto(null)
   }
 
   // ---- Conferencia de coordenada de campo (GPS de celular) ----------------
@@ -2362,7 +2401,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                         {(homenagemPorLapide.get(lapideHover.id)?.foto_url || lapideHover.foto_face_url) ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={urlMidiaProtegida(homenagemPorLapide.get(lapideHover.id)?.foto_url) || lapideHover.foto_face_url!}
+                            src={
+                              urlMidiaProtegida(homenagemPorLapide.get(lapideHover.id)?.foto_url) ||
+                              urlMidiaProtegida(lapideHover.foto_face_url)!
+                            }
                             alt=""
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
@@ -2471,30 +2513,53 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           {lapideSelecionada.foto_face_url && (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={lapideSelecionada.foto_face_url}
+                              src={urlMidiaProtegida(lapideSelecionada.foto_face_url) || lapideSelecionada.foto_face_url}
                               alt=""
                               style={{ width: '100%', maxWidth: 200, borderRadius: 6, margin: '6px 0', display: 'block' }}
                             />
                           )}
                           {editavel && (
-                            <label style={{ fontSize: 11, color: '#0B5FFF', cursor: 'pointer', display: 'block', marginTop: 4 }}>
-                              {subindoFoto === lapideSelecionada.id
-                                ? 'Enviando foto...'
-                                : lapideSelecionada.foto_face_url
-                                  ? 'Trocar foto do túmulo'
-                                  : 'Adicionar foto do túmulo'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }}
-                                disabled={subindoFoto != null}
-                                onChange={(ev) => {
-                                  const f = ev.target.files?.[0]
-                                  if (f) subirFotoTumulo(lapideSelecionada.id, f)
-                                  ev.target.value = ''
-                                }}
-                              />
-                            </label>
+                            <>
+                              <label style={{ fontSize: 11, color: '#0B5FFF', cursor: 'pointer', display: 'block', marginTop: 4 }}>
+                                {subindoFoto === lapideSelecionada.id
+                                  ? 'Enviando foto...'
+                                  : lapideSelecionada.foto_face_url
+                                    ? 'Trocar foto do túmulo'
+                                    : 'Adicionar foto do túmulo'}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  style={{ display: 'none' }}
+                                  disabled={subindoFoto != null}
+                                  onChange={(ev) => {
+                                    const f = ev.target.files?.[0]
+                                    if (f) subirFotoTumulo(lapideSelecionada.id, f)
+                                    ev.target.value = ''
+                                  }}
+                                />
+                              </label>
+                              {lapideSelecionada.foto_face_url && (
+                                <button
+                                  type="button"
+                                  disabled={removendoFoto === lapideSelecionada.id}
+                                  onClick={() => removerFotoTumulo(lapideSelecionada.id)}
+                                  style={{
+                                    fontSize: 11,
+                                    color: '#B91C1C',
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0,
+                                    marginTop: 4,
+                                    cursor: 'pointer',
+                                    display: 'block',
+                                  }}
+                                >
+                                  {removendoFoto === lapideSelecionada.id
+                                    ? 'Removendo...'
+                                    : 'Remover foto (volta a não conferido)'}
+                                </button>
+                              )}
+                            </>
                           )}
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>

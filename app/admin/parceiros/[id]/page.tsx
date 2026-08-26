@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
 import SecaoRetratil from '@/components/admin/SecaoRetratil'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -107,6 +108,7 @@ export default function DetalheParceiro() {
   const [logoUrl, setLogoUrl] = useState('')
   const [descricaoPublica, setDescricaoPublica] = useState('')
   const [enviandoLogo, setEnviandoLogo] = useState(false)
+  const [removendoLogo, setRemovendoLogo] = useState(false)
   const [salvandoPagina, setSalvandoPagina] = useState(false)
   const [paginaErro, setPaginaErro] = useState('')
   const [paginaSalva, setPaginaSalva] = useState(false)
@@ -127,6 +129,31 @@ export default function DetalheParceiro() {
       setPaginaErro(err.message || 'Erro ao enviar logo')
     }
     setEnviandoLogo(false)
+  }
+
+  // Remove de verdade: zera a coluna E apaga o arquivo do servidor. Antes o
+  // campo so tinha envio -- trocar de logo empilhava arquivo no Storage pra
+  // sempre, e nao existia jeito nenhum de voltar a "sem logo".
+  async function removerLogo() {
+    if (!parceiro) return
+    setRemovendoLogo(true)
+    setPaginaErro('')
+    try {
+      const res = await fetch('/api/remover-arquivo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
+        },
+        body: JSON.stringify({ recurso: 'logo_parceiro', id: parceiro.id }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Nao foi possivel remover o logo')
+      setLogoUrl('')
+    } catch (err: any) {
+      setPaginaErro(err.message || 'Erro ao remover logo')
+    }
+    setRemovendoLogo(false)
   }
 
   async function salvarPaginaPublica(e: React.FormEvent) {
@@ -369,15 +396,30 @@ export default function DetalheParceiro() {
           </div>
           {!parceiro.slug && (
             <p className="text-yellow-500 text-sm mb-3">
-              Este parceiro ainda não tem slug — rode a migração de backfill antes de publicar.
+              Este parceiro ainda não tem endereço público — preencha o nome fantasia (ou a razão
+              social) e salve os dados do parceiro; o endereço é gerado sozinho no save.
             </p>
           )}
           <form onSubmit={salvarPaginaPublica} className="space-y-3">
             <div>
               <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Logo</label>
               {logoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-[var(--tema-zinc-800)] rounded p-2" />
+                <div className="flex items-center gap-3 mb-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={urlMidiaProtegida(logoUrl) || logoUrl}
+                    alt="Logo"
+                    className="h-14 object-contain bg-[var(--tema-zinc-800)] rounded p-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={removerLogo}
+                    disabled={removendoLogo}
+                    className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 disabled:opacity-50"
+                  >
+                    {removendoLogo ? 'Removendo...' : 'Remover logo'}
+                  </button>
+                </div>
               )}
               <input
                 type="file"

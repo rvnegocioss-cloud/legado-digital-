@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ScrollText, ClipboardList, CreditCard } from 'lucide-react'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface ParceiroInfo {
   id: string
@@ -79,6 +80,7 @@ function ParceiroDashboardInner() {
   const [logoUrl, setLogoUrl] = useState('')
   const [descricaoPublica, setDescricaoPublica] = useState('')
   const [enviandoLogo, setEnviandoLogo] = useState(false)
+  const [removendoLogo, setRemovendoLogo] = useState(false)
   const [salvandoPagina, setSalvandoPagina] = useState(false)
   const [paginaErro, setPaginaErro] = useState('')
   const [paginaSalva, setPaginaSalva] = useState(false)
@@ -160,6 +162,30 @@ function ParceiroDashboardInner() {
       setPaginaErro(err.message || 'Erro ao enviar logo')
     }
     setEnviandoLogo(false)
+  }
+
+  // Mesma rota da Central: o parceiro so consegue remover o proprio logo (a
+  // rota confere parceiros_usuarios antes de apagar).
+  async function removerLogo() {
+    if (!parceiro) return
+    setRemovendoLogo(true)
+    setPaginaErro('')
+    try {
+      const res = await fetch('/api/remover-arquivo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
+        },
+        body: JSON.stringify({ recurso: 'logo_parceiro', id: parceiro.id }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Nao foi possivel remover o logo')
+      setLogoUrl('')
+    } catch (err: any) {
+      setPaginaErro(err.message || 'Erro ao remover logo')
+    }
+    setRemovendoLogo(false)
   }
 
   async function salvarPaginaPublica(e: React.FormEvent) {
@@ -318,8 +344,22 @@ function ParceiroDashboardInner() {
           <div>
             <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Logo</label>
             {logoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt="Logo" className="h-14 object-contain mb-2 bg-[var(--tema-zinc-800)] rounded p-2" />
+              <div className="flex items-center gap-3 mb-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={urlMidiaProtegida(logoUrl) || logoUrl}
+                  alt="Logo"
+                  className="h-14 object-contain bg-[var(--tema-zinc-800)] rounded p-2"
+                />
+                <button
+                  type="button"
+                  onClick={removerLogo}
+                  disabled={removendoLogo}
+                  className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 disabled:opacity-50"
+                >
+                  {removendoLogo ? 'Removendo...' : 'Remover logo'}
+                </button>
+              </div>
             )}
             <input
               type="file"

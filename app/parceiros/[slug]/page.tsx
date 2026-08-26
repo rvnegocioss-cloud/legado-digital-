@@ -2,6 +2,7 @@ import { Camera, Video, MessageSquareText, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { tema, CORES } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
+import { urlMidiaProtegida } from "@/lib/urlMidia";
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +91,7 @@ export default async function ParceiroPublicoPage({
         {p.logo_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={p.logo_url}
+            src={urlMidiaProtegida(p.logo_url) || p.logo_url}
             alt={p.nome_fantasia || p.razao_social}
             style={{ maxHeight: 64, maxWidth: 200, objectFit: "contain", marginBottom: 16 }}
           />
