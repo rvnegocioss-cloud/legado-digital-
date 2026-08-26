@@ -273,11 +273,6 @@ export default async function PerfilMemorialPage({
     })
     .filter((x): x is MarcoVida => x !== null);
 
-  // Capa: primeira foto da galeria. A foto do retrato NAO serve -- e a mesma
-  // que aparece no circulo logo abaixo, e repetir a mesma imagem borrada atras
-  // dela pareceria falha de carregamento, nao design.
-  const capa = galeria.length > 0 ? galeria[0] : null;
-
   const paragrafos = lerParagrafos(m.biografia);
   const iniciais = m.nome_completo
     .split(" ")
@@ -313,25 +308,12 @@ export default async function PerfilMemorialPage({
 
       <SeletorTema temaInicial={m.tema} />
 
-      {/* ---- Capa + identificação ------------------------------------------
-          A base abre com o hero ocupando quase uma tela inteira. Aqui a capa é
-          uma faixa baixa e a foto encosta na borda dela, então nome, datas e
-          vínculos já aparecem sem rolar nada.
-
-          A capa carrega uma foto da própria pessoa (a primeira da galeria),
-          escurecida e desfocada. Uma faixa de cor vazia parecia descuido, e
-          decoração inventada não diria nada sobre ela — a foto dela diz. Sem
-          galeria, a faixa encolhe em vez de ficar vazia. */}
-      <div className={`perfil-capa${capa ? " perfil-capa-com-foto" : ""}`} aria-hidden="true">
-        {capa ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={capa} alt="" className="perfil-capa-img" />
-        ) : (
-          <span className="perfil-capa-brilho" />
-        )}
-        <span className="perfil-capa-veu" />
-      </div>
-
+      {/* ---- Cabeçalho: igual ao topo da página original -------------------
+          Tentei uma capa com foto (banner atrás do retrato) em duas versões
+          -- desfocada e depois nítida -- e nenhuma das duas ficou boa (a
+          nítida "estourou"). O Rafael pediu pra voltar exatamente ao topo
+          centralizado da página base: retrato com anel dourado e brilho atrás,
+          tudo centralizado abaixo. Sem banner. */}
       <header className="perfil-cabecalho">
         <div className="perfil-retrato">
           {/* Anel dourado + borda interna escura: construcao copiada da pagina
@@ -352,6 +334,16 @@ export default async function PerfilMemorialPage({
           <span className="perfil-eyebrow">Em memória</span>
           <h1 className="perfil-nome">{m.nome_completo}</h1>
 
+          {Array.isArray(m.vinculos) && m.vinculos.length > 0 && (
+            <div className="perfil-vinculos">
+              {m.vinculos.map((x) => (
+                <span key={x} className="perfil-vinculo">
+                  {x}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="perfil-linha-dados">
             {anos && <span className="perfil-anos">{anos}</span>}
             {m.cidade && (
@@ -362,14 +354,8 @@ export default async function PerfilMemorialPage({
             )}
           </div>
 
-          {Array.isArray(m.vinculos) && m.vinculos.length > 0 && (
-            <div className="perfil-vinculos">
-              {m.vinculos.map((x) => (
-                <span key={x} className="perfil-vinculo">
-                  {x}
-                </span>
-              ))}
-            </div>
+          {m.frase_preferida && (
+            <blockquote className="perfil-frase">&ldquo;{m.frase_preferida}&rdquo;</blockquote>
           )}
         </div>
 
@@ -383,12 +369,6 @@ export default async function PerfilMemorialPage({
           <BotaoCompartilhar nome={m.nome_completo} />
         </div>
       </header>
-
-      {m.frase_preferida && (
-        <div className="perfil-frase-faixa">
-          <blockquote className="perfil-frase">&ldquo;{m.frase_preferida}&rdquo;</blockquote>
-        </div>
-      )}
 
       {/* ---- Corpo: coluna de leitura + lateral fixa ---------------------- */}
       <div className="perfil-corpo">

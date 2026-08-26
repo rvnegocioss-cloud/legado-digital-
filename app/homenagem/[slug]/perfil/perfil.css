@@ -62,88 +62,25 @@
   }
 }
 
-/* ---- Capa ------------------------------------------------------------- */
-
-.perfil-capa {
-  position: relative;
-  /* Sem foto a faixa e baixa de proposito: banda de cor vazia com 260px de
-     altura parece descuido. Com foto ela pode respirar. */
-  height: clamp(96px, 12vw, 150px);
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(201, 164, 106, 0.14), rgba(201, 164, 106, 0) 78%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
-  border-bottom: 1px solid var(--perfil-borda);
-}
-
-.perfil-capa-com-foto {
-  height: clamp(150px, 16vw, 216px);
-}
-
-.perfil-capa-brilho {
-  position: absolute;
-  inset: -40% -10% auto -10%;
-  height: 200%;
-  background: radial-gradient(closest-side, rgba(201, 164, 106, 0.18), transparent 72%);
-  pointer-events: none;
-}
-
-.perfil-capa-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Nitida, sem desfoque nem escurecer -- e a foto de verdade, como no
-     Facebook. Regra 6 esquecida da primeira vez: rede social nenhuma borra a
-     propria capa. */
-}
-
-.perfil-capa-veu {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  /* So um esfumado bem baixo, colado na borda de baixo, pra a foto encontrar o
-     fundo da pagina sem um corte seco -- nao e mais escurecimento da foto
-     inteira. */
-  background: linear-gradient(180deg, transparent 82%, var(--perfil-fundo-base) 100%);
-}
-
-/* ---- Cabeçalho: retrato encostado na capa ----------------------------- */
+/* ---- Cabeçalho: centralizado, igual ao topo da página original ------- */
 
 .perfil-cabecalho {
   width: min(100% - 40px, var(--perfil-largura));
   margin: 0 auto;
-  padding-bottom: 20px;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-areas:
-    "retrato identidade"
-    "acoes   acoes";
-  align-items: end;
-  column-gap: 26px;
-  row-gap: 18px;
-  /* Sem isto a linha do grid encolhe junto com a margem negativa do retrato e
-     o nome sobe pra dentro da capa. */
-  min-height: 96px;
+  padding: 56px 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .perfil-retrato {
-  grid-area: retrato;
-  /* Construcao IDENTICA a da pagina base, que o Rafael aprovou: anel dourado
-     de 2px, borda interna de 4px na cor do fundo (o vao escuro entre o anel e
-     a foto e o que faz o retrato descolar) e brilho radial por tras.
-     Tamanho tambem o da base: clamp(160px, 20vw, 220px) -- o meu estava em
-     104-168px, ou seja, sempre menor, e circulo menor com a mesma foto corta
-     mais rosto na percepcao. */
-  align-self: start;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: clamp(160px, 20vw, 220px);
   height: clamp(160px, 20vw, 220px);
-  margin-top: clamp(-104px, -7vw, -66px);
   flex-shrink: 0;
 }
 
@@ -184,35 +121,57 @@
 }
 
 .perfil-identidade {
-  grid-area: identidade;
-  min-width: 0;
-  padding-bottom: 4px;
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 640px;
 }
 
 .perfil-eyebrow {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--perfil-dourado);
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .perfil-nome {
   margin: 0;
-  font-size: clamp(28px, 4.4vw, 50px);
-  line-height: 1.06;
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 1.08;
   font-weight: 400;
   letter-spacing: -0.015em;
   color: var(--perfil-texto-forte);
+  text-align: center;
+}
+
+.perfil-vinculos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.perfil-vinculo {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--perfil-texto);
+  padding: 4px 11px;
+  border: 1px solid var(--perfil-borda);
+  border-radius: 999px;
 }
 
 .perfil-linha-dados {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: 8px 16px;
-  margin-top: 10px;
+  margin-top: 14px;
   color: var(--perfil-texto-fraco);
   font-size: 14px;
 }
@@ -228,33 +187,23 @@
   gap: 5px;
 }
 
-.perfil-vinculos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 12px;
-}
-
-.perfil-vinculo {
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--perfil-texto);
-  padding: 4px 11px;
-  border: 1px solid var(--perfil-borda);
-  border-radius: 999px;
+.perfil-frase {
+  margin: 22px 0 0;
+  font-size: clamp(17px, 2vw, 21px);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--perfil-texto-forte);
+  max-width: 46ch;
 }
 
 /* ---- Ações ------------------------------------------------------------ */
 
 .perfil-acoes {
-  grid-area: acoes;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
-  padding-top: 6px;
-  border-top: 1px solid var(--perfil-borda);
-  margin-top: 6px;
+  margin-top: 26px;
 }
 
 .perfil-btn {
@@ -295,46 +244,6 @@
 }
 
 /* ---- Frase: citação destacada, recurso de revista --------------------- */
-
-.perfil-frase-faixa {
-  position: relative;
-  width: min(100% - 40px, var(--perfil-largura));
-  margin: 26px auto 0;
-  padding: 30px 0 32px;
-  border-top: 1px solid var(--perfil-borda);
-  border-bottom: 1px solid var(--perfil-borda);
-}
-
-/* Losango no fio, centralizado: ornamento de pagina de rosto. Um so, e pequeno
-   -- e o unico enfeite da pagina inteira. */
-.perfil-frase-faixa::before,
-.perfil-frase-faixa::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  background: var(--perfil-fundo-base);
-  border: 1px solid var(--perfil-borda-forte);
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-.perfil-frase-faixa::before {
-  top: 0;
-}
-.perfil-frase-faixa::after {
-  top: 100%;
-}
-
-.perfil-frase {
-  margin: 0;
-  font-size: clamp(19px, 2.3vw, 27px);
-  font-style: italic;
-  line-height: 1.42;
-  color: var(--perfil-texto-forte);
-  text-align: center;
-  max-width: 46ch;
-  margin-inline: auto;
-}
 
 /* ---- Corpo: régua | leitura | lateral --------------------------------- */
 
