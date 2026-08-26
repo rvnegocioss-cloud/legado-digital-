@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
+import { LivroAssinaturas, type Assinatura } from '@/components/public/LivroAssinaturas'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 import { supabase } from '@/lib/auth'
 import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
@@ -142,6 +143,7 @@ export default function FamiliaEdicaoPage() {
   // em vez de a pessoa descobrir so no Salvar, meia hora de texto depois.
   const { outros, temOutroEditando } = useTravaEdicao(params.slug)
   const [usoStorageMB, setUsoStorageMB] = useState(0)
+  const [assinaturas, setAssinaturas] = useState<Assinatura[]>([])
   const [preenchidoPor, setPreenchidoPor] = useState<'funeraria' | 'familia' | null>(null)
   const [memorialId, setMemorialId] = useState('')
   const [modoGate, setModoGate] = useState<ModoGate>('aberto')
@@ -175,6 +177,8 @@ export default function FamiliaEdicaoPage() {
     setLinkHabilitado(json.privacidade?.linkHabilitado ?? true)
     setQrcodeHabilitado(json.privacidade?.qrcodeHabilitado ?? true)
     setTemSenhaAcesso(!!json.privacidade?.temSenhaAcesso)
+
+    setAssinaturas(json.assinaturas || [])
     fetch(`/api/memorial-storage-usage?memorialId=${m.id}`)
       .then((r) => r.json())
       .then((j) => setUsoStorageMB(Math.round((j.usageBytes || 0) / 1024 / 1024)))
@@ -763,6 +767,22 @@ export default function FamiliaEdicaoPage() {
                 />
               </div>
             )}
+
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+              <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-1">
+                Livro de assinaturas
+              </h2>
+              <p className="text-xs text-zinc-500 mb-4">
+                É o mesmo livro que aparece na página do memorial. Aqui você pode remover qualquer
+                assinatura — clique no nome de quem assinou.
+              </p>
+              <LivroAssinaturas
+                memorialId={memorialId}
+                assinaturasIniciais={assinaturas}
+                nomeHomenageado={(form.nome_completo || '').split(' ')[0] || 'ele'}
+                moderar
+              />
+            </div>
 
             <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-4">
               <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Fotos, vídeos e aparência</h2>

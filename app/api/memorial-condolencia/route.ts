@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkResourceRateLimit } from '@/lib/rateLimitUtil'
 import { criarComprovante, verificarComprovante } from '@/lib/comprovanteAssinatura'
+import { autorizarMemorial } from '@/lib/autorizacaoMemorial'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -61,20 +62,44 @@ export async function POST(req: NextRequest) {
   })
 }
 
-// Remocao pela propria pessoa que assinou, provada pelo comprovante que ela
-// recebeu ao assinar. Sem comprovante valido nao remove nada -- e o unico
-// caminho de remocao que existe na pagina publica.
+// Dois caminhos de remocao, e so dois:
+//
+// 1. QUEM ASSINOU, na pagina publica: prova com o comprovante que recebeu ao
+//    assinar. So alcanca a propria assinatura.
+// 2. QUEM CUIDA DO MEMORIAL (familia pelo cookie, staff/parceiro pela sessao):
+//    alcanca qualquer assinatura. E o caminho do Livro no Portal da Familia.
+//
+// Visitante sem comprovante e sem sessao nao remove nada. Isso importa: a
+// pagina do memorial e publica, entao remocao livre ali deixaria um estranho
+// apagar todas as mensagens que a familia recebeu, sem volta e sem registro.
 export async function DELETE(req: NextRequest) {
   const { memorialId, id, comprovante } = await req.json()
-  if (!memorialId || !id || !comprovante) {
+  if (!memorialId || !id) {
     return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
   }
 
-  if (!verificarComprovante(id, comprovante)) {
-    return NextResponse.json({ error: 'Essa assinatura não é sua' }, { status: 403 })
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+
+  let autorizado = verificarComprovante(id, comprovante)
+
+  if (!autorizado) {
+    const { data: homenagem } = await supabaseAdmin
+      .from('homenagens')
+      .select('id, parceiro_id')
+      .eq('id', memorialId)
+      .maybeSingle()
+
+    if (!homenagem) {
+      return NextResponse.json({ error: 'Memorial não encontrado' }, { status: 404 })
+    }
+
+    const resultado = await autorizarMemorial(req, supabaseAdmin, homenagem as never)
+    autorizado = resultado.autorizado
   }
 
-  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+  if (!autorizado) {
+    return NextResponse.json({ error: 'Sem permissão para remover esta assinatura' }, { status: 403 })
+  }
 
   // O memorialId entra no filtro tambem: sem isso, um comprovante valido de um
   // memorial removeria a assinatura em qualquer outro, se o id fosse conhecido.

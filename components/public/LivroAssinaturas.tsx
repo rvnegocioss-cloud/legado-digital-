@@ -101,13 +101,21 @@ function Folha({
   lado,
   escrevendoId,
   vazio,
-  minhas,
+  moderar,
+  aRemover,
+  aoPedirRemocao,
+  aoCancelar,
+  removendoId,
 }: {
   itens: Assinatura[]
   lado: 'esq' | 'dir'
   escrevendoId: string | null
   vazio: string
-  minhas: Set<string>
+  moderar: boolean
+  aRemover: string | null
+  aoPedirRemocao: (id: string) => void
+  aoCancelar: () => void
+  removendoId: string | null
 }) {
   return (
     <div className={`livro-pagina livro-pagina-${lado}`}>
@@ -122,15 +130,40 @@ function Folha({
               <figure key={a.id} className={`livro-registro${escrevendo ? ' livro-registro-novo' : ''}`}>
                 <blockquote className="livro-mensagem">{a.message}</blockquote>
                 <figcaption className="livro-assinatura-linha">
-                  <span className={`livro-nome${escrevendo ? ' livro-nome-escrevendo' : ''}`}>
-                    <span className="livro-nome-texto">{a.visitor_name}</span>
-                    {escrevendo && <span className="livro-pena" aria-hidden="true" />}
-                  </span>
-                  <span className="livro-data">
-                    {minhas.has(a.id) && <span className="livro-marca-sua">sua assinatura</span>}
-                    {dataCurta(a.created_at)}
-                  </span>
+                  {moderar ? (
+                    // No modo moderacao o proprio nome e o alvo do clique --
+                    // pedido do Rafael. Nao apaga no primeiro clique: remocao e
+                    // permanente e um toque errado apagaria a mensagem que
+                    // alguem deixou pro falecido, sem volta.
+                    <button
+                      type="button"
+                      className={`livro-nome livro-nome-alvo${aRemover === a.id ? ' livro-nome-marcado' : ''}`}
+                      onClick={() => (aRemover === a.id ? aoCancelar() : aoPedirRemocao(a.id))}
+                      disabled={removendoId === a.id}
+                      title="Clique para remover esta assinatura"
+                    >
+                      <span className="livro-nome-texto">{a.visitor_name}</span>
+                    </button>
+                  ) : (
+                    <span className={`livro-nome${escrevendo ? ' livro-nome-escrevendo' : ''}`}>
+                      <span className="livro-nome-texto">{a.visitor_name}</span>
+                      {escrevendo && <span className="livro-pena" aria-hidden="true" />}
+                    </span>
+                  )}
+                  <span className="livro-data">{dataCurta(a.created_at)}</span>
                 </figcaption>
+
+                {moderar && aRemover === a.id && (
+                  <p className="livro-confirma">
+                    Remover esta assinatura para sempre?
+                    <button type="button" className="livro-confirma-sim" onClick={() => aoPedirRemocao(a.id)} disabled={removendoId === a.id}>
+                      {removendoId === a.id ? 'Removendo...' : 'Remover'}
+                    </button>
+                    <button type="button" className="livro-confirma-nao" onClick={aoCancelar}>
+                      Cancelar
+                    </button>
+                  </p>
+                )}
               </figure>
             )
           })
@@ -144,10 +177,15 @@ export function LivroAssinaturas({
   memorialId,
   assinaturasIniciais,
   nomeHomenageado,
+  moderar = false,
 }: {
   memorialId: string
   assinaturasIniciais: Assinatura[]
   nomeHomenageado: string
+  /** Portal da Família: clicar no nome remove qualquer assinatura, não só a
+   *  própria. Quem autoriza é o servidor (cookie de família), nunca esta prop
+   *  -- ela só decide o que a tela mostra. */
+  moderar?: boolean
 }) {
   // Mais antigas primeiro: livro se lê do começo, e assinatura nova entra no
   // fim, que é onde a pena vai escrever.
@@ -173,6 +211,8 @@ export function LivroAssinaturas({
     useCallback(() => VAZIO, [])
   )
   const [removendo, setRemovendo] = useState(false)
+  const [aRemover, setARemover] = useState<string | null>(null)
+  const [removendoId, setRemovendoId] = useState<string | null>(null)
   const reduzMovimento = usaReducaoMovimento()
 
   const temporizadores = useRef<ReturnType<typeof setTimeout>[]>([])
@@ -273,6 +313,38 @@ export function LivroAssinaturas({
     return visiveis.find((a) => minhas.has(a.id)) || null
   }, [paginas, minhas])
 
+  // Primeiro clique marca, segundo confirma. Remocao e permanente.
+  async function pedirRemocao(id: string) {
+    if (aRemover !== id) {
+      setARemover(id)
+      return
+    }
+
+    setRemovendoId(id)
+    setErro('')
+
+    const res = await fetch('/api/memorial-condolencia', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      // Sem comprovante: quem autoriza aqui e o cookie de familia, checado no
+      // servidor. A prop `moderar` nao autoriza nada sozinha.
+      body: JSON.stringify({ memorialId, id }),
+    })
+
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      setErro(json.error || 'Não foi possível remover agora.')
+      setRemovendoId(null)
+      return
+    }
+
+    const restantes = assinaturas.filter((a) => a.id !== id)
+    setAssinaturas(restantes)
+    setSpread((atual) => Math.min(atual, Math.max(0, Math.ceil(restantes.length / (POR_PAGINA * 2)) - 1)))
+    setARemover(null)
+    setRemovendoId(null)
+  }
+
   async function remover() {
     if (!minhaNaPagina || removendo) return
     const ficha = comprovantes.find((c) => c.id === minhaNaPagina.id)
@@ -310,7 +382,11 @@ export function LivroAssinaturas({
             itens={paginas.esquerda}
             lado="esq"
             escrevendoId={escrevendoId}
-            minhas={minhas}
+            moderar={moderar}
+            aRemover={aRemover}
+            aoPedirRemocao={pedirRemocao}
+            aoCancelar={() => setARemover(null)}
+            removendoId={removendoId}
             vazio={
               assinaturas.length === 0
                 ? `Ninguém assinou ainda. Seja o primeiro a deixar uma palavra para ${nomeHomenageado}.`
@@ -318,7 +394,17 @@ export function LivroAssinaturas({
             }
           />
           <span className="livro-lombada" aria-hidden="true" />
-          <Folha itens={paginas.direita} lado="dir" escrevendoId={escrevendoId} minhas={minhas} vazio="" />
+          <Folha
+            itens={paginas.direita}
+            lado="dir"
+            escrevendoId={escrevendoId}
+            moderar={moderar}
+            aRemover={aRemover}
+            aoPedirRemocao={pedirRemocao}
+            aoCancelar={() => setARemover(null)}
+            removendoId={removendoId}
+            vazio=""
+          />
           {virando && <span className="livro-folha-solta" aria-hidden="true" />}
         </div>
       </div>
@@ -350,6 +436,12 @@ export function LivroAssinaturas({
           →
         </button>
       </div>
+
+      {moderar && assinaturas.length > 0 && (
+        <p className="livro-dica-moderacao">
+          Clique no nome de quem assinou para remover a assinatura do livro.
+        </p>
+      )}
 
       <form className="livro-form" onSubmit={assinar}>
         <div className="livro-campo">
@@ -388,7 +480,7 @@ export function LivroAssinaturas({
             {enviando ? 'Registrando...' : 'Assinar o livro'}
           </button>
 
-          {minhaNaPagina && (
+          {!moderar && minhaNaPagina && (
             <button type="button" className="livro-botao-remover" onClick={remover} disabled={removendo}>
               {removendo ? 'Removendo...' : 'Remover minha assinatura'}
             </button>

@@ -85,6 +85,14 @@ export async function GET(req: NextRequest) {
     .eq('homenagem_id', resultado.homenagem.id)
     .maybeSingle()
 
+  // Assinaturas do Livro: a familia modera o proprio livro, entao precisa da
+  // lista completa. Nenhuma coluna a mais que a pagina publica ja mostra.
+  const { data: assinaturas } = await supabaseAdmin
+    .from('condolencias')
+    .select('id, visitor_name, message, created_at')
+    .eq('homenagem_id', resultado.homenagem.id)
+    .order('created_at', { ascending: true })
+
   return NextResponse.json({
     memorial: resultado.homenagem,
     privacidade: {
@@ -95,6 +103,7 @@ export async function GET(req: NextRequest) {
       // Só o booleano — o hash nunca sai daqui.
       temSenhaAcesso: !!seguranca?.senha_acesso_hash,
     },
+    assinaturas: assinaturas || [],
   })
 }
 

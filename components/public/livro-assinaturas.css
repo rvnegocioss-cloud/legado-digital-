@@ -161,17 +161,79 @@
   color: var(--livro-tinta-fraca);
 }
 
-/* Marca discreta na propria assinatura: sem ela a pessoa nao saberia qual das
-   assinaturas o botao vai remover. */
-.livro-marca-sua {
-  font-size: 9px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--livro-ouro);
-  border: 1px solid rgba(154, 111, 40, 0.4);
-  border-radius: 999px;
-  padding: 2px 7px;
-  white-space: nowrap;
+/* ---- Moderacao: o nome vira o alvo do clique -------------------------- */
+
+.livro-nome-alvo {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.livro-nome-alvo:hover:not(:disabled),
+.livro-nome-alvo:focus-visible {
+  color: #a33b3b;
+  border-bottom-color: rgba(163, 59, 59, 0.55);
+}
+.livro-nome-marcado {
+  color: #a33b3b;
+  border-bottom-color: rgba(163, 59, 59, 0.75);
+}
+.livro-nome-alvo:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Confirmacao no papel, junto do registro: remocao e permanente, e um toque
+   errado apagaria a mensagem que alguem deixou pro falecido. */
+.livro-confirma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 0;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  color: var(--livro-tinta-fraca);
+}
+
+.livro-confirma-sim,
+.livro-confirma-nao {
+  font-family: Georgia, serif;
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: 2px;
+  cursor: pointer;
+  background: none;
+}
+
+.livro-confirma-sim {
+  color: #7d1f1f;
+  border: 1px solid rgba(125, 31, 31, 0.45);
+}
+.livro-confirma-sim:hover:not(:disabled) {
+  background: rgba(125, 31, 31, 0.09);
+}
+.livro-confirma-sim:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.livro-confirma-nao {
+  color: var(--livro-tinta-fraca);
+  border: 1px solid rgba(120, 90, 45, 0.28);
+}
+.livro-confirma-nao:hover {
+  color: var(--livro-tinta);
+}
+
+.livro-dica-moderacao {
+  margin: 0;
+  font-size: 12px;
+  color: var(--perfil-texto-fraco, #7a8a96);
 }
 
 /* ---- A escrita -------------------------------------------------------- */
