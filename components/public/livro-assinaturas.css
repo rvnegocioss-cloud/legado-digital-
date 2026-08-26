@@ -53,6 +53,58 @@
     linear-gradient(180deg, var(--livro-papel-sombra), var(--livro-papel) 12%, var(--livro-papel) 88%, var(--livro-papel-sombra));
 }
 
+/* ---- Fita marcadora --------------------------------------------------- */
+
+.livro-fita {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  /* Passa da borda de baixo: fita de livro sempre sobra pra fora, e e essa
+     sobra que faz ela parecer fita e nao uma listra pintada na pagina. */
+  height: calc(100% + 58px);
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 26px;
+
+  /* Seda: um brilho vertical fora do centro, que e como tecido reflete. */
+  background:
+    linear-gradient(
+      90deg,
+      #0a1622 0%,
+      #16304a 22%,
+      #22486c 42%,
+      #16304a 62%,
+      #0a1622 100%
+    );
+  /* Ponta em V, o corte classico de fita de livro. */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), 50% 100%, 0 calc(100% - 16px));
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.45);
+}
+
+/* Dobra de sombra onde a fita sai de dentro do livro. */
+.livro-fita::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent);
+}
+
+.livro-fita-logo {
+  width: 19px;
+  height: auto;
+  opacity: 0.95;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
 /* ---- Página ----------------------------------------------------------- */
 
 .livro-pagina {
@@ -253,38 +305,83 @@
   }
 }
 
-/* A pena. Feita em CSS: um traço fino inclinado com a ponta escura embaixo. */
-.livro-pena {
+/* A caneta tinteiro.
+   Proporcao de caneta real: corpo longo laqueado, secao de pega mais estreita,
+   aro dourado na juncao, e a pena metalica com fenda e furo de respiro na
+   ponta. Inclinada em 38deg -- o angulo em que a mao apoia a caneta no papel.
+   Tudo em CSS: 3 elementos e seus pseudos, nenhuma imagem. */
+.livro-caneta {
   position: absolute;
-  bottom: 2px;
+  bottom: -6px;
   left: 0;
-  width: 3px;
-  height: 46px;
+  width: 11px;
+  height: 96px;
   transform-origin: 50% 100%;
-  animation:
-    livro-pena-anda 1900ms cubic-bezier(0.5, 0.05, 0.35, 1) forwards,
-    livro-pena-balanca 260ms ease-in-out 0s 7 alternate,
-    livro-pena-sai 320ms ease-in 1900ms forwards;
-  background: linear-gradient(180deg, rgba(60, 45, 25, 0) 0%, rgba(70, 52, 28, 0.85) 62%, #2e2418 100%);
-  border-radius: 60% 60% 20% 20%;
+  transform: rotate(38deg);
   pointer-events: none;
+  animation:
+    livro-caneta-anda 1900ms cubic-bezier(0.5, 0.05, 0.35, 1) forwards,
+    livro-caneta-sai 340ms ease-in 1900ms forwards;
 }
 
-/* A barba da pena, mais larga e clara, saindo pra cima. */
-.livro-pena::before {
+/* Corpo laqueado: escuro, com um filete de luz descendo por um lado -- e o
+   reflexo que faz uma superficie parecer curva e envernizada em vez de chapada. */
+.livro-caneta::before {
   content: "";
   position: absolute;
-  bottom: 18px;
-  left: -7px;
-  width: 17px;
-  height: 40px;
-  background: linear-gradient(200deg, rgba(240, 232, 214, 0.92), rgba(190, 170, 135, 0.55) 55%, transparent);
-  border-radius: 80% 20% 60% 40%;
-  transform: rotate(16deg);
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+  top: 0;
+  left: 0;
+  width: 11px;
+  height: 62px;
+  border-radius: 5px 5px 2px 2px;
+  background:
+    linear-gradient(90deg, #0d0d12 0%, #24242e 26%, #4a4a5c 42%, #2a2a36 58%, #101016 100%),
+    linear-gradient(180deg, #2a2a36, #14141b);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-@keyframes livro-pena-anda {
+/* Secao de pega: mais estreita que o corpo e afunilando, como toda tinteiro. */
+.livro-caneta::after {
+  content: "";
+  position: absolute;
+  top: 64px;
+  left: 1.5px;
+  width: 8px;
+  height: 17px;
+  border-radius: 2px 2px 40% 40%;
+  background: linear-gradient(90deg, #0b0b10, #33333f 44%, #15151c);
+}
+
+/* Aro dourado na juncao do corpo com a pega. */
+.livro-caneta-aro {
+  position: absolute;
+  top: 60px;
+  left: 0.5px;
+  width: 10px;
+  height: 4px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #6b4d18, #e3c47f 40%, #f3e0af 52%, #a37c35 70%, #5c4315);
+}
+
+/* A pena: metal dourado afunilando ate a ponta que toca o papel.
+   O clip-path desenha o formato real -- larga na base, ombros arredondados
+   pelo gradiente, ponta fina embaixo. */
+.livro-caneta-bico {
+  position: absolute;
+  top: 79px;
+  left: 2px;
+  width: 7px;
+  height: 19px;
+  clip-path: polygon(0% 0%, 100% 0%, 78% 62%, 50% 100%, 22% 62%);
+  background:
+    /* fenda central: a linha escura que corre da ponta ate o furo */
+    linear-gradient(90deg, transparent 46%, rgba(60, 40, 10, 0.85) 46%, rgba(60, 40, 10, 0.85) 54%, transparent 54%),
+    /* furo de respiro */
+    radial-gradient(circle 1.6px at 50% 30%, rgba(60, 40, 10, 0.9) 60%, transparent 62%),
+    linear-gradient(90deg, #8a6520 0%, #e8ca88 38%, #fbf0ce 50%, #d9b268 62%, #b8912f 72%, #7a5718 100%);
+}
+
+@keyframes livro-caneta-anda {
   from {
     left: 0;
   }
@@ -293,19 +390,10 @@
   }
 }
 
-@keyframes livro-pena-balanca {
-  from {
-    transform: rotate(-7deg) translateY(0);
-  }
-  to {
-    transform: rotate(-3deg) translateY(-1.5px);
-  }
-}
-
-@keyframes livro-pena-sai {
+@keyframes livro-caneta-sai {
   to {
     opacity: 0;
-    transform: translate(14px, -26px) rotate(-24deg);
+    transform: rotate(30deg) translate(16px, -30px);
   }
 }
 
@@ -558,6 +646,13 @@
     display: none;
   }
 
+  .livro-fita {
+    left: auto;
+    right: 24px;
+    transform: none;
+    width: 24px;
+  }
+
   .livro-pagina-esq {
     border-radius: 2px;
     box-shadow: inset 0 -14px 20px -16px rgba(60, 45, 20, 0.45);
@@ -568,13 +663,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .livro-nome-escrevendo .livro-nome-texto,
-  .livro-pena,
+  .livro-caneta,
   .livro-registro-novo .livro-nome,
   .livro-folha-solta {
     animation: none !important;
     clip-path: none !important;
   }
-  .livro-pena {
+  .livro-caneta {
     display: none;
   }
 }

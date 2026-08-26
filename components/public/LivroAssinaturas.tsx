@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { usaReducaoMovimento } from '@/lib/usaReducaoMovimento'
 import './livro-assinaturas.css'
@@ -147,7 +148,12 @@ function Folha({
                   ) : (
                     <span className={`livro-nome${escrevendo ? ' livro-nome-escrevendo' : ''}`}>
                       <span className="livro-nome-texto">{a.visitor_name}</span>
-                      {escrevendo && <span className="livro-pena" aria-hidden="true" />}
+                      {escrevendo && (
+                        <span className="livro-caneta" aria-hidden="true">
+                          <span className="livro-caneta-aro" />
+                          <span className="livro-caneta-bico" />
+                        </span>
+                      )}
                     </span>
                   )}
                   <span className="livro-data">{dataCurta(a.created_at)}</span>
@@ -394,6 +400,20 @@ export function LivroAssinaturas({
             }
           />
           <span className="livro-lombada" aria-hidden="true" />
+
+          {/* Fita marcadora saindo da lombada, com o simbolo da marca.
+              Fica sobre a lombada de proposito: e a unica faixa vertical do
+              livro onde nao ha texto, entao a fita nunca cruza por cima do que
+              alguem escreveu. */}
+          <span className="livro-fita" aria-hidden="true">
+            <Image
+              src="/logo-icone-somente.png"
+              alt=""
+              width={72}
+              height={94}
+              className="livro-fita-logo"
+            />
+          </span>
           <Folha
             itens={paginas.direita}
             lado="dir"
