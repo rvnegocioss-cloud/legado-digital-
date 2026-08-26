@@ -120,7 +120,6 @@ function Folha({
 }) {
   return (
     <div className={`livro-pagina livro-pagina-${lado}`}>
-      <div className="livro-margem" aria-hidden="true" />
       <div className="livro-conteudo">
         {itens.length === 0 ? (
           <p className="livro-vazio">{vazio}</p>
@@ -384,6 +383,19 @@ export function LivroAssinaturas({
     <div className="livro-bloco">
       <div className="livro-cena">
         <div className={`livro${virando ? ` livro-virando-${virando}` : ''}`}>
+          {/* O livro e a imagem. Tentei desenhar essa forma em CSS e depois em
+              SVG -- a folha de livro aberto e curva bezier, e nenhuma das duas
+              chegou perto. Com a arte pronta o resultado e identico a
+              referencia, porque E a referencia. O texto entra por cima em HTML,
+              entao continua selecionavel e acessivel. */}
+          <Image
+            src="/livro-aberto.png"
+            alt=""
+            width={600}
+            height={406}
+            className="livro-arte"
+            priority
+          />
           <Folha
             itens={paginas.esquerda}
             lado="esq"
@@ -399,8 +411,6 @@ export function LivroAssinaturas({
                 : ''
             }
           />
-          <span className="livro-lombada" aria-hidden="true" />
-
           {/* Fita marcadora saindo da lombada, com o simbolo da marca.
               Fica sobre a lombada de proposito: e a unica faixa vertical do
               livro onde nao ha texto, entao a fita nunca cruza por cima do que
