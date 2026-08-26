@@ -45,12 +45,18 @@
 
 .perfil-capa {
   position: relative;
-  height: clamp(140px, 22vw, 260px);
+  /* Sem foto a faixa e baixa de proposito: banda de cor vazia com 260px de
+     altura parece descuido. Com foto ela pode respirar. */
+  height: clamp(96px, 12vw, 150px);
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(201, 164, 106, 0.14), rgba(201, 164, 106, 0) 78%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
   border-bottom: 1px solid var(--perfil-borda);
+}
+
+.perfil-capa-com-foto {
+  height: clamp(170px, 24vw, 300px);
 }
 
 .perfil-capa-brilho {
@@ -59,6 +65,28 @@
   height: 200%;
   background: radial-gradient(closest-side, rgba(201, 164, 106, 0.18), transparent 72%);
   pointer-events: none;
+}
+
+.perfil-capa-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Escurecida e desfocada de proposito: a capa e atmosfera, nunca conteudo
+     pra examinar -- quem quer ver a foto de verdade tem a galeria. Assim o
+     nome nunca disputa contraste com o que esta atras dele. */
+  filter: blur(18px) saturate(0.72) brightness(0.42);
+  transform: scale(1.14);
+}
+
+.perfil-capa-veu {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(11, 29, 42, 0.35) 0%, rgba(11, 29, 42, 0.72) 62%, var(--perfil-fundo-base, #0b1d2a) 100%),
+    radial-gradient(120% 90% at 50% 0%, transparent 40%, rgba(11, 29, 42, 0.55) 100%);
 }
 
 /* ---- Cabeçalho: retrato encostado na capa ----------------------------- */

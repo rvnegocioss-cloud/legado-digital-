@@ -273,6 +273,11 @@ export default async function PerfilMemorialPage({
     })
     .filter((x): x is MarcoVida => x !== null);
 
+  // Capa: primeira foto da galeria. A foto do retrato NAO serve -- e a mesma
+  // que aparece no circulo logo abaixo, e repetir a mesma imagem borrada atras
+  // dela pareceria falha de carregamento, nao design.
+  const capa = galeria.length > 0 ? galeria[0] : null;
+
   const paragrafos = lerParagrafos(m.biografia);
   const iniciais = m.nome_completo
     .split(" ")
@@ -313,9 +318,20 @@ export default async function PerfilMemorialPage({
       {/* ---- Capa + identificação ------------------------------------------
           A base abre com o hero ocupando quase uma tela inteira. Aqui a capa é
           uma faixa baixa e a foto encosta na borda dela, então nome, datas e
-          vínculos já aparecem sem rolar nada. */}
-      <div className="perfil-capa" aria-hidden="true">
-        <span className="perfil-capa-brilho" />
+          vínculos já aparecem sem rolar nada.
+
+          A capa carrega uma foto da própria pessoa (a primeira da galeria),
+          escurecida e desfocada. Uma faixa de cor vazia parecia descuido, e
+          decoração inventada não diria nada sobre ela — a foto dela diz. Sem
+          galeria, a faixa encolhe em vez de ficar vazia. */}
+      <div className={`perfil-capa${capa ? " perfil-capa-com-foto" : ""}`} aria-hidden="true">
+        {capa ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={capa} alt="" className="perfil-capa-img" />
+        ) : (
+          <span className="perfil-capa-brilho" />
+        )}
+        <span className="perfil-capa-veu" />
       </div>
 
       <header className="perfil-cabecalho">
