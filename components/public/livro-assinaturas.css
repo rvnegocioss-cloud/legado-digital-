@@ -136,55 +136,6 @@
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
 }
 
-/* ---- Página ----------------------------------------------------------- */
-
-.livro-pagina {
-  position: relative;
-  /* Container de medida: tudo dentro da folha passa a poder se dimensionar em
-     cqw (1% da largura DESTA folha). Sem isso a assinatura ficava num pixel
-     fixo e nao acompanhava o livro -- em 30px sobre folha de 413px ela ocupava
-     quase um terco da largura, que foi o que o Rafael apontou. */
-  container-type: inline-size;
-  min-height: 340px;
-  padding: 34px 30px 30px;
-  background-color: var(--livro-papel);
-  /* Textura de papel: fibra fina em duas direções + envelhecimento nas bordas.
-     Tudo gradiente, nenhuma imagem carregada. */
-  background-image:
-    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.035) 3px 4px),
-    repeating-linear-gradient(90deg, transparent 0 5px, rgba(120, 96, 60, 0.022) 5px 6px),
-    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120, 90, 45, 0.14) 100%);
-  overflow: hidden;
-}
-
-.livro-pagina-esq {
-  border-radius: 2px 0 0 2px;
-  box-shadow: inset -16px 0 22px -16px rgba(60, 45, 20, 0.5);
-}
-
-.livro-pagina-dir {
-  border-radius: 0 2px 2px 0;
-  box-shadow: inset 16px 0 22px -16px rgba(60, 45, 20, 0.5);
-}
-
-
-.livro-conteudo {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
-  height: 100%;
-}
-
-.livro-vazio {
-  margin: auto 0;
-  color: var(--livro-tinta-fraca);
-  font-style: italic;
-  font-size: 14px;
-  text-align: center;
-  line-height: 1.6;
-}
-
 /* ---- Registro --------------------------------------------------------- */
 
 .livro-registro {
