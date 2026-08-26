@@ -24,112 +24,63 @@
 /* ---- Cena e livro ----------------------------------------------------- */
 
 .livro-cena {
-  /* Ponto de vista: de cima e de frente, como quem olha um livro apoiado na
-     mesa. E o que dá profundidade lateral -- sem isso o livro fica sempre de
-     frente e chapado, por mais sombra que se coloque nele.
-     Distancia longa (1500px) pra deformar pouco: perspectiva curta joga o
-     texto pra fora de foco visual e atrapalha a leitura. */
-  perspective: 1500px;
-  perspective-origin: 50% 4%;
-  /* A inclinacao encurta o livro na tela; o padding devolve o espaco pra ele
-     nao encostar no que vem antes e depois. */
-  padding: 14px 0 26px;
-}
-
-.livro-cena > .livro {
-  /* Tombado pra tras: quem olha ve o topo das folhas e a espessura da base.
-     7 graus e o limite antes de o texto comecar a parecer deitado. */
-  transform: rotateX(10deg);
-  transform-origin: 50% 100%;
+  /* De frente. A referencia que o Rafael mandou e vista reta -- tombar o livro
+     pra tras deitava o texto e nao ajudava em nada. A profundidade vem da
+     forma das folhas e da espessura lateral, nao de rotacao. */
+  perspective: 2000px;
+  padding: 6px 0 10px;
 }
 
 .livro {
   position: relative;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  transform-style: preserve-3d;
-  /* Canto arredondado so por fora, como capa dura de verdade: a capa e cortada
-     com raio, as folhas por dentro nao. */
-  border-radius: 5px 5px 7px 7px;
-  padding: 13px 14px 34px;
+  border-radius: 4px 4px 8px 8px;
+  /* Capa fina: na referencia ela so aparece como uma faixa marrom nas pontas,
+     por tras do miolo. */
+  padding: 6px 16px 10px;
 
-  /* Couro: base escura + grao fino em duas direcoes + variacao de tom. Sem
-     imagem -- tudo gradiente repetido. */
-  background-color: #241608;
+  background-color: #4a2c16;
   background-image:
-    repeating-linear-gradient(58deg, transparent 0 2px, rgba(0, 0, 0, 0.24) 2px 3px),
-    repeating-linear-gradient(-42deg, transparent 0 3px, rgba(255, 226, 180, 0.028) 3px 4px),
-    radial-gradient(140% 120% at 20% 0%, rgba(150, 104, 46, 0.34), transparent 62%),
-    linear-gradient(150deg, #2e1d0b, #1b1005 55%, #120b03);
+    repeating-linear-gradient(58deg, transparent 0 2px, rgba(0, 0, 0, 0.2) 2px 3px),
+    linear-gradient(90deg, #3d2411 0%, #6b4021 12%, #57331a 50%, #6b4021 88%, #3d2411 100%);
 
   box-shadow:
-    /* aresta de luz no topo da capa */
-    0 1px 0 rgba(226, 190, 132, 0.22) inset,
-    /* vinco escuro na base, onde a capa dobra */
-    0 -10px 16px -12px rgba(0, 0, 0, 0.9) inset,
-    /* filete dourado circundando a capa */
-    0 0 0 1px rgba(190, 148, 84, 0.42),
-    0 26px 60px rgba(0, 0, 0, 0.62),
-    0 8px 20px rgba(0, 0, 0, 0.45);
-}
-
-/* Filete dourado gravado por dentro da capa -- acabamento de livro de registro.
-   Fica no vao entre a borda da capa e as folhas, entao nao encosta em texto. */
-.livro::before {
-  content: "";
-  position: absolute;
-  inset: 6px 7px 10px;
-  border: 1px solid rgba(198, 156, 92, 0.34);
-  border-radius: 3px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* O VOLUME DE PAGINAS na base: folhas empilhadas aparecendo por baixo do bloco.
-   E o que tira o livro de "retangulo bege" e da espessura a ele. Cada linha e
-   uma folha; as de baixo saem menos, como pilha real. */
-.livro::after {
-  content: "";
-  position: absolute;
-  left: 26px;
-  right: 26px;
-  bottom: 8px;
-  height: 8px;
-  border-radius: 0 0 3px 3px;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(
-      180deg,
-      #efe5d1 0 1px,
-      #cdbc9d 1px 2px,
-      #e6dac2 2px 3px,
-      #bfae8e 3px 4px
-    );
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.55),
-    0 -1px 0 rgba(0, 0, 0, 0.4);
-  /* Afunila nas pontas: pilha de papel nunca tem canto reto. */
-  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 55%, calc(100% - 3px) 100%, 3px 100%, 0 55%);
+    0 1px 0 rgba(226, 190, 132, 0.18) inset,
+    0 22px 44px rgba(0, 0, 0, 0.55),
+    0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
 .livro-lombada {
-  width: 26px;
+  width: 30px;
   align-self: stretch;
   position: relative;
-  /* O VINCO. Num livro aberto de verdade esta e a parte mais ESCURA da imagem
-     -- e o fundo da dobra, onde quase nao entra luz. Antes estava clara, do
-     tom do papel, e por isso lia como uma terceira folha em vez de dobra. */
-  background:
-    linear-gradient(
-      90deg,
-      rgba(20, 12, 4, 0.0) 0%,
-      rgba(20, 12, 4, 0.55) 18%,
-      rgba(12, 7, 2, 0.92) 44%,
-      rgba(12, 7, 2, 0.92) 56%,
-      rgba(20, 12, 4, 0.55) 82%,
-      rgba(20, 12, 4, 0.0) 100%
-    ),
-    linear-gradient(180deg, #6b5a3f, #8a765a 10%, #8a765a 90%, #6b5a3f);
+  /* O vinco: escuro no centro, abrindo pros lados. Na referencia e a parte
+     mais escura da imagem inteira. */
+  background: linear-gradient(
+    90deg,
+    rgba(60, 36, 16, 0.0) 0%,
+    rgba(52, 30, 12, 0.5) 22%,
+    rgba(30, 16, 5, 0.92) 46%,
+    rgba(30, 16, 5, 0.92) 54%,
+    rgba(52, 30, 12, 0.5) 78%,
+    rgba(60, 36, 16, 0.0) 100%
+  );
+}
+
+/* A curva da lombada na base, onde as duas paginas se encontram -- aquele
+   arredondado escuro que aparece embaixo do vinco na referencia. */
+.livro-lombada::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 20px;
+  border-radius: 50% 50% 46% 46% / 70% 70% 30% 30%;
+  background: radial-gradient(60% 100% at 50% 12%, #2a1607, #3f2210 62%, #221205);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.6);
 }
 
 /* ---- Fita marcadora --------------------------------------------------- */
@@ -229,7 +180,7 @@
      quase um terco da largura, que foi o que o Rafael apontou. */
   container-type: inline-size;
   min-height: 340px;
-  padding: 34px 30px 30px;
+  padding: 42px 34px 36px;
   background-color: var(--livro-papel);
   /* Textura de papel: fibra fina em duas direções + envelhecimento nas bordas.
      Tudo gradiente, nenhuma imagem carregada. */
@@ -243,118 +194,77 @@
    aberto" em vez de "duas colunas": num livro apoiado, cada lado sobe do vinco
    pra borda externa. O angulo e pequeno de proposito -- o suficiente pra dar a
    forma, sem atrapalhar a leitura do texto. */
+/* Forma da folha. Na referencia a borda de cima sobe na ponta externa e
+   mergulha no vinco, e a de baixo faz o mesmo ao contrario. Raio eliptico
+   grande nos cantos externos desenha esse arco; os cantos do vinco ficam
+   quase retos, que e onde a folha esta presa. */
 .livro-pagina-esq {
-  /* Topo arqueado: num livro aberto a folha nao termina numa reta, ela sobe do
-     vinco e cai na borda externa. O raio eliptico grande no canto externo de
-     cima e o que desenha esse arco. */
-  border-radius: 2px 42px 0 2px / 2px 16px 0 2px;
-  transform-origin: right center;
-  transform: perspective(1400px) rotateY(2.2deg);
-  /* Curvatura do papel: sombra funda encostada no vinco, subindo pra luz na
-     crista da folha e caindo de novo na borda externa. */
+  border-radius: 76px 6px 60px 6px / 30px 4px 26px 4px;
+  /* Papel: claro na borda externa, escurecendo pro vinco. E o que da a
+     sensacao de folha erguida em vez de retangulo pintado. */
   background-image:
     linear-gradient(
       270deg,
-      rgba(40, 26, 8, 0.44) 0%,
-      rgba(40, 26, 8, 0.12) 7%,
-      rgba(255, 250, 238, 0.5) 26%,
-      rgba(255, 250, 238, 0.16) 58%,
-      transparent 82%,
-      rgba(60, 44, 20, 0.14) 100%
+      rgba(96, 66, 30, 0.30) 0%,
+      rgba(96, 66, 30, 0.10) 10%,
+      rgba(255, 251, 240, 0.42) 46%,
+      rgba(255, 252, 243, 0.62) 88%,
+      rgba(255, 252, 243, 0.34) 100%
     ),
-    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.035) 3px 4px),
-    repeating-linear-gradient(90deg, transparent 0 5px, rgba(120, 96, 60, 0.022) 5px 6px),
-    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120, 90, 45, 0.14) 100%);
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.03) 3px 4px),
+    radial-gradient(120% 90% at 50% 50%, transparent 60%, rgba(120, 90, 45, 0.1) 100%);
+  box-shadow: -3px 4px 10px rgba(0, 0, 0, 0.28);
 }
 
 .livro-pagina-dir {
-  border-radius: 42px 2px 0 0 / 16px 2px 0 0;
-  transform-origin: left center;
-  transform: perspective(1400px) rotateY(-2.2deg);
+  border-radius: 6px 76px 6px 60px / 4px 30px 4px 26px;
   background-image:
     linear-gradient(
       90deg,
-      rgba(40, 26, 8, 0.44) 0%,
-      rgba(40, 26, 8, 0.12) 7%,
-      rgba(255, 250, 238, 0.5) 26%,
-      rgba(255, 250, 238, 0.16) 58%,
-      transparent 82%,
-      rgba(60, 44, 20, 0.14) 100%
+      rgba(96, 66, 30, 0.30) 0%,
+      rgba(96, 66, 30, 0.10) 10%,
+      rgba(255, 251, 240, 0.42) 46%,
+      rgba(255, 252, 243, 0.62) 88%,
+      rgba(255, 252, 243, 0.34) 100%
     ),
-    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.035) 3px 4px),
-    repeating-linear-gradient(90deg, transparent 0 5px, rgba(120, 96, 60, 0.022) 5px 6px),
-    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120, 90, 45, 0.14) 100%);
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.03) 3px 4px),
+    radial-gradient(120% 90% at 50% 50%, transparent 60%, rgba(120, 90, 45, 0.1) 100%);
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.28);
 }
 
-/* O MIOLO DA FRENTE: pilha de folhas na borda de baixo de cada pagina.
-   Grosso e em leque, curvando pra fora do vinco -- e o elemento que mais faz
-   o conjunto ler como livro. Fino e reto, lia como cartao. */
+/* MIOLO NAS LATERAIS: as folhas empilhadas que aparecem na ponta externa de
+   cada lado. Na referencia sao elas que dao a espessura do livro -- grossas,
+   acompanhando a curva da folha. Vertical, nao horizontal: foi o que eu tinha
+   errado. */
 .livro-miolo {
   position: absolute;
-  bottom: -15px;
-  height: 17px;
+  top: 12px;
+  bottom: 12px;
+  width: 15px;
   pointer-events: none;
   z-index: 3;
-  /* Cada faixa e uma folha. Espacamento irregular de proposito: pilha real
-     nunca tem folhas perfeitamente equidistantes. */
+  /* Cada faixa e uma folha vista de canto; espacamento irregular porque pilha
+     real nao e equidistante. */
   background: repeating-linear-gradient(
-    180deg,
-    #f4ebd8 0 1px,
-    #c4b190 1px 2px,
-    #ece0c8 2px 3px,
-    #b5a082 3px 4px,
-    #f0e5d0 4px 5px,
-    #cbb996 5px 6px
+    90deg,
+    #f6efdd 0 1px,
+    #c2ab84 1px 2px,
+    #ede2ca 2px 3px,
+    #b09772 3px 4px,
+    #f2e9d5 4px 5px
   );
-  box-shadow:
-    0 3px 6px rgba(0, 0, 0, 0.6),
-    0 -1px 0 rgba(0, 0, 0, 0.35) inset;
 }
 
 .livro-pagina-esq .livro-miolo {
-  left: -7px;
-  right: 0;
-  /* Afunila no vinco e engrossa na borda externa: o leque abre pra fora. */
-  border-radius: 7px 1px 5px 2px / 5px 1px 9px 3px;
-  transform-origin: right center;
-  transform: rotate(-0.5deg);
+  left: -15px;
+  border-radius: 60px 2px 48px 2px / 26px 2px 22px 2px;
+  box-shadow: -3px 3px 8px rgba(0, 0, 0, 0.45);
 }
 
 .livro-pagina-dir .livro-miolo {
-  left: 0;
-  right: -7px;
-  border-radius: 1px 7px 2px 5px / 1px 5px 3px 9px;
-  transform-origin: left center;
-  transform: rotate(0.5deg);
-}
-
-/* Miolo nas laterais tambem (o corte dianteiro do livro), nao so na base. */
-.livro-pagina-esq::after,
-.livro-pagina-dir::after {
-  content: "";
-  position: absolute;
-  top: 14px;
-  bottom: 6px;
-  width: 5px;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    90deg,
-    #eee3cd 0 1px,
-    #c9b795 1px 2px,
-    #e4d8bf 2px 3px
-  );
-}
-
-.livro-pagina-esq::after {
-  left: -8px;
-  border-radius: 3px 0 0 3px;
-  box-shadow: -1px 0 3px rgba(0, 0, 0, 0.5);
-}
-
-.livro-pagina-dir::after {
-  right: -8px;
-  border-radius: 0 3px 3px 0;
-  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.5);
+  right: -15px;
+  border-radius: 2px 60px 2px 48px / 2px 26px 2px 22px;
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.45);
 }
 
 /* Margem impressa, como caderno de registro de cartório. */
