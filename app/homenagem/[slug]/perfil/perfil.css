@@ -1,0 +1,777 @@
+/* =========================================================================
+   Variante "perfil" da página do memorial.
+
+   Escopo: TODA regra aqui começa com .perfil- . A página base usa .mem- e
+   nunca é alcançada por este arquivo (regra 21 do projeto).
+
+   Direção visual: Editorial Grid / Magazine, escolhida com o banco da skill
+   ui-ux-pro-max — "grade assimétrica, tipografia editorial, citação
+   destacada, capitular, coluna, inspirado em impresso; indicado para texto
+   longo e publicação". É o que a biografia de 5.468 caracteres pede. A casca
+   é de perfil (capa + retrato + lateral fixa); o miolo é revista.
+
+   Um ponto de quebra só, declarado uma vez. O bug da página base foi
+   exatamente ter dois (container em 768px, biografia em 640px), o que deixava
+   a faixa 641-767px com coluna de texto de 248px.
+   ========================================================================= */
+
+.perfil-page {
+  --perfil-largura: 1240px;
+  --perfil-lateral: 320px;
+  --perfil-vao: 48px;
+  --perfil-borda: rgba(201, 164, 106, 0.16);
+  --perfil-borda-forte: rgba(201, 164, 106, 0.32);
+  --perfil-carta: rgba(255, 255, 255, 0.035);
+  --perfil-texto: #cfd9e2;
+  --perfil-texto-forte: #f5f2eb;
+  --perfil-texto-fraco: #7a8a96;
+
+  /* Fundo padrão do memorial: o navy sozinho lê como vazio digital. Um
+     vinhete radial no topo e um véu de grão dão profundidade de papel sem
+     custar requisição nenhuma (é gradiente, não imagem). */
+  background-image:
+    radial-gradient(1200px 520px at 50% -8%, rgba(201, 164, 106, 0.09), transparent 70%),
+    radial-gradient(900px 600px at 92% 12%, rgba(255, 255, 255, 0.028), transparent 70%);
+  background-attachment: fixed;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---- Capa ------------------------------------------------------------- */
+
+.perfil-capa {
+  position: relative;
+  height: clamp(140px, 22vw, 260px);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(201, 164, 106, 0.14), rgba(201, 164, 106, 0) 78%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+  border-bottom: 1px solid var(--perfil-borda);
+}
+
+.perfil-capa-brilho {
+  position: absolute;
+  inset: -40% -10% auto -10%;
+  height: 200%;
+  background: radial-gradient(closest-side, rgba(201, 164, 106, 0.18), transparent 72%);
+  pointer-events: none;
+}
+
+/* ---- Cabeçalho: retrato encostado na capa ----------------------------- */
+
+.perfil-cabecalho {
+  width: min(100% - 40px, var(--perfil-largura));
+  margin: 0 auto;
+  padding-bottom: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "retrato identidade"
+    "acoes   acoes";
+  align-items: end;
+  column-gap: 26px;
+  row-gap: 18px;
+}
+
+.perfil-retrato {
+  grid-area: retrato;
+  margin-top: clamp(-88px, -9vw, -56px);
+  width: clamp(104px, 13vw, 168px);
+  height: clamp(104px, 13vw, 168px);
+  border-radius: 50%;
+  padding: 5px;
+  background: linear-gradient(150deg, var(--perfil-dourado, #c9a46a), rgba(201, 164, 106, 0.25));
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.perfil-retrato-img,
+.perfil-monograma {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: cover;
+  background: #0b1d2a;
+}
+
+.perfil-monograma {
+  font-size: clamp(30px, 4vw, 46px);
+  letter-spacing: 0.06em;
+  color: var(--perfil-dourado, #c9a46a);
+}
+
+.perfil-identidade {
+  grid-area: identidade;
+  min-width: 0;
+  padding-bottom: 4px;
+}
+
+.perfil-eyebrow {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--perfil-dourado, #c9a46a);
+  margin-bottom: 6px;
+}
+
+.perfil-nome {
+  margin: 0;
+  font-size: clamp(28px, 4.4vw, 50px);
+  line-height: 1.06;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--perfil-texto-forte);
+}
+
+.perfil-linha-dados {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 10px;
+  color: var(--perfil-texto-fraco);
+  font-size: 14px;
+}
+
+.perfil-anos {
+  color: var(--perfil-dourado, #c9a46a);
+  letter-spacing: 0.06em;
+}
+
+.perfil-cidade {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.perfil-vinculos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.perfil-vinculo {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--perfil-texto);
+  padding: 4px 11px;
+  border: 1px solid var(--perfil-borda);
+  border-radius: 999px;
+}
+
+/* ---- Ações ------------------------------------------------------------ */
+
+.perfil-acoes {
+  grid-area: acoes;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px solid var(--perfil-borda);
+  margin-top: 6px;
+}
+
+.perfil-btn {
+  /* 44px de alvo de toque: regra crítica do banco de UX (mínimo 44x44). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.perfil-btn-fantasma {
+  color: var(--perfil-texto);
+  border: 1px solid var(--perfil-borda-forte);
+}
+.perfil-btn-fantasma:hover {
+  border-color: var(--perfil-dourado, #c9a46a);
+  color: var(--perfil-texto-forte);
+}
+
+.perfil-btn-dourado {
+  background: var(--perfil-dourado, #c9a46a);
+  color: #14202b;
+  border: 1px solid var(--perfil-dourado, #c9a46a);
+}
+.perfil-btn-dourado:hover {
+  background: #dfc08a;
+}
+
+.perfil-page a:focus-visible,
+.perfil-page button:focus-visible {
+  outline: 2px solid var(--perfil-dourado, #c9a46a);
+  outline-offset: 3px;
+}
+
+/* ---- Frase: citação destacada, recurso de revista --------------------- */
+
+.perfil-frase-faixa {
+  width: min(100% - 40px, var(--perfil-largura));
+  margin: 26px auto 0;
+  padding: 22px 0;
+  border-top: 1px solid var(--perfil-borda);
+  border-bottom: 1px solid var(--perfil-borda);
+}
+
+.perfil-frase {
+  margin: 0;
+  font-size: clamp(19px, 2.3vw, 27px);
+  font-style: italic;
+  line-height: 1.42;
+  color: var(--perfil-texto-forte);
+  text-align: center;
+  max-width: 46ch;
+  margin-inline: auto;
+}
+
+/* ---- Corpo: régua | leitura | lateral --------------------------------- */
+
+.perfil-corpo {
+  width: min(100% - 40px, var(--perfil-largura));
+  margin: 0 auto;
+  padding: 44px 0 72px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--perfil-vao);
+  position: relative;
+}
+
+.perfil-coluna {
+  min-width: 0;
+}
+
+.perfil-secao + .perfil-secao {
+  margin-top: 64px;
+}
+
+.perfil-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--perfil-dourado, #c9a46a);
+}
+
+.perfil-titulo::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--perfil-borda);
+}
+
+.perfil-titulo-centro {
+  justify-content: center;
+}
+.perfil-titulo-centro::after {
+  display: none;
+}
+
+.perfil-contagem {
+  font-size: 11px;
+  color: var(--perfil-texto-fraco);
+  letter-spacing: 0.08em;
+}
+
+.perfil-apoio {
+  margin: 0 0 14px;
+  color: var(--perfil-texto-fraco);
+  font-size: 14px;
+}
+.perfil-apoio-centro {
+  text-align: center;
+}
+
+.perfil-vazio {
+  color: var(--perfil-texto-fraco);
+  font-style: italic;
+}
+
+/* ---- Biografia: medida controlada + capitular ------------------------- */
+
+.perfil-texto {
+  /* 65-75 caracteres por linha é a regra do banco de UX. Em ch, o navegador
+     mede na fonte real — não precisa chutar pixel. */
+  max-width: 68ch;
+}
+
+.perfil-paragrafo {
+  margin: 0 0 1.15em;
+  font-size: 17px;
+  line-height: 1.72;
+  color: var(--perfil-texto);
+}
+
+.perfil-paragrafo strong {
+  color: var(--perfil-texto-forte);
+  font-weight: 700;
+}
+
+.perfil-paragrafo-abertura::first-letter {
+  font-size: 3.3em;
+  float: left;
+  line-height: 0.84;
+  padding: 0.04em 0.09em 0 0;
+  color: var(--perfil-dourado, #c9a46a);
+}
+
+/* ---- Linha do tempo --------------------------------------------------- */
+
+.perfil-linha-tempo {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 26px;
+  position: relative;
+}
+
+.perfil-linha-tempo::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--perfil-borda-forte), var(--perfil-borda), transparent);
+}
+
+.perfil-marco {
+  position: relative;
+  padding-bottom: 26px;
+  scroll-margin-top: 90px;
+}
+.perfil-marco:last-child {
+  padding-bottom: 0;
+}
+
+.perfil-marco-no {
+  position: absolute;
+  left: -26px;
+  top: 7px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #0b1d2a;
+  border: 1px solid var(--perfil-dourado, #c9a46a);
+}
+
+.perfil-marco-ano {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--perfil-dourado, #c9a46a);
+  margin-bottom: 3px;
+}
+
+.perfil-marco-titulo {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--perfil-texto-forte);
+}
+
+.perfil-marco-desc {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--perfil-texto);
+  max-width: 62ch;
+}
+
+/* ---- Vídeo ------------------------------------------------------------ */
+
+.perfil-video {
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--perfil-borda);
+  background: #000;
+}
+
+.perfil-videos-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+/* ---- Livro de assinaturas -------------------------------------------- */
+
+.perfil-assinaturas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.perfil-assinatura-card {
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--perfil-borda);
+  border-radius: 6px;
+  background: var(--perfil-carta);
+}
+
+.perfil-assinatura-texto {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--perfil-texto);
+}
+
+.perfil-assinatura-rodape {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--perfil-borda);
+}
+
+.perfil-assinatura-nome {
+  font-style: italic;
+  font-size: 17px;
+  color: var(--perfil-dourado, #c9a46a);
+}
+
+.perfil-assinatura-data {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--perfil-texto-fraco);
+}
+
+.perfil-secao-vela {
+  text-align: center;
+  scroll-margin-top: 80px;
+}
+
+/* ---- Lateral ---------------------------------------------------------- */
+
+.perfil-lateral {
+  min-width: 0;
+}
+
+.perfil-lateral-fixa {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.perfil-cartao {
+  padding: 18px;
+  border: 1px solid var(--perfil-borda);
+  border-radius: 8px;
+  background: var(--perfil-carta);
+}
+
+.perfil-cartao-titulo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 14px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--perfil-dourado, #c9a46a);
+}
+
+.perfil-numeros {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.perfil-numero {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--perfil-borda);
+}
+.perfil-numero:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.perfil-numero dt {
+  font-size: 13px;
+  color: var(--perfil-texto-fraco);
+}
+
+.perfil-numero dd {
+  margin: 0;
+  font-size: 22px;
+  color: var(--perfil-dourado, #c9a46a);
+}
+
+.perfil-atalho {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--perfil-texto);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.perfil-atalho:hover {
+  color: var(--perfil-dourado, #c9a46a);
+  border-bottom-color: var(--perfil-borda-forte);
+}
+
+.perfil-miniaturas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.perfil-miniatura {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--perfil-borda);
+}
+
+.perfil-miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 250ms ease, filter 250ms ease;
+}
+.perfil-miniatura:hover img {
+  transform: scale(1.06);
+  filter: brightness(1.08);
+}
+
+.perfil-local-nome {
+  margin: 0 0 3px;
+  font-size: 15px;
+  color: var(--perfil-texto-forte);
+}
+
+.perfil-local-detalhe {
+  margin: 0;
+  font-size: 13px;
+  color: var(--perfil-texto-fraco);
+}
+
+/* ---- Régua da vida ---------------------------------------------------- */
+
+.perfil-rail {
+  display: none;
+}
+
+.perfil-rail-ano {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--perfil-texto-fraco);
+  text-align: center;
+}
+
+.perfil-rail-trilho {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.perfil-rail-linha {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, var(--perfil-borda) 12%, var(--perfil-borda) 88%, transparent);
+}
+
+.perfil-rail-ponto {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  text-decoration: none;
+}
+
+.perfil-rail-marca {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0b1d2a;
+  border: 1px solid var(--perfil-borda-forte);
+  transition: background-color 220ms ease, border-color 220ms ease, transform 220ms ease;
+}
+
+.perfil-rail-ponto:hover .perfil-rail-marca,
+.perfil-rail-ponto-ativo .perfil-rail-marca {
+  background: var(--perfil-dourado, #c9a46a);
+  border-color: var(--perfil-dourado, #c9a46a);
+  transform: scale(1.3);
+}
+
+.perfil-rail-etiqueta {
+  position: absolute;
+  left: 30px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--perfil-texto);
+  background: rgba(11, 29, 42, 0.96);
+  border: 1px solid var(--perfil-borda);
+  border-radius: 4px;
+  padding: 6px 10px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.perfil-rail-etiqueta em {
+  display: block;
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--perfil-dourado, #c9a46a);
+  margin-bottom: 2px;
+}
+
+.perfil-rail-ponto:hover .perfil-rail-etiqueta,
+.perfil-rail-ponto:focus-visible .perfil-rail-etiqueta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ---- Rodapé ----------------------------------------------------------- */
+
+.perfil-rodape {
+  width: min(100% - 40px, var(--perfil-largura));
+  margin: 0 auto;
+  padding: 30px 0 44px;
+  border-top: 1px solid var(--perfil-borda);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.perfil-selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.perfil-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--perfil-texto-fraco);
+}
+
+.perfil-rodape-links {
+  display: flex;
+  gap: 16px;
+}
+
+.perfil-rodape-links a {
+  font-size: 12px;
+  color: var(--perfil-texto-fraco);
+  text-decoration: none;
+}
+.perfil-rodape-links a:hover {
+  color: var(--perfil-dourado, #c9a46a);
+}
+
+/* =========================================================================
+   Pontos de quebra — declarados UMA vez, em ordem crescente.
+   1024px: entra a lateral.  1360px: entra a régua da vida.
+   ========================================================================= */
+
+@media (min-width: 1024px) {
+  .perfil-cabecalho {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "retrato identidade acoes";
+    align-items: end;
+    column-gap: 30px;
+  }
+
+  .perfil-acoes {
+    border-top: 0;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 6px;
+    justify-content: flex-end;
+  }
+
+  .perfil-corpo {
+    grid-template-columns: minmax(0, 1fr) var(--perfil-lateral);
+  }
+
+  .perfil-lateral-fixa {
+    position: sticky;
+    /* Folga no topo pra lateral nunca encostar na borda da janela. */
+    top: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .perfil-frase {
+    max-width: 60ch;
+  }
+}
+
+@media (min-width: 1360px) {
+  .perfil-page {
+    --perfil-largura: 1340px;
+  }
+
+  .perfil-corpo {
+    grid-template-columns: 56px minmax(0, 1fr) var(--perfil-lateral);
+  }
+
+  .perfil-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: sticky;
+    top: 24px;
+    height: calc(100vh - 48px);
+    padding: 8px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .perfil-page *,
+  .perfil-page *::before,
+  .perfil-page *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
