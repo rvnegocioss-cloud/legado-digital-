@@ -58,33 +58,34 @@
 .livro-fita {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 30px;
-  /* Passa da borda de baixo: fita de livro sempre sobra pra fora, e e essa
-     sobra que faz ela parecer fita e nao uma listra pintada na pagina. */
-  height: calc(100% + 58px);
+  /* Deslocada do centro pro lado da pagina da direita, encostada no vinco: e
+     onde uma fita de livro realmente fica, e e a faixa onde nao ha texto em
+     pagina nenhuma. Centralizada, ela cortava o texto da paginacao logo abaixo
+     do livro. */
+  left: calc(50% + 26px);
+  width: 20px;
+  /* Sobra curta: o suficiente pra ler como fita, sem alcancar os controles. */
+  height: calc(100% + 30px);
   z-index: 2;
   pointer-events: none;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  padding-bottom: 26px;
+  padding-bottom: 15px;
 
-  /* Seda: um brilho vertical fora do centro, que e como tecido reflete. */
-  background:
-    linear-gradient(
-      90deg,
-      #0a1622 0%,
-      #16304a 22%,
-      #22486c 42%,
-      #16304a 62%,
-      #0a1622 100%
-    );
-  /* Ponta em V, o corte classico de fita de livro. */
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), 50% 100%, 0 calc(100% - 16px));
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.45);
+  /* Seda: brilho estreito fora do centro, que e como tecido reflete. Tom mais
+     fechado que antes -- o azul saturado lia como plastico. */
+  background: linear-gradient(
+    90deg,
+    #0a141e 0%,
+    #12283c 30%,
+    #1d3d59 46%,
+    #12283c 64%,
+    #08111a 100%
+  );
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 11px), 50% 100%, 0 calc(100% - 11px));
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 /* Dobra de sombra onde a fita sai de dentro do livro. */
@@ -94,15 +95,15 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 22px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent);
+  height: 20px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent);
 }
 
 .livro-fita-logo {
-  width: 19px;
+  width: 15px;
   height: auto;
-  opacity: 0.95;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  opacity: 0.92;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
 }
 
 /* ---- Página ----------------------------------------------------------- */
@@ -476,6 +477,9 @@
 /* ---- Controles -------------------------------------------------------- */
 
 .livro-controles {
+  /* Folga maior que a sobra da fita (30px): garante que a ponta nunca cruze
+     por cima do texto da paginacao. */
+  padding-top: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -648,9 +652,8 @@
 
   .livro-fita {
     left: auto;
-    right: 24px;
-    transform: none;
-    width: 24px;
+    right: 22px;
+    width: 16px;
   }
 
   .livro-pagina-esq {
