@@ -43,7 +43,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  /* contain, nunca fill: a arte tem proporcao propria e esticar deforma as
+     curvas das folhas -- foi o que aconteceu na primeira tentativa. */
+  object-fit: contain;
   pointer-events: none;
   user-select: none;
 }
@@ -58,12 +60,14 @@
      depois do miolo lateral e termina antes do vinco, e a curva das bordas de
      cima e de baixo pede folga maior nelas. Em porcentagem isso acompanha
      qualquer largura sem recalculo. */
-  padding: 13% 5% 13% 13%;
+  /* Medidos sobre a arte: a folha comeca depois do miolo lateral e a area
+     plana do papel (onde a curva ja assentou) vai de 16% a 84% da altura. */
+  padding: 17% 6% 17% 17%;
   overflow: hidden;
 }
 
 .livro-pagina-dir {
-  padding: 13% 13% 13% 5%;
+  padding: 17% 17% 17% 6%;
 }
 
 .livro-conteudo {
@@ -83,58 +87,8 @@
   line-height: 1.6;
 }
 
-/* ---- Fita marcadora --------------------------------------------------- */
 
-.livro-fita {
-  position: absolute;
-  top: 0;
-  /* Deslocada do centro pro lado da pagina da direita, encostada no vinco: e
-     onde uma fita de livro realmente fica, e e a faixa onde nao ha texto em
-     pagina nenhuma. Centralizada, ela cortava o texto da paginacao logo abaixo
-     do livro. */
-  left: 56%;
-  width: 3%;
-  /* Sobra curta: o suficiente pra ler como fita, sem alcancar os controles. */
-  height: calc(100% + 26px);
-  z-index: 2;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  padding-bottom: 15px;
 
-  /* Seda: brilho estreito fora do centro, que e como tecido reflete. Tom mais
-     fechado que antes -- o azul saturado lia como plastico. */
-  background: linear-gradient(
-    90deg,
-    #0a141e 0%,
-    #12283c 30%,
-    #1d3d59 46%,
-    #12283c 64%,
-    #08111a 100%
-  );
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 11px), 50% 100%, 0 calc(100% - 11px));
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Dobra de sombra onde a fita sai de dentro do livro. */
-.livro-fita::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 20px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent);
-}
-
-.livro-fita-logo {
-  width: 15px;
-  height: auto;
-  opacity: 0.92;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
-}
 
 /* ---- Registro --------------------------------------------------------- */
 
@@ -639,12 +593,7 @@
     gap: 22px;
   }
 
-  .livro-fita {
-    left: auto;
-    right: 20px;
-    width: 15px;
   }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .livro-nome-escrevendo .livro-nome-texto,

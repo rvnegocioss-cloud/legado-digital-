@@ -411,19 +411,6 @@ export function LivroAssinaturas({
                 : ''
             }
           />
-          {/* Fita marcadora saindo da lombada, com o simbolo da marca.
-              Fica sobre a lombada de proposito: e a unica faixa vertical do
-              livro onde nao ha texto, entao a fita nunca cruza por cima do que
-              alguem escreveu. */}
-          <span className="livro-fita" aria-hidden="true">
-            <Image
-              src="/logo-icone-somente.png"
-              alt=""
-              width={72}
-              height={94}
-              className="livro-fita-logo"
-            />
-          </span>
           <Folha
             itens={paginas.direita}
             lado="dir"
