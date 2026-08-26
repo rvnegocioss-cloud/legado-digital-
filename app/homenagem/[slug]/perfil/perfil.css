@@ -77,7 +77,7 @@
 }
 
 .perfil-capa-com-foto {
-  height: clamp(170px, 24vw, 300px);
+  height: clamp(150px, 16vw, 216px);
 }
 
 .perfil-capa-brilho {
@@ -124,20 +124,45 @@
   align-items: end;
   column-gap: 26px;
   row-gap: 18px;
+  /* Sem isto a linha do grid encolhe junto com a margem negativa do retrato e
+     o nome sobe pra dentro da capa. */
+  min-height: 96px;
 }
 
 .perfil-retrato {
   grid-area: retrato;
-  margin-top: clamp(-88px, -9vw, -56px);
-  width: clamp(104px, 13vw, 168px);
-  height: clamp(104px, 13vw, 168px);
-  border-radius: 50%;
-  padding: 5px;
-  background: linear-gradient(150deg, var(--perfil-dourado-claro), var(--perfil-dourado) 38%, color-mix(in srgb, var(--perfil-dourado) 22%, transparent));
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--perfil-dourado) 26%, transparent),
-    0 18px 44px rgba(0, 0, 0, 0.5);
+  /* Construcao IDENTICA a da pagina base, que o Rafael aprovou: anel dourado
+     de 2px, borda interna de 4px na cor do fundo (o vao escuro entre o anel e
+     a foto e o que faz o retrato descolar) e brilho radial por tras.
+     Tamanho tambem o da base: clamp(160px, 20vw, 220px) -- o meu estava em
+     104-168px, ou seja, sempre menor, e circulo menor com a mesma foto corta
+     mais rosto na percepcao. */
+  align-self: start;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(160px, 20vw, 220px);
+  height: clamp(160px, 20vw, 220px);
+  margin-top: clamp(-104px, -7vw, -66px);
   flex-shrink: 0;
+}
+
+.perfil-retrato::before {
+  content: "";
+  position: absolute;
+  inset: -30px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--perfil-dourado) 15%, transparent), transparent);
+  pointer-events: none;
+}
+
+.perfil-retrato-anel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  padding: 2px;
+  background: var(--perfil-dourado);
 }
 
 .perfil-retrato-img,
@@ -145,16 +170,17 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
+  overflow: hidden;
+  object-fit: cover;
   display: flex;
   align-items: center;
   justify-content: center;
-  object-fit: cover;
-  background: var(--perfil-fundo-profundo);
+  background: var(--perfil-fundo-topo);
+  border: 4px solid var(--perfil-fundo-base);
 }
 
 .perfil-monograma {
-  font-size: clamp(30px, 4vw, 46px);
-  letter-spacing: 0.06em;
+  font-size: clamp(40px, 6vw, 56px);
   color: var(--perfil-dourado);
 }
 

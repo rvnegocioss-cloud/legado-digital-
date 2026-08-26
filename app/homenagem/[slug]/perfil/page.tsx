@@ -332,12 +332,18 @@ export default async function PerfilMemorialPage({
 
       <header className="perfil-cabecalho">
         <div className="perfil-retrato">
-          {fotoAssinada ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={fotoAssinada} alt={m.nome_completo} className="perfil-retrato-img" />
-          ) : (
-            <span className="perfil-monograma">{iniciais}</span>
-          )}
+          {/* Anel dourado + borda interna escura: construcao copiada da pagina
+              base, aprovada pelo Rafael. Nao simplificar pra um circulo so --
+              o vao escuro entre o anel e a foto e o que faz o retrato descolar
+              do fundo. */}
+          <div className="perfil-retrato-anel">
+            {fotoAssinada ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={fotoAssinada} alt={m.nome_completo} className="perfil-retrato-img" />
+            ) : (
+              <span className="perfil-monograma">{iniciais}</span>
+            )}
+          </div>
         </div>
 
         <div className="perfil-identidade">
