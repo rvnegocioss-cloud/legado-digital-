@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { usaReducaoMovimento } from '@/lib/usaReducaoMovimento'
 import './livro-assinaturas.css'
 
@@ -27,6 +27,67 @@ export interface Assinatura {
 
 const POR_PAGINA = 2
 
+// Comprovantes das assinaturas feitas NESTE navegador. E o que autoriza
+// remover: sem comprovante o servidor recusa, entao um visitante nunca apaga a
+// mensagem que outra pessoa deixou.
+interface Comprovante {
+  id: string
+  comprovante: string
+}
+
+function chaveGuardada(memorialId: string) {
+  return `livro_assinaturas_${memorialId}`
+}
+
+const VAZIO: Comprovante[] = []
+
+// Cache do valor lido: useSyncExternalStore compara por identidade, entao
+// devolver um array novo a cada leitura entraria em laco infinito de render.
+const cache = new Map<string, { bruto: string | null; valor: Comprovante[] }>()
+const ouvintes = new Set<() => void>()
+
+function lerComprovantes(memorialId: string): Comprovante[] {
+  let bruto: string | null = null
+  try {
+    bruto = localStorage.getItem(chaveGuardada(memorialId))
+  } catch {
+    // Navegador com armazenamento bloqueado (aba anonima, politica do
+    // dispositivo): a pessoa so perde o botao de remover, o livro funciona.
+    return VAZIO
+  }
+
+  const guardado = cache.get(memorialId)
+  if (guardado && guardado.bruto === bruto) return guardado.valor
+
+  let valor: Comprovante[] = VAZIO
+  try {
+    const lista = bruto ? JSON.parse(bruto) : []
+    if (Array.isArray(lista) && lista.length > 0) valor = lista
+  } catch {
+    valor = VAZIO
+  }
+
+  cache.set(memorialId, { bruto, valor })
+  return valor
+}
+
+function guardarComprovantes(memorialId: string, lista: Comprovante[]) {
+  try {
+    localStorage.setItem(chaveGuardada(memorialId), JSON.stringify(lista))
+  } catch {
+    /* sem armazenamento: segue sem guardar */
+  }
+  cache.delete(memorialId)
+  ouvintes.forEach((fn) => fn())
+}
+
+function inscrever(fn: () => void) {
+  ouvintes.add(fn)
+  return () => {
+    ouvintes.delete(fn)
+  }
+}
+
 function dataCurta(iso: string) {
   try {
     return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -40,11 +101,13 @@ function Folha({
   lado,
   escrevendoId,
   vazio,
+  minhas,
 }: {
   itens: Assinatura[]
   lado: 'esq' | 'dir'
   escrevendoId: string | null
   vazio: string
+  minhas: Set<string>
 }) {
   return (
     <div className={`livro-pagina livro-pagina-${lado}`}>
@@ -63,7 +126,10 @@ function Folha({
                     <span className="livro-nome-texto">{a.visitor_name}</span>
                     {escrevendo && <span className="livro-pena" aria-hidden="true" />}
                   </span>
-                  <span className="livro-data">{dataCurta(a.created_at)}</span>
+                  <span className="livro-data">
+                    {minhas.has(a.id) && <span className="livro-marca-sua">sua assinatura</span>}
+                    {dataCurta(a.created_at)}
+                  </span>
                 </figcaption>
               </figure>
             )
@@ -96,6 +162,17 @@ export function LivroAssinaturas({
   const [mensagem, setMensagem] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
+  // Lido com useSyncExternalStore em vez de useState+useEffect: o
+  // armazenamento do navegador e estado que mora fora do React, e setState
+  // dentro de efeito dispara render em cascata (o lint do React reprova).
+  // No servidor a lista sai vazia -- ninguem tem comprovante ate abrir a
+  // pagina, entao nao ha diferenca de marcacao pra reconciliar.
+  const comprovantes = useSyncExternalStore(
+    inscrever,
+    useCallback(() => lerComprovantes(memorialId), [memorialId]),
+    useCallback(() => VAZIO, [])
+  )
+  const [removendo, setRemovendo] = useState(false)
   const reduzMovimento = usaReducaoMovimento()
 
   const temporizadores = useRef<ReturnType<typeof setTimeout>[]>([])
@@ -157,11 +234,19 @@ export function LivroAssinaturas({
       return
     }
 
+    const json = await res.json().catch(() => ({}))
+
     const nova: Assinatura = {
-      id: `nova-${Date.now()}`,
+      // Id real do banco, nao inventado: e ele que o comprovante assina, entao
+      // um id de mentira aqui deixaria o botao de remover sem efeito nenhum.
+      id: json.id || `nova-${Date.now()}`,
       visitor_name: nome.trim(),
       message: mensagem.trim(),
-      created_at: new Date().toISOString(),
+      created_at: json.criadoEm || new Date().toISOString(),
+    }
+
+    if (json.id && json.comprovante) {
+      guardarComprovantes(memorialId, [...comprovantes, { id: json.id, comprovante: json.comprovante }])
     }
 
     const lista = [...assinaturas, nova]
@@ -179,6 +264,44 @@ export function LivroAssinaturas({
     }
   }
 
+  const minhas = useMemo(() => new Set(comprovantes.map((c) => c.id)), [comprovantes])
+
+  // A assinatura desta pessoa que esta visivel agora -- so aparece botao pra
+  // ela, e so se estiver na pagina aberta.
+  const minhaNaPagina = useMemo(() => {
+    const visiveis = [...paginas.esquerda, ...paginas.direita]
+    return visiveis.find((a) => minhas.has(a.id)) || null
+  }, [paginas, minhas])
+
+  async function remover() {
+    if (!minhaNaPagina || removendo) return
+    const ficha = comprovantes.find((c) => c.id === minhaNaPagina.id)
+    if (!ficha) return
+
+    setRemovendo(true)
+    setErro('')
+
+    const res = await fetch('/api/memorial-condolencia', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memorialId, id: ficha.id, comprovante: ficha.comprovante }),
+    })
+
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      setErro(json.error || 'Não foi possível remover agora.')
+      setRemovendo(false)
+      return
+    }
+
+    const restantes = assinaturas.filter((a) => a.id !== ficha.id)
+    setAssinaturas(restantes)
+    guardarComprovantes(memorialId, comprovantes.filter((c) => c.id !== ficha.id))
+    // A pagina aberta pode ter deixado de existir depois da remocao.
+    setSpread((atual) => Math.min(atual, Math.max(0, Math.ceil(restantes.length / (POR_PAGINA * 2)) - 1)))
+    setRemovendo(false)
+  }
+
   return (
     <div className="livro-bloco">
       <div className="livro-cena">
@@ -187,6 +310,7 @@ export function LivroAssinaturas({
             itens={paginas.esquerda}
             lado="esq"
             escrevendoId={escrevendoId}
+            minhas={minhas}
             vazio={
               assinaturas.length === 0
                 ? `Ninguém assinou ainda. Seja o primeiro a deixar uma palavra para ${nomeHomenageado}.`
@@ -194,7 +318,7 @@ export function LivroAssinaturas({
             }
           />
           <span className="livro-lombada" aria-hidden="true" />
-          <Folha itens={paginas.direita} lado="dir" escrevendoId={escrevendoId} vazio="" />
+          <Folha itens={paginas.direita} lado="dir" escrevendoId={escrevendoId} minhas={minhas} vazio="" />
           {virando && <span className="livro-folha-solta" aria-hidden="true" />}
         </div>
       </div>
@@ -259,9 +383,17 @@ export function LivroAssinaturas({
           </p>
         )}
 
-        <button type="submit" className="livro-botao" disabled={enviando}>
-          {enviando ? 'Registrando...' : 'Assinar o livro'}
-        </button>
+        <div className="livro-acoes">
+          <button type="submit" className="livro-botao" disabled={enviando}>
+            {enviando ? 'Registrando...' : 'Assinar o livro'}
+          </button>
+
+          {minhaNaPagina && (
+            <button type="button" className="livro-botao-remover" onClick={remover} disabled={removendo}>
+              {removendo ? 'Removendo...' : 'Remover minha assinatura'}
+            </button>
+          )}
+        </div>
       </form>
     </div>
   )

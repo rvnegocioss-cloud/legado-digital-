@@ -57,6 +57,11 @@
 
 .livro-pagina {
   position: relative;
+  /* Container de medida: tudo dentro da folha passa a poder se dimensionar em
+     cqw (1% da largura DESTA folha). Sem isso a assinatura ficava num pixel
+     fixo e nao acompanhava o livro -- em 30px sobre folha de 413px ela ocupava
+     quase um terco da largura, que foi o que o Rafael apontou. */
+  container-type: inline-size;
   min-height: 340px;
   padding: 34px 30px 30px;
   background-color: var(--livro-papel);
@@ -120,7 +125,7 @@
 .livro-mensagem {
   margin: 0 0 12px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 15px;
+  font-size: clamp(13px, 3.4cqw, 15px);
   line-height: 1.66;
   color: var(--livro-tinta);
 }
@@ -137,18 +142,36 @@
   position: relative;
   display: inline-block;
   font-family: var(--font-assinatura), "Segoe Script", cursive;
-  font-size: 30px;
-  line-height: 1.1;
+  /* Proporcional a folha: cresce e encolhe com o livro, com piso e teto pra
+     nao sumir no celular nem virar cartaz no monitor grande. */
+  font-size: clamp(17px, 5.2cqw, 27px);
+  line-height: 1.15;
   color: var(--livro-ouro);
   /* Tinta assentada no papel: sombra minúscula, não brilho. */
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .livro-data {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: Georgia, serif;
   font-size: 11px;
   letter-spacing: 0.08em;
   color: var(--livro-tinta-fraca);
+}
+
+/* Marca discreta na propria assinatura: sem ela a pessoa nao saberia qual das
+   assinaturas o botao vai remover. */
+.livro-marca-sua {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--livro-ouro);
+  border: 1px solid rgba(154, 111, 40, 0.4);
+  border-radius: 999px;
+  padding: 2px 7px;
+  white-space: nowrap;
 }
 
 /* ---- A escrita -------------------------------------------------------- */
@@ -405,6 +428,37 @@
   color: #f87171;
 }
 
+.livro-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Remover e acao destrutiva e irreversivel: nunca com o mesmo peso visual do
+   botao principal. Texto sublinhado, sem preenchimento, e so fica vermelho no
+   hover -- quem procura acha, quem nao procura nao esbarra. */
+.livro-botao-remover {
+  min-height: 44px;
+  padding: 0 6px;
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: var(--perfil-texto-fraco, #7a8a96);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.livro-botao-remover:hover:not(:disabled) {
+  color: #e06a6a;
+  border-bottom-color: rgba(224, 106, 106, 0.5);
+}
+.livro-botao-remover:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .livro-botao {
   justify-self: start;
   min-height: 44px;
@@ -447,10 +501,6 @@
     box-shadow: inset 0 -14px 20px -16px rgba(60, 45, 20, 0.45);
     min-height: 300px;
     padding: 26px 20px 22px;
-  }
-
-  .livro-nome {
-    font-size: 26px;
   }
 }
 
