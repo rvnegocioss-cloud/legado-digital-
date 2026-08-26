@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { usaReducaoMovimento } from '@/lib/usaReducaoMovimento'
-import { LivroArte } from './LivroArte'
 import './livro-assinaturas.css'
 
 // Livro de assinaturas de verdade: livro aberto, a pessoa digita o nome, uma
@@ -121,6 +120,7 @@ function Folha({
 }) {
   return (
     <div className={`livro-pagina livro-pagina-${lado}`}>
+      <div className="livro-margem" aria-hidden="true" />
       <div className="livro-conteudo">
         {itens.length === 0 ? (
           <p className="livro-vazio">{vazio}</p>
@@ -384,7 +384,6 @@ export function LivroAssinaturas({
     <div className="livro-bloco">
       <div className="livro-cena">
         <div className={`livro${virando ? ` livro-virando-${virando}` : ''}`}>
-          <LivroArte />
           <Folha
             itens={paginas.esquerda}
             lado="esq"
@@ -400,20 +399,20 @@ export function LivroAssinaturas({
                 : ''
             }
           />
+          <span className="livro-lombada" aria-hidden="true" />
+
           {/* Fita marcadora saindo da lombada, com o simbolo da marca.
               Fica sobre a lombada de proposito: e a unica faixa vertical do
               livro onde nao ha texto, entao a fita nunca cruza por cima do que
               alguem escreveu. */}
           <span className="livro-fita" aria-hidden="true">
-            <span className="livro-fita-ponta">
-              <Image
-                src="/logo-icone-somente.png"
-                alt=""
-                width={72}
-                height={94}
-                className="livro-fita-logo"
-              />
-            </span>
+            <Image
+              src="/logo-icone-somente.png"
+              alt=""
+              width={72}
+              height={94}
+              className="livro-fita-logo"
+            />
           </span>
           <Folha
             itens={paginas.direita}
