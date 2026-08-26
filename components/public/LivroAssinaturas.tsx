@@ -406,13 +406,15 @@ export function LivroAssinaturas({
               livro onde nao ha texto, entao a fita nunca cruza por cima do que
               alguem escreveu. */}
           <span className="livro-fita" aria-hidden="true">
-            <Image
-              src="/logo-icone-somente.png"
-              alt=""
-              width={72}
-              height={94}
-              className="livro-fita-logo"
-            />
+            <span className="livro-fita-ponta">
+              <Image
+                src="/logo-icone-somente.png"
+                alt=""
+                width={72}
+                height={94}
+                className="livro-fita-logo"
+              />
+            </span>
           </span>
           <Folha
             itens={paginas.direita}
