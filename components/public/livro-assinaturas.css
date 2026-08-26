@@ -24,8 +24,23 @@
 /* ---- Cena e livro ----------------------------------------------------- */
 
 .livro-cena {
-  perspective: 1900px;
-  perspective-origin: 50% 42%;
+  /* Ponto de vista: de cima e de frente, como quem olha um livro apoiado na
+     mesa. E o que dá profundidade lateral -- sem isso o livro fica sempre de
+     frente e chapado, por mais sombra que se coloque nele.
+     Distancia longa (1500px) pra deformar pouco: perspectiva curta joga o
+     texto pra fora de foco visual e atrapalha a leitura. */
+  perspective: 1500px;
+  perspective-origin: 50% 12%;
+  /* A inclinacao encurta o livro na tela; o padding devolve o espaco pra ele
+     nao encostar no que vem antes e depois. */
+  padding: 14px 0 26px;
+}
+
+.livro-cena > .livro {
+  /* Tombado pra tras: quem olha ve o topo das folhas e a espessura da base.
+     7 graus e o limite antes de o texto comecar a parecer deitado. */
+  transform: rotateX(7deg);
+  transform-origin: 50% 100%;
 }
 
 .livro {
@@ -98,13 +113,23 @@
 }
 
 .livro-lombada {
-  width: 18px;
+  width: 26px;
   align-self: stretch;
-  /* O vinco central: sombra dos dois lados convergindo. É o detalhe que separa
-     "duas colunas" de "um livro aberto". */
+  position: relative;
+  /* O VINCO. Num livro aberto de verdade esta e a parte mais ESCURA da imagem
+     -- e o fundo da dobra, onde quase nao entra luz. Antes estava clara, do
+     tom do papel, e por isso lia como uma terceira folha em vez de dobra. */
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.06) 42%, rgba(0, 0, 0, 0.06) 58%, rgba(0, 0, 0, 0.34)),
-    linear-gradient(180deg, var(--livro-papel-sombra), var(--livro-papel) 12%, var(--livro-papel) 88%, var(--livro-papel-sombra));
+    linear-gradient(
+      90deg,
+      rgba(20, 12, 4, 0.0) 0%,
+      rgba(20, 12, 4, 0.55) 18%,
+      rgba(12, 7, 2, 0.92) 44%,
+      rgba(12, 7, 2, 0.92) 56%,
+      rgba(20, 12, 4, 0.55) 82%,
+      rgba(20, 12, 4, 0.0) 100%
+    ),
+    linear-gradient(180deg, #6b5a3f, #8a765a 10%, #8a765a 90%, #6b5a3f);
 }
 
 /* ---- Fita marcadora --------------------------------------------------- */
@@ -212,17 +237,80 @@
     repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.035) 3px 4px),
     repeating-linear-gradient(90deg, transparent 0 5px, rgba(120, 96, 60, 0.022) 5px 6px),
     radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120, 90, 45, 0.14) 100%);
-  overflow: hidden;
 }
 
+/* As duas metades se inclinam uma pra outra. E o que faz o cerebro ler "livro
+   aberto" em vez de "duas colunas": num livro apoiado, cada lado sobe do vinco
+   pra borda externa. O angulo e pequeno de proposito -- o suficiente pra dar a
+   forma, sem atrapalhar a leitura do texto. */
 .livro-pagina-esq {
   border-radius: 2px 0 0 2px;
-  box-shadow: inset -16px 0 22px -16px rgba(60, 45, 20, 0.5);
+  transform-origin: right center;
+  transform: perspective(1400px) rotateY(2.2deg);
+  /* Curvatura do papel: sombra funda encostada no vinco, subindo pra luz na
+     crista da folha e caindo de novo na borda externa. */
+  background-image:
+    linear-gradient(
+      270deg,
+      rgba(40, 26, 8, 0.44) 0%,
+      rgba(40, 26, 8, 0.12) 7%,
+      rgba(255, 250, 238, 0.5) 26%,
+      rgba(255, 250, 238, 0.16) 58%,
+      transparent 82%,
+      rgba(60, 44, 20, 0.14) 100%
+    ),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.035) 3px 4px),
+    repeating-linear-gradient(90deg, transparent 0 5px, rgba(120, 96, 60, 0.022) 5px 6px),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120, 90, 45, 0.14) 100%);
 }
 
 .livro-pagina-dir {
   border-radius: 0 2px 2px 0;
-  box-shadow: inset 16px 0 22px -16px rgba(60, 45, 20, 0.5);
+  transform-origin: left center;
+  transform: perspective(1400px) rotateY(-2.2deg);
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(40, 26, 8, 0.44) 0%,
+      rgba(40, 26, 8, 0.12) 7%,
+      rgba(255, 250, 238, 0.5) 26%,
+      rgba(255, 250, 238, 0.16) 58%,
+      transparent 82%,
+      rgba(60, 44, 20, 0.14) 100%
+    ),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120, 96, 60, 0.035) 3px 4px),
+    repeating-linear-gradient(90deg, transparent 0 5px, rgba(120, 96, 60, 0.022) 5px 6px),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120, 90, 45, 0.14) 100%);
+}
+
+/* Miolo nas laterais tambem (o corte dianteiro do livro), nao so na base.
+   Livro so com espessura embaixo continua lendo como cartao. */
+.livro-pagina-esq::after,
+.livro-pagina-dir::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  width: 7px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg,
+    #eee3cd 0 1px,
+    #c9b795 1px 2px,
+    #e4d8bf 2px 3px
+  );
+}
+
+.livro-pagina-esq::after {
+  left: -8px;
+  border-radius: 3px 0 0 3px;
+  box-shadow: -1px 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.livro-pagina-dir::after {
+  right: -8px;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Margem impressa, como caderno de registro de cartório. */
