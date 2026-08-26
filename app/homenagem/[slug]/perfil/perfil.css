@@ -94,20 +94,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Escurecida e desfocada de proposito: a capa e atmosfera, nunca conteudo
-     pra examinar -- quem quer ver a foto de verdade tem a galeria. Assim o
-     nome nunca disputa contraste com o que esta atras dele. */
-  filter: blur(18px) saturate(0.72) brightness(0.42);
-  transform: scale(1.14);
+  /* Nitida, sem desfoque nem escurecer -- e a foto de verdade, como no
+     Facebook. Regra 6 esquecida da primeira vez: rede social nenhuma borra a
+     propria capa. */
 }
 
 .perfil-capa-veu {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--perfil-fundo-base) 38%, transparent) 0%, color-mix(in srgb, var(--perfil-fundo-base) 74%, transparent) 60%, var(--perfil-fundo-base) 100%),
-    radial-gradient(120% 90% at 50% 0%, transparent 38%, color-mix(in srgb, var(--perfil-fundo-base) 58%, transparent) 100%);
+  /* So um esfumado bem baixo, colado na borda de baixo, pra a foto encontrar o
+     fundo da pagina sem um corte seco -- nao e mais escurecimento da foto
+     inteira. */
+  background: linear-gradient(180deg, transparent 82%, var(--perfil-fundo-base) 100%);
 }
 
 /* ---- Cabeçalho: retrato encostado na capa ----------------------------- */
