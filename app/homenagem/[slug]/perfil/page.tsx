@@ -17,7 +17,7 @@ import { SeletorTema } from "@/components/public/SeletorTema";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { RailVida, type MarcoVida } from "@/components/public/RailVida";
-import { anosDestaque } from "@/lib/publicTheme";
+import { CORES, anosDestaque } from "@/lib/publicTheme";
 import { lerParagrafos } from "@/lib/textoRico";
 import { calcularRota, type RuaMapeada } from "@/lib/rotaCemiterio";
 import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
@@ -49,6 +49,8 @@ import {
 // BotaoCompartilhar. O Livro de Assinaturas e proprio desta variante
 // (components/public/LivroAssinaturas.tsx) -- a base segue com a lista de
 // cartoes de sempre, intocada.
+
+const v = (nomeVar: string, valorPadrao: string) => `var(${nomeVar}, ${valorPadrao})`;
 
 export const dynamic = "force-dynamic";
 
@@ -140,6 +142,121 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     },
   };
 }
+
+// Copia LITERAL dos valores de estilo do topo da pagina original
+// (app/homenagem/[slug]/page.tsx). O Rafael pediu pra nao inventar nada
+// novo aqui -- e o mesmo nav + hero, pixel a pixel, so que sem o header/main
+// da base (esta pagina tem o corpo proprio da variante logo abaixo).
+const estiloTopo = {
+  nav: {
+    margin: "0 auto",
+    padding: "14px 20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 12,
+    borderBottom: `1px solid ${CORES.douradoBorda}`,
+    position: "sticky",
+    top: 0,
+    zIndex: 20,
+    background: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+  },
+  navLinks: { display: "flex", flexWrap: "wrap", gap: 18 },
+  navLink: { color: CORES.textoFraco, fontSize: 12.5, textDecoration: "none", letterSpacing: 0.3 },
+  navAcoes: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" },
+  navBotaoFantasma: {
+    color: CORES.textoFraco,
+    fontSize: 12,
+    textDecoration: "none",
+    border: `1px solid ${CORES.douradoBorda}`,
+    padding: "8px 14px",
+    borderRadius: 4,
+    whiteSpace: "nowrap",
+  },
+  navBotaoDourado: {
+    color: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+    background: v(VAR_DOURADO, CORES.dourado),
+    fontSize: 12,
+    fontWeight: 600,
+    textDecoration: "none",
+    padding: "8px 14px",
+    borderRadius: 4,
+    whiteSpace: "nowrap",
+  },
+  hero: {
+    margin: "0 auto",
+    padding: "64px 20px 40px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  fotoGlowWrap: { position: "relative", display: "flex", alignItems: "center", justifyContent: "center" },
+  fotoGlow: {
+    position: "absolute",
+    inset: -30,
+    background: CORES.glowHero,
+  },
+  fotoRing: {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    borderRadius: "50%",
+    padding: 2,
+    background: v(VAR_DOURADO, CORES.dourado),
+  },
+  fotoInner: {
+    width: "100%",
+    height: "100%",
+    borderRadius: "50%",
+    overflow: "hidden",
+    background: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+    border: `4px solid ${v(VAR_FUNDO_BASE, CORES.fundoBase)}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  foto: { width: "100%", height: "100%", objectFit: "cover" },
+  monograma: { fontSize: "clamp(40px, 6vw, 56px)", color: v(VAR_DOURADO, CORES.dourado), fontFamily: "Georgia, serif" },
+  eyebrowLinha: { marginTop: 28, display: "flex", alignItems: "center", gap: 10 },
+  hairlineCurta: { width: 24, height: 1, background: CORES.douradoBorda },
+  eyebrow: {
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    color: v(VAR_DOURADO, CORES.dourado),
+    fontWeight: 600,
+  },
+  nome: {
+    fontSize: "clamp(34px, 6vw, 52px)",
+    fontWeight: 400,
+    margin: "10px 0 10px",
+    lineHeight: 1.1,
+    letterSpacing: -0.5,
+  },
+  vinculosWrap: { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 },
+  vinculoBadge: {
+    fontSize: 12,
+    letterSpacing: 0.5,
+    textTransform: "uppercase" as const,
+    color: v(VAR_DOURADO, CORES.dourado),
+    border: `1px solid ${CORES.douradoBorda}`,
+    borderRadius: 999,
+    padding: "3px 12px",
+  },
+  anos: { fontSize: 20, color: v(VAR_DOURADO, CORES.dourado), marginBottom: 6 },
+  cidade: { display: "inline-flex", alignItems: "center", gap: 6, color: CORES.textoFraco, fontSize: 15 },
+  fraseWrap: { marginTop: 32, display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 14 },
+  frase: {
+    margin: 0,
+    fontSize: 20,
+    fontStyle: "italic",
+    color: CORES.textoCorpo,
+    maxWidth: 540,
+    textAlign: "center" as const,
+  },
+} as const;
 
 export default async function PerfilMemorialPage({
   params,
@@ -308,65 +425,66 @@ export default async function PerfilMemorialPage({
 
       <SeletorTema temaInicial={m.tema} />
 
-      {/* ---- Cabeçalho: igual ao topo da página original -------------------
-          Tentei uma capa com foto (banner atrás do retrato) em duas versões
-          -- desfocada e depois nítida -- e nenhuma das duas ficou boa (a
-          nítida "estourou"). O Rafael pediu pra voltar exatamente ao topo
-          centralizado da página base: retrato com anel dourado e brilho atrás,
-          tudo centralizado abaixo. Sem banner. */}
-      <header className="perfil-cabecalho">
-        <div className="perfil-retrato">
-          {/* Anel dourado + borda interna escura: construcao copiada da pagina
-              base, aprovada pelo Rafael. Nao simplificar pra um circulo so --
-              o vao escuro entre o anel e a foto e o que faz o retrato descolar
-              do fundo. */}
-          <div className="perfil-retrato-anel">
-            {fotoAssinada ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={fotoAssinada} alt={m.nome_completo} className="perfil-retrato-img" />
-            ) : (
-              <span className="perfil-monograma">{iniciais}</span>
-            )}
+      <nav className="mem-container" style={estiloTopo.nav}>
+        <div style={estiloTopo.navLinks}>
+          <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
+          <a href="#timeline" style={estiloTopo.navLink}>Linha do Tempo</a>
+          <a href="#homenagens" style={estiloTopo.navLink}>Homenagens</a>
+          <a href="#livro" style={estiloTopo.navLink}>Livro</a>
+          <a href="#galeria" style={estiloTopo.navLink}>Fotos e Vídeos</a>
+          <a href="#localizacao" style={estiloTopo.navLink}>Localização</a>
+        </div>
+        <div style={estiloTopo.navAcoes}>
+          <a href="#homenagens" style={estiloTopo.navBotaoFantasma}>Deixar homenagem</a>
+          <a href="#livro" style={estiloTopo.navBotaoDourado}>Assinar livro</a>
+          <BotaoCompartilhar nome={m.nome_completo} />
+        </div>
+      </nav>
+
+      <header className="mem-hero mem-container" style={estiloTopo.hero}>
+        <div className="mem-hero-ring" style={estiloTopo.fotoGlowWrap}>
+          <div style={estiloTopo.fotoGlow} />
+          <div style={estiloTopo.fotoRing}>
+            <div style={estiloTopo.fotoInner}>
+              {fotoAssinada ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={fotoAssinada} alt={m.nome_completo} style={estiloTopo.foto} />
+              ) : (
+                <span style={estiloTopo.monograma}>{iniciais}</span>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="perfil-identidade">
-          <span className="perfil-eyebrow">Em memória</span>
-          <h1 className="perfil-nome">{m.nome_completo}</h1>
+        <div className="mem-hero-texto">
+          <div style={estiloTopo.eyebrowLinha}>
+            <span style={estiloTopo.hairlineCurta} />
+            <span style={estiloTopo.eyebrow}>Em Memória</span>
+            <span style={estiloTopo.hairlineCurta} />
+          </div>
 
+          <h1 style={estiloTopo.nome}>{m.nome_completo}</h1>
           {Array.isArray(m.vinculos) && m.vinculos.length > 0 && (
-            <div className="perfil-vinculos">
+            <div style={estiloTopo.vinculosWrap}>
               {m.vinculos.map((x) => (
-                <span key={x} className="perfil-vinculo">
-                  {x}
-                </span>
+                <span key={x} style={estiloTopo.vinculoBadge}>{x}</span>
               ))}
             </div>
           )}
-
-          <div className="perfil-linha-dados">
-            {anos && <span className="perfil-anos">{anos}</span>}
-            {m.cidade && (
-              <span className="perfil-cidade">
-                <MapPin size={13} strokeWidth={1.5} />
-                {m.cidade}
-              </span>
-            )}
-          </div>
+          {anos && <div style={estiloTopo.anos}>{anos}</div>}
+          {m.cidade && (
+            <div style={estiloTopo.cidade}>
+              <MapPin size={14} strokeWidth={1.5} />
+              <span>{m.cidade}</span>
+            </div>
+          )}
 
           {m.frase_preferida && (
-            <blockquote className="perfil-frase">&ldquo;{m.frase_preferida}&rdquo;</blockquote>
+            <div style={estiloTopo.fraseWrap}>
+              <span style={estiloTopo.hairlineCurta} />
+              <blockquote style={estiloTopo.frase}>&ldquo;{m.frase_preferida}&rdquo;</blockquote>
+            </div>
           )}
-        </div>
-
-        <div className="perfil-acoes">
-          <a href="#homenagens" className="perfil-btn perfil-btn-fantasma">
-            Deixar homenagem
-          </a>
-          <a href="#livro" className="perfil-btn perfil-btn-dourado">
-            Assinar livro
-          </a>
-          <BotaoCompartilhar nome={m.nome_completo} />
         </div>
       </header>
 
