@@ -10,14 +10,14 @@ import { GateNaoEncontrado } from "@/components/public/GateNaoEncontrado";
 import { GateCadastro } from "@/components/public/GateCadastro";
 import { GateEmailAutorizado } from "@/components/public/GateEmailAutorizado";
 import { AcenderVela } from "@/components/public/AcenderVela";
-import { LivroAssinaturas } from "@/components/public/LivroAssinaturas";
+import { FormularioCondolencia } from "@/components/public/FormularioCondolencia";
 import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { RailVida, type MarcoVida } from "@/components/public/RailVida";
-import { anosDestaque } from "@/lib/publicTheme";
+import { anosDestaque, dataPtBr } from "@/lib/publicTheme";
 import { lerParagrafos } from "@/lib/textoRico";
 import { calcularRota, type RuaMapeada } from "@/lib/rotaCemiterio";
 import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
@@ -45,10 +45,8 @@ import {
 // coluna só, na mesma ordem da base.
 //
 // Componentes reaproveitados sem UMA alteração: AcenderVela (regra 20),
-// GuiaTumulo (regra 17), GaleriaFotos, MuralMemorias, SeletorTema e
-// BotaoCompartilhar. O Livro de Assinaturas e proprio desta variante
-// (components/public/LivroAssinaturas.tsx) -- a base segue com a lista de
-// cartoes de sempre, intocada.
+// GuiaTumulo (regra 17), GaleriaFotos, MuralMemorias, FormularioCondolencia,
+// SeletorTema, BotaoCompartilhar.
 
 export const dynamic = "force-dynamic";
 
@@ -509,14 +507,24 @@ export default async function PerfilMemorialPage({
               Livro de assinaturas
               {condolencias.length > 0 && <span className="perfil-contagem">{condolencias.length}</span>}
             </h2>
-            <p className="perfil-apoio">
-              Escreva seu nome e ele será registrado no livro, à mão, para sempre.
-            </p>
-            <LivroAssinaturas
-              memorialId={m.id}
-              assinaturasIniciais={condolencias}
-              nomeHomenageado={m.nome_completo.split(" ")[0]}
-            />
+            <p className="perfil-apoio">Assine e deixe sua mensagem — um registro permanente de carinho.</p>
+
+            {condolencias.length === 0 ? (
+              <p className="perfil-vazio">Ainda ninguém assinou o livro.</p>
+            ) : (
+              <div className="perfil-assinaturas">
+                {condolencias.map((c) => (
+                  <figure key={c.id} className="perfil-assinatura-card">
+                    <blockquote className="perfil-assinatura-texto">{c.message}</blockquote>
+                    <figcaption className="perfil-assinatura-rodape">
+                      <span className="perfil-assinatura-nome">{c.visitor_name}</span>
+                      <span className="perfil-assinatura-data">{dataPtBr(c.created_at)}</span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
+            <FormularioCondolencia memorialId={m.id} />
           </section>
 
           {/* AcenderVela entra idêntico, sem uma prop nova (regra 20). Fica na
