@@ -120,6 +120,9 @@ function Folha({
 }) {
   return (
     <div className={`livro-pagina livro-pagina-${lado}`}>
+      {/* Miolo da frente: a pilha de folhas que aparece na borda de baixo. E o
+          que da espessura de livro -- sem ela o conjunto le como cartao. */}
+      <span className="livro-miolo" aria-hidden="true" />
       <div className="livro-margem" aria-hidden="true" />
       <div className="livro-conteudo">
         {itens.length === 0 ? (

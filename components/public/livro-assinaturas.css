@@ -30,7 +30,7 @@
      Distancia longa (1500px) pra deformar pouco: perspectiva curta joga o
      texto pra fora de foco visual e atrapalha a leitura. */
   perspective: 1500px;
-  perspective-origin: 50% 12%;
+  perspective-origin: 50% 4%;
   /* A inclinacao encurta o livro na tela; o padding devolve o espaco pra ele
      nao encostar no que vem antes e depois. */
   padding: 14px 0 26px;
@@ -39,7 +39,7 @@
 .livro-cena > .livro {
   /* Tombado pra tras: quem olha ve o topo das folhas e a espessura da base.
      7 graus e o limite antes de o texto comecar a parecer deitado. */
-  transform: rotateX(7deg);
+  transform: rotateX(10deg);
   transform-origin: 50% 100%;
 }
 
@@ -51,7 +51,7 @@
   /* Canto arredondado so por fora, como capa dura de verdade: a capa e cortada
      com raio, as folhas por dentro nao. */
   border-radius: 5px 5px 7px 7px;
-  padding: 13px 14px 20px;
+  padding: 13px 14px 34px;
 
   /* Couro: base escura + grao fino em duas direcoes + variacao de tom. Sem
      imagem -- tudo gradiente repetido. */
@@ -91,10 +91,10 @@
 .livro::after {
   content: "";
   position: absolute;
-  left: 20px;
-  right: 20px;
-  bottom: 7px;
-  height: 11px;
+  left: 26px;
+  right: 26px;
+  bottom: 8px;
+  height: 8px;
   border-radius: 0 0 3px 3px;
   pointer-events: none;
   background:
@@ -244,7 +244,10 @@
    pra borda externa. O angulo e pequeno de proposito -- o suficiente pra dar a
    forma, sem atrapalhar a leitura do texto. */
 .livro-pagina-esq {
-  border-radius: 2px 0 0 2px;
+  /* Topo arqueado: num livro aberto a folha nao termina numa reta, ela sobe do
+     vinco e cai na borda externa. O raio eliptico grande no canto externo de
+     cima e o que desenha esse arco. */
+  border-radius: 2px 42px 0 2px / 2px 16px 0 2px;
   transform-origin: right center;
   transform: perspective(1400px) rotateY(2.2deg);
   /* Curvatura do papel: sombra funda encostada no vinco, subindo pra luz na
@@ -265,7 +268,7 @@
 }
 
 .livro-pagina-dir {
-  border-radius: 0 2px 2px 0;
+  border-radius: 42px 2px 0 0 / 16px 2px 0 0;
   transform-origin: left center;
   transform: perspective(1400px) rotateY(-2.2deg);
   background-image:
@@ -283,15 +286,56 @@
     radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120, 90, 45, 0.14) 100%);
 }
 
-/* Miolo nas laterais tambem (o corte dianteiro do livro), nao so na base.
-   Livro so com espessura embaixo continua lendo como cartao. */
+/* O MIOLO DA FRENTE: pilha de folhas na borda de baixo de cada pagina.
+   Grosso e em leque, curvando pra fora do vinco -- e o elemento que mais faz
+   o conjunto ler como livro. Fino e reto, lia como cartao. */
+.livro-miolo {
+  position: absolute;
+  bottom: -15px;
+  height: 17px;
+  pointer-events: none;
+  z-index: 3;
+  /* Cada faixa e uma folha. Espacamento irregular de proposito: pilha real
+     nunca tem folhas perfeitamente equidistantes. */
+  background: repeating-linear-gradient(
+    180deg,
+    #f4ebd8 0 1px,
+    #c4b190 1px 2px,
+    #ece0c8 2px 3px,
+    #b5a082 3px 4px,
+    #f0e5d0 4px 5px,
+    #cbb996 5px 6px
+  );
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.6),
+    0 -1px 0 rgba(0, 0, 0, 0.35) inset;
+}
+
+.livro-pagina-esq .livro-miolo {
+  left: -7px;
+  right: 0;
+  /* Afunila no vinco e engrossa na borda externa: o leque abre pra fora. */
+  border-radius: 7px 1px 5px 2px / 5px 1px 9px 3px;
+  transform-origin: right center;
+  transform: rotate(-0.5deg);
+}
+
+.livro-pagina-dir .livro-miolo {
+  left: 0;
+  right: -7px;
+  border-radius: 1px 7px 2px 5px / 1px 5px 3px 9px;
+  transform-origin: left center;
+  transform: rotate(0.5deg);
+}
+
+/* Miolo nas laterais tambem (o corte dianteiro do livro), nao so na base. */
 .livro-pagina-esq::after,
 .livro-pagina-dir::after {
   content: "";
   position: absolute;
-  top: 5px;
-  bottom: 5px;
-  width: 7px;
+  top: 14px;
+  bottom: 6px;
+  width: 5px;
   pointer-events: none;
   background: repeating-linear-gradient(
     90deg,
