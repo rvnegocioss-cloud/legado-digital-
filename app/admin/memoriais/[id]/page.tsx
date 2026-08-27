@@ -1246,14 +1246,14 @@ export default function DetalheMemorial() {
         <div className="flex items-center gap-4">
           {qrCodeUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={qrCodeUrl} alt="" className="w-28 h-28 rounded bg-white p-1.5" />
+            <img src={urlMidiaProtegida(qrCodeUrl) || qrCodeUrl} alt="" className="w-28 h-28 rounded bg-white p-1.5" />
           ) : (
             <div className="w-28 h-28 rounded bg-[var(--tema-zinc-800)]" />
           )}
           <div className="flex flex-col gap-2">
             {qrCodeUrl && (
               <a
-                href={qrCodeUrl}
+                href={urlMidiaProtegida(qrCodeUrl) || qrCodeUrl}
                 download={`qrcode-${memorial.slug}.png`}
                 className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-branco-fixo text-sm font-medium text-center"
               >

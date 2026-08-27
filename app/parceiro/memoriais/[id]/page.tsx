@@ -1216,13 +1216,13 @@ function FichaMemorialParceiroInner() {
               <div className="flex items-center gap-3">
                 {qrCodeUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={qrCodeUrl} alt="" className="w-16 h-16 rounded bg-white p-1" />
+                  <img src={urlMidiaProtegida(qrCodeUrl) || qrCodeUrl} alt="" className="w-16 h-16 rounded bg-white p-1" />
                 ) : (
                   <div className="w-16 h-16 rounded bg-[var(--tema-zinc-800)]" />
                 )}
                 <div className="flex flex-col gap-1">
                   {qrCodeUrl && (
-                    <a href={qrCodeUrl} download={`qrcode-${memorial.slug}.png`} className="text-blue-400 hover:underline text-xs">
+                    <a href={urlMidiaProtegida(qrCodeUrl) || qrCodeUrl} download={`qrcode-${memorial.slug}.png`} className="text-blue-400 hover:underline text-xs">
                       Baixar
                     </a>
                   )}

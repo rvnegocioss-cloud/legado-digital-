@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface Memorial {
   id: string
@@ -173,7 +174,7 @@ function ParceiroMemoriaisInner() {
                   <td className="py-3 px-4">
                     {m.qr_code_url && (
                       <a
-                        href={m.qr_code_url}
+                        href={urlMidiaProtegida(m.qr_code_url) || m.qr_code_url}
                         download={`qrcode-${m.slug}.png`}
                         className="text-blue-400 hover:underline text-xs"
                       >

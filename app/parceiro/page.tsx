@@ -281,7 +281,7 @@ function ParceiroDashboardInner() {
                     <td className="py-2 px-3">
                       {m.qr_code_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={m.qr_code_url} alt="" className="w-10 h-10 rounded bg-white p-0.5" />
+                        <img src={urlMidiaProtegida(m.qr_code_url) || m.qr_code_url} alt="" className="w-10 h-10 rounded bg-white p-0.5" />
                       ) : (
                         <span className="text-[var(--tema-zinc-600)] text-xs">Sem QR ainda</span>
                       )}
@@ -290,7 +290,7 @@ function ParceiroDashboardInner() {
                     <td className="py-2 px-3">
                       {m.qr_code_url && (
                         <a
-                          href={m.qr_code_url}
+                          href={urlMidiaProtegida(m.qr_code_url) || m.qr_code_url}
                           download={`qrcode-${m.slug}.png`}
                           className="text-blue-400 hover:underline text-xs"
                         >
