@@ -4,6 +4,9 @@ import { useRef, useState } from 'react'
 import { CORES } from '@/lib/publicTheme'
 import { MuralVelasVotivas, type MuralVelasVotivasHandle } from './MuralVelasVotivas'
 import { MURAL_TOTAL, slotFisicoDaOrdem } from '@/lib/muralVelas'
+import { VelaPrincipalCastical, type VelaPrincipalCasticalHandle } from './VelaPrincipalCastical'
+import { ChamaVoadora } from './ChamaVoadora'
+import { VELA_ESCALA } from '@/lib/velaPrincipalCastical'
 
 interface Voo {
   top: number
@@ -26,7 +29,7 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
   const [principalAcesa, setPrincipalAcesa] = useState(false)
 
   const secaoRef = useRef<HTMLDivElement | null>(null)
-  const chamaPrincipalRef = useRef<HTMLDivElement | null>(null)
+  const velaPrincipalRef = useRef<VelaPrincipalCasticalHandle | null>(null)
   const muralRef = useRef<MuralVelasVotivasHandle | null>(null)
   // Próxima POSIÇÃO NA ORDEM de acendimento (0..34) — não é o slot físico
   // direto; o mural embaralha ordem de acendimento x posição na parede pra
@@ -54,23 +57,22 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
 
   function iniciarVoo(posicaoNaOrdem: number) {
     const secao = secaoRef.current
-    const origem = chamaPrincipalRef.current
+    const posOrigem = velaPrincipalRef.current?.obterPosicaoDoPavio() ?? null
     const posDestino = muralRef.current?.obterPosicaoDoSlot(slotFisicoDaOrdem(posicaoNaOrdem)) ?? null
 
     acenderEApagarPrincipal(1300)
 
-    if (!secao || !origem || !posDestino) {
+    if (!secao || !posOrigem || !posDestino) {
       // Sem medida possível (refs ainda não montaram) — acende direto, sem animação de voo.
       acenderSlotDaParede(posicaoNaOrdem)
       return
     }
 
     const rSecao = secao.getBoundingClientRect()
-    const rOrigem = origem.getBoundingClientRect()
 
     setVoo({
-      top: rOrigem.top - rSecao.top,
-      left: rOrigem.left - rSecao.left + rOrigem.width / 2,
+      top: posOrigem.top - rSecao.top,
+      left: posOrigem.left - rSecao.left,
       fase: 'inicio',
     })
 
@@ -113,92 +115,31 @@ export function AcenderVela({ slug, velasIniciais }: { slug: string; velasInicia
           do protótipo aprovado pelo Rafael. */}
       <MuralVelasVotivas ref={muralRef} acesas={paredeAcesas} slotRecemAceso={slotRecemAceso} />
 
-      {/* Chama voando da vela principal até a vela da parede recém-acesa */}
+      {/* Chama voando da vela principal até a vela da parede recém-acesa —
+          mesma sprite do castiçal e da parede, pra não trocar de formato no ar. */}
       {voo && (
         <div
-          className="vela-voo vela-flame"
+          className="vela-voo"
           style={{
             position: 'absolute',
             top: voo.top,
             left: voo.left,
-            width: 14,
-            height: 20,
-            animation: 'none',
-            transform: `translate(0,-100%) translateX(-50%) rotate(-45deg) scale(${voo.fase === 'fim' ? 0.4 : 1})`,
+            transform: `translate(0,-100%) translateX(-50%) scale(${voo.fase === 'fim' ? 0.4 : 1})`,
             opacity: voo.fase === 'fim' ? 0.15 : 1,
             filter: 'drop-shadow(0 0 8px rgba(255,170,80,0.6))',
             pointerEvents: 'none',
             zIndex: 6,
           }}
-        />
+        >
+          <ChamaVoadora escala={VELA_ESCALA} />
+        </div>
       )}
 
-      {/* Vela principal — mesma forma de chama do mockup (border-radius + rotate),
-          fica apagada por padrão, acende só no gesto de clicar (ver acender()/iniciarVoo()). */}
-      <div style={{ position: 'relative', width: 120, height: 100, margin: '0 auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-        <div
-          style={{
-            position: 'relative',
-            width: 14,
-            height: 60,
-            background: 'linear-gradient(#EAE3D6, #C9A46A)',
-            borderRadius: 2,
-            boxShadow: 'inset 0 0 6px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.25)',
-          }}
-        >
-          {/* Pavio — âncora fixa pro cálculo de voo (getBoundingClientRect), sempre montado */}
-          <div
-            ref={chamaPrincipalRef}
-            style={{
-              position: 'absolute',
-              bottom: '100%',
-              left: '50%',
-              marginLeft: -1,
-              width: 2,
-              height: 8,
-              background: '#2a221a',
-            }}
-          >
-            {/* Brasa — visível só quando apagada */}
-            {!principalAcesa && (
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: '100%',
-                  left: '50%',
-                  marginLeft: -2,
-                  width: 4,
-                  height: 4,
-                  borderRadius: '1em',
-                  background: 'radial-gradient(circle at top right, #ffe98a, #ff5a1f)',
-                }}
-              />
-            )}
-          </div>
-
-          {principalAcesa && (
-            <>
-              <div
-                className="vela-glow"
-                style={{
-                  position: 'absolute',
-                  bottom: '100%',
-                  left: '50%',
-                  marginLeft: -35,
-                  width: 70,
-                  height: 70,
-                  background: 'radial-gradient(circle, rgba(255,196,120,0.5), transparent 70%)',
-                  pointerEvents: 'none',
-                }}
-              />
-              <div
-                className="vela-flame"
-                style={{ position: 'absolute', bottom: 'calc(100% + 14px)', left: 'calc(50% + 8px)', width: 22, height: 30 }}
-              />
-            </>
-          )}
-        </div>
-      </div>
+      {/* Vela principal — castiçal de bronze com cera escorrendo, migrado do
+          protótipo aprovado pelo Rafael (decisão confirmada 2026-08-26/27,
+          MIGRAR-PARA-O-PROJETO.md). Fica apagada por padrão, acende só no
+          gesto de clicar (ver acender()/iniciarVoo()). */}
+      <VelaPrincipalCastical ref={velaPrincipalRef} acesa={principalAcesa} />
 
       <button
         onClick={acender}
