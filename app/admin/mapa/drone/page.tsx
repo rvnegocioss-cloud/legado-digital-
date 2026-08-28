@@ -25,6 +25,7 @@ const css = `
   font-size:0.78rem; padding:0.32rem 0.7rem; border-radius:999px;
   background:#FBF0DA; color:#8A6416; border:1px solid #EBD09C; font-weight:600;
 }
+.status-pill.ok{background:#E4F0E8; color:#2F6B4F; border-color:#BBD9C7;}
 
 .toc{
   border:1px solid #D4D9DC; border-radius:10px; background:#F7F8F9;
@@ -121,257 +122,196 @@ export default function RelatorioMapeamentoDrone() {
         <Link href="/admin/mapa" className="back-link">← Voltar pro Mapa</Link>
 
         <span className="kicker">Legado Digital · Central — Cemitérios</span>
-        <h1>Mapeamento de cemitério por drone: guia técnico</h1>
+        <h1>Mapeamento de cemitério por drone: o que deu certo</h1>
         <p className="dek">
-          Preparado pra decisão dos sócios (Pedro incluso) — como sair de &quot;temos a ideia&quot; pra
-          &quot;cada túmulo tem uma coordenada confiável no banco&quot;. Cobre equipamento, apps de voo,
-          processamento das fotos, e onde entra (e onde não entra) o que dá pra construir no sistema.
+          Registro do que já foi feito de verdade — pra ninguém esquecer o que funcionou. Dois
+          cemitérios voados e processados, pipeline validado em produção, e a lição real sobre
+          qual tipo de arquivo pedir da próxima vez.
         </p>
         <div className="status-row">
-          <span className="status-pill">Decisão em aberto — nada implementado ainda</span>
+          <span className="status-pill ok">Em produção — 2 cemitérios mapeados</span>
+          <span className="status-pill">José Lázaro: parcial, em andamento</span>
+          <span className="status-pill">São Pedro: ortomosaico no ar, endereçamento pendente</span>
         </div>
 
         <nav className="toc">
           <span className="toc-label">Neste relatório</span>
           <ol>
-            <li><a href="#hardware">1. Drone — qual usar</a></li>
-            <li><a href="#apps">2. App de planejamento de voo</a></li>
-            <li><a href="#gcp">3. Pontos de controle (GCP)</a></li>
-            <li><a href="#software">4. Software que gera o mapa</a></li>
-            <li><a href="#fluxo">5. Fluxo do início ao fim</a></li>
-            <li><a href="#claude">6. O que o Claude Code faz e não faz</a></li>
-            <li><a href="#custo">7. Estimativa de custo e esforço</a></li>
-            <li><a href="#onde">8. Onde estudar cada parte</a></li>
-            <li><a href="#integracao">9. Integração com o mapa já construído</a></li>
+            <li><a href="#quem">1. Quem fez e com o quê</a></li>
+            <li><a href="#jl">2. José Lázaro (Tupaciguara/MG)</a></li>
+            <li><a href="#sp">3. São Pedro (Uberlândia/MG)</a></li>
+            <li><a href="#arquivos">4. Tipo de arquivo — o que deu certo</a></li>
+            <li><a href="#pipeline">5. Pipeline que processa o material</a></li>
+            <li><a href="#producao">6. Onde já está no ar</a></li>
+            <li><a href="#3d">7. Modelo 3D — material pronto, sem visualizador ainda</a></li>
+            <li><a href="#proximo">8. Recomendação pro próximo cemitério</a></li>
           </ol>
         </nav>
 
-        <section id="hardware">
-          <h2><span className="num">01</span>Drone — qual usar</h2>
+        <section id="quem">
+          <h2><span className="num">01</span>Quem fez e com o quê</h2>
           <p>
-            Não precisa de drone profissional de topografia pra começar. A diferença de precisão final
-            vem mais do método (com ou sem ponto de controle no chão — seção 3) do que do modelo do drone.
+            Os dois voos foram feitos por <strong>Rafael Rassi</strong>, com drone e câmera
+            próprios (captura nadir — reto de cima, sem inclinação). O processamento fotogramétrico
+            (transformar as centenas de fotos num ortomosaico único georreferenciado) do São Pedro
+            também foi feito por ele, no <strong>Agisoft Metashape</strong>.
           </p>
-          <div className="chips">
-            <span className="chip">DJI Mini 4 Pro</span>
-            <span className="chip">DJI Air 3</span>
-            <span className="chip">DJI Mavic 3 Enterprise (M3E)</span>
-            <span className="chip">DJI D-RTK 2 (módulo GPS de precisão)</span>
-          </div>
-          <p>
-            <strong>Mini 4 Pro / Air 3</strong> — suficiente pra gerar as fotos. GPS de bordo com erro de
-            1-3m, corrigido depois com pontos de controle. <strong>Mavic 3 Enterprise</strong> — versão
-            com módulo RTK embutido, já entrega coordenada de cada foto com poucos centímetros de erro
-            sem precisar de tanto ponto de controle no chão.
-          </p>
-          <div className="callout">
-            <span className="mark">i</span>
-            <div className="body">
-              Se o cemitério for pequeno (poucas quadras), um drone comum + alguns pontos de controle já
-              resolve. Mavic com RTK só compensa se for mapear vários cemitérios com frequência.
-            </div>
-          </div>
-        </section>
-
-        <section id="apps">
-          <h2><span className="num">02</span>App de planejamento de voo</h2>
-          <p>
-            É o app que desenha a grade de voo (tipo &quot;cortar grama&quot;) e faz o drone voar sozinho
-            tirando foto automática com a sobreposição certa entre elas.
-          </p>
-          <div className="table-wrap">
-            <table>
-              <thead><tr><th>App</th><th>Onde roda</th><th>Observação</th></tr></thead>
-              <tbody>
-                <tr><td>DJI Pilot 2</td><td>Tablet/celular ligado ao controle</td><td>App oficial DJI. Drones mais novos já têm modo &quot;Mapping&quot;/&quot;Waypoint&quot; nativo.</td></tr>
-                <tr><td>Pix4Dcapture</td><td>Tablet/celular</td><td>Gratuito, feito pra alimentar o Pix4D depois. Foco só em planejar o voo.</td></tr>
-                <tr><td>DroneDeploy (app)</td><td>Tablet/celular</td><td>Planeja voo e já sobe as fotos pra nuvem da DroneDeploy processar.</td></tr>
-                <tr><td>Litchi</td><td>Tablet/celular</td><td>3º terceiro, popular pra missão em grade, não depende de nenhum software específico depois.</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p>
-            Configuração típica de missão: altura de voo (quanto mais baixo, mais detalhe e mais fotos),
-            sobreposição frontal ~75-80%, sobreposição lateral ~60-65%. O app calcula o resto sozinho.
-          </p>
-        </section>
-
-        <section id="gcp">
-          <h2><span className="num">03</span>Pontos de controle no chão (GCP)</h2>
-          <p>
-            <strong>GCP</strong> (Ground Control Point) é um marco físico no chão — pode ser uma placa
-            pintada, um alvo de fotogrametria, até uma cruz de fita — cuja coordenada real é medida com
-            GPS de precisão <em>antes</em> do voo. O software depois usa esses pontos conhecidos pra
-            corrigir o mapa final.
-          </p>
-          <div className="table-wrap">
-            <table>
-              <thead><tr><th>Método</th><th>Precisão final</th><th>Custo/esforço</th></tr></thead>
-              <tbody>
-                <tr><td>Só GPS do drone, sem GCP</td><td>1 – 3 metros</td><td><span className="tag ok">Baixo</span></td></tr>
-                <tr><td>Com 4-6 GCPs medidos</td><td>Poucos centímetros</td><td><span className="tag mid">Médio</span> — precisa medir os pontos antes do voo</td></tr>
-                <tr><td>Drone com RTK embutido (Mavic 3E)</td><td>Poucos centímetros</td><td><span className="tag mid">Médio</span> — equipamento mais caro, sem trabalho extra no campo</td></tr>
-              </tbody>
-            </table>
-          </div>
           <div className="callout warn">
             <span className="mark">!</span>
             <div className="body">
-              Túmulo costuma ficar a ~1 metro do vizinho. Sem GCP nem RTK, o erro de 1-3m do GPS comum
-              não é suficiente pra saber com certeza qual túmulo é qual — GCP deixa de ser opcional
-              nesse caso.
+              Câmera nadir não lê o nome gravado na face vertical da lápide, por mais nítida que a
+              imagem seja — é limite físico do ângulo de captura, confirmado abrindo os arquivos
+              brutos dos dois voos. Por isso o sistema usa endereçamento por código
+              (<code>Q36-R01-T011</code>) em vez de tentar ler nome na foto — nome vem depois, por
+              foto de campo de perto ou cadastro da família.
             </div>
           </div>
         </section>
 
-        <section id="software">
-          <h2><span className="num">04</span>Software que transforma as fotos em mapa</h2>
+        <section id="jl">
+          <h2><span className="num">02</span>José Lázaro (Tupaciguara/MG)</h2>
           <p>
-            Esse software junta as centenas de fotos do drone num <strong>ortomosaico</strong> — uma
-            imagem única, vista de cima, sem distorção de ângulo, com cada pixel amarrado numa
-            coordenada real.
+            Primeiro cemitério mapeado, em frente ao Fórum Adolpho Fidélis dos Santos. Entrega em
+            <code>GeoPackage</code> (SIRGAS 2000 / UTM 22S), processado com o pipeline próprio pra
+            <strong> 2,2cm de resolução nativa por pixel</strong> — roda em produção na tela a
+            3,5cm/px (zoom máximo 22), nítido o bastante pra distinguir cada túmulo individual.
           </p>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>Software</th><th>Tipo</th><th>Facilidade</th><th>Custo</th></tr></thead>
+              <thead><tr><th>Item</th><th>Status real</th></tr></thead>
               <tbody>
-                <tr><td>DroneDeploy</td><td>Nuvem</td><td><span className="tag ok">Fácil</span> — sobe foto, processa sozinho</td><td>Assinatura</td></tr>
-                <tr><td>Pix4Dcloud / Pix4Dmapper</td><td>Nuvem ou desktop</td><td><span className="tag mid">Médio</span> — mais opções técnicas de ajuste</td><td>Assinatura ou licença</td></tr>
-                <tr><td>WebODM</td><td>Self-hosted (aberto)</td><td><span className="tag hard">Técnico</span> — precisa instalar/rodar num servidor</td><td>Gratuito (paga só o servidor/processamento)</td></tr>
+                <tr><td>Ortomosaico</td><td><span className="tag ok">No ar</span> — camada de satélite do mapa da Central e do "Como Chegar" público</td></tr>
+                <tr><td>Quadras reconhecidas</td><td>12 candidatos achados pelo reconhecimento automático, ~7-8 são quadras reais (resto é pomar/telhado)</td></tr>
+                <tr><td>Túmulos endereçados</td><td>Fileira 11 revisada e travada na mão; demais fileiras foram apagadas depois de um bug de alinhamento (corrigido no código, ainda não regeradas)</td></tr>
+                <tr><td>Entrada do cemitério</td><td><span className="tag mid">Pendente</span> — Rafael ainda não marcou pela Central</td></tr>
+                <tr><td>1º memorial real vinculado</td><td>Ainda não — José Antônio da Silva é memorial de teste</td></tr>
               </tbody>
             </table>
           </div>
+        </section>
+
+        <section id="sp">
+          <h2><span className="num">03</span>São Pedro (Uberlândia/MG)</h2>
           <p>
-            Saída de qualquer um deles: um arquivo de imagem georreferenciada (geralmente
-            <code>GeoTIFF</code>) — é esse arquivo que entra no sistema como camada do mapa.
+            Segundo cemitério, voado 11/ago/2026. Entrega em pirâmide de tiles já renderizada
+            (esquema XYZ/Google, o mesmo do Google Maps) — pipeline processou sem precisar
+            reamostrar a imagem duas vezes, resultando em <strong>1,6cm de resolução nativa por
+            pixel</strong>, 2× mais nítido que o José Lázaro.
           </p>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Item</th><th>Status real</th></tr></thead>
+              <tbody>
+                <tr><td>Ortomosaico</td><td><span className="tag ok">No ar</span> — mapa público (<code>/cemiterios</code>) e mapa da Central</td></tr>
+                <tr><td>Numeração oficial</td><td>Confirmada via mapa impresso da Prefeitura + letreiros de ferro em campo (2 conferências independentes batendo)</td></tr>
+                <tr><td>Escala estimada</td><td>10-15 mil túmulos (contra 104 do José Lázaro) — cemitério urbano antigo, densidade alta</td></tr>
+                <tr><td>Endereçamento por quadra/fila</td><td><span className="tag mid">Pendente</span> — recomendado mapear pelo fluxo manual, começando por 1 quadra pra medir tempo real antes de comprometer o resto</td></tr>
+                <tr><td>1º memorial real vinculado</td><td><span className="tag ok">Carlos Saraiva</span>, <code>Q36-R01-T011</code>, conferido por 4 fontes (registro oficial da prefeitura, contagem no ortomosaico, foto de campo, GPS a 0,62m do ponto real)</td></tr>
+              </tbody>
+            </table>
+          </div>
         </section>
 
-        <section id="fluxo">
-          <h2><span className="num">05</span>Fluxo do início ao fim</h2>
-          <ol className="steps">
-            <li><h3>Medir os pontos de controle (GCP)</h3><p>Marcar 4-6 pontos físicos espalhados pelo cemitério, medir a coordenada real de cada um com GPS de precisão. (Pular essa etapa só se usar drone com RTK embutido.)</p></li>
-            <li><h3>Voar o drone</h3><p>App de planejamento (Pilot 2 / Pix4Dcapture / DroneDeploy / Litchi) desenha a grade sobre a área do cemitério e o drone voa sozinho tirando as fotos.</p></li>
-            <li><h3>Processar as fotos</h3><p>Sobe as fotos + as coordenadas dos GCPs no software (DroneDeploy, Pix4D ou WebODM), que devolve o ortomosaico georreferenciado.</p></li>
-            <li><h3>Importar o ortomosaico no sistema</h3><p>O arquivo georreferenciado entra como camada de imagem no mapa do admin — aqui é onde o Claude Code constrói.</p></li>
-            <li><h3>Marcar cada túmulo</h3><p>Equipe abre o mapa no admin, vê a imagem aérea real (nítida o bastante pra distinguir cada túmulo) e clica em cada um pra salvar a coordenada — mesmo padrão de clique já usado em <code>/admin/cemiterios</code> pra marcar o cemitério inteiro.</p></li>
-          </ol>
-        </section>
-
-        <section id="claude">
-          <h2><span className="num">06</span>O que o Claude Code faz e não faz</h2>
+        <section id="arquivos">
+          <h2><span className="num">04</span>Tipo de arquivo — o que deu certo</h2>
+          <p>
+            A lição mais cara do São Pedro: o arquivo que <strong>parecia</strong> ser o certo era o
+            errado. Registrado aqui pra não repetir a confusão no próximo cemitério.
+          </p>
           <div className="boundary">
             <div className="col can">
-              <h4>Dá pra construir</h4>
+              <h4>Funcionou bem</h4>
               <ul>
-                <li>Upload do ortomosaico (GeoTIFF/imagem) pro sistema</li>
-                <li>Exibir a imagem como camada no mapa do admin, na posição georreferenciada certa</li>
-                <li>Tela de clique-pra-marcar cada túmulo, salvando lat/lng no banco (jazigo/gaveta)</li>
-                <li>Editar/mover marcações depois de criadas</li>
+                <li><code>GeoPackage</code> (voo cru, José Lázaro) — processa com rewarp no pipeline</li>
+                <li><strong>Pirâmide de tiles já renderizada, EPSG:3857/XYZ</strong> (<code>Sao Pedro map.zip</code>, 2,8GB) — o que o Metashape/DJI Terra/WebODM exportam via &quot;Export Tiled&quot; — processa direto, sem reamostrar duas vezes, resultado mais nítido</li>
+                <li><code>.kmz</code> — bom pra conferir contorno/posição rápido, não pro ortomosaico em si</li>
               </ul>
             </div>
             <div className="col cannot">
-              <h4>Fica de fora</h4>
+              <h4>Não usar</h4>
               <ul>
-                <li>Pilotar o drone ou comprar/configurar o equipamento</li>
-                <li>Medir os pontos de controle (GCP) no chão</li>
-                <li>Rodar o processamento fotogramétrico (DroneDeploy/Pix4D/WebODM)</li>
+                <li>Pasta de <code>tile-X-Y.tif</code> soltos — parece o material bom, mas é nível intermediário decimado (25,8cm/px, 16× pior) ou máscara técnica sem cor nenhuma</li>
+                <li>Modelo 3D &quot;Model&quot; simples do Metashape (exportado como <code>.glb</code>) — resumido, textura única de baixa resolução (5,3cm) — ver seção 7</li>
               </ul>
             </div>
           </div>
-          <p>
-            Ou seja: a parte física/operacional (voar, medir, processar) é serviço externo — drone
-            próprio, operador contratado, ou parceria. O Claude Code entra depois que o ortomosaico já
-            existe, construindo a ferramenta de marcação dentro do admin.
-          </p>
         </section>
 
-        <section id="custo">
-          <h2><span className="num">07</span>Estimativa de custo e esforço</h2>
+        <section id="pipeline">
+          <h2><span className="num">05</span>Pipeline que processa o material</h2>
+          <p>
+            Um script só (<code>scripts/ortomosaico/converter-ortomosaico.py</code>) processa os dois
+            formatos de entrada, sem depender de GDAL nem compilador instalado:
+          </p>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>Item</th><th>Esforço</th><th>Observação</th></tr></thead>
+              <thead><tr><th>Modo</th><th>Entrada</th><th>Quando usar</th></tr></thead>
               <tbody>
-                <tr><td>Drone (comprar ou já ter)</td><td><span className="tag ok">Único</span></td><td>Mini/Air já resolve; RTK só se for recorrente em vários cemitérios</td></tr>
-                <tr><td>Operador de drone</td><td><span className="tag mid">Por voo</span></td><td>Rafael/Pedro pilotando ou serviço terceirizado</td></tr>
-                <tr><td>Medição de GCP</td><td><span className="tag mid">Por cemitério</span></td><td>GPS de precisão avulso ou serviço de topografia</td></tr>
-                <tr><td>Processamento (software)</td><td><span className="tag ok">Por projeto</span></td><td>WebODM grátis (self-host) ou assinatura DroneDeploy/Pix4D</td></tr>
-                <tr><td>Ferramenta de marcação no admin</td><td><span className="tag ok">Único</span></td><td>Construído uma vez, reaproveitado pra todos os cemitérios depois</td></tr>
+                <tr><td><code>--src</code></td><td>GeoPackage cru do voo</td><td>Quando só existe o raster bruto, sem tile pré-renderizado (José Lázaro)</td></tr>
+                <tr><td><code>--src-xyz</code></td><td>Pirâmide de tiles já renderizada</td><td>Quando o processador do voo já entrega em XYZ/EPSG:3857 — copia direto, sem rewarp, resultado mais nítido (São Pedro)</td></tr>
               </tbody>
             </table>
           </div>
+          <p>
+            Saída dos dois: tiles WebP com transparência → MBTiles → <strong>PMTiles</strong> (arquivo
+            único, hospedado no Storage privado do Supabase, servido por URL assinada de vida curta —
+            é o ativo mais caro do projeto, não fica público direto).
+          </p>
         </section>
 
-        <section id="onde">
-          <h2><span className="num">08</span>Onde estudar cada parte</h2>
-          <p>
-            Sem links prontos aqui de propósito — pra não indicar endereço desatualizado ou errado.
-            Busca pelo nome oficial de cada item direto no site do fabricante/produto:
-          </p>
-          <div className="chips">
-            <span className="chip">DJI Pilot 2 — doc oficial DJI</span>
-            <span className="chip">Pix4Dcapture / Pix4Dcloud</span>
-            <span className="chip">DroneDeploy</span>
-            <span className="chip">WebODM (OpenDroneMap)</span>
-            <span className="chip">Litchi</span>
-            <span className="chip">DJI D-RTK 2</span>
+        <section id="producao">
+          <h2><span className="num">06</span>Onde já está no ar</h2>
+          <div className="boundary">
+            <div className="col can">
+              <h4>Em produção agora</h4>
+              <ul>
+                <li>&quot;Como Chegar&quot; da página pública do memorial — troca o satélite genérico pelo ortomosaico real quando o cemitério tem um</li>
+                <li>Mapa da Central (<code>/admin/cemiterios/[id]/mapa</code>) — staff marca cada túmulo clicando na imagem real</li>
+                <li>Mapa Público de Cemitérios (<code>/cemiterios</code>, sem login) — os dois cemitérios já aparecem</li>
+              </ul>
+            </div>
+            <div className="col cannot">
+              <h4>Ainda não construído</h4>
+              <ul>
+                <li>Visualizador 3D (material já existe, ver seção 7)</li>
+                <li>Vistoria de campo mobile (staff confirmando túmulo por túmulo andando no cemitério)</li>
+              </ul>
+            </div>
           </div>
-          <p>
-            Termos de busca que ajudam: <em>&quot;drone mapping ground control points tutorial&quot;</em>,{' '}
-            <em>&quot;photogrammetry overlap settings&quot;</em>, <em>&quot;WebODM GCP file format&quot;</em>.
-          </p>
         </section>
 
-        <section id="integracao">
-          <h2><span className="num">09</span>Integração com o mapa já construído (2026-07-17)</h2>
+        <section id="3d">
+          <h2><span className="num">07</span>Modelo 3D — material pronto, sem visualizador ainda</h2>
           <p>
-            A parte de navegação já saiu do papel — não é mais teórica. A página pública do memorial
-            (<code>/homenagem/[slug]</code>) tem uma seção &quot;Como Chegar&quot; funcionando de verdade:
-            botão de rota de carro (abre o Google Maps/Waze já instalado no celular, aponta pro
-            cemitério) + um mapa próprio guiando do portão até o túmulo, com o GPS do visitante ao vivo.
+            O projeto do Metashape do São Pedro inclui um <strong>Tiled Model</strong> (9 níveis de
+            detalhe, textura em 1,6cm) — muito melhor que o <code>.glb</code> de teste anterior, que
+            era export do modelo &quot;resumido&quot; errado. Ainda não tem visualizador no site (MapLibre,
+            a lib usada hoje, não lê 3D Tiles nativo) — trilho separado, não decidido ainda.
           </p>
           <div className="callout">
             <span className="mark">i</span>
             <div className="body">
-              O mapa desse guia usa <strong>MapLibre GL</strong> (gratuito, open source) em vez do Leaflet
-              usado no resto do admin — suporta inclinar/girar em 3D de verdade (arrastar com 2 dedos no
-              celular ou botão direito no desktop), igual Google Earth/Maps 3D.
-            </div>
-          </div>
-          <p>
-            Hoje esse mapa mostra a imagem de satélite pública Esri World Imagery como camada de fundo —
-            gratuita, sem chave, mas com a mesma limitação de precisão de qualquer satélite comum
-            (não é nítida o bastante pra distinguir túmulos muito próximos).
-          </p>
-          <p>
-            <strong>É exatamente aqui que o ortomosaico do drone entra.</strong> Não substitui o mapa —
-            substitui só a <em>imagem por baixo dele</em>. O componente já foi construído pensando nessa
-            troca: quando o ortomosaico existir (seção 4), a URL da camada de satélite Esri é trocada
-            pela URL/tiles do ortomosaico georreferenciado. O mapa continua 3D, continua girando, a
-            navegação por GPS continua igual — só a nitidez da imagem muda, de &quot;satélite genérico&quot;
-            pra &quot;foto real do nosso próprio cemitério, em centímetros de precisão&quot;.
-          </p>
-          <p>
-            Isso beneficia dois lugares ao mesmo tempo: o mapa público (visitante vendo uma imagem mais
-            nítida do cemitério) e a tela de marcação no admin (staff clicando no túmulo certo com muito
-            mais confiança, sem risco de marcar o vizinho errado — ver seção 3, túmulo fica a ~1m do
-            vizinho).
-          </p>
-          <div className="callout warn">
-            <span className="mark">!</span>
-            <div className="body">
-              O drone melhora a precisão de <strong>onde marcamos o túmulo no mapa</strong>. Não muda a
-              precisão do GPS do celular de quem está visitando (isso é limite de hardware do aparelho
-              dela, continua 3-10m de erro independente da qualidade da nossa imagem de fundo).
+              Pedido certo pro Rafael Rassi da próxima vez: exportar o <strong>Tiled Model</strong>
+              (não o Model simples) em formato <strong>Cesium 3D Tiles</strong> — não precisa
+              reprocessar o voo, só trocar a opção de export.
             </div>
           </div>
         </section>
 
+        <section id="proximo">
+          <h2><span className="num">08</span>Recomendação pro próximo cemitério</h2>
+          <ol className="steps">
+            <li><h3>Pedir a pirâmide de tiles já renderizada</h3><p>Mesmo formato do <code>Sao Pedro map.zip</code> (Export Tiled em EPSG:3857) — mais direto de processar e mais fácil de conferir antes de subir do que GeoPackage cru.</p></li>
+            <li><h3>Mapear 1 quadra primeiro</h3><p>Medir o tempo real de endereçamento antes de comprometer o cemitério inteiro — São Pedro estimado em 10-15 mil túmulos.</p></li>
+            <li><h3>Usar o fluxo manual, não o automático</h3><p>O reconhecimento automático (<code>mapear-cemiterio.py</code>) ainda tem 2 bugs conhecidos não corrigidos que pioram em fileiras coladas/apertadas.</p></li>
+            <li><h3>Pedir o Tiled Model em Cesium 3D Tiles</h3><p>Se quiser manter a porta aberta pro visualizador 3D futuro, sem custo extra de voo.</p></li>
+          </ol>
+        </section>
+
         <footer>
-          Seções 1-8 preparadas pra decisão dos sócios sobre o mapeamento por drone em si — ainda não
-          implementadas (voo, GCP, processamento). Seção 9 documenta o que já está em produção agora
-          (2026-07-17): navegação GPS + mapa 3D funcionando, pronto pra receber o ortomosaico assim que
-          ele existir. Fase 5 do roadmap (Geolocalização avançada, mapeamento cemiterial).
+          Detalhe técnico completo (arquitetura, bugs corrigidos, cada decisão de design) fica em
+          <code> docs/mapa.md</code> — anexo vivo, atualizado a cada mudança real na tecnologia. Este
+          relatório é o resumo executivo: só o que já foi feito e comprovado, sem hipótese.
         </footer>
       </div>
     </div>
