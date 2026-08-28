@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Camera, Video, MessageSquareText, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { supabaseServidor } from "@/lib/supabaseServidor";
 import { tema, CORES } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
@@ -86,6 +87,36 @@ export default async function ParceiroPublicoPage({
   const p = parceiro as Parceiro;
   const localCidade = [p.cidade, p.estado].filter(Boolean).join("/");
 
+  // Exemplo real de memorial pra visitante entender o produto antes de
+  // buscar — só memorial genuinamente público (gate aberto, busca e link
+  // habilitados) pode virar vitrine comercial, nunca um protegido pela
+  // família. Sem linha em homenagens_seguranca = público por padrão
+  // (mesma semântica do resto do sistema).
+  const { data: candidatos } = await supabaseServidor
+    .from("homenagens")
+    .select("id, nome_completo, slug, foto_url, frase_preferida")
+    .eq("parceiro_id", p.id)
+    .neq("nome_completo", "Novo memorial")
+    .not("slug", "like", "rascunho-%")
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  let exemplo: { id: string; nome_completo: string; slug: string; foto_url: string | null; frase_preferida: string | null } | null = null;
+  if (candidatos && candidatos.length > 0) {
+    const { data: segurancas } = await supabaseServidor
+      .from("homenagens_seguranca")
+      .select("homenagem_id, modo_gate, busca_habilitada, link_habilitado")
+      .in("homenagem_id", candidatos.map((c) => c.id));
+    const segPorId = new Map((segurancas || []).map((s) => [s.homenagem_id, s]));
+    exemplo = candidatos.find((c) => {
+      const seg = segPorId.get(c.id);
+      const gate = seg?.modo_gate ?? "aberto";
+      const busca = seg?.busca_habilitada ?? true;
+      const link = seg?.link_habilitado ?? true;
+      return gate === "aberto" && busca && link;
+    }) || null;
+  }
+
   return (
     <div style={tema.page}>
       <header style={tema.hero}>
@@ -117,6 +148,55 @@ export default async function ParceiroPublicoPage({
       </header>
 
       <main>
+        {exemplo && (
+          <section style={tema.secao}>
+            <div style={tema.eyebrow}>Um exemplo real</div>
+            <a
+              href={`/homenagem/${exemplo.slug}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                textDecoration: "none",
+                maxWidth: 560,
+              }}
+            >
+              {exemplo.foto_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={urlMidiaProtegida(exemplo.foto_url) || exemplo.foto_url}
+                  alt={exemplo.nome_completo}
+                  style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: "50%",
+                    background: CORES.douradoBorda,
+                    color: CORES.dourado,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 22,
+                    flexShrink: 0,
+                  }}
+                >
+                  {exemplo.nome_completo.charAt(0)}
+                </div>
+              )}
+              <div>
+                <p style={{ color: CORES.textoForte, fontSize: 16, margin: 0 }}>{exemplo.nome_completo}</p>
+                {exemplo.frase_preferida && (
+                  <p style={{ color: CORES.textoFraco, fontSize: 13, margin: "4px 0 0" }}>{exemplo.frase_preferida}</p>
+                )}
+                <p style={{ color: CORES.dourado, fontSize: 12, margin: "6px 0 0" }}>Ver memorial →</p>
+              </div>
+            </a>
+          </section>
+        )}
+
         <section style={tema.secao}>
           <div style={tema.eyebrow}>O que é o Legado Digital</div>
           <div style={tema.secaoGrid}>

@@ -114,8 +114,10 @@
 
 ## 12. Página pública do parceiro (`/parceiros/[slug]`)
 
-- [ ] Logo do parceiro + logo Legado Digital (**corrigido hoje**) exibindo
+- [x] Logo do parceiro + logo Legado Digital (**corrigido hoje**) exibindo
 - [ ] Busca restrita ao parceiro funcionando
+- [x] **Feature nova (pedido do Rafael, "pega um e coloca lá"):** seção "Um exemplo real" — mostra 1 memorial de verdade daquele parceiro (foto/monograma, nome, frase, link), só se for genuinamente público (gate aberto + busca + link habilitados, mesma regra de privacidade do mapa público) — nunca mostra memorial que a família protegeu. Some sozinho se o parceiro não tiver nenhum elegível.
+- [x] **Achado bônus, corrigido:** 2 memoriais de teste ("Helena Martins Costa", "Antônio Ferreira Lima") tinham `foto_url` apontando pra `http://localhost:3000/...` — link morto em produção, zerado no banco, cai no monograma padrão.
 
 ## 13. Segurança transversal
 
