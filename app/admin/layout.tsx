@@ -279,7 +279,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           <span className="text-[var(--tema-zinc-500)] ml-auto shrink-0">{tempoRelativo(a.created_at)}</span>
                         </p>
                         <p className="text-xs text-[var(--tema-zinc-500)] mt-0.5 truncate">
-                          {a.homenagens?.nome_completo || a.destinatario}
+                          {a.homenagens?.nome_completo ? `Sobre: ${a.homenagens.nome_completo}` : `Para: ${a.destinatario}`}
                         </p>
                       </Link>
                     ))

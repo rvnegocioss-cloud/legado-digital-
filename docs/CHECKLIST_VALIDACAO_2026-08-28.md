@@ -33,7 +33,7 @@
 - [x] Links de rodapé Privacidade/Termos corretos
 - [x] LegadoBot Público presente ("Posso ajudar?")
 - [x] **Achado, corrigido:** CLAUDE.md "O que está pronto" ainda dizia "Landing premium (Hero 3D)" — landing inteira foi trocada em 25/08 pela "O Fio da Vida" (migrada do protótipo, `9f3d9a4`), nunca atualizado ali. Corrigido.
-- [ ] **Achado, decisão sua pendente:** a busca embutida no hero (`BuscaMemorial`, feature de 30/07) **não existe mais** na landing atual — sumiu quando a página inteira foi trocada em 25/08 pelo "O Fio da Vida" (`dangerouslySetInnerHTML` do protótipo, não tinha busca). Não reintroduzi sozinho — quer a busca de volta nessa landing nova, ou tá certo assim (busca só em `/busca`, acessível pelo menu)?
+- [x] Busca embutida no hero (feature de 30/07) sumiu quando a landing foi trocada em 25/08 — **confirmado com o Rafael: intencional, ele mesmo pediu pra tirar.** Não é regressão, fica assim.
 
 ## 2. Central — Dashboard (`/admin`)
 
@@ -71,13 +71,14 @@
 
 - [ ] Criar staff, trocar papel, ativar/desativar funcionando
 
-## 7. Central — E-mails / Comunicações (`/admin/emails`)
+## 7. Central — E-mails / Comunicações (`/admin/emails`) — 🟡 em andamento
 
-- [ ] Feed de `emails_enviados` carregando
+- [x] **Achado, corrigido:** sino de alerta (`app/admin/layout.tsx`) mostrava o **nome do memorial** solto na 2ª linha de cada item, sem dizer se era "sobre quem" ou "pra quem" — lia como se o nome do memorial fosse o destinatário (achado ao vivo pelo Rafael: "ele não é fornecedor cara, o nome tá errado", sobre ver "Teste Conflito Silva" do lado de "Fornecedor"). Corrigido: `Sobre: {nome}` quando linkado a memorial, `Para: {destinatário}` quando não. Confirmado no banco: 100% dos e-mails já disparados (9 no total: 7 `envio_fornecedor`, 1 `convite_parceiro`, 1 `senha_familia`) foram só pra `rvnegocioss@gmail.com` — nunca saiu e-mail real pra fornecedor/parceiro/família de verdade, tudo teste.
+- [x] Confirmado: nenhum fornecedor de placa real cadastrado ainda (`configuracoes_sistema.email_fornecedor_placas` = e-mail de teste do Rafael) — bate com o item já registrado no CLAUDE.md.
+- [ ] Feed de `emails_enviados` carregando (visual, aguardando Rafael confirmar tela)
 - [ ] Filtro/busca funcionando
 - [ ] Link `wa.me` (clique pra conversar) funcionando
 - [ ] SMTP Google Workspace ainda entregando (DKIM/SPF/DMARC — confirmados 30/07, revalidar)
-- [ ] `email_fornecedor_placas` ainda com e-mail de teste do Rafael — trocar quando tiver fornecedor real
 
 ## 8. Portal do Parceiro (`/parceiro`)
 
