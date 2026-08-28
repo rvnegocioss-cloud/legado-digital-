@@ -218,12 +218,7 @@ export default function AdminComunicacoes() {
         )}
       </div>
 
-      <h2 className="text-lg font-medium text-white mb-1">Histórico de e-mails automáticos</h2>
-      <p className="text-[var(--tema-zinc-400)] text-sm mb-4">
-        Todo e-mail que o sistema disparou — senha da família, confirmação de placa, envio ao
-        fornecedor, convite de acesso ao parceiro. Agrupado por parceiro (retrátil), pra não virar
-        uma lista solta ilegível conforme o volume cresce.
-      </p>
+      <h2 className="text-lg font-medium text-white mb-4">Histórico de e-mails automáticos</h2>
 
       <input
         type="text"
