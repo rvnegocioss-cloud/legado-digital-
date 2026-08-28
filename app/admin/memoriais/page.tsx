@@ -24,6 +24,13 @@ interface Memorial {
   cidade: string | null
   slug: string | null
   created_at: string
+  parceiro_id: string | null
+}
+
+interface Parceiro {
+  id: string
+  nome_fantasia: string | null
+  razao_social: string
 }
 
 const FORM_INICIAL = {
@@ -37,7 +44,9 @@ const FORM_INICIAL = {
 
 export default function AdminMemoriais() {
   const [memoriais, setMemoriais] = useState<Memorial[]>([])
+  const [parceiros, setParceiros] = useState<Parceiro[]>([])
   const [loading, setLoading] = useState(true)
+  const [abertoId, setAbertoId] = useState<string | null>(null)
   const [dialogAberto, setDialogAberto] = useState(false)
   const [form, setForm] = useState(FORM_INICIAL)
   const [salvando, setSalvando] = useState(false)
@@ -51,9 +60,16 @@ export default function AdminMemoriais() {
     setLoading(true)
     const { data } = await supabase
       .from('homenagens')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at')
+      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at, parceiro_id')
       .order('created_at', { ascending: false })
     if (data) setMemoriais(data)
+
+    const { data: parceirosData } = await supabase
+      .from('parceiros_b2b')
+      .select('id, nome_fantasia, razao_social')
+      .order('razao_social')
+    if (parceirosData) setParceiros(parceirosData)
+
     setLoading(false)
   }
 
@@ -177,36 +193,80 @@ export default function AdminMemoriais() {
           <p className="text-[var(--tema-zinc-400)]">Nenhum memorial cadastrado ainda.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
-                <th className="text-left py-3 px-4">Nome</th>
-                <th className="text-left py-3 px-4">Nascimento</th>
-                <th className="text-left py-3 px-4">Falecimento</th>
-                <th className="text-left py-3 px-4">Cidade</th>
-                <th className="text-left py-3 px-4">Criado em</th>
-              </tr>
-            </thead>
-            <tbody>
-              {memoriais.map((m) => (
-                <tr key={m.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
-                  <td className="py-3 px-4 text-white">
-                    <Link href={`/admin/memoriais/${m.id}`} className="hover:text-blue-400 hover:underline">
-                      {m.nome_completo}
-                    </Link>
-                  </td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{m.data_nascimento || '-'}</td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{m.data_falecimento || '-'}</td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{m.cidade || '-'}</td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
-                    {new Date(m.created_at).toLocaleDateString('pt-BR')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        (() => {
+          const parceiroPorId = new Map(parceiros.map((p) => [p.id, p]))
+          const grupos = new Map<string, { parceiro: Parceiro | null; memoriais: Memorial[] }>()
+          for (const m of memoriais) {
+            const chave = m.parceiro_id || 'sem-parceiro'
+            if (!grupos.has(chave)) {
+              grupos.set(chave, { parceiro: m.parceiro_id ? parceiroPorId.get(m.parceiro_id) || null : null, memoriais: [] })
+            }
+            grupos.get(chave)!.memoriais.push(m)
+          }
+          const listaGrupos = Array.from(grupos.entries()).sort(([chaveA, a], [chaveB, b]) => {
+            if (chaveA === 'sem-parceiro') return 1
+            if (chaveB === 'sem-parceiro') return -1
+            const nomeA = a.parceiro?.nome_fantasia || a.parceiro?.razao_social || ''
+            const nomeB = b.parceiro?.nome_fantasia || b.parceiro?.razao_social || ''
+            return nomeA.localeCompare(nomeB)
+          })
+
+          return (
+            <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] divide-y divide-[var(--tema-zinc-800)]">
+              {listaGrupos.map(([chave, grupo]) => {
+                const aberto = abertoId === chave
+                const nome = grupo.parceiro
+                  ? grupo.parceiro.nome_fantasia || grupo.parceiro.razao_social
+                  : 'Memoriais Legado Digital (nosso, sem parceiro)'
+                return (
+                  <div key={chave}>
+                    <button
+                      onClick={() => setAbertoId(aberto ? null : chave)}
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--tema-zinc-800)]/40 transition-colors"
+                    >
+                      <span className="text-white font-medium text-sm">{nome}</span>
+                      <span className="text-[var(--tema-zinc-500)] text-xs">
+                        {grupo.memoriais.length} memorial{grupo.memoriais.length === 1 ? '' : 'is'} {aberto ? '▲' : '▼'}
+                      </span>
+                    </button>
+                    {aberto && (
+                      <div className="px-4 pb-4 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-[var(--tema-zinc-500)] text-xs">
+                              <th className="text-left py-2 px-2">Nome</th>
+                              <th className="text-left py-2 px-2">Nascimento</th>
+                              <th className="text-left py-2 px-2">Falecimento</th>
+                              <th className="text-left py-2 px-2">Cidade</th>
+                              <th className="text-left py-2 px-2">Criado em</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {grupo.memoriais.map((m) => (
+                              <tr key={m.id} className="border-t border-[var(--tema-zinc-800)]/50">
+                                <td className="py-2 px-2 text-white">
+                                  <Link href={`/admin/memoriais/${m.id}`} className="hover:text-blue-400 hover:underline">
+                                    {m.nome_completo}
+                                  </Link>
+                                </td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{m.data_nascimento || '-'}</td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{m.data_falecimento || '-'}</td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{m.cidade || '-'}</td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-400)]">
+                                  {new Date(m.created_at).toLocaleDateString('pt-BR')}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()
       )}
     </div>
   )

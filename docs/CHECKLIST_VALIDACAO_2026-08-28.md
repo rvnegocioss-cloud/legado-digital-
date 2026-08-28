@@ -61,6 +61,7 @@
 
 ## 5. Central — Memoriais (`/admin/memoriais`)
 
+- [x] **Achado, corrigido:** lista de memoriais era tabela plana, mesmo problema já achado no histórico de e-mails ("tá solto, quero vinculado com o parceiro"). Reescrita com o mesmo esquema: agrupado por parceiro (retrátil), balde "Memoriais Legado Digital (nosso, sem parceiro)" pros cadastrados direto pela Central — mesmo exemplo citado pelo Rafael (memorial do bizavô do Pedro).
 - [ ] Lista + ficha completa carregando
 - [ ] QR Code — **corrigido hoje**, confirmar ao vivo (imagem + download)
 - [ ] Upload de mídia funcionando
