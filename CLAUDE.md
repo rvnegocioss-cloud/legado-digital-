@@ -319,7 +319,7 @@ Ver seção Convenções acima.
 - Ricardo (admin): ricrodalves@gmail.com
 
 ## O que está pronto
-Landing premium (Hero 3D) · Central completa (Parceiros/Cemitérios/Memoriais/Mapa/Usuários/Emails/Manual) · Portal do Parceiro B2B completo · Busca pública + sub-landing do parceiro · Portal da Família completo · QR Code automático com pipeline de e-mail pro fornecedor · Rate limit middleware centralizado · Política de Privacidade/Termos · Repositório GitHub `rvnegocioss-cloud/legado-digital-` · CI/CD (lint+typecheck+build em paralelo). Detalhe de cada peça nas seções "como funciona" acima.
+Landing "O Fio da Vida" (migrada do protótipo do Rafael, 2026-08-25 — substituiu a landing anterior por inteiro) · Central completa (Parceiros/Cemitérios/Memoriais/Mapa/Usuários/Emails/Manual) · Portal do Parceiro B2B completo · Busca pública + sub-landing do parceiro · Portal da Família completo · QR Code automático com pipeline de e-mail pro fornecedor · Rate limit middleware centralizado · Política de Privacidade/Termos · Repositório GitHub `rvnegocioss-cloud/legado-digital-` · CI/CD (lint+typecheck+build em paralelo). Detalhe de cada peça nas seções "como funciona" acima.
 
 ## Chatbot IA (LegadoBot) — status
 **Planejado (não construído):** entrada por voz, acesso de leitura/escrita direta no banco com guardrail (parte mais sensível, precisa desenho cuidadoso antes), escalonamento pra admin humano.
