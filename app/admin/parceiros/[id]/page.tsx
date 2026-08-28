@@ -382,76 +382,6 @@ export default function DetalheParceiro() {
           </dl>
         </div>
 
-        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-[var(--tema-zinc-400)]">Página pública do parceiro</h2>
-            {parceiro.slug && (
-              <a
-                href={`/parceiros/${parceiro.slug}`}
-                className="text-blue-400 hover:underline text-xs"
-              >
-                Ver página pública
-              </a>
-            )}
-          </div>
-          {!parceiro.slug && (
-            <p className="text-yellow-500 text-sm mb-3">
-              Este parceiro ainda não tem endereço público — preencha o nome fantasia (ou a razão
-              social) e salve os dados do parceiro; o endereço é gerado sozinho no save.
-            </p>
-          )}
-          <form onSubmit={salvarPaginaPublica} className="space-y-3">
-            <div>
-              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Logo</label>
-              {logoUrl && (
-                <div className="flex items-center gap-3 mb-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={urlMidiaProtegida(logoUrl) || logoUrl}
-                    alt="Logo"
-                    className="h-14 object-contain bg-[var(--tema-zinc-800)] rounded p-2"
-                  />
-                  <button
-                    type="button"
-                    onClick={removerLogo}
-                    disabled={removendoLogo}
-                    className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 disabled:opacity-50"
-                  >
-                    {removendoLogo ? 'Removendo...' : 'Remover logo'}
-                  </button>
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoChange}
-                disabled={enviandoLogo}
-                className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)]"
-              />
-              {enviandoLogo && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando logo...</p>}
-            </div>
-            <div>
-              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Descrição institucional (aparece na página pública)</label>
-              <textarea
-                placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
-                rows={3}
-                value={descricaoPublica}
-                onChange={(e) => setDescricaoPublica(e.target.value)}
-                className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
-              />
-            </div>
-            {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
-            {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
-            <button
-              type="submit"
-              disabled={salvandoPagina}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-branco-fixo text-sm font-medium rounded-lg"
-            >
-              {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
-            </button>
-          </form>
-        </div>
-
         <div className="lg:col-span-2 xl:col-span-3 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 space-y-5">
             <SecaoRetratil titulo={`Contatos da empresa ${contatos.length > 0 ? `(${contatos.length})` : ''}`} abertoPorPadrao>
               <p className="text-[var(--tema-zinc-500)] text-xs mb-4">
@@ -633,6 +563,79 @@ export default function DetalheParceiro() {
               )}
             </SecaoRetratil>
         </div>
+
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-medium text-[var(--tema-zinc-400)]">Página pública do parceiro</h2>
+            {parceiro.slug && (
+              <a
+                href={`/parceiros/${parceiro.slug}`}
+                className="text-blue-400 hover:underline text-xs"
+              >
+                Ver página pública
+              </a>
+            )}
+          </div>
+          {!parceiro.slug && (
+            <p className="text-yellow-500 text-sm mb-3">
+              Este parceiro ainda não tem endereço público — preencha o nome fantasia (ou a razão
+              social) e salve os dados do parceiro; o endereço é gerado sozinho no save.
+            </p>
+          )}
+          <form onSubmit={salvarPaginaPublica} className="space-y-3">
+            <div>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Logo</label>
+              {logoUrl && (
+                <div className="flex items-center gap-3 mb-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={urlMidiaProtegida(logoUrl) || logoUrl}
+                    alt="Logo"
+                    className="h-14 object-contain bg-[var(--tema-zinc-800)] rounded p-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={removerLogo}
+                    disabled={removendoLogo}
+                    className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 disabled:opacity-50"
+                  >
+                    {removendoLogo ? 'Removendo...' : 'Remover logo'}
+                  </button>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                disabled={enviandoLogo}
+                className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)]"
+              />
+              {enviandoLogo && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando logo...</p>}
+            </div>
+            <div>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Descrição institucional (aparece na página pública)</label>
+              <textarea
+                placeholder="Uma breve apresentação da funerária/cemitério pras famílias que visitarem a página"
+                rows={3}
+                value={descricaoPublica}
+                onChange={(e) => setDescricaoPublica(e.target.value)}
+                className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
+              />
+            </div>
+            {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
+            {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
+            <button
+              type="submit"
+              disabled={salvandoPagina}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-branco-fixo text-sm font-medium rounded-lg"
+            >
+              {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
+            </button>
+          </form>
+        </div>
+
+
+
       </div>
     </div>
   )
