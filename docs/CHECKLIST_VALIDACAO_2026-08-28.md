@@ -75,8 +75,8 @@
 
 - [x] **Achado, corrigido:** sino de alerta (`app/admin/layout.tsx`) mostrava o **nome do memorial** solto na 2ª linha de cada item, sem dizer se era "sobre quem" ou "pra quem" — lia como se o nome do memorial fosse o destinatário (achado ao vivo pelo Rafael: "ele não é fornecedor cara, o nome tá errado", sobre ver "Teste Conflito Silva" do lado de "Fornecedor"). Corrigido: `Sobre: {nome}` quando linkado a memorial, `Para: {destinatário}` quando não. Confirmado no banco: 100% dos e-mails já disparados (9 no total: 7 `envio_fornecedor`, 1 `convite_parceiro`, 1 `senha_familia`) foram só pra `rvnegocioss@gmail.com` — nunca saiu e-mail real pra fornecedor/parceiro/família de verdade, tudo teste.
 - [x] Confirmado: nenhum fornecedor de placa real cadastrado ainda (`configuracoes_sistema.email_fornecedor_placas` = e-mail de teste do Rafael) — bate com o item já registrado no CLAUDE.md.
+- [x] **Achado, corrigido:** histórico de e-mails (`/admin/emails`) era tabela plana sem fim — pedido do Rafael: "pensa quando tiver milhares de e-mails soltos, não faz sentido". Reescrito pra agrupar por parceiro (retrátil, mesmo padrão já usado no bloco de contatos acima), balde "Sem parceiro" pros memoriais cadastrados direto pela Central. Campo de busca adicionado (`ilike` em destinatário/assunto, debounce 300ms, servidor — não filtro só client-side, senão não acha e-mail fora da primeira leva carregada).
 - [ ] Feed de `emails_enviados` carregando (visual, aguardando Rafael confirmar tela)
-- [ ] Filtro/busca funcionando
 - [ ] Link `wa.me` (clique pra conversar) funcionando
 - [ ] SMTP Google Workspace ainda entregando (DKIM/SPF/DMARC — confirmados 30/07, revalidar)
 

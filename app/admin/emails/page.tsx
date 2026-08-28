@@ -16,7 +16,7 @@ interface EmailEnviado {
   erro_msg: string | null
   confirmado_em: string | null
   created_at: string
-  homenagens: { nome_completo: string } | null
+  homenagens: { nome_completo: string; parceiro_id: string | null } | null
 }
 
 interface MemorialContato {
@@ -53,19 +53,38 @@ const STATUS_STYLE: Record<string, string> = {
 
 export default function AdminComunicacoes() {
   const [emails, setEmails] = useState<EmailEnviado[]>([])
+  const [carregandoEmails, setCarregandoEmails] = useState(true)
+  const [buscaEmail, setBuscaEmail] = useState('')
   const [parceiros, setParceiros] = useState<ParceiroContato[]>([])
   const [loading, setLoading] = useState(true)
   const [abertoId, setAbertoId] = useState<string | null>(null)
+  const [historicoAbertoId, setHistoricoAbertoId] = useState<string | null>(null)
+
+  const carregarEmails = useCallback(async (termo: string) => {
+    setCarregandoEmails(true)
+    let query = supabase
+      .from('emails_enviados')
+      .select('*, homenagens(nome_completo, parceiro_id)')
+      .order('created_at', { ascending: false })
+      .limit(300)
+
+    const termoLimpo = termo.trim()
+    if (termoLimpo) {
+      query = query.or(`destinatario.ilike.%${termoLimpo}%,assunto.ilike.%${termoLimpo}%`)
+    }
+
+    const { data: emailsData } = await query
+    setEmails((emailsData as any) || [])
+    setCarregandoEmails(false)
+  }, [])
+
+  useEffect(() => {
+    const t = setTimeout(() => carregarEmails(buscaEmail), 300)
+    return () => clearTimeout(t)
+  }, [buscaEmail, carregarEmails])
 
   const load = useCallback(async () => {
     setLoading(true)
-
-    const { data: emailsData } = await supabase
-      .from('emails_enviados')
-      .select('*, homenagens(nome_completo)')
-      .order('created_at', { ascending: false })
-      .limit(100)
-    setEmails((emailsData as any) || [])
 
     const { data: parceirosData } = await supabase
       .from('parceiros_b2b')
@@ -202,10 +221,19 @@ export default function AdminComunicacoes() {
       <h2 className="text-lg font-medium text-white mb-1">Histórico de e-mails automáticos</h2>
       <p className="text-[var(--tema-zinc-400)] text-sm mb-4">
         Todo e-mail que o sistema disparou — senha da família, confirmação de placa, envio ao
-        fornecedor, convite de acesso ao parceiro.
+        fornecedor, convite de acesso ao parceiro. Agrupado por parceiro (retrátil), pra não virar
+        uma lista solta ilegível conforme o volume cresce.
       </p>
 
-      {emails[0] && (
+      <input
+        type="text"
+        value={buscaEmail}
+        onChange={(e) => setBuscaEmail(e.target.value)}
+        placeholder="Buscar por e-mail ou assunto..."
+        className="w-full max-w-md mb-4 px-3 py-2 rounded-lg bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] text-white text-sm placeholder:text-[var(--tema-zinc-500)] focus:outline-none focus:border-[var(--tema-zinc-600)]"
+      />
+
+      {emails[0] && !buscaEmail && (
         <div
           className={`flex items-center justify-between rounded-lg px-4 py-3 mb-4 text-sm ${
             emails[0].status === 'erro' ? 'bg-red-900/30 border border-red-800' : 'bg-green-900/30 border border-green-800'
@@ -221,40 +249,89 @@ export default function AdminComunicacoes() {
         </div>
       )}
 
-      {emails.length === 0 ? (
-        <p className="text-[var(--tema-zinc-400)]">Nenhum e-mail disparado ainda.</p>
+      {carregandoEmails ? (
+        <p className="text-[var(--tema-zinc-400)] text-sm">Buscando...</p>
+      ) : emails.length === 0 ? (
+        <p className="text-[var(--tema-zinc-400)] text-sm">
+          {buscaEmail ? 'Nenhum e-mail encontrado pra essa busca.' : 'Nenhum e-mail disparado ainda.'}
+        </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
-                <th className="text-left py-3 px-4">Memorial</th>
-                <th className="text-left py-3 px-4">Tipo</th>
-                <th className="text-left py-3 px-4">Destinatário</th>
-                <th className="text-left py-3 px-4">Status</th>
-                <th className="text-left py-3 px-4">Quando</th>
-              </tr>
-            </thead>
-            <tbody>
-              {emails.map((e) => (
-                <tr key={e.id} className="border-b border-[var(--tema-zinc-800)]/50 hover:bg-[var(--tema-zinc-900)]/50">
-                  <td className="py-3 px-4 text-white">{e.homenagens?.nome_completo || '—'}</td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{rotuloTipoEmail(e.tipo)}</td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-300)]">{e.destinatario}</td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-xs ${STATUS_STYLE[e.status] || 'bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-400)]'}`}>
-                      {e.status}
-                    </span>
-                    {e.erro_msg && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">{e.erro_msg}</p>}
-                  </td>
-                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
-                    {new Date(e.confirmado_em || e.created_at).toLocaleString('pt-BR')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        (() => {
+          const parceiroPorId = new Map(parceiros.map((p) => [p.id, p]))
+          const grupos = new Map<string, { parceiro: ParceiroContato | null; emails: EmailEnviado[] }>()
+          for (const e of emails) {
+            const parceiroId = e.homenagens?.parceiro_id ?? null
+            const chave = parceiroId || 'sem-parceiro'
+            if (!grupos.has(chave)) {
+              grupos.set(chave, { parceiro: parceiroId ? parceiroPorId.get(parceiroId) || null : null, emails: [] })
+            }
+            grupos.get(chave)!.emails.push(e)
+          }
+          const listaGrupos = Array.from(grupos.entries()).sort(([chaveA, a], [chaveB, b]) => {
+            if (chaveA === 'sem-parceiro') return 1
+            if (chaveB === 'sem-parceiro') return -1
+            const nomeA = a.parceiro?.nome_fantasia || a.parceiro?.razao_social || ''
+            const nomeB = b.parceiro?.nome_fantasia || b.parceiro?.razao_social || ''
+            return nomeA.localeCompare(nomeB)
+          })
+
+          return (
+            <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] divide-y divide-[var(--tema-zinc-800)]">
+              {listaGrupos.map(([chave, grupo]) => {
+                const aberto = historicoAbertoId === chave
+                const nome = grupo.parceiro
+                  ? grupo.parceiro.nome_fantasia || grupo.parceiro.razao_social
+                  : 'Sem parceiro (cadastrado direto pela Central)'
+                return (
+                  <div key={chave}>
+                    <button
+                      onClick={() => setHistoricoAbertoId(aberto ? null : chave)}
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--tema-zinc-800)]/40 transition-colors"
+                    >
+                      <span className="text-white font-medium text-sm">{nome}</span>
+                      <span className="text-[var(--tema-zinc-500)] text-xs">
+                        {grupo.emails.length} e-mail{grupo.emails.length === 1 ? '' : 's'} {aberto ? '▲' : '▼'}
+                      </span>
+                    </button>
+                    {aberto && (
+                      <div className="px-4 pb-4 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-[var(--tema-zinc-500)] text-xs">
+                              <th className="text-left py-2 px-2">Memorial</th>
+                              <th className="text-left py-2 px-2">Tipo</th>
+                              <th className="text-left py-2 px-2">Destinatário</th>
+                              <th className="text-left py-2 px-2">Status</th>
+                              <th className="text-left py-2 px-2">Quando</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {grupo.emails.map((e) => (
+                              <tr key={e.id} className="border-t border-[var(--tema-zinc-800)]/50">
+                                <td className="py-2 px-2 text-white">{e.homenagens?.nome_completo || '—'}</td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{rotuloTipoEmail(e.tipo)}</td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{e.destinatario}</td>
+                                <td className="py-2 px-2">
+                                  <span className={`px-2 py-1 rounded text-xs ${STATUS_STYLE[e.status] || 'bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-400)]'}`}>
+                                    {e.status}
+                                  </span>
+                                  {e.erro_msg && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">{e.erro_msg}</p>}
+                                </td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-400)]">
+                                  {new Date(e.confirmado_em || e.created_at).toLocaleString('pt-BR')}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()
       )}
     </div>
   )
