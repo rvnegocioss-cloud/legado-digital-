@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Camera, Video, MessageSquareText, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { tema, CORES } from "@/lib/publicTheme";
@@ -158,11 +159,14 @@ export default async function ParceiroPublicoPage({
       </main>
 
       <footer style={tema.footer}>
-        <a
-          href="/"
-          style={{ fontFamily: "Georgia, serif", color: CORES.textoForte, textDecoration: "none" }}
-        >
-          Legado Digital
+        <a href="/" style={{ display: "block" }}>
+          <Image
+            src="/logo-legado-digital.svg"
+            alt="Legado Digital"
+            width={160}
+            height={64}
+            style={{ height: 32, width: "auto" }}
+          />
         </a>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>

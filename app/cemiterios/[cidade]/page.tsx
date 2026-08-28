@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MapPin, Satellite } from "lucide-react";
 import { tema, CORES } from "@/lib/publicTheme";
@@ -75,7 +76,15 @@ export default async function CidadeCemiteriosPage({
       </main>
 
       <footer style={tema.footer}>
-        <span style={{ fontFamily: "Georgia, serif" }}>Legado Digital</span>
+        <a href="/" style={{ display: "block" }}>
+          <Image
+            src="/logo-legado-digital.svg"
+            alt="Legado Digital"
+            width={160}
+            height={64}
+            style={{ height: 32, width: "auto" }}
+          />
+        </a>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>
           <a href="/termos-de-uso" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Termos</a>

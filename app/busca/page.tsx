@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { tema } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 
@@ -18,7 +19,15 @@ export default function BuscaPage() {
       </main>
 
       <footer style={tema.footer}>
-        <span style={{ fontFamily: "Georgia, serif" }}>Legado Digital</span>
+        <a href="/" style={{ display: "block" }}>
+          <Image
+            src="/logo-legado-digital.svg"
+            alt="Legado Digital"
+            width={160}
+            height={64}
+            style={{ height: 32, width: "auto" }}
+          />
+        </a>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <a href="/cemiterios" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Cemitérios</a>
           <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>
