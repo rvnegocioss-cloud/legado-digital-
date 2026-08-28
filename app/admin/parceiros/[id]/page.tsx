@@ -369,19 +369,6 @@ export default function DetalheParceiro() {
           </dl>
         </div>
 
-        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
-          <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-3">Plano e pagamento</h2>
-          <dl>
-            <Campo label="Plano">{parceiro.plano_contratado || '—'}</Campo>
-            <Campo label="Pagamento">
-              <span className={`px-2 py-0.5 rounded text-xs ${pagamento.className}`}>
-                {pagamento.label}
-              </span>
-            </Campo>
-            <Campo label="Desde">{new Date(parceiro.created_at).toLocaleDateString('pt-BR')}</Campo>
-          </dl>
-        </div>
-
         <div className="lg:col-span-2 xl:col-span-3 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 space-y-5">
             <SecaoRetratil titulo={`Contatos da empresa ${contatos.length > 0 ? `(${contatos.length})` : ''}`} abertoPorPadrao>
               <p className="text-[var(--tema-zinc-500)] text-xs mb-4">
@@ -634,7 +621,18 @@ export default function DetalheParceiro() {
           </form>
         </div>
 
-
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
+          <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-3">Plano e pagamento</h2>
+          <dl>
+            <Campo label="Plano">{parceiro.plano_contratado || '—'}</Campo>
+            <Campo label="Pagamento">
+              <span className={`px-2 py-0.5 rounded text-xs ${pagamento.className}`}>
+                {pagamento.label}
+              </span>
+            </Campo>
+            <Campo label="Desde">{new Date(parceiro.created_at).toLocaleDateString('pt-BR')}</Campo>
+          </dl>
+        </div>
 
       </div>
     </div>
