@@ -118,6 +118,9 @@ export default function AdminMemoriais() {
             <DialogHeader>
               <DialogTitle className="text-white">Novo Memorial</DialogTitle>
             </DialogHeader>
+            <p className="text-xs text-[var(--tema-zinc-500)] -mt-2 mb-1">
+              Criado direto pela Central, sem vínculo com parceiro — entra no balde "Memoriais Legado Digital".
+            </p>
             <form onSubmit={salvar} className="space-y-3">
               <div>
                 <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome completo</label>
