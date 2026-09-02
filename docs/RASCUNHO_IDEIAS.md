@@ -81,3 +81,32 @@ grande — o São Pedro tem fileiras mais coladas, caso onde o algoritmo erra ma
 **Nada construído.** As telas do fluxo (cadastro rápido de sepultamento, página enxuta de localização,
 botão de enviar pra família) não existem — só o mapa, o endereçamento e a conferência por GPS, que já
 estão no ar.
+
+## Decks de apresentação do Ricardo (2026-09-02, aguardando decisão)
+
+Ricardo mandou 2 PDFs prontos, provavelmente gerados por IA (tipo Gamma) — mesma ideia do "book
+digital" de vendas já cogitada em 26/08 (nunca aprovada). Guardando aqui pra não perder, análise feita
+na hora:
+
+- **"Apresentação Financeira Legado Digital"** (13 slides) — modelo de preço sugerido (Memorial
+  Básico R$250 taxa única, Premium R$490, Membro PAF Corp +R$3,50/mês), margem 320% no up-sell,
+  projeção de MRR em 36 meses, receita incremental por porte de funerária.
+- **"Apresentação Comercial Legado Digital"** (13 slides) — pitch pra funerária: cenário do setor,
+  solução (placa QR + espaço online), experiência da família, 3 modelos de parceria (inclusão no PAF /
+  venda direta up-sell / cortesia premium), jornada de implantação em 4 passos, "4 níveis de acesso".
+
+**Aproveitável:** estrutura narrativa e os 3 modelos de parceria (batem com o modelo B2B2C já
+confirmado em ata — funerária paga, não a família).
+
+**Cuidado antes de usar pra vender de verdade:**
+- Todo número financeiro é inventado (320% margem, 100% satisfação, churn -18%, os preços) — nenhum
+  vem do banco real nem foi decidido pelos sócios (preço/modelo segue pendência aberta, Fase 4).
+- Imagens são banco de imagem genérico, não print do sistema real — a própria última página do PDF
+  financeiro entrega a fonte (qlik.com, boldbi.com, dashboards de outro produto qualquer); o comercial
+  usa foto de honoryou.com/gabb.com pro cemitério e a família no celular.
+- "4 níveis de acesso" — sistema real tem 5 modos (aberto/senha/identificação/lista de e-mail/oculto).
+- "Envio do acesso via WhatsApp" — sistema real manda por e-mail (SMTP Google Workspace), não
+  WhatsApp.
+
+**Pendência:** decidir se vira a base do book digital de vendas de verdade — troca números fictícios
+por preço decidido (ou tira os números até decidir) e print real do sistema no lugar do stock.

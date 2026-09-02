@@ -656,6 +656,27 @@ export default function MapaPaginas() {
         </div>
 
         <div className="callout">
+          <span className="mark">📑</span>
+          <div className="body">
+            <strong>Decks de apresentação do Ricardo (2026-09-02):</strong> 2 PDFs prontos (provável
+            IA/Gamma) — &quot;Apresentação Financeira&quot; (preço sugerido, margem, MRR projetado) e
+            &quot;Apresentação Comercial&quot; (pitch pra funerária, 3 modelos de parceria).
+            <p>
+              Estrutura e os 3 modelos de parceria (PAF/venda direta/cortesia) são aproveitáveis —
+              batem com o modelo B2B2C já confirmado em ata. <strong>Números e imagens são
+              placeholder</strong>: preços/margem/churn não vêm do banco nem foram decididos pelos
+              sócios, e as imagens são banco de imagem genérico (a própria última página do PDF
+              financeiro cita qlik.com/boldbi.com como fonte), não print real do sistema.
+            </p>
+            <p>
+              Antes de usar pra vender de verdade: trocar números por preço decidido (ou tirar até
+              decidir) e trocar imagem stock por print real do sistema. Detalhe completo em{' '}
+              <code>docs/RASCUNHO_IDEIAS.md</code>.
+            </p>
+          </div>
+        </div>
+
+        <div className="callout">
           <span className="mark">💰</span>
           <div className="body">
             <strong>Custo de armazenamento em escala</strong> — cada memorial vai guardar até
