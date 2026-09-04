@@ -669,6 +669,25 @@ path.thread-main, path.thread-stub, #fiosDNA { opacity: 0 !important; }
   .fio-da-vida .node-img-b { animation: none; opacity: 0; }
 }
 
+/* Node com 3 fotos (O caminho até lá): mesmo revezamento, 3 tempos.
+   A 2a e a 3a precisam do MESMO ciclo de 12s da primeira — sem isso a 2a
+   herda o ciclo de 8s dos nodes de 2 fotos e sai de sincronia. */
+.fio-da-vida .node-3fotos {
+  animation: fio-t1 12s ease-in-out infinite;
+  animation-delay: var(--reveza-atraso, 0s);
+}
+.fio-da-vida .node-3fotos ~ .node-img-b {
+  animation: fio-t2 12s ease-in-out infinite;
+  animation-delay: var(--reveza-atraso, 0s);
+}
+.fio-da-vida .node-3fotos ~ .node-img-c {
+  animation: fio-t3 12s ease-in-out infinite;
+  animation-delay: var(--reveza-atraso, 0s);
+}
+@keyframes fio-t1 { 0%,29%{opacity:1} 33%,96%{opacity:0} 100%{opacity:1} }
+@keyframes fio-t2 { 0%,29%{opacity:0} 33%,62%{opacity:1} 66%,100%{opacity:0} }
+@keyframes fio-t3 { 0%,62%{opacity:0} 66%,96%{opacity:1} 100%{opacity:0} }
+
 /* Node com 4 fotos (De onde você estiver): mesmo revezamento, 4 tempos. */
 .fio-da-vida .node-img-c,
 .fio-da-vida .node-img-d {

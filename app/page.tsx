@@ -132,7 +132,7 @@ const MARCACAO = `<nav class="navbar">
   <div class="node dot"   data-x="460" data-y="150"  data-t="0.06"></div>
 
   <div class="node photo" data-x="330" data-y="300" data-t="0.092">
-    <div class="ring"><img src="/fio-da-vida/nodes/mapa-rota-1.png" class="node-img node-img-a" style="--reveza-atraso:0.0s" alt="Mapa aéreo do cemitério com o memorial marcado e a rota até o túmulo" /><img src="/fio-da-vida/nodes/mapa-rota-2.png" class="node-img node-img-b" style="--reveza-atraso:0.0s" alt="Mapa aéreo do cemitério com o memorial marcado e a rota até o túmulo" /></div>
+    <div class="ring"><img src="/fio-da-vida/nodes/mapa-rota-1.png" class="node-img node-img-a node-3fotos" style="--reveza-atraso:0.0s" alt="Mapa aéreo do cemitério com o memorial marcado e a rota até o túmulo" /><img src="/fio-da-vida/nodes/mapa-rota-2.png" class="node-img node-img-b" style="--reveza-atraso:0.0s" alt="Mapa aéreo do cemitério com o memorial marcado e a rota até o túmulo" /><img src="/fio-da-vida/nodes/mapa-rota-3.png" class="node-img node-img-c" style="--reveza-atraso:0.0s" alt="Mapa aéreo do cemitério com vários memoriais marcados" /></div>
     <div class="cap side-right"><b>O caminho até lá</b>Nosso mapa localiza o memorial no cemitério e traça a rota por GPS, direto do celular, até o túmulo exato.<a href="/cemiterios" class="cap-link">Ver o mapa dos cemitérios →</a></div>
   </div>
 
