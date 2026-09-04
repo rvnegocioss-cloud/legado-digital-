@@ -163,8 +163,8 @@ const MARCACAO = `<nav class="navbar">
 
 
   <div class="node photo" data-x="340" data-y="1387" data-t="0.318">
-    <div class="ring"><img src="/fio-da-vida/nodes/encontro-diario-1.png" class="node-img node-img-a" style="--reveza-atraso:0.8s" alt="Senhora vendo o memorial no tablet, luz da tarde" /><img src="/fio-da-vida/nodes/encontro-diario-2.png" class="node-img node-img-b" style="--reveza-atraso:0.8s" alt="Senhora vendo o memorial no tablet, luz da tarde" /></div>
-    <div class="cap side-right"><b>Um encontro de todo dia</b>Ela abre o memorial e passa um tempo com ele. Nem sempre precisa de motivo.</div>
+    <div class="ring"><img src="/fio-da-vida/nodes/memorial-node-1.png" class="node-img node-img-a" style="--reveza-atraso:0.8s" alt="Senhora abrindo o memorial no celular, no jardim" /><img src="/fio-da-vida/nodes/memorial-node-2.png" class="node-img node-img-b" style="--reveza-atraso:0.8s" alt="Família vendo o memorial no tablet, na sala" /></div>
+    <div class="cap side-right"><b>Memorial Legado Digital</b>Fotos, vídeos, biografia, linha do tempo e as mensagens de quem conviveu. Acessível pelo QR Code da placa, de qualquer celular.</div>
   </div>
 
   <div class="node dot" data-x="560" data-y="1780" data-t="0.399"></div>
