@@ -1,10 +1,11 @@
-import Image from "next/image";
 import { Camera, Video, MessageSquareText, Lock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { supabaseServidor } from "@/lib/supabaseServidor";
 import { tema, CORES } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
+import SiteNav from "@/components/public/SiteNav";
+import SiteFooter from "@/components/public/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -75,11 +76,15 @@ export default async function ParceiroPublicoPage({
 
   if (!parceiro) {
     return (
-      <div style={{ ...tema.page, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ textAlign: "center" }}>
-          <p style={{ fontSize: 18, color: CORES.dourado, margin: 0 }}>Página não encontrada.</p>
-          <p style={{ color: CORES.textoFraco, marginTop: 8 }}>Confira o endereço e tente novamente.</p>
+      <div style={tema.page}>
+        <SiteNav />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 20px" }}>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: 18, color: CORES.dourado, margin: 0 }}>Página não encontrada.</p>
+            <p style={{ color: CORES.textoFraco, marginTop: 8 }}>Confira o endereço e tente novamente.</p>
+          </div>
         </div>
+        <SiteFooter />
       </div>
     );
   }
@@ -119,6 +124,7 @@ export default async function ParceiroPublicoPage({
 
   return (
     <div style={tema.page}>
+      <SiteNav />
       <header style={tema.hero}>
         {p.logo_url && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -238,21 +244,7 @@ export default async function ParceiroPublicoPage({
         </section>
       </main>
 
-      <footer style={tema.footer}>
-        <a href="/" style={{ display: "block" }}>
-          <Image
-            src="/logo-legado-digital.svg"
-            alt="Legado Digital"
-            width={160}
-            height={64}
-            style={{ height: 32, width: "auto" }}
-          />
-        </a>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>
-          <a href="/termos-de-uso" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Termos</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -1,10 +1,12 @@
-import Image from "next/image";
 import { tema } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
+import SiteNav from "@/components/public/SiteNav";
+import SiteFooter from "@/components/public/SiteFooter";
 
 export default function BuscaPage() {
   return (
     <div style={tema.page}>
+      <SiteNav />
       <header style={tema.hero}>
         <div style={tema.eyebrow}>Em Memória</div>
         <h1 style={tema.titulo}>Buscar um memorial</h1>
@@ -18,22 +20,7 @@ export default function BuscaPage() {
         <BuscaMemorial />
       </main>
 
-      <footer style={tema.footer}>
-        <a href="/" style={{ display: "block" }}>
-          <Image
-            src="/logo-legado-digital.svg"
-            alt="Legado Digital"
-            width={160}
-            height={64}
-            style={{ height: 32, width: "auto" }}
-          />
-        </a>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <a href="/cemiterios" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Cemitérios</a>
-          <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>
-          <a href="/termos-de-uso" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Termos</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

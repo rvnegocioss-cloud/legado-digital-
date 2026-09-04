@@ -1,11 +1,12 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { tema, CORES } from "@/lib/publicTheme";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
 import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
+import SiteNav from "@/components/public/SiteNav";
+import SiteFooter from "@/components/public/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +75,7 @@ export default async function CemiterioMapaPage({
 
   return (
     <div style={tema.page}>
+      <SiteNav />
       <header style={tema.hero}>
         <div style={{ alignSelf: "flex-start", margin: "0 auto 12px" }}>
           <Link href={`/cemiterios/${cidade}`} style={{ color: CORES.textoFraco, fontSize: 12.5, textDecoration: "none" }}>
@@ -102,21 +104,7 @@ export default async function CemiterioMapaPage({
         />
       </main>
 
-      <footer style={tema.footer}>
-        <a href="/" style={{ display: "block" }}>
-          <Image
-            src="/logo-legado-digital.svg"
-            alt="Legado Digital"
-            width={160}
-            height={64}
-            style={{ height: 32, width: "auto" }}
-          />
-        </a>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <a href="/politica-de-privacidade" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Privacidade</a>
-          <a href="/termos-de-uso" style={{ color: "#7a8a96", fontSize: 12, textDecoration: "none" }}>Termos</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
