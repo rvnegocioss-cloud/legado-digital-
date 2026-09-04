@@ -71,6 +71,25 @@ export async function POST(req: NextRequest) {
   const { data: existingUsers } = await admin.auth.admin.listUsers({ perPage: 200 })
   const existing = existingUsers?.users.find((u) => u.email === email)
 
+  if (existing) {
+    const { data: perfisExistentes } = await admin
+      .from('usuarios_perfis')
+      .select('perfis(nome)')
+      .eq('usuario_id', existing.id)
+    const jaEhStaff = (perfisExistentes || []).some(
+      (p: { perfis: { nome: string } | { nome: string }[] | null }) => {
+        const perfil = Array.isArray(p.perfis) ? p.perfis[0] : p.perfis
+        return perfil?.nome === 'Admin Legado Digital' || perfil?.nome === 'Operador Legado Digital'
+      }
+    )
+    if (jaEhStaff) {
+      return NextResponse.json(
+        { error: 'Esse e-mail já pertence a uma conta da equipe Legado Digital — não pode virar parceiro automaticamente.' },
+        { status: 409 }
+      )
+    }
+  }
+
   let userId: string
   if (existing) {
     const { data, error } = await admin.auth.admin.updateUserById(existing.id, {

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { checkResourceRateLimit } from '@/lib/rateLimitUtil'
 import { criarComprovante, verificarComprovante } from '@/lib/comprovanteAssinatura'
 import { autorizarMemorial } from '@/lib/autorizacaoMemorial'
+import { escritaPublicaLiberada } from '@/lib/verificarGatePublico'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -42,6 +43,11 @@ export async function POST(req: NextRequest) {
   }
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+
+  if (!(await escritaPublicaLiberada(req, supabaseAdmin, memorialId))) {
+    return NextResponse.json({ error: 'Memorial não encontrado' }, { status: 404 })
+  }
+
   const { data, error } = await supabaseAdmin
     .from('condolencias')
     .insert({ homenagem_id: memorialId, visitor_name: nome.trim(), message: mensagem.trim() })

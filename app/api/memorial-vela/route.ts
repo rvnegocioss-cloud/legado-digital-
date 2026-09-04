@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkResourceRateLimit } from '@/lib/rateLimitUtil'
+import { escritaPublicaLiberada } from '@/lib/verificarGatePublico'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -29,6 +30,17 @@ export async function POST(req: NextRequest) {
   }
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
+
+  const { data: homenagem } = await supabaseAdmin
+    .from('homenagens')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (!homenagem || !(await escritaPublicaLiberada(req, supabaseAdmin, homenagem.id))) {
+    return NextResponse.json({ error: 'Memorial não encontrado' }, { status: 404 })
+  }
+
   const { data, error } = await supabaseAdmin.rpc('acender_vela', { p_slug: slug })
 
   if (error) {

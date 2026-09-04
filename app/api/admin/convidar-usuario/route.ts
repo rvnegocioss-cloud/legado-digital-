@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { gerarSenhaTemporaria } from '@/lib/gerarSenhaTemporaria'
 
-const TEMP_PASSWORD = '123456'
 const PAPEIS_STAFF = ['Admin Legado Digital', 'Operador Legado Digital']
 
 export async function POST(req: NextRequest) {
@@ -66,10 +66,31 @@ export async function POST(req: NextRequest) {
   const { data: existingUsers } = await admin.auth.admin.listUsers({ perPage: 200 })
   const existing = existingUsers?.users.find((u) => u.email === email)
 
+  if (existing) {
+    const { data: perfisExistentes } = await admin
+      .from('usuarios_perfis')
+      .select('perfis(nome)')
+      .eq('usuario_id', existing.id)
+    const jaEhParceiro = (perfisExistentes || []).some(
+      (p: { perfis: { nome: string } | { nome: string }[] | null }) => {
+        const perfil = Array.isArray(p.perfis) ? p.perfis[0] : p.perfis
+        return perfil?.nome === 'Parceiro B2B'
+      }
+    )
+    if (jaEhParceiro) {
+      return NextResponse.json(
+        { error: 'Esse e-mail já pertence a uma conta de Parceiro B2B — não pode virar staff automaticamente.' },
+        { status: 409 }
+      )
+    }
+  }
+
+  const senhaTemporaria = gerarSenhaTemporaria(nome || 'staff')
+
   let userId: string
   if (existing) {
     const { data, error } = await admin.auth.admin.updateUserById(existing.id, {
-      password: TEMP_PASSWORD,
+      password: senhaTemporaria,
       email_confirm: true,
       user_metadata: { nome },
     })
@@ -78,7 +99,7 @@ export async function POST(req: NextRequest) {
   } else {
     const { data, error } = await admin.auth.admin.createUser({
       email,
-      password: TEMP_PASSWORD,
+      password: senhaTemporaria,
       email_confirm: true,
       user_metadata: { nome },
     })
@@ -86,7 +107,7 @@ export async function POST(req: NextRequest) {
     userId = data.user.id
   }
 
-  await admin.from('usuarios').update({ nome }).eq('id', userId)
+  await admin.from('usuarios').update({ nome, senha_temporaria: true }).eq('id', userId)
 
   // remove qualquer outro papel de staff que já tivesse (nunca 2 papéis de staff ao mesmo tempo)
   const outrosPapeisStaffIds = (papeisStaff || []).map((p) => p.id).filter((id) => id !== perfilNovo.id)
@@ -103,5 +124,10 @@ export async function POST(req: NextRequest) {
     .upsert({ usuario_id: userId, perfil_id: perfilNovo.id }, { onConflict: 'usuario_id,perfil_id' })
 
   // TODO: enviar via Resend quando RESEND_API_KEY configurado
-  return NextResponse.json({ success: true, message: 'Usuário criado. Senha enviada por e-mail (quando domínio for configurado)' })
+  return NextResponse.json({
+    success: true,
+    message: 'Usuário criado. Repasse a senha temporária manualmente (e-mail ainda não configurado).',
+    email,
+    tempPassword: senhaTemporaria,
+  })
 }

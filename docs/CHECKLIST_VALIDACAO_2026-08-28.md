@@ -35,29 +35,26 @@
 - [x] **Achado, corrigido:** CLAUDE.md "O que está pronto" ainda dizia "Landing premium (Hero 3D)" — landing inteira foi trocada em 25/08 pela "O Fio da Vida" (migrada do protótipo, `9f3d9a4`), nunca atualizado ali. Corrigido.
 - [x] Busca embutida no hero (feature de 30/07) sumiu quando a landing foi trocada em 25/08 — **confirmado com o Rafael: intencional, ele mesmo pediu pra tirar.** Não é regressão, fica assim.
 
-## 2. Central — Dashboard (`/admin`)
+## 2. Central — Dashboard (`/admin`) — 🟢 validada 04/09 (auditoria por código)
 
-- [ ] Login/auth funcionando
-- [ ] Métricas carregam (visitas, memoriais, parceiros)
-- [ ] Sino de alerta → feed de `emails_enviados` funcionando (link pro memorial/comunicações)
-- [ ] Alerta de memorial com dado faltando funcionando
-- [ ] Tabela de QR Code — **corrigida hoje**, confirmar ao vivo que renderiza
-- [ ] Dropdown "Parceiros" no header (pular pro Portal do Parceiro) funcionando
+- [x] Login/auth — `getAdminUser()` exige papel real (Admin/Operador), confirmado
+- [x] Métricas carregam via RPC `admin_dashboard_metricas` (agregação no Postgres)
+- [x] Sino de alerta → feed `emails_enviados` — confirmado `Sobre:`/`Para:` certo
+- [x] Alerta de memorial com dado faltando funcionando (nota: só olha os 200 mais recentes — irrelevante hoje com 7 memoriais, vira limite real em escala)
+- [x] Tabela de QR Code — confirmado `urlMidiaProtegida()` aplicado certo
+- [x] Dropdown "Parceiros" no header funcionando
 
-## 3. Central — Parceiros (`/admin/parceiros`)
+## 3. Central — Parceiros (`/admin/parceiros`) — 🟢 validada 04/09
 
-- [ ] Lista carrega, CRUD funciona
-- [ ] Logo do parceiro exibindo (`urlMidiaProtegida`)
-- [ ] Descrição pública / slug salvando
-- [ ] Convite de contato — **bug conhecido não corrigido**: sobrescreve conta existente se e-mail já tem cadastro (achado 26/08). Decisão sua pendente: bloquear e-mail duplicado?
-- [ ] "Acessar Plataforma do Parceiro" (modo Central) funcionando
+- [x] Lista + CRUD, logo via `urlMidiaProtegida`, descrição pública/slug salvando
+- [x] **Achado grave, corrigido 04/09:** convite de contato sobrescrevia a senha de **qualquer** conta existente com aquele e-mail (não só parceiro — inclusive staff), sem checar dono. Corrigido: bloqueia com erro 409 se o e-mail já pertence a uma conta de staff.
+- [x] "Acessar Plataforma do Parceiro" funcionando, corretamente gated por `getAdminUser()`
 
-## 4. Central — Cemitérios + Mapa (`/admin/cemiterios`)
+## 4. Central — Cemitérios + Mapa (`/admin/cemiterios`) — 🟢 validada 04/09
 
-- [ ] Lista de cemitérios, ortomosaico carregando (assinado, não público)
-- [ ] Mapa: quadra/fila/túmulo, modo edição funcionando
-- [ ] Painel "Quem opera neste cemitério" funcionando
-- [ ] Painel de conferência por GPS de campo funcionando
+- [x] Ortomosaico via URL assinada (12h), gate `pode_ver_cemiterio()` confirmado
+- [x] Mapa quadra/fila/túmulo, painel "Quem opera", painel GPS — todos confirmados por código
+- [ ] **Achado, não corrigido (baixa prioridade):** painel de quadras do `MapaCemiterio.tsx` em modo leitura (Portal do Parceiro) não esconde o link "meus memoriais" que aponta pra `/admin/memoriais/{id}` — rota só-staff, dá link morto pro parceiro. Não vaza dado (a rota de destino é protegida), só UX quebrada.
 
 ## 5. Central — Memoriais (`/admin/memoriais`)
 
@@ -68,9 +65,11 @@
 - [ ] Privacidade (5 modos) salvando
 - [ ] Livro de assinaturas (se aplicável na ficha) — checar se staff também modera daqui ou só família
 
-## 6. Central — Usuários (`/admin/usuarios`)
+## 6. Central — Usuários (`/admin/usuarios`) — 🟢 validada 04/09
 
-- [ ] Criar staff, trocar papel, ativar/desativar funcionando
+- [x] Ativar/desativar funcionando
+- [x] **Achado grave, corrigido 04/09:** criar staff usava senha fixa `123456` (6 caracteres — abaixo do mínimo de 10 do Supabase Auth, convite provavelmente falhava sempre) e sobrescrevia qualquer conta existente com aquele e-mail. Corrigido: senha aleatória de 12 caracteres (mesmo padrão de `gerarSenhaTemporaria`, já usado pro parceiro), bloqueio se o e-mail já é de um parceiro, resposta da API agora devolve `email`/`tempPassword` (a tela já esperava esses campos e mostraria "undefined" antes).
+- [x] **Achado grave, corrigido 04/09:** Operador conseguia se promover a Admin (ou promover/rebaixar qualquer staff) — RLS de `usuarios_perfis` não distinguia os 2 papéis. Corrigido: escrita em `usuarios_perfis` agora exige Admin (`is_admin_legado()`), leitura continua liberada pra qualquer staff.
 
 ## 7. Central — E-mails / Comunicações (`/admin/emails`) — 🟡 em andamento
 
@@ -81,58 +80,60 @@
 - [ ] Link `wa.me` (clique pra conversar) funcionando
 - [ ] SMTP Google Workspace ainda entregando (DKIM/SPF/DMARC — confirmados 30/07, revalidar)
 
-## 8. Portal do Parceiro (`/parceiro`)
+## 8. Portal do Parceiro (`/parceiro`) — 🟢 validada 04/09
 
-- [ ] Login + troca de senha obrigatória no 1º acesso
-- [ ] Dashboard — QR Code **corrigido hoje**, confirmar ao vivo
-- [ ] `/parceiro/memoriais` — lista + ficha completa, QR **corrigido hoje**
-- [ ] `/parceiro/cemiterios` — modo leitura funcionando, sem botão de escrita vazando
-- [ ] `/parceiro/emails` — filtro por empresa funcionando
+- [x] Login + troca de senha obrigatória — token server-side confirmado, cliente não consegue burlar
+- [x] Dashboard QR Code, `/parceiro/memoriais` lista+ficha+QR — confirmados
+- [x] `/parceiro/cemiterios` modo leitura — confirmado sem write vazando (spot-check ~20 pontos de gate no arquivo de 3800 linhas)
+- [x] `/parceiro/emails` — filtro server-side real (`.eq('homenagens.parceiro_id', ...)`), não só UI
 
-## 9. Portal da Família (`/familia/login`, `/familia/[slug]`)
+## 9. Portal da Família (`/familia/login`, `/familia/[slug]`) — 🟢 validada 04/09
 
-- [ ] Login só com senha (sem e-mail) funcionando
-- [ ] Livro de assinaturas com moderação (clicar no nome remove) — **mudou essa semana**, validar ao vivo
-- [ ] Card de Privacidade (senha + 3 toggles) salvando
-- [ ] Upload de foto/vídeo (fluxo de 2 etapas) funcionando
-- [ ] Trava de edição simultânea + auto-save funcionando
-- [ ] Preview reflete a página oficial nova (livro/castiçal/régua) — **mudou essa semana**
+- [x] Login só com senha, sem coluna de e-mail na autenticação — confirmado
+- [x] Livro de assinaturas com moderação — clique-pra-remover funcionando, autorização real via `autorizarMemorial` (não confia no prop do client)
+- [x] Card de Privacidade (senha + 3 toggles) salvando, `gate_versao` invalidando cookie na hora
+- [x] Upload 2 etapas — valida cookie, magic bytes, e trava caminho pro próprio memorial (sem sequestro cross-memorial)
+- [x] Trava de edição simultânea + auto-save + rascunho local — confirmados
+- [x] Preview reflete página oficial nova — é link direto pra `/homenagem/[slug]` (a nova), não widget embutido, mas resultado é o esperado
 
-## 10. Página pública do memorial (`/homenagem/[slug]`)
+## 10. Página pública do memorial (`/homenagem/[slug]`) — 🟢 validada 04/09
 
-- [ ] Página oficial nova carrega certo (livro, régua, castiçal) — **promovida essa semana**
-- [ ] `/classico` preservada intocada, ainda acessível
-- [ ] Seletor de tema funciona na nova, sabidamente quebrado na clássica (não mexer)
-- [ ] Mural de velas (35, canvas) + castiçal principal + chama voadora funcionando
-- [ ] Como Chegar intocado (regra 17)
-- [ ] Todos os gates de privacidade (5 modos) bloqueando certo
+- [x] Página oficial nova com livro/régua/castiçal confirmados no código
+- [x] `/classico` preservada como rota separada de verdade (não é alias)
+- [x] Mural de 35 velas + castiçal + chama voadora — todos wired
+- [x] Como Chegar presente e intocado (regra 17 respeitada, não revisado por dentro)
+- [x] Os 5 modos de privacidade — lógica de precedência confirmada linha a linha em `lib/modosPrivacidade.ts`
+- [x] **Achado grave, corrigido 04/09:** as escritas públicas (condolência, mural, vela) **não conferiam o portão de privacidade no servidor** — só rate limit. Um memorial com senha/oculto ainda aceitava spam se alguém pegasse o `memorialId` no HTML da página (visível mesmo antes de passar pelo gate). Corrigido: `lib/verificarGatePublico.ts` novo, chamado nos 3 endpoints antes de qualquer insert — reusa a mesma lógica (`resolverAcesso`) e cookie (`mem_acesso_{slug}`) que a página pública já usa pra exibir o conteúdo.
 
-## 11. Busca pública + Mapa público de cemitérios
+## 11. Busca pública + Mapa público de cemitérios — 🟢 validada 04/09
 
-- [ ] `/busca` — logo **corrigido hoje**, busca funcionando
-- [ ] `/cemiterios`, `/cemiterios/[cidade]`, `/cemiterios/[cidade]/[cemiterio]` — logo **corrigido hoje**, mapa carregando
-- [ ] Rate limit `mapa_publico` (60/min) ainda ativo
+- [x] `/busca` — logo certo, RPC `buscar_homenagens_publicas` confirmada (filtro `busca_habilitada`+`modo_gate<>oculto`)
+- [x] Mapa público (3 níveis) — logo certo, RPCs confirmadas
+- [x] Rate limit `mapa_publico` (60/min) confirmado ainda ativo em `proxy.ts`
 
-## 12. Página pública do parceiro (`/parceiros/[slug]`)
+## 12. Página pública do parceiro (`/parceiros/[slug]`) — 🟢 validada 04/09
 
-- [x] Logo do parceiro + logo Legado Digital (**corrigido hoje**) exibindo
-- [ ] Busca restrita ao parceiro funcionando
-- [x] **Feature nova (pedido do Rafael, "pega um e coloca lá"):** seção "Um exemplo real" — mostra 1 memorial de verdade daquele parceiro (foto/monograma, nome, frase, link), só se for genuinamente público (gate aberto + busca + link habilitados, mesma regra de privacidade do mapa público) — nunca mostra memorial que a família protegeu. Some sozinho se o parceiro não tiver nenhum elegível.
-- [x] **Achado bônus, corrigido:** 2 memoriais de teste ("Helena Martins Costa", "Antônio Ferreira Lima") tinham `foto_url` apontando pra `http://localhost:3000/...` — link morto em produção, zerado no banco, cai no monograma padrão.
+- [x] Logo do parceiro + logo Legado Digital exibindo
+- [x] Busca restrita ao parceiro — confirmado filtro server-side dentro da RPC (`SECURITY DEFINER`), não dá pra burlar removendo o param no client
+- [x] Seção "Um exemplo real" funcionando, só memorial genuinamente público
+- [x] Achado bônus (foto `localhost`) corrigido
 
-## 13. Segurança transversal
+## 13. Segurança transversal — 🟢 revalidada 04/09 (nada regrediu desde 28/08)
 
-- [x] `get_advisors` rodado (28/08) — nenhum achado novo, tudo já conhecido/aceito ou intencional
-- [x] 13 RPCs de cemitério (numeração/vínculo) — confirmado por leitura de código que todas checam `is_legado_staff()`/`pode_ver_cemiterio()` internamente
+- [x] `get_advisors` rodado de novo — mesmos achados já conhecidos/aceitos, nada novo
+- [x] 13 RPCs de cemitério + rotas admin recentes — confirmado uso do padrão tripartite (staff/parceiro-dono/família)
+- [x] Rate limit `proxy.ts` — todas as categorias (login, upload, edicao_familia, api, pagina, mapa_publico) confirmadas presentes e wired
+- [x] Headers de segurança (CSP/HSTS/X-Frame-Options) — confirmados de pé, incluindo o `server.arcgisonline.com` no CSP (bug de 29/07, sem regressão)
+- [x] **Achado, corrigido 04/09** (mesmo daqui de cima): gate de escrita pública nas 3 rotas de interação
+- [x] `admin_dashboard_metricas` executável por `anon` — corrigido, revogado (só `authenticated` agora)
 - [ ] Leaked Password Protection — **ação manual sua** no painel Supabase (Auth → Providers → Email), não dá via código
-- [ ] `scripts/audit-rls.js` — não roda hoje (falta `SUPABASE_DB_PASSWORD` no `.env.local` + `psql` instalado); `get_advisors` já cobre RLS habilitado/policy, redundante em parte
-- [ ] Semgrep MCP — instalado, mas `CONNECTION_CLOSED` ao conectar; binário roda sozinho, causa ainda não achada
-- [ ] Threat Modeling MCP — instalado e conectado, ainda não usado
-- [ ] Headers de segurança (CSP/HSTS/X-Frame-Options) — revalidar ainda de pé
-- [ ] Rate limit `proxy.ts` — revalidar ainda ativo em todas as categorias
+- [ ] `scripts/audit-rls.js` — ainda não roda (falta `SUPABASE_DB_PASSWORD`); `get_advisors` cobre a maior parte
+- [ ] Semgrep MCP — ainda `CONNECTION_CLOSED`
+- [ ] Threat Modeling MCP — instalado, ainda não usado
 
 ## 14. Pendências de decisão (não são bug)
 
 - [ ] Contagem de velas do Carlos Saraiva inflada por teste (17 vs ~3 orgânico) — perguntado antes, sem resposta ainda
-- [ ] Convite de parceiro sobrescreve conta existente — decisão sobre bloquear e-mail duplicado
+- [x] ~~Convite de parceiro sobrescreve conta existente~~ — **corrigido 04/09** (bloqueia se e-mail já é staff; e o mesmo bug no convite de staff também corrigido)
 - [ ] Módulo de pagamento — aguardando CNPJ + decisão de preço/modelo
+- [ ] Link morto pro parceiro no painel de quadras do mapa (achado 04/09, baixa prioridade — ver seção 4)
