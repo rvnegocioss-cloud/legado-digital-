@@ -4,9 +4,9 @@
 
 ## Landing page
 
-1. [ ] Padronizar menu e rodapé em todas as seções (hoje quebra a navegação ao entrar em cemitérios/sub-páginas)
-2. [ ] Corrigir alinhamento do rodapé e menu principal — centralizar conteúdo responsivo (achado ao vivo: "rodapé tá estrangulado")
-3. [ ] Destacar o mapa: imagem representativa do mapa de cemitérios + link de acesso direto na landing
+1. [x] Padronizar menu e rodapé em todas as seções (hoje quebra a navegação ao entrar em cemitérios/sub-páginas)
+2. [x] Corrigir alinhamento do rodapé e menu principal — centralizar conteúdo responsivo (achado ao vivo: "rodapé tá estrangulado")
+3. [x] Destacar o mapa: imagem representativa do mapa de cemitérios + link de acesso direto na landing
 4. [ ] Reformular Área Restrita: remover "Legado Central", virar botão único "Área Restrita" → escolha entre funerária/parceiro ou família
 5. [ ] Separar login de cadastro: página única de acesso dividida (portal do parceiro vs formulário de captação de lead pro Ricardo)
 6. [ ] Manter menu/rodapé do site principal nas páginas de cemitério (não sumir a navegação ao entrar lá)

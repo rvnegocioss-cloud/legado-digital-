@@ -329,6 +329,8 @@ path.thread-stub {
 .node.photo .cap.side-right { left: 100%; margin-left: 26px; }
 .node.photo .cap.side-left { right: 100%; margin-right: 26px; text-align: right; }
 .node.photo .cap b { color: var(--gold-light); font-weight: 600; font-size: 16px; display: block; margin-bottom: 3px; }
+.node.photo .cap .cap-link { color: var(--gold); font-size: 13.5px; display: block; margin-top: 8px; text-decoration: none; }
+.node.photo .cap .cap-link:hover { text-decoration: underline; }
 
 @media (max-width: 700px) {
   .node.photo .cap {

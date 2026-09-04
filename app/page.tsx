@@ -178,7 +178,10 @@ const MARCACAO = `<nav class="navbar">
 
   <div class="node dot" data-x="300" data-y="2620" data-t="0.574"></div>
 
-
+  <div class="node photo" data-x="460" data-y="3020" data-t="0.657">
+    <div class="ring"><img src="/fio-da-vida/nodes/mapa-rota-1.png" class="node-img node-img-a" style="--reveza-atraso:2.0s" alt="Mapa aéreo do cemitério com o memorial marcado e a rota até o túmulo" /><img src="/fio-da-vida/nodes/mapa-rota-2.png" class="node-img node-img-b" style="--reveza-atraso:2.0s" alt="Mapa aéreo do cemitério com o memorial marcado e a rota até o túmulo" /></div>
+    <div class="cap side-right"><b>O caminho até lá</b>Nosso mapa localiza o memorial no cemitério e traça a rota por GPS, direto do celular, até o túmulo exato.<a href="/cemiterios" class="cap-link">Ver o mapa dos cemitérios →</a></div>
+  </div>
 
   <div class="node photo" data-x="480" data-y="3559" data-t="0.769">
     <div class="ring"><img src="/fio-da-vida/nodes/de-onde-estiver-1.png" class="node-img node-img-a node-4fotos" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-2.png" class="node-img node-img-b" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-3.png" class="node-img node-img-c" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-4.png" class="node-img node-img-d" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /></div>
