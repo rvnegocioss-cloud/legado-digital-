@@ -15,6 +15,7 @@ import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import AmbienteLateral, { type Ambiente, type CorLateral } from "@/components/public/AmbienteLateral";
 import GaleriaTopo from "@/components/public/GaleriaTopo";
+import TextoVerMais from "@/components/public/TextoVerMais";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
@@ -557,19 +558,21 @@ export default async function PerfilMemorialPage({
         <main className="perfil-coluna">
           <section id="biografia" className="perfil-secao">
             <h2 className="perfil-titulo">A história</h2>
-            <div className="perfil-texto">
-              {paragrafos.length > 0 ? (
-                paragrafos.map((pedacos, i) => (
-                  <p key={i} className={i === 0 ? "perfil-paragrafo perfil-paragrafo-abertura" : "perfil-paragrafo"}>
-                    {pedacos.map((pedaco, j) =>
-                      pedaco.negrito ? <strong key={j}>{pedaco.texto}</strong> : <span key={j}>{pedaco.texto}</span>
-                    )}
-                  </p>
-                ))
-              ) : (
-                <p className="perfil-paragrafo perfil-vazio">A biografia será adicionada em breve pela família.</p>
-              )}
-            </div>
+            <TextoVerMais>
+              <div className="perfil-texto">
+                {paragrafos.length > 0 ? (
+                  paragrafos.map((pedacos, i) => (
+                    <p key={i} className={i === 0 ? "perfil-paragrafo perfil-paragrafo-abertura" : "perfil-paragrafo"}>
+                      {pedacos.map((pedaco, j) =>
+                        pedaco.negrito ? <strong key={j}>{pedaco.texto}</strong> : <span key={j}>{pedaco.texto}</span>
+                      )}
+                    </p>
+                  ))
+                ) : (
+                  <p className="perfil-paragrafo perfil-vazio">A biografia será adicionada em breve pela família.</p>
+                )}
+              </div>
+            </TextoVerMais>
           </section>
 
           {timeline.length > 0 && (
