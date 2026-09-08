@@ -503,7 +503,7 @@ export default async function PerfilMemorialPage({
               que puxados pro topo -- lá embaixo ninguém achava. A lógica do
               mapa/rota continua intocada (regra 17): aqui é só atalho. */}
           {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
-            <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18, alignItems: "flex-start" }}>
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${localizacao.cemiterio_lat},${localizacao.cemiterio_lng}`}
                 target="_blank"

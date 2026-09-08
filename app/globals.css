@@ -202,9 +202,12 @@ html {
 @media (min-width: 1100px) {
   .mem-hero-galeria {
     display: block;
-    width: 320px;
+    width: 420px;
     flex-shrink: 0;
   }
+}
+@media (min-width: 1500px) {
+  .mem-hero-galeria { width: 520px; }
 }
 
 /* Hero: foto empilhada com texto no mobile (default), lado a lado no desktop */
