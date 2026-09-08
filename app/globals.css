@@ -188,6 +188,24 @@ html {
     max-width: 1100px;
   }
 }
+/* Em tela larga o conteúdo abre mais: com 1100px fixos sobravam ~400px vazios
+   de cada lado, que é onde entra o ambiente lateral (pontos/pétalas). */
+@media (min-width: 1400px) {
+  .mem-container {
+    max-width: 1320px;
+  }
+}
+
+/* Galeria de fotos e vídeos ao lado do rosto, no topo. Só a partir de 1100px:
+   abaixo disso ela desce pro fluxo normal, embaixo do texto. */
+.mem-hero-galeria { display: none; }
+@media (min-width: 1100px) {
+  .mem-hero-galeria {
+    display: block;
+    width: 320px;
+    flex-shrink: 0;
+  }
+}
 
 /* Hero: foto empilhada com texto no mobile (default), lado a lado no desktop */
 .mem-hero-texto {

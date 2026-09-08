@@ -30,7 +30,7 @@
 
   /* ---------- HERO: rosto | texto | galeria ---------- */
   .hero{
-    display:grid;grid-template-columns:210px 1fr 320px;gap:40px;align-items:center;
+    display:grid;grid-template-columns:200px minmax(0,1fr) 480px;gap:44px;align-items:center;
     padding:48px 20px 28px;max-width:1320px;margin:0 auto;
   }
   @media (max-width:980px){ .hero{grid-template-columns:1fr;text-align:center;gap:24px} }
@@ -56,7 +56,7 @@
   /* galeria dentro do hero */
   .galeria-hero{
     background:rgba(255,255,255,0.04);border:1px solid var(--gold-borda);
-    border-radius:12px;padding:14px;
+    border-radius:12px;padding:16px;
   }
   .galeria-hero .rot{
     font-size:10.5px;text-transform:uppercase;letter-spacing:1.6px;color:var(--gold);
@@ -64,7 +64,7 @@
   }
   .galeria-hero .rot a{color:var(--fraco);text-decoration:none;font-size:11px;letter-spacing:0}
   .destaque{
-    position:relative;width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;
+    position:relative;width:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;
     background:linear-gradient(135deg,#1b3purple,#20384a);margin-bottom:8px;
     display:flex;align-items:center;justify-content:center;
   }
@@ -73,7 +73,7 @@
     width:46px;height:46px;border-radius:50%;background:rgba(201,164,106,.92);
     display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:16px;
   }
-  .thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   .thumb{
     aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#22384a,#2b4658);
     display:flex;align-items:center;justify-content:center;color:var(--fraco);font-size:10px;

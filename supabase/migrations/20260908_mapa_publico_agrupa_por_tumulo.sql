@@ -1,0 +1,8 @@
+-- Um tumulo pode guardar varios memoriais (uma gaveta cada). A versao anterior
+-- devolvia UMA feature por memorial, entao dois memoriais no mesmo tumulo
+-- viravam dois pontos na mesma coordenada, empilhados: o hover mostrava so o de
+-- cima e os outros ficavam invisiveis no mapa.
+--
+-- Agora e UMA feature por lapide, com a lista de memoriais dentro das
+-- properties. O card do mapa passa a listar todos os homenageados do jazigo.
+-- (definicao completa aplicada via MCP -- ver funcao no banco)

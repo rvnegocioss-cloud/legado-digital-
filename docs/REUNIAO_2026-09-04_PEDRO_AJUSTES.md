@@ -13,7 +13,7 @@
 
 ## Página do memorial
 
-7. [ ] Testar vídeo em loop ou carrossel de fotos no espaço superior (topo do memorial), no lugar do que tem hoje
+7. [ ] Galeria de fotos e vídeos no topo do memorial, ao lado do rosto (**vídeo em loop foi descartado pelo Rafael em 08/09** — não é isso)
 8. [ ] Redimensionar campos de mídia pra acomodar vídeo/slide automático — substituir a galeria lateral por espaço visual centralizado
 9. [ ] Ajustar texto: corrigir extensão pra caber nos componentes, implementar "ver mais" em vez de cortar/estourar
 10. [ ] Adicionar indicação de usuário logado na interface (mostrar quem é o responsável pela sessão)

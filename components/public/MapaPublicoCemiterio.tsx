@@ -21,11 +21,20 @@ const CRUZ_SVG =
   '<circle cx="14" cy="14" r="13" fill="#0B1D2A" stroke="#C9A46A" stroke-width="2"/>' +
   '<path d="M14 7v14M8 12h12" stroke="#C9A46A" stroke-width="2.2" stroke-linecap="round"/></svg>'
 
-interface PinoProps {
+interface MemorialDoTumulo {
   slug: string
   nome: string | null
   foto_url: string | null
   protegido: boolean
+}
+
+// Um túmulo pode guardar vários memoriais (uma gaveta cada). A RPC devolve um
+// ponto por LÁPIDE com a lista dentro -- sem isso, dois memoriais no mesmo
+// túmulo viravam dois pinos na mesma coordenada e só o de cima aparecia.
+interface PinoProps extends MemorialDoTumulo {
+  total?: number
+  lapide_codigo?: string | null
+  memoriais?: MemorialDoTumulo[] | string
 }
 
 interface Props {
@@ -90,11 +99,30 @@ export default function MapaPublicoCemiterio({
 
   const aoClicarPino = useCallback(
     (e: MapLayerMouseEvent) => {
-      const slug = e.features?.[0]?.properties?.slug
-      if (slug) router.push(`/homenagem/${slug}`)
+      const props = e.features?.[0]?.properties as PinoProps | undefined
+      if (!props) return
+      // Com mais de um memorial no mesmo túmulo o clique não escolhe por conta
+      // própria: mantém o card aberto pra pessoa escolher qual quer abrir.
+      if ((props.total ?? 1) > 1) return
+      if (props.slug) router.push(`/homenagem/${props.slug}`)
     },
     [router]
   )
+
+  // O GeoJSON serializa arrays de properties como string ao passar pelo mapa.
+  function lerMemoriais(props: PinoProps): MemorialDoTumulo[] {
+    const bruto = props.memoriais
+    if (Array.isArray(bruto)) return bruto
+    if (typeof bruto === 'string') {
+      try {
+        const lista = JSON.parse(bruto)
+        return Array.isArray(lista) ? lista : []
+      } catch {
+        return []
+      }
+    }
+    return [{ slug: props.slug, nome: props.nome, foto_url: props.foto_url, protegido: props.protegido }]
+  }
 
   return (
     <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'rgba(201,164,106,0.2)' }}>
@@ -131,37 +159,73 @@ export default function MapaPublicoCemiterio({
             closeButton={false}
             closeOnClick={false}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 150, fontFamily: 'Georgia, serif' }}>
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                  background: CORES.fundoTopo,
-                  border: `1.5px solid ${CORES.dourado}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {hover.props.foto_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={urlMidiaProtegida(hover.props.foto_url) || hover.props.foto_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <span style={{ color: CORES.dourado, fontSize: 18 }}>+</span>
-                )}
-              </div>
-              <div>
-                <p style={{ fontSize: 13, margin: 0, color: '#1a1a1a' }}>
-                  {hover.props.protegido ? 'Memorial protegido' : hover.props.nome}
-                </p>
-                <p style={{ fontSize: 10.5, margin: 0, color: '#666' }}>
-                  {hover.props.protegido ? 'Toque para pedir acesso' : 'Toque para ver o memorial'}
-                </p>
-              </div>
-            </div>
+            {(() => {
+              const lista = lerMemoriais(hover.props)
+              const varios = lista.length > 1
+              return (
+                <div style={{ minWidth: 190, maxWidth: 260, fontFamily: 'Georgia, serif' }}>
+                  {varios && (
+                    <p
+                      style={{
+                        fontSize: 10,
+                        letterSpacing: 1.2,
+                        textTransform: 'uppercase',
+                        color: '#8a6d3b',
+                        margin: '0 0 8px',
+                        paddingBottom: 6,
+                        borderBottom: '1px solid rgba(0,0,0,0.08)',
+                      }}
+                    >
+                      {lista.length} memoriais neste túmulo
+                    </p>
+                  )}
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 210, overflowY: 'auto' }}>
+                    {lista.map((mem, i) => (
+                      <a
+                        key={mem.slug || i}
+                        href={mem.slug ? `/homenagem/${mem.slug}` : undefined}
+                        style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
+                      >
+                        <div
+                          style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: '50%',
+                            overflow: 'hidden',
+                            flexShrink: 0,
+                            background: CORES.fundoTopo,
+                            border: `1.5px solid ${CORES.dourado}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {mem.foto_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={urlMidiaProtegida(mem.foto_url) || mem.foto_url}
+                              alt=""
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <span style={{ color: CORES.dourado, fontSize: 16 }}>+</span>
+                          )}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ fontSize: 13, margin: 0, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {mem.protegido ? 'Memorial protegido' : mem.nome}
+                          </p>
+                          <p style={{ fontSize: 10.5, margin: 0, color: '#666' }}>
+                            {mem.protegido ? 'Toque para pedir acesso' : 'Toque para ver o memorial'}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
           </Popup>
         )}
       </Map>
