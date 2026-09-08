@@ -21,6 +21,22 @@
 
 18. [ ] "Como Chegar" ficou escondido demais (lá embaixo) — subir um atalho pra ele mais perto do topo (só um botão que desce até a seção, ou destaca ela — **não mexe na lógica interna do mapa/rota**, regra 17, só a posição/visibilidade do link)
 
+19. [ ] **Banner / fundo personalizado no perfil do memorial** (00:42:36) — Pedro sugeriu; Rafael ponderou a dificuldade de manter responsivo com imagem de tamanho variado. *(faltava na lista, achado na revisão de 08/09)*
+20. [ ] **Galeria de mídia integrada** (00:45:05) — foto abrindo em pop-up maior e vídeo tocando sem poluir a interface; unificar foto+vídeo numa galeria só. *(faltava na lista)*
+21. [ ] **Guia de navegação dentro do mapa de cemitérios** (01:09:35) — o visitante precisa entender como achar e acessar o túmulo da própria família. *(faltava na lista)*
+22. [ ] **Cuidado de performance no mapa** (00:19:01) — destacar o mapa na landing sem carregar o mapa toda hora e pesar o servidor. *(faltava na lista — resolvido por enquanto: a landing usa imagem, não o mapa ao vivo)*
+
+## Storytelling (direção de conteúdo, não tarefa fechada)
+
+- Pedro (00:23:00): o site inteiro deve girar em torno de **"toda família tem uma história que deve ser eterna"**, misturando o visual com informação prática sobre cemitérios e memoriais. A landing já abre com "Toda Família Tem Uma História" — usar isso como régua ao escrever qualquer texto novo.
+- Pedro (00:08:36): as imagens da landing focavam demais em público mais velho, podem ser adaptadas. *(várias já trocadas em 08/09)*
+
+## Tarefas do Pedro (não são minhas)
+
+- Enviar o wireframe da tela do memorial (trava o item 11)
+- Testar geolocalização em campo no cemitério, calibrando a navegação por GPS
+- Testar com 3 memoriais reais no fim de semana
+
 ## Debatido, sem decisão (não construir)
 
 - Unificar Portal da Família dentro do mesmo painel do staff/parceiro (login único, perfil "família" com campos travados tipo QR Code) — Pedro sugeriu, Rafael ponderou que hoje tem coisa staff-only lá dentro que precisaria travar por perfil. **Não decidido**, ficou pra próxima conversa.
