@@ -170,7 +170,7 @@ const MARCACAO = `<nav class="navbar">
 
   <div class="node photo" data-x="320" data-y="2473" data-t="0.543">
     <div class="ring"><img src="/fio-da-vida/nodes/constelacao-1.png" class="node-img node-img-a" style="--reveza-atraso:1.6s" alt="Retratos e velas formando uma constelação" /><img src="/fio-da-vida/nodes/constelacao-2.png" class="node-img node-img-b" style="--reveza-atraso:1.6s" alt="Retratos e velas formando uma constelação" /></div>
-    <div class="cap side-right"><b>Ninguém se apaga</b>Cada memorial acende um ponto de luz que a família mantém aceso.</div>
+    <div class="cap side-right"><b>QR Code na lápide</b>Uma placa discreta com QR Code é instalada no túmulo. Quem visita aponta a câmera do celular e abre o memorial completo na hora.</div>
   </div>
 
   <div class="node dot" data-x="500" data-y="2420" data-t="0.532"></div>
@@ -179,7 +179,7 @@ const MARCACAO = `<nav class="navbar">
 
   <div class="node photo" data-x="480" data-y="3559" data-t="0.769">
     <div class="ring"><img src="/fio-da-vida/nodes/de-onde-estiver-1.png" class="node-img node-img-a node-4fotos" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-2.png" class="node-img node-img-b" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-3.png" class="node-img node-img-c" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-4.png" class="node-img node-img-d" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /></div>
-    <div class="cap side-left"><b>De onde você estiver</b>O neto que mora longe também tem para onde voltar.</div>
+    <div class="cap side-left"><b>Portal da Família</b>A família recebe um acesso próprio: sobe fotos e vídeos, escreve a história, monta a linha do tempo e decide quem pode ver o memorial.</div>
   </div>
 
   <div class="node dot" data-x="400" data-y="3559" data-t="0.769"></div>
