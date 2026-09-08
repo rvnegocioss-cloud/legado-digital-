@@ -1,0 +1,7 @@
+-- Quem cria o PRIMEIRO memorial de um jazigo passa a responder por ele: a
+-- familia desse memorial e a gestora de todas as gavetas daquele tumulo.
+-- Aditivo: colunas novas, nenhuma existente e tocada.
+-- (definicao completa aplicada via MCP: colunas gestor_homenagem_id /
+-- gestor_definido_em em lapides, trigger definir_gestor_do_jazigo em
+-- homenagens, backfill do memorial mais antigo por lapide, e a funcao
+-- obter_jazigo_do_memorial que devolve o tumulo inteiro numa chamada so.)

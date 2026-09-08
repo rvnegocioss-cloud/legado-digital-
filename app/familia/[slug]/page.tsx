@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
+import JazigoDaFamilia from '@/components/familia/JazigoDaFamilia'
 import { LivroAssinaturas, type Assinatura } from '@/components/public/LivroAssinaturas'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 import { AMBIENTES, CORES_LATERAIS, type Ambiente, type CorLateral } from '@/components/public/AmbienteLateral'
@@ -794,6 +795,8 @@ export default function FamiliaEdicaoPage() {
           </form>
 
           <div className="lg:col-span-5 space-y-4">
+            {memorialId && <JazigoDaFamilia slug={params.slug} memorialId={memorialId} />}
+
             {memorialId && (
               <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
                 <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>

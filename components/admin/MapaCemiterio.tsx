@@ -2574,6 +2574,16 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                             >
                               Gavetas 3D →
                             </a>
+                            {/* Atalho direto pro cadastro: sem ele a pessoa sai
+                                do mapa e procura o túmulo de novo no menu. */}
+                            {modo !== 'leitura' && (
+                              <a
+                                href={`/admin/cemiterios/${cemiterioId}/lapides/${lapideSelecionada.id}/gavetas`}
+                                style={{ fontSize: 12, color: '#0B5FFF' }}
+                              >
+                                Cadastrar gavetas →
+                              </a>
+                            )}
                             <button
                               type="button"
                               onClick={() => {

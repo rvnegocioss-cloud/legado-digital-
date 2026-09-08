@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protótipo — Jazigo e gavetas</title>
+<style>
+  :root{
+    --navy:#0B1D2A; --navy-topo:#0f2436; --zinc950:#09090b; --zinc900:#18181b;
+    --zinc800:#27272a; --zinc700:#3f3f46; --zinc400:#a1a1aa; --zinc500:#71717a;
+    --gold:#C9A46A; --gold-claro:#dfc08a; --azul:#3b82f6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zinc950);color:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:14px}
+  .abas{display:flex;gap:8px;padding:14px 20px;background:#000;position:sticky;top:0;z-index:20;flex-wrap:wrap}
+  .abas button{font:inherit;font-size:13px;padding:8px 16px;border-radius:8px;cursor:pointer;background:transparent;color:#9aa;border:1px solid #333}
+  .abas button.on{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:700}
+  .tela{display:none;padding:28px 20px 60px;max-width:1100px;margin:0 auto}
+  .tela.on{display:block}
+  h1{font-size:20px;font-weight:700;margin:0 0 4px}
+  .sub{color:var(--zinc400);font-size:13px;margin:0 0 24px}
+  .card{background:var(--zinc900);border:1px solid var(--zinc800);border-radius:12px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:15px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .card .desc{color:var(--zinc400);font-size:12.5px;margin:0 0 16px}
+  .rot{font-size:11px;color:var(--zinc500);margin-bottom:6px;display:block}
+  .campo{width:100%;padding:9px 12px;border-radius:8px;background:var(--zinc900);border:1px solid var(--zinc700);color:#fff;font:inherit;font-size:13px;margin-bottom:12px}
+  .btn{padding:9px 16px;border-radius:8px;border:0;font:inherit;font-size:13px;cursor:pointer}
+  .btn-azul{background:#2563eb;color:#fff}
+  .btn-linha{background:transparent;border:1px solid var(--zinc700);color:var(--zinc400)}
+  .badge{font-size:11px;padding:3px 8px;border-radius:999px}
+  .b-voce{background:rgba(201,164,106,.16);color:var(--gold)}
+  .b-gestor{background:rgba(34,197,94,.16);color:#4ade80}
+  .b-livre{background:var(--zinc800);color:var(--zinc400)}
+  .aviso{background:rgba(201,164,106,.08);border:1px solid rgba(201,164,106,.28);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--gold-claro);margin-bottom:16px}
+
+  /* jazigo 2D, corte do que o 3D mostra */
+  .jazigo{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:420px;margin-bottom:14px}
+  .gav{
+    border:1px solid var(--zinc700);border-radius:8px;padding:12px;min-height:74px;
+    display:flex;flex-direction:column;justify-content:center;gap:3px;cursor:pointer;
+  }
+  .gav.ocupada{background:rgba(201,164,106,.10);border-color:rgba(201,164,106,.45)}
+  .gav.voce{background:rgba(201,164,106,.20);border-color:var(--gold)}
+  .gav .cod{font-size:10.5px;color:var(--zinc500);letter-spacing:.5px}
+  .gav .nome{font-size:13px}
+  .gav .vazio{font-size:12px;color:var(--zinc500)}
+  .legenda{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--zinc500)}
+  .legenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--zinc400);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--zinc800)}
+  td{padding:9px 10px;border-bottom:1px solid var(--zinc800)}
+  .mapa-falso{
+    height:220px;border-radius:10px;border:1px solid var(--zinc800);position:relative;
+    background:repeating-linear-gradient(90deg,#1f2937 0 34px,#111827 34px 68px),repeating-linear-gradient(0deg,#1f2937 0 34px,#111827 34px 68px);
+    margin-bottom:12px;
+  }
+  .pino{position:absolute;left:46%;top:38%;width:18px;height:18px;border-radius:50%;background:var(--gold);border:3px solid #fff}
+  .popup{
+    position:absolute;left:52%;top:20%;background:#fff;color:#1a1a1a;border-radius:10px;padding:10px 12px;width:230px;
+    box-shadow:0 6px 20px rgba(0,0,0,.45);font-family:Georgia,serif;
+  }
+  .popup .tit{font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:#8a6d3b;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.08)}
+  .popup .linha{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .popup .bol{width:28px;height:28px;border-radius:50%;background:var(--navy-topo);border:1.5px solid var(--gold);flex-shrink:0}
+  .popup .n{font-size:12.5px}
+  .popup .acao{display:block;margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08);font-size:11.5px;color:#2563eb;text-decoration:none}
+  .antes{border-left:3px solid #ef4444;padding-left:12px;margin-bottom:14px}
+  .depois{border-left:3px solid #22c55e;padding-left:12px}
+  .antes .t,.depois .t{font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+  .antes .t{color:#f87171}.depois .t{color:#4ade80}
+</style>
+</head>
+<body>
+
+<div class="abas">
+  <button class="on" onclick="ver('familia',this)">Portal da Família</button>
+  <button onclick="ver('parceiro',this)">Portal do Parceiro</button>
+  <button onclick="ver('cadastro',this)">Cadastro de gaveta</button>
+  <button onclick="ver('mapa',this)">Atalho no mapa</button>
+</div>
+
+<!-- ================= FAMÍLIA ================= -->
+<section class="tela on" id="familia">
+  <h1>Portal da Família — card novo "Jazigo da família"</h1>
+  <p class="sub">Só visualização: a família enxerga o túmulo inteiro e quem está em cada gaveta, mas não cadastra nada.</p>
+
+  <div class="card">
+    <h2>Jazigo da família <span class="badge b-livre">Q36 · Fileira 1 · Túmulo 10</span></h2>
+    <p class="desc">Cemitério São Pedro — Uberlândia, MG</p>
+
+    <div class="jazigo">
+      <div class="gav ocupada"><span class="cod">GAVETA 1</span><span class="nome">Antônio Ferreira Lima</span></div>
+      <div class="gav voce"><span class="cod">GAVETA 2</span><span class="nome">Maria Aparecida Souza <span class="badge b-voce">seu memorial</span></span></div>
+      <div class="gav ocupada"><span class="cod">GAVETA 3</span><span class="nome">Helena Martins Costa</span></div>
+      <div class="gav"><span class="cod">GAVETA 4</span><span class="vazio">Livre</span></div>
+    </div>
+
+    <div class="legenda">
+      <span><i style="background:rgba(201,164,106,.20);border:1px solid var(--gold)"></i>Seu memorial</span>
+      <span><i style="background:rgba(201,164,106,.10);border:1px solid rgba(201,164,106,.45)"></i>Outro memorial da família</span>
+      <span><i style="border:1px solid var(--zinc700)"></i>Gaveta livre</span>
+    </div>
+
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-azul">Ver o jazigo em 3D</button>
+      <button class="btn btn-linha">Ver no mapa do cemitério</button>
+    </div>
+
+    <div class="aviso" style="margin-top:16px;margin-bottom:0">
+      Para incluir alguém neste jazigo, fale com a funerária responsável — o cadastro de gavetas é feito por ela.
+    </div>
+  </div>
+</section>
+
+<!-- ================= PARCEIRO ================= -->
+<section class="tela" id="parceiro">
+  <h1>Portal do Parceiro — jazigo com cadastro</h1>
+  <p class="sub">A funerária vê o mesmo jazigo, mas pode cadastrar e vincular gavetas.</p>
+
+  <div class="card">
+    <h2>Jazigo Q36-R01-T010 <span class="badge b-gestor">Gestor: família de Maria A. Souza</span></h2>
+    <p class="desc">Quem criou o primeiro memorial deste jazigo responde por todos os vinculados a ele.</p>
+
+    <table>
+      <thead><tr><th>Gaveta</th><th>Memorial</th><th>Situação</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Gaveta 1</td><td>Antônio Ferreira Lima</td><td><span class="badge b-livre">ocupada</span></td><td><button class="btn btn-linha">Editar</button></td></tr>
+        <tr><td>Gaveta 2</td><td>Maria Aparecida Souza</td><td><span class="badge b-gestor">gestora</span></td><td><button class="btn btn-linha">Editar</button></td></tr>
+        <tr><td>Gaveta 3</td><td>Helena Martins Costa</td><td><span class="badge b-livre">ocupada</span></td><td><button class="btn btn-linha">Editar</button></td></tr>
+        <tr><td>Gaveta 4</td><td style="color:var(--zinc500)">—</td><td><span class="badge b-livre">livre</span></td><td><button class="btn btn-azul">Vincular memorial</button></td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-azul">+ Nova gaveta</button>
+      <button class="btn btn-linha">Ver em 3D</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CADASTRO ================= -->
+<section class="tela" id="cadastro">
+  <h1>Cadastro de gaveta — o campo do memorial</h1>
+  <p class="sub">Achado real no código: hoje o campo lista <b>todos os memoriais do sistema</b>, sem filtro nenhum.</p>
+
+  <div class="card">
+    <div class="antes">
+      <div class="t">Como está hoje</div>
+      <span class="rot">Memorial vinculado</span>
+      <select class="campo">
+        <option>— todos os memoriais do sistema, de qualquer cemitério e parceiro —</option>
+        <option>Antônio Ferreira Lima</option>
+        <option>Carlos Saraiva (outro cemitério)</option>
+        <option>Helena Martins Costa</option>
+        <option>Maria Aparecida Souza</option>
+        <option>jon doe da silva (rascunho de teste)</option>
+      </select>
+    </div>
+
+    <div class="depois">
+      <div class="t">Proposta</div>
+      <span class="rot">Memorial vinculado — só os deste jazigo</span>
+      <select class="campo">
+        <option>Selecione…</option>
+        <option>Antônio Ferreira Lima</option>
+        <option>Helena Martins Costa</option>
+        <option>Maria Aparecida Souza</option>
+      </select>
+      <p class="desc" style="margin:0">
+        Lista só memoriais já vinculados a este túmulo e ainda sem gaveta. Rascunho e memorial de
+        outro cemitério ou de outro parceiro nunca aparecem.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MAPA ================= -->
+<section class="tela" id="mapa">
+  <h1>Atalho no mapa → gavetas</h1>
+  <p class="sub">Clicando no túmulo, o card leva direto pro jazigo, sem procurar no menu.</p>
+
+  <div class="card">
+    <div class="mapa-falso">
+      <div class="pino"></div>
+      <div class="popup">
+        <div class="tit">3 memoriais neste túmulo</div>
+        <div class="linha"><span class="bol"></span><span class="n">Antônio Ferreira Lima</span></div>
+        <div class="linha"><span class="bol"></span><span class="n">Helena Martins Costa</span></div>
+        <div class="linha"><span class="bol"></span><span class="n">Maria Aparecida Souza</span></div>
+        <a class="acao" href="#">Ver o jazigo e as gavetas →</a>
+      </div>
+    </div>
+    <p class="desc" style="margin:0">
+      O link do rodapé do card leva pro jazigo — no Portal da Família se for a família,
+      no Portal do Parceiro se for a funerária.
+    </p>
+  </div>
+</section>
+
+<script>
+function ver(id, botao){
+  document.querySelectorAll('.tela').forEach(function(t){ t.classList.remove('on') });
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.abas button').forEach(function(b){ b.classList.remove('on') });
+  botao.classList.add('on');
+}
+</script>
+</body>
+</html>

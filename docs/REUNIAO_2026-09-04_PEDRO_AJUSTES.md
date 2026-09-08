@@ -43,10 +43,10 @@
 
 ## Jazigos e gavetas (Portal da Família)
 
-12. [ ] Jazigo + gavetas 3D visíveis no Portal da Família — **só visualização** (confirmado 08/09: quem cadastra é o parceiro) e no Portal do Parceiro
-13. [ ] Restringir cadastro de gaveta: só aparecem memoriais já vinculados ao jazigo selecionado (esconder campo irrelevante)
-14. [ ] Atalho direto no mapa → cadastro de gavetas no Portal da Família
-15. [ ] Regra de vínculo: quem cria o 1º memorial daquele jazigo vira o gestor de todos os memoriais vinculados a ele
+12. [x] Jazigo + gavetas 3D visíveis no Portal da Família — **só visualização** (confirmado 08/09: quem cadastra é o parceiro) e no Portal do Parceiro
+13. [x] Restringir cadastro de gaveta: só aparecem memoriais já vinculados ao jazigo selecionado (esconder campo irrelevante)
+14. [x] Atalho direto no mapa → cadastro de gavetas no Portal da Família
+15. [x] Regra de vínculo: quem cria o 1º memorial daquele jazigo vira o gestor de todos os memoriais vinculados a ele
 16. [x] Túmulo com múltiplos memoriais: hover no mapa mostra cartão com nome+foto de todos os homenageados daquele jazigo
 17. [ ] Checar performance: visualizador 3D de gavetas deixa a página pesada?
 

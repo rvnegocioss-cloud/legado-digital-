@@ -49,9 +49,15 @@ export default function GavetasLapide() {
       .order('coluna', { ascending: true })
     setGavetas((data as any) || [])
 
+    // Só os memoriais DESTE túmulo. Antes o campo listava o sistema inteiro --
+    // memorial de outro cemitério, de outro parceiro e até rascunho apareciam,
+    // e era fácil vincular a gaveta na pessoa errada.
     const { data: homenagensData } = await supabase
       .from('homenagens')
       .select('id, nome_completo, slug')
+      .eq('lapide_id', lapideId)
+      .not('slug', 'like', 'rascunho-%')
+      .neq('nome_completo', 'Novo memorial')
       .order('nome_completo', { ascending: true })
     setHomenagens(homenagensData || [])
 
@@ -189,6 +195,11 @@ export default function GavetasLapide() {
               <option key={h.id} value={h.id}>{h.nome_completo}</option>
             ))}
           </select>
+          <p className="text-[11px] text-[var(--tema-zinc-500)] mt-1">
+            {homenagens.length === 0
+              ? 'Nenhum memorial vinculado a este túmulo ainda — vincule o memorial ao túmulo primeiro, na ficha dele.'
+              : 'Só aparecem os memoriais já vinculados a este túmulo.'}
+          </p>
         </div>
         <div>
           <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Observações</label>
