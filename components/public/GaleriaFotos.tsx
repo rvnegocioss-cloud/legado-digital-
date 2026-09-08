@@ -17,7 +17,17 @@ const MOSAICO_B = [
   { col: 1, row: 2 }, { col: 1, row: 1 },
 ]
 
-export function GaleriaFotos({ fotos }: { fotos: string[] }) {
+// Galeria unificada: foto e vídeo no mesmo mosaico e no mesmo pop-up, em vez
+// de vídeo numa seção separada lá embaixo. `videos` é opcional -- quem já
+// chamava o componente só com fotos continua funcionando igual.
+function ehVideo(url: string) {
+  return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url)
+}
+
+export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?: string[] }) {
+  // Vídeo primeiro: é o que a família mais quer mostrar, e no mosaico ele
+  // ocupa o bloco grande de abertura.
+  const itens = [...videos, ...fotos]
   const [aberta, setAberta] = useState<number | null>(null)
   const [variacao, setVariacao] = useState<'a' | 'b'>('a')
   const [colunas, setColunas] = useState(4)
@@ -35,18 +45,18 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
     if (aberta === null) return
     function aoTeclar(e: KeyboardEvent) {
       if (e.key === 'Escape') setAberta(null)
-      if (e.key === 'ArrowRight') setAberta((i) => (i === null ? i : (i + 1) % fotos.length))
-      if (e.key === 'ArrowLeft') setAberta((i) => (i === null ? i : (i - 1 + fotos.length) % fotos.length))
+      if (e.key === 'ArrowRight') setAberta((i) => (i === null ? i : (i + 1) % itens.length))
+      if (e.key === 'ArrowLeft') setAberta((i) => (i === null ? i : (i - 1 + itens.length) % itens.length))
     }
     window.addEventListener('keydown', aoTeclar)
     return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aberta, fotos.length])
+  }, [aberta, itens.length])
 
   const padrao = variacao === 'a' ? MOSAICO_A : MOSAICO_B
 
   return (
     <>
-      {fotos.length > 3 && (
+      {itens.length > 3 && (
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginBottom: 12 }}>
           {(['a', 'b'] as const).map((v) => (
             <button
@@ -77,9 +87,61 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
           gap: 8,
         }}
       >
-        {fotos.map((url, i) => {
+        {itens.map((url, i) => {
           const span = padrao[i % padrao.length]
           const col = Math.min(span.col, colunas)
+          const estilo = {
+            gridColumn: `span ${col}`,
+            gridRow: `span ${span.row}`,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover' as const,
+            borderRadius: 6,
+            border: `1px solid ${CORES.douradoBorda}`,
+            cursor: 'zoom-in' as const,
+          }
+
+          if (ehVideo(url)) {
+            return (
+              <div
+                key={i}
+                onClick={() => setAberta(i)}
+                className="mem-galeria-item"
+                style={{ ...estilo, position: 'relative', overflow: 'hidden', background: '#000' }}
+              >
+                {/* preload metadata: carrega só o primeiro quadro como capa,
+                    nunca o vídeo inteiro só pra montar o mosaico */}
+                <video src={url} preload="metadata" muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <span
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '50%',
+                      background: 'rgba(201,164,106,0.92)',
+                      color: CORES.fundoBase,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 15,
+                    }}
+                  >
+                    ▶
+                  </span>
+                </span>
+              </div>
+            )
+          }
+
           return (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -90,16 +152,7 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
               decoding="async"
               onClick={() => setAberta(i)}
               className="mem-galeria-item"
-              style={{
-                gridColumn: `span ${col}`,
-                gridRow: `span ${span.row}`,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderRadius: 6,
-                border: `1px solid ${CORES.douradoBorda}`,
-                cursor: 'zoom-in',
-              }}
+              style={estilo}
             />
           )
         })}
@@ -141,10 +194,10 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
             <X size={18} strokeWidth={1.5} />
           </button>
 
-          {fotos.length > 1 && (
+          {itens.length > 1 && (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); setAberta((aberta - 1 + fotos.length) % fotos.length) }}
+                onClick={(e) => { e.stopPropagation(); setAberta((aberta - 1 + itens.length) % itens.length) }}
                 aria-label="Foto anterior"
                 style={{
                   position: 'absolute',
@@ -164,7 +217,7 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
                 <ChevronLeft size={20} strokeWidth={1.5} />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); setAberta((aberta + 1) % fotos.length) }}
+                onClick={(e) => { e.stopPropagation(); setAberta((aberta + 1) % itens.length) }}
                 aria-label="Próxima foto"
                 style={{
                   position: 'absolute',
@@ -186,19 +239,35 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
             </>
           )}
 
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={fotos[aberta]}
-            alt={`Foto ${aberta + 1}`}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '88vh',
-              objectFit: 'contain',
-              borderRadius: 6,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-            }}
-          />
+          {ehVideo(itens[aberta]) ? (
+            <video
+              src={itens[aberta]}
+              controls
+              autoPlay
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '88vh',
+                borderRadius: 6,
+                background: '#000',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              }}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={itens[aberta]}
+              alt={`Item ${aberta + 1}`}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '88vh',
+                objectFit: 'contain',
+                borderRadius: 6,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+              }}
+            />
+          )}
 
           <div
             style={{
@@ -209,7 +278,7 @@ export function GaleriaFotos({ fotos }: { fotos: string[] }) {
               letterSpacing: 1,
             }}
           >
-            {aberta + 1} / {fotos.length}
+            {aberta + 1} / {itens.length}
           </div>
         </div>
       )}

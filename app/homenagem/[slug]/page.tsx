@@ -619,24 +619,13 @@ export default async function PerfilMemorialPage({
             </section>
           )}
 
-          {videosGaleria.length > 0 && (
-            <section className="perfil-secao">
-              <h2 className="perfil-titulo">Mais vídeos</h2>
-              <div className="perfil-videos-grade">
-                {videosGaleria.map((url) => (
-                  <div key={url} className="perfil-video">
-                    {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-                    <video src={url} controls preload="metadata" style={{ width: "100%", height: "100%", background: "#000" }} />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {galeria.length > 0 && (
+          {/* Foto e vídeo no mesmo mosaico: a seção "Mais vídeos" separada
+              deixava a mídia espalhada em dois lugares da página. O vídeo de
+              capa continua na própria seção acima, com destaque. */}
+          {(galeria.length > 0 || videosGaleria.length > 0) && (
             <section id="galeria" className="perfil-secao">
-              <h2 className="perfil-titulo">Galeria</h2>
-              <GaleriaFotos fotos={galeria} />
+              <h2 className="perfil-titulo">Fotos e vídeos</h2>
+              <GaleriaFotos fotos={galeria} videos={videosGaleria} />
             </section>
           )}
 
