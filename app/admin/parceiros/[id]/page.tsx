@@ -527,7 +527,8 @@ export default function DetalheParceiro() {
               {memoriais.length === 0 ? (
                 <p className="text-[var(--tema-zinc-500)] text-sm">Nenhum memorial cadastrado por este parceiro ainda.</p>
               ) : (
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[560px]">
                   <thead>
                     <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                       <th className="text-left py-2">Nome</th>
@@ -547,6 +548,7 @@ export default function DetalheParceiro() {
                     ))}
                   </tbody>
                 </table>
+              </div>
               )}
             </SecaoRetratil>
         </div>

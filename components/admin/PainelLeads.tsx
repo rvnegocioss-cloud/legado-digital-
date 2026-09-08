@@ -94,13 +94,13 @@ export default function PainelLeads({ tipo }: { tipo: 'parceiro' | 'familia' }) 
       </button>
 
       {!aberto ? null : (
-      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] overflow-hidden">
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] overflow-hidden overflow-x-auto">
         {carregando ? (
           <p className="text-[var(--tema-zinc-400)] text-sm p-6">Carregando...</p>
         ) : leads.length === 0 ? (
           <p className="text-[var(--tema-zinc-400)] text-sm p-6">Nenhum lead recebido ainda.</p>
         ) : (
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="text-left text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="px-4 py-3 font-medium">Quem</th>

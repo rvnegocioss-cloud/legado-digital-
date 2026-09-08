@@ -866,7 +866,7 @@ export default function DetalheMemorial() {
             </label>
             <p className="text-xs text-[var(--tema-zinc-400)] mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
             {galeria.length > 0 && (
-              <div className="grid grid-cols-4 gap-2 mb-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                 {galeria.map((url) => (
                   <div key={url} className="relative group">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
