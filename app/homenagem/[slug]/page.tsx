@@ -14,6 +14,7 @@ import { LivroAssinaturas } from "@/components/public/LivroAssinaturas";
 import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import AmbienteLateral, { type Ambiente, type CorLateral } from "@/components/public/AmbienteLateral";
+import GaleriaTopo from "@/components/public/GaleriaTopo";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
@@ -496,6 +497,56 @@ export default async function PerfilMemorialPage({
               <blockquote style={estiloTopo.frase}>&ldquo;{m.frase_preferida}&rdquo;</blockquote>
             </div>
           )}
+
+          {/* Os mesmos dois caminhos que já existem na seção Localização, só
+              que puxados pro topo -- lá embaixo ninguém achava. A lógica do
+              mapa/rota continua intocada (regra 17): aqui é só atalho. */}
+          {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
+            <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${localizacao.cemiterio_lat},${localizacao.cemiterio_lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "9px 16px",
+                  borderRadius: 8,
+                  background: "var(--mem-dourado, #C9A46A)",
+                  color: "var(--mem-fundo-base, #0B1D2A)",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  textDecoration: "none",
+                }}
+              >
+                Rota de carro até o cemitério
+              </a>
+              <a
+                href="#localizacao"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "9px 16px",
+                  borderRadius: 8,
+                  border: "1px solid var(--mem-dourado, #C9A46A)",
+                  color: "var(--mem-dourado-claro, #dfc08a)",
+                  fontSize: 13,
+                  textDecoration: "none",
+                }}
+              >
+                Guia até o túmulo dentro do cemitério
+              </a>
+            </div>
+          )}
+        </div>
+
+        <div className="mem-hero-galeria">
+          <GaleriaTopo
+            fotos={galeria}
+            videoCapa={isYoutube(m.video_url || "") ? getEmbedUrl(m.video_url || "") : videoAssinado}
+            videosExtras={videosGaleria}
+            ehYoutube={isYoutube(m.video_url || "")}
+          />
         </div>
       </header>
 

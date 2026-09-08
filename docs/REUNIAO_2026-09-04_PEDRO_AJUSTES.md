@@ -13,13 +13,13 @@
 
 ## Página do memorial
 
-7. [ ] Galeria de fotos e vídeos no topo do memorial, ao lado do rosto (**vídeo em loop foi descartado pelo Rafael em 08/09** — não é isso)
-8. [ ] Redimensionar campos de mídia pra acomodar vídeo/slide automático — substituir a galeria lateral por espaço visual centralizado
+7. [x] Galeria de fotos e vídeos no topo do memorial, ao lado do rosto (**vídeo em loop foi descartado pelo Rafael em 08/09** — não é isso)
+8. [x] Redimensionar campos de mídia pra acomodar vídeo/slide automático — substituir a galeria lateral por espaço visual centralizado
 9. [ ] Ajustar texto: corrigir extensão pra caber nos componentes, implementar "ver mais" em vez de cortar/estourar
 10. [ ] Adicionar indicação de usuário logado na interface (mostrar quem é o responsável pela sessão)
 11. [ ] **Aguardando Pedro**: wireframe do posicionamento de rota/mapa/textos na tela principal do memorial — não mexe até o wireframe chegar
 
-18. [ ] "Como Chegar" ficou escondido demais (lá embaixo) — subir um atalho pra ele mais perto do topo (só um botão que desce até a seção, ou destaca ela — **não mexe na lógica interna do mapa/rota**, regra 17, só a posição/visibilidade do link)
+18. [x] "Como Chegar" ficou escondido demais (lá embaixo) — subir um atalho pra ele mais perto do topo (só um botão que desce até a seção, ou destaca ela — **não mexe na lógica interna do mapa/rota**, regra 17, só a posição/visibilidade do link)
 
 19. [ ] **Banner / fundo personalizado no perfil do memorial** (00:42:36) — Pedro sugeriu; Rafael ponderou a dificuldade de manter responsivo com imagem de tamanho variado. *(faltava na lista, achado na revisão de 08/09)*
 20. [ ] **Galeria de mídia integrada** (00:45:05) — foto abrindo em pop-up maior e vídeo tocando sem poluir a interface; unificar foto+vídeo numa galeria só. *(faltava na lista)*
