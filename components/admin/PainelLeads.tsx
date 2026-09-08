@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { MessageCircle, Mail } from 'lucide-react'
+import { MessageCircle, Mail, ChevronDown, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { linkWhatsApp } from '@/lib/linkWhatsApp'
 
@@ -37,6 +37,7 @@ const STATUS_STYLE: Record<string, string> = {
 export default function PainelLeads({ tipo }: { tipo: 'parceiro' | 'familia' }) {
   const [leads, setLeads] = useState<Lead[]>([])
   const [carregando, setCarregando] = useState(true)
+  const [aberto, setAberto] = useState(false)
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -46,7 +47,11 @@ export default function PainelLeads({ tipo }: { tipo: 'parceiro' | 'familia' }) 
       .eq('tipo', tipo)
       .order('created_at', { ascending: false })
       .limit(200)
-    setLeads((data as Lead[]) || [])
+    const lista = (data as Lead[]) || []
+    setLeads(lista)
+    // Abre sozinho quando tem lead esperando resposta -- fechado, um lead novo
+    // passaria batido atrás do retrátil, que é o oposto do que ele serve.
+    if (lista.some((l) => !l.lido)) setAberto(true)
     setCarregando(false)
   }, [tipo])
 
@@ -66,17 +71,29 @@ export default function PainelLeads({ tipo }: { tipo: 'parceiro' | 'familia' }) 
   const origem = tipo === 'parceiro' ? '/parceiro/login' : '/familia/login'
 
   return (
-    <div className="mb-10">
-      <div className="flex items-center gap-3 mb-4">
+    <div className="mb-6">
+      <button
+        type="button"
+        onClick={() => setAberto(!aberto)}
+        className="w-full flex items-center gap-3 mb-3 text-left"
+      >
+        {aberto ? (
+          <ChevronDown size={16} strokeWidth={1.5} className="shrink-0 text-[var(--tema-zinc-400)]" />
+        ) : (
+          <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-[var(--tema-zinc-400)]" />
+        )}
         <h2 className="text-lg font-medium text-white">{titulo}</h2>
         {naoLidos > 0 && (
           <span className="text-xs px-2 py-0.5 rounded-full bg-amber-900/50 text-amber-400">
             {naoLidos} não {naoLidos === 1 ? 'lido' : 'lidos'}
           </span>
         )}
-        <span className="text-xs text-[var(--tema-zinc-500)]">recebidos em {origem}</span>
-      </div>
+        <span className="text-xs text-[var(--tema-zinc-500)]">
+          {leads.length} no total · recebidos em {origem}
+        </span>
+      </button>
 
+      {!aberto ? null : (
       <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] overflow-hidden">
         {carregando ? (
           <p className="text-[var(--tema-zinc-400)] text-sm p-6">Carregando...</p>
@@ -148,6 +165,7 @@ export default function PainelLeads({ tipo }: { tipo: 'parceiro' | 'familia' }) 
           </table>
         )}
       </div>
+      )}
     </div>
   )
 }
