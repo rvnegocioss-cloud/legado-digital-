@@ -208,11 +208,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="md:hidden text-[var(--tema-zinc-400)] hover:text-white transition-colors"
-              aria-label="Voltar pro Site"
-              title="Voltar pro Site"
+              className="flex items-center gap-1.5 text-sm text-[var(--tema-zinc-400)] hover:text-white transition-colors"
+              aria-label="Voltar pro site"
+              title="Voltar pro site"
             >
               <Home size={18} />
+              <span className="hidden sm:inline">Voltar pro site</span>
             </Link>
             <div
               className="relative hidden sm:block"

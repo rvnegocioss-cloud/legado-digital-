@@ -605,9 +605,17 @@ export default function FamiliaEdicaoPage() {
   return (
     <div className="min-h-screen bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <Link href="/familia/login" className="text-sm text-zinc-400 hover:text-white">
-          ← Sair
-        </Link>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white border border-zinc-700 bg-zinc-900 hover:border-zinc-500"
+          >
+            ← Voltar pro site
+          </Link>
+          <Link href="/familia/login" className="text-sm text-zinc-400 hover:text-white">
+            Sair
+          </Link>
+        </div>
 
         <div className="flex items-center justify-between mt-4 mb-6">
           <h1 className="text-xl font-bold text-white">Editar memorial de {form.nome_completo}</h1>

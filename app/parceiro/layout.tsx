@@ -7,7 +7,7 @@ import { getParceiroUser, getAdminUser, signOut, supabase } from '@/lib/auth'
 import { useTema } from '@/lib/useTema'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 import TrocarSenhaObrigatoria from '@/components/TrocarSenhaObrigatoria'
-import { MessageCircle, Sun, Moon } from 'lucide-react'
+import { Home, MessageCircle, Sun, Moon } from 'lucide-react'
 
 type ParceiroUser = {
   email: string
@@ -182,6 +182,15 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 text-sm text-[var(--tema-zinc-400)] hover:text-white transition-colors"
+                aria-label="Voltar pro site"
+                title="Voltar pro site"
+              >
+                <Home size={18} />
+                <span className="hidden sm:inline">Voltar pro site</span>
+              </Link>
               <span className="text-sm text-[var(--tema-zinc-400)] hidden sm:inline">{email}</span>
               <button
                 onClick={alternarTema}
