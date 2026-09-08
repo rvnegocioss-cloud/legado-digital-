@@ -2569,7 +2569,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                               </a>
                             )}
                             <a
-                              href={`/admin/cemiterios/${cemiterioId}/lapides/${lapideSelecionada.id}/gavetas-3d`}
+                              href={
+                                modo === 'leitura'
+                                  ? `/parceiro/cemiterios/${cemiterioId}/lapides/${lapideSelecionada.id}/gavetas-3d`
+                                  : `/admin/cemiterios/${cemiterioId}/lapides/${lapideSelecionada.id}/gavetas-3d`
+                              }
                               style={{ fontSize: 12, color: '#0B5FFF' }}
                             >
                               Gavetas 3D →

@@ -48,7 +48,7 @@
 14. [x] Atalho direto no mapa → cadastro de gavetas no Portal da Família
 15. [x] Regra de vínculo: quem cria o 1º memorial daquele jazigo vira o gestor de todos os memoriais vinculados a ele
 16. [x] Túmulo com múltiplos memoriais: hover no mapa mostra cartão com nome+foto de todos os homenageados daquele jazigo
-17. [ ] Checar performance: visualizador 3D de gavetas deixa a página pesada?
+17. [x] Checar performance: visualizador 3D de gavetas deixa a página pesada? — **medido 08/09: não.** three.js + @react-three somam ~1,3 MB, mas só carregam nas duas rotas `/gavetas-3d`, sob demanda (`dynamic` com `ssr:false`). Não entram no bundle inicial do memorial, da Central nem do Portal do Parceiro.
 
 ## Combinado, sem ação de código agora
 
