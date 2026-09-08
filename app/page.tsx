@@ -57,8 +57,8 @@ const MARCACAO = `<nav class="navbar">
     <div class="beam"></div>
     <div class="beam-linger"></div>
     <div class="glow"></div>
-    <h1><span class="word" style="animation-delay:1.45s">Toda</span> <span class="word" style="animation-delay:1.55s">Família</span><br><em><span class="word" style="animation-delay:1.68s">Tem</span> <span class="word" style="animation-delay:1.76s">Uma</span> <span class="word" style="animation-delay:1.86s">História</span></em></h1>
-    <p class="sub">Legado Digital é o memorial digital que sua funerária oferece à família: uma página com fotos, vídeos e histórias reais, acessada por QR Code na lápide. Cada memorial é um ponto de luz — sozinho no começo, depois interligado a todos os outros, numa constelação viva.</p>
+    <h1><span class="word" style="animation-delay:1.45s">Toda</span> <span class="word" style="animation-delay:1.55s">Família</span> <span class="word" style="animation-delay:1.62s">Tem</span> <span class="word" style="animation-delay:1.70s">Uma</span> <span class="word" style="animation-delay:1.78s">História</span><br><em><span class="word" style="animation-delay:1.92s">Que</span> <span class="word" style="animation-delay:2.00s">Deve</span> <span class="word" style="animation-delay:2.08s">Ser</span> <span class="word" style="animation-delay:2.16s">Eterna</span></em></h1>
+    <p class="sub">A funerária entrega à família uma página com as fotos, os vídeos e a história de quem se foi — aberta pelo QR Code na lápide, de qualquer celular, a qualquer hora.</p>
     <div class="dica-rolar" aria-hidden="true">
       <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </div>
