@@ -120,3 +120,13 @@ As telas públicas de acesso são divididas ao meio: metade clara com um formul�
 Todo lead cai na tabela `leads`, aparece na Central de Comunicações, acende o sino do dashboard e dispara e-mail pros destinatários configurados em `configuracoes_sistema.emails_leads`. Se o SMTP falhar, o lead continua salvo e visível na Central.
 
 O dropdown "Área Restrita" da landing tem só **Portal do Parceiro** e **Portal da Família** — o acesso da equipe (`/admin/login`) saiu do menu público de propósito, mas continua funcionando normalmente pra quem digita o endereço.
+
+## Ambiente das laterais do memorial (desde 2026-09-08)
+
+Em tela larga, as faixas laterais da página do memorial (fora da coluna de conteúdo, nunca atrás de texto) ganham decoração: pontos de luz com profundidade e/ou pétalas caindo, desenhados em canvas, mais uma cor de fundo própria das faixas.
+
+Quem escolhe é a **família**, no Portal da Família (`/familia/[slug]`), junto do tema de cor:
+- **Ambiente**: pontos de luz · pétalas · os dois · nenhum (`homenagens.ambiente_lateral`, padrão `pontos`)
+- **Cor das laterais**: preto · vinho · marrom (`homenagens.cor_lateral`, padrão `preto`)
+
+Isso é separado do **tema** (navy/verde/grafite), que continua controlando o centro da página. A escolha não aparece como controle na página pública — o visitante só vê o resultado. Some abaixo de 1240px de largura e com `prefers-reduced-motion`.

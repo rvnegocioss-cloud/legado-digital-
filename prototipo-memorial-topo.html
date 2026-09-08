@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protótipo — topo do memorial</title>
+<style>
+  :root{
+    --navy:#0B1D2A; --navy-topo:#0f2436;
+    --gold:#C9A46A; --gold-claro:#dfc08a;
+    --gold-borda:rgba(201,164,106,0.18);
+    --texto:#F5F2EB; --corpo:#b0c0cc; --fraco:#7a8a96;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:linear-gradient(180deg,var(--navy-topo) 0%,var(--navy) 100%);
+    color:var(--texto);font-family:Georgia,'Times New Roman',serif;line-height:1.6;
+  }
+  .aviso{
+    background:#1c2c38;border-bottom:1px solid var(--gold-borda);padding:10px 20px;
+    font-size:12.5px;color:var(--fraco);text-align:center;
+  }
+  .aviso b{color:var(--gold)}
+
+  .nav{
+    border-bottom:1px solid var(--gold-borda);padding:14px 20px;display:flex;gap:20px;
+    justify-content:center;font-size:12.5px;color:var(--fraco);flex-wrap:wrap;
+  }
+  .container{max-width:1100px;margin:0 auto;padding:0 20px}
+
+  /* ---------- HERO: rosto | texto | galeria ---------- */
+  .hero{
+    display:grid;grid-template-columns:210px 1fr 320px;gap:40px;align-items:center;
+    padding:48px 20px 28px;max-width:1320px;margin:0 auto;
+  }
+  @media (max-width:980px){ .hero{grid-template-columns:1fr;text-align:center;gap:24px} }
+
+  .anel{
+    width:190px;height:190px;border-radius:50%;padding:3px;justify-self:center;
+    background:conic-gradient(from 0deg,var(--gold),var(--gold-claro),#a8834a,var(--gold));
+  }
+  .anel-inner{
+    width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--navy-topo);
+    display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:44px;
+  }
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--gold)}
+  .nome{font-size:38px;font-weight:400;margin:10px 0 6px;line-height:1.15}
+  .anos{color:var(--gold-claro);font-size:16px}
+  .cidade{color:var(--fraco);font-size:13.5px;margin-top:4px}
+  .frase{
+    border-left:2px solid var(--gold);padding-left:16px;margin:18px 0 0;
+    font-style:italic;color:var(--corpo);font-size:15.5px;
+  }
+  @media (max-width:980px){ .frase{border-left:none;padding:0;text-align:center} }
+
+  /* galeria dentro do hero */
+  .galeria-hero{
+    background:rgba(255,255,255,0.04);border:1px solid var(--gold-borda);
+    border-radius:12px;padding:14px;
+  }
+  .galeria-hero .rot{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:1.6px;color:var(--gold);
+    margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .galeria-hero .rot a{color:var(--fraco);text-decoration:none;font-size:11px;letter-spacing:0}
+  .destaque{
+    position:relative;width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;
+    background:linear-gradient(135deg,#1b3purple,#20384a);margin-bottom:8px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .destaque{background:linear-gradient(135deg,#1b3040,#20384a)}
+  .play{
+    width:46px;height:46px;border-radius:50%;background:rgba(201,164,106,.92);
+    display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:16px;
+  }
+  .thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .thumb{
+    aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#22384a,#2b4658);
+    display:flex;align-items:center;justify-content:center;color:var(--fraco);font-size:10px;
+  }
+  .thumb.mais{background:rgba(201,164,106,.14);color:var(--gold)}
+
+  /* ---------- FAIXA: como chegar ---------- */
+  .faixa-mapa{
+    max-width:1320px;margin:8px auto 0;padding:0 20px;
+  }
+  .cartao-mapa{
+    background:rgba(255,255,255,0.04);border:1px solid var(--gold-borda);border-radius:12px;
+    overflow:hidden;display:grid;grid-template-columns:1fr 300px;
+  }
+  @media (max-width:820px){ .cartao-mapa{grid-template-columns:1fr} }
+  .mapa-falso{
+    min-height:210px;background:
+      repeating-linear-gradient(90deg,#22333f 0 38px,#1d2c37 38px 76px),
+      repeating-linear-gradient(0deg,#22333f 0 38px,#1d2c37 38px 76px);
+    position:relative;display:flex;align-items:center;justify-content:center;
+  }
+  .rota{
+    position:absolute;left:50%;top:22%;width:5px;height:56%;border-radius:4px;
+    background:#1D4ED8;box-shadow:0 0 0 3px #fff;
+  }
+  .pino{
+    position:absolute;left:calc(50% - 9px);top:16%;width:22px;height:22px;border-radius:50%;
+    background:var(--gold);border:3px solid #fff;
+  }
+  .mapa-lado{padding:20px;border-left:1px solid var(--gold-borda)}
+  @media (max-width:820px){ .mapa-lado{border-left:none;border-top:1px solid var(--gold-borda)} }
+  .mapa-lado .rot{font-size:10.5px;text-transform:uppercase;letter-spacing:1.6px;color:var(--gold);margin-bottom:8px}
+  .mapa-lado h3{margin:0 0 6px;font-size:19px;font-weight:400}
+  .mapa-lado p{margin:0 0 14px;font-size:13.5px;color:var(--fraco);line-height:1.5}
+  .botao-ouro{
+    display:block;text-align:center;padding:11px;border-radius:8px;background:var(--gold);
+    color:var(--navy);font-weight:700;font-size:14px;text-decoration:none;margin-bottom:8px;
+  }
+  .botao-linha{
+    display:block;text-align:center;padding:11px;border-radius:8px;
+    border:1px solid var(--gold-borda);color:var(--corpo);font-size:14px;text-decoration:none;
+  }
+
+  /* ---------- corpo ---------- */
+  .corpo{max-width:1320px;margin:0 auto;padding:38px 20px 60px;display:grid;grid-template-columns:1fr;gap:8px}
+  .secao{padding:30px 0;border-top:1px solid var(--gold-borda)}
+  .titulo{font-size:12px;text-transform:uppercase;letter-spacing:2.4px;color:var(--gold);margin:0 0 14px}
+  .texto{color:var(--corpo);font-size:16px;max-width:660px}
+  .dim{opacity:.42}
+
+  /* atalho: só texto + botões; o mapa fica retrátil, fechado por padrão */
+  /* Mesma geometria do cartao de mapa: o TEXTO ocupa a area grande (onde o
+     mapa aparecia) e os botoes ficam na coluna estreita da direita. */
+  .cartao-atalho{
+    background:rgba(255,255,255,0.04);border:1px solid var(--gold-borda);border-radius:12px;
+    display:grid;grid-template-columns:1fr 300px;overflow:hidden;
+  }
+  @media (max-width:820px){ .cartao-atalho{grid-template-columns:1fr} }
+  .atalho-texto{padding:30px 32px;display:flex;flex-direction:column;justify-content:center}
+  .atalho-texto h3{margin:4px 0 8px;font-size:28px;font-weight:400}
+  .atalho-texto p{margin:0;font-size:15px;color:var(--fraco);line-height:1.6}
+  .atalho-botoes{
+    padding:24px 20px;border-left:1px solid var(--gold-borda);
+    display:flex;flex-direction:column;gap:10px;justify-content:center;
+  }
+  @media (max-width:820px){ .atalho-botoes{border-left:none;border-top:1px solid var(--gold-borda)} }
+  .atalho-botoes .botao-ouro,.atalho-botoes .botao-linha{margin:0;padding:12px;cursor:pointer;font-family:inherit;width:100%}
+  .atalho-botoes .botao-linha{background:transparent}
+  .mapa-retratil{
+    margin-top:10px;border:1px solid var(--gold-borda);border-radius:12px;overflow:hidden;
+  }
+
+  /* ---------- laterais que aproveitam o espaco vazio em tela grande ---------- */
+  .palco{display:grid;grid-template-columns:190px minmax(0,1fr) 240px;gap:32px;
+    max-width:1320px;margin:0 auto;padding:0 20px;align-items:start}
+  @media (max-width:1240px){
+    .palco{grid-template-columns:1fr}
+    .lateral{display:none}
+  }
+  .lateral{position:sticky;top:24px}
+
+  .indice{list-style:none;margin:0;padding:0;border-left:1px solid var(--gold-borda)}
+  .indice li{position:relative}
+  .indice a{
+    display:block;padding:9px 0 9px 18px;font-size:13px;color:var(--fraco);text-decoration:none;
+  }
+  .indice a:hover{color:var(--texto)}
+  .indice a.aqui{color:var(--gold-claro)}
+  .indice a.aqui::before{
+    content:'';position:absolute;left:-1px;top:8px;bottom:8px;width:2px;background:var(--gold);
+  }
+  .regua{margin-top:26px;padding-left:18px;border-left:1px solid var(--gold-borda)}
+  .regua .ano{font-size:12px;color:var(--fraco);padding:7px 0;letter-spacing:1px}
+  .regua .ano.forte{color:var(--gold-claro)}
+
+  .presenca{
+    background:rgba(255,255,255,0.04);border:1px solid var(--gold-borda);border-radius:12px;padding:16px;
+  }
+  .presenca .rot{font-size:10.5px;text-transform:uppercase;letter-spacing:1.6px;color:var(--gold);margin-bottom:12px}
+  .presenca .linha{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:9px 0;border-bottom:1px solid var(--gold-borda);font-size:13px;color:var(--fraco);
+  }
+  .presenca .linha:last-of-type{border-bottom:none}
+  .presenca .num{font-size:19px;color:var(--gold-claro)}
+  .presenca .vela{
+    display:block;text-align:center;margin-top:12px;padding:10px;border-radius:8px;
+    background:var(--gold);color:var(--navy);font-weight:700;font-size:13.5px;text-decoration:none;
+  }
+
+  /* ---------- pétalas nas laterais (mesma técnica da landing "O Fio da Vida":
+     CSS puro, só transform/opacity, sem JS e sem imagem). Posicionadas a partir
+     da borda do palco, nunca em % da viewport — assim ocupam a folga lateral em
+     tela larga sem jamais cruzar atrás do texto. ---------- */
+  .petalas{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .petala{
+    position:absolute;width:5px;height:5px;border-radius:50%;
+    background:radial-gradient(circle,#fff4de 0%,var(--gold-claro) 35%,rgba(201,164,106,0) 70%);
+    box-shadow:0 0 10px 3px rgba(201,164,106,0.45);
+    opacity:0;filter:blur(0.2px);
+    animation:petalaCai var(--pf,14s) ease-in-out infinite;
+    animation-delay:var(--pd,0s);
+  }
+  .petala.l{left:calc(50% - 680px - var(--pin,60px))}
+  .petala.r{left:calc(50% + 672px + var(--pin,60px))}
+  @keyframes petalaCai{
+    0%   {transform:translate(0,40px) scale(.6);opacity:0}
+    12%  {opacity:.85}
+    50%  {transform:translate(calc(var(--pdx,60px) * .5),-170px) scale(1);opacity:.7}
+    88%  {opacity:.45}
+    100% {transform:translate(var(--pdx,60px),-380px) scale(.75);opacity:0}
+  }
+  @media (max-width:1240px){ .petalas{display:none} }
+  @media (prefers-reduced-motion: reduce){ .petalas{display:none} }
+
+  .palco,.hero,.faixa-mapa,.nav{position:relative;z-index:1}
+
+  /* atalho discreto: uma linha só dentro do hero. O mapa nunca aparece de
+     entrada -- abre no clique, logo abaixo do próprio atalho. */
+  /* Mesmos dois caminhos que já existem lá embaixo na Localização, só que
+     puxados pro topo e em dourado. Sem quadra/fileira: dado técnico que o
+     visitante não entende. */
+  .atalhos-mapa{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  @media (max-width:980px){ .atalhos-mapa{justify-content:center} }
+  .atalho-ouro{
+    display:inline-flex;align-items:center;padding:9px 16px;border-radius:8px;
+    background:var(--gold);color:var(--navy);font-size:13px;font-weight:700;
+    text-decoration:none;font-family:inherit;
+  }
+  .atalho-ouro:hover{background:var(--gold-claro)}
+  .atalho-ouro-linha{
+    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;
+    background:transparent;border:1px solid var(--gold);color:var(--gold-claro);
+    font-size:13px;font-family:inherit;cursor:pointer;
+  }
+  .atalho-ouro-linha:hover{background:rgba(201,164,106,.12)}
+  .mapa-retratil{margin-top:12px;border:1px solid var(--gold-borda);border-radius:10px;overflow:hidden;max-width:520px}
+  .mapa-retratil .mapa-falso{min-height:180px}
+
+  /* Profundidade nas laterais — técnica do react-bits/Particles (catálogo
+     `sites`) adaptada pra canvas 2D: cada ponto tem z próprio, o tamanho e o
+     alfa caem com a distância e o mouse desloca a nuvem inteira (parallax de
+     cena, não repulsão ponto a ponto). Só desenha nas faixas laterais, nunca
+     atrás da coluna de texto. */
+  #poeira{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+  @media (max-width:1240px){ #poeira{display:none} }
+  @media (prefers-reduced-motion: reduce){ #poeira{display:none} }
+
+  /* Só no protótipo: alterna o ambiente pra comparar. Na página real isso vira
+     uma escolha da família, salva no memorial. */
+  .seletor-ambiente{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:40;
+    display:flex;gap:6px;align-items:center;padding:8px 12px;border-radius:999px;
+    background:rgba(11,29,42,.92);border:1px solid var(--gold-borda);backdrop-filter:blur(6px);
+  }
+  .seletor-ambiente span{font-size:11.5px;color:var(--fraco);margin-right:4px}
+  .seletor-ambiente button{
+    font-family:inherit;font-size:12px;padding:6px 12px;border-radius:999px;cursor:pointer;
+    background:transparent;border:1px solid transparent;color:var(--fraco);
+  }
+  .seletor-ambiente button.on{background:var(--gold);color:var(--navy);font-weight:700}
+
+  /* Faixas laterais com tom próprio: escurece o que está fora do palco central,
+     então a coluna de conteúdo lê como um bloco iluminado no meio. Puro
+     gradiente no body, sem elemento novo e sem cruzar atrás do texto. */
+  /* Só as FAIXAS LATERAIS mudam de cor (--lateral). O centro continua no tema
+     do memorial (navy/verde/grafite), intocado. */
+  :root{--lateral:#0a0a0b; --lateral-transp:rgba(10,10,11,0)}
+  body{
+    background:
+      linear-gradient(90deg,
+        var(--lateral) 0px,
+        var(--lateral) calc(50% - 700px),
+        var(--lateral-transp) calc(50% - 620px),
+        var(--lateral-transp) calc(50% + 620px),
+        var(--lateral) calc(50% + 700px),
+        var(--lateral) 100%),
+      linear-gradient(180deg, var(--navy-topo) 0%, var(--navy) 100%);
+  }
+  @media (max-width:1240px){
+    body{background:linear-gradient(180deg, var(--navy-topo) 0%, var(--navy) 100%)}
+  }
+
+  .seletor-cor{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:66px;z-index:40;
+    display:flex;gap:7px;align-items:center;padding:8px 12px;border-radius:999px;
+    background:rgba(11,29,42,.92);border:1px solid var(--gold-borda);backdrop-filter:blur(6px);
+  }
+  .seletor-cor span{font-size:11.5px;color:var(--fraco);margin-right:2px}
+  .seletor-cor button{
+    width:24px;height:24px;border-radius:50%;cursor:pointer;
+    border:1px solid rgba(255,255,255,.18);
+  }
+  .seletor-cor button.on{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,164,106,.35)}
+</style>
+</head>
+<body>
+
+<div class="seletor-cor">
+  <span>Cor das laterais:</span>
+  <button class="on" onclick="trocarLateral('#0a0a0b','10,10,11',this)" title="Preto" style="background:#0a0a0b"></button>
+  <button onclick="trocarLateral('#23121a','35,18,26',this)" title="Vinho" style="background:#23121a"></button>
+  <button onclick="trocarLateral('#241a12','36,26,18',this)" title="Marrom" style="background:#241a12"></button>
+  <button onclick="trocarLateral('#4A4741','74,71,65',this)" title="Cinza escuro" style="background:#4A4741"></button>
+</div>
+
+<div class="seletor-ambiente">
+  <span>Ambiente da página:</span>
+  <button data-amb="pontos" onclick="trocarAmbiente('pontos',this)">Pontos de luz</button>
+  <button data-amb="petalas" onclick="trocarAmbiente('petalas',this)">Pétalas</button>
+  <button class="on" data-amb="ambos" onclick="trocarAmbiente('ambos',this)">Os dois</button>
+  <button data-amb="nenhum" onclick="trocarAmbiente('nenhum',this)">Nenhum</button>
+  <span style="width:1px;height:20px;background:rgba(201,164,106,.25);margin:0 4px"></span>
+  <button class="on" id="btnFaixa" onclick="alternarFaixa(this)">Laterais escuras</button>
+</div>
+
+<canvas id="poeira" aria-hidden="true"></canvas>
+
+<div class="petalas" aria-hidden="true">
+  <div class="petala l" style="top:3%; --pin:90px; --pf:16.4s; --pd:4.2s; --pdx:-45px;"></div>
+  <div class="petala l" style="top:9%; --pin:290px; --pf:14.9s; --pd:3.0s; --pdx:-45px;"></div>
+  <div class="petala l" style="top:15%; --pin:190px; --pf:13.4s; --pd:6.1s; --pdx:-45px;"></div>
+  <div class="petala l" style="top:21%; --pin:190px; --pf:14.7s; --pd:7.2s; --pdx:-45px;"></div>
+  <div class="petala l" style="top:27%; --pin:90px; --pf:16.9s; --pd:4.9s; --pdx:35px;"></div>
+  <div class="petala l" style="top:33%; --pin:140px; --pf:14.6s; --pd:0.5s; --pdx:35px;"></div>
+  <div class="petala l" style="top:39%; --pin:290px; --pf:13.3s; --pd:3.3s; --pdx:-45px;"></div>
+  <div class="petala l" style="top:45%; --pin:240px; --pf:14.1s; --pd:11.6s; --pdx:-60px;"></div>
+  <div class="petala l" style="top:51%; --pin:90px; --pf:16.4s; --pd:3.4s; --pdx:-35px;"></div>
+  <div class="petala l" style="top:57%; --pin:90px; --pf:13.4s; --pd:4.2s; --pdx:45px;"></div>
+  <div class="petala l" style="top:63%; --pin:140px; --pf:16.1s; --pd:4.1s; --pdx:-60px;"></div>
+  <div class="petala l" style="top:69%; --pin:40px; --pf:13.8s; --pd:11.1s; --pdx:-35px;"></div>
+  <div class="petala l" style="top:75%; --pin:140px; --pf:15.9s; --pd:5.6s; --pdx:45px;"></div>
+  <div class="petala l" style="top:81%; --pin:190px; --pf:14.2s; --pd:5.7s; --pdx:60px;"></div>
+  <div class="petala l" style="top:87%; --pin:140px; --pf:15.3s; --pd:6.7s; --pdx:45px;"></div>
+  <div class="petala l" style="top:93%; --pin:240px; --pf:15.3s; --pd:2.4s; --pdx:-35px;"></div>
+  <div class="petala r" style="top:3%; --pin:40px; --pf:14.7s; --pd:2.2s; --pdx:35px;"></div>
+  <div class="petala r" style="top:9%; --pin:90px; --pf:13.5s; --pd:4.3s; --pdx:35px;"></div>
+  <div class="petala r" style="top:15%; --pin:290px; --pf:14.0s; --pd:1.5s; --pdx:60px;"></div>
+  <div class="petala r" style="top:21%; --pin:240px; --pf:15.3s; --pd:8.4s; --pdx:-45px;"></div>
+  <div class="petala r" style="top:27%; --pin:190px; --pf:15.1s; --pd:2.5s; --pdx:-45px;"></div>
+  <div class="petala r" style="top:33%; --pin:40px; --pf:14.2s; --pd:10.2s; --pdx:-35px;"></div>
+  <div class="petala r" style="top:39%; --pin:40px; --pf:16.4s; --pd:6.8s; --pdx:45px;"></div>
+  <div class="petala r" style="top:45%; --pin:240px; --pf:15.6s; --pd:0.3s; --pdx:45px;"></div>
+  <div class="petala r" style="top:51%; --pin:90px; --pf:14.5s; --pd:6.6s; --pdx:-60px;"></div>
+  <div class="petala r" style="top:57%; --pin:90px; --pf:14.8s; --pd:4.5s; --pdx:35px;"></div>
+  <div class="petala r" style="top:63%; --pin:290px; --pf:14.8s; --pd:4.5s; --pdx:-45px;"></div>
+  <div class="petala r" style="top:69%; --pin:40px; --pf:14.4s; --pd:0.6s; --pdx:45px;"></div>
+  <div class="petala r" style="top:75%; --pin:140px; --pf:15.4s; --pd:10.2s; --pdx:-60px;"></div>
+  <div class="petala r" style="top:81%; --pin:190px; --pf:13.8s; --pd:2.2s; --pdx:45px;"></div>
+  <div class="petala r" style="top:87%; --pin:240px; --pf:14.3s; --pd:2.5s; --pdx:-45px;"></div>
+  <div class="petala r" style="top:93%; --pin:40px; --pf:15.8s; --pd:11.5s; --pdx:-45px;"></div>
+</div>
+
+<div class="aviso">
+  Protótipo — <b>galeria de fotos e vídeos</b> subiu pro topo (ao lado do rosto) e o
+  <b>atalho "Onde descansa"</b> passa a vir antes de "A história" — só texto e botões; o mapa abre retrátil. Container 1100 → 1320px e as laterais vazias ganham índice + régua da vida (esquerda) e painel Presença fixo (direita).
+</div>
+
+<div class="nav">
+  <span>Sobre</span><span>Linha do Tempo</span><span>Homenagens</span>
+  <span>Livro</span><span>Fotos e Vídeos</span><span>Localização</span>
+</div>
+
+<header class="hero">
+  <div class="anel"><div class="anel-inner">MA</div></div>
+
+  <div>
+    <span class="eyebrow">— Em Memória —</span>
+    <h1 class="nome">Maria Aparecida Souza</h1>
+    <div class="anos">1958 — 2025</div>
+    <div class="cidade">São Paulo</div>
+    <blockquote class="frase">"O amor que ela deixou continua vivo em cada um de nós."</blockquote>
+
+    <div class="atalhos-mapa">
+      <a class="atalho-ouro" href="#">Rota de carro até o cemitério</a>
+      <button class="atalho-ouro-linha" type="button" onclick="alternarMapa()">
+        Guia até o túmulo dentro do cemitério <span id="chev">▾</span>
+      </button>
+    </div>
+    <div class="mapa-retratil" id="mapaRetratil" hidden>
+      <div class="mapa-falso"><div class="rota"></div><div class="pino"></div></div>
+    </div>
+  </div>
+
+  <div class="galeria-hero">
+    <div class="rot"><span>Fotos e vídeos</span><a href="#">ver tudo (7)</a></div>
+    <div class="destaque"><div class="play">▶</div></div>
+    <div class="thumbs">
+      <div class="thumb">foto</div>
+      <div class="thumb">foto</div>
+      <div class="thumb">foto</div>
+      <div class="thumb mais">+4</div>
+    </div>
+  </div>
+</header>
+
+  </div>
+</div>
+
+<div class="palco">
+  <aside class="lateral">
+    <ul class="indice">
+      <li><a class="aqui" href="#">A história</a></li>
+      <li><a href="#">Uma vida</a></li>
+      <li><a href="#">Galeria</a></li>
+      <li><a href="#">Homenagens</a></li>
+      <li><a href="#">Livro de assinaturas</a></li>
+      <li><a href="#">Acender uma vela</a></li>
+    </ul>
+    <div class="regua">
+      <div class="ano forte">1958</div>
+      <div class="ano">1976</div>
+      <div class="ano">1980</div>
+      <div class="ano">2010</div>
+      <div class="ano forte">2025</div>
+    </div>
+  </aside>
+
+  <div class="corpo">
+  <section class="secao">
+    <h2 class="titulo">A história</h2>
+    <p class="texto">
+      Maria foi professora de escola pública por 30 anos, dedicando a vida à educação de
+      gerações de crianças do bairro. Deixou uma marca em cada aluno que passou por sua sala.
+    </p>
+  </section>
+
+  <section class="secao dim">
+    <h2 class="titulo">Uma vida (linha do tempo)</h2>
+    <p class="texto">— resto da página segue igual ao que já está no ar —</p>
+  </section>
+
+  <section class="secao dim">
+    <h2 class="titulo">Mural de memórias · Livro de assinaturas · Acender uma vela</h2>
+    <p class="texto">— inalterados —</p>
+  </section>
+  </div>
+
+  <aside class="lateral">
+    <div class="presenca">
+      <div class="rot">Presença</div>
+      <div class="linha"><span>Velas acesas</span><span class="num">114</span></div>
+      <div class="linha"><span>Homenagens</span><span class="num">0</span></div>
+      <div class="linha"><span>Memórias</span><span class="num">6</span></div>
+      <a class="vela" href="#">Acender uma vela</a>
+    </div>
+  </aside>
+</div>
+
+<script>
+function alternarMapa(){
+  var m = document.getElementById('mapaRetratil');
+  m.hidden = !m.hidden;
+  document.getElementById('chev').textContent = m.hidden ? '▾' : '▴';
+}
+</script>
+<script>
+(function(){
+  var cv = document.getElementById('poeira');
+  if (!cv || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var ctx = cv.getContext('2d');
+  var pontos = [], petalas = [], mx = 0, my = 0, alvoX = 0, alvoY = 0;
+  var ambiente = 'ambos';   // pontos | petalas | ambos | nenhum
+  window.__setAmbiente = function(v){ ambiente = v; };
+  var LARGURA_PALCO = 1320;
+
+  function dimensionar(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function semear(){
+    pontos = [];
+    var folga = (innerWidth - LARGURA_PALCO) / 2;
+    if (folga < 90) return;
+    for (var i = 0; i < 130; i++){
+      var esq = Math.random() < 0.5;
+      // z entre 0.25 e 1: perto = maior e mais claro, longe = pequeno e apagado
+      var z = 0.25 + Math.random() * 0.75;
+      pontos.push({
+        base: esq ? Math.random() * folga : innerWidth - Math.random() * folga,
+        y: Math.random() * innerHeight,
+        z: z,
+        r: (0.6 + Math.random() * 1.7) * z,
+        vel: (0.06 + Math.random() * 0.20) * z,
+        fase: Math.random() * 6.28,
+        piscar: 0.6 + Math.random() * 1.6
+      });
+    }
+
+    // Pétalas: mesma lógica de profundidade dos pontos (z manda em tamanho,
+    // velocidade e parallax), mas caem em vez de subir e giram no próprio eixo.
+    petalas = [];
+    for (var j = 0; j < 26; j++){
+      var e = Math.random() < 0.5;
+      var pz = 0.35 + Math.random() * 0.65;
+      petalas.push({
+        base: e ? Math.random() * folga : innerWidth - Math.random() * folga,
+        y: Math.random() * innerHeight,
+        z: pz,
+        tam: (12 + Math.random() * 12) * pz,
+        vel: (0.22 + Math.random() * 0.35) * pz,
+        giro: Math.random() * 6.28,
+        velGiro: (Math.random() - 0.5) * 0.014,
+        balanco: 14 + Math.random() * 26,
+        fase: Math.random() * 6.28,
+        tom: Math.random()
+      });
+    }
+  }
+
+  // Pétala desenhada na mão: duas curvas espelhadas fechando em ponta, com um
+  // vinco no meio. Sem imagem — assim ela pode girar e mudar de tamanho sem
+  // perder nitidez.
+  function desenharPetala(x, y, tam, giro, alfa, tom){
+    var largura = tam * (0.42 + 0.30 * Math.abs(Math.cos(giro))); // giro no próprio eixo
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(giro * 0.6);
+    var g = ctx.createLinearGradient(0, -tam / 2, 0, tam / 2);
+    if (tom < 0.55){
+      g.addColorStop(0, 'rgba(247,206,214,' + alfa + ')');
+      g.addColorStop(1, 'rgba(206,122,142,' + (alfa * 0.75) + ')');
+    } else {
+      g.addColorStop(0, 'rgba(255,240,220,' + alfa + ')');
+      g.addColorStop(1, 'rgba(201,164,106,' + (alfa * 0.75) + ')');
+    }
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(0, -tam / 2);
+    ctx.bezierCurveTo(largura, -tam * 0.24, largura, tam * 0.26, 0, tam / 2);
+    ctx.bezierCurveTo(-largura, tam * 0.26, -largura, -tam * 0.24, 0, -tam / 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,' + (alfa * 0.22) + ')';
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(0, -tam / 2); ctx.lineTo(0, tam / 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  addEventListener('mousemove', function(e){
+    alvoX = (e.clientX / innerWidth - 0.5) * 26;
+    alvoY = (e.clientY / innerHeight - 0.5) * 18;
+  });
+
+  var t = 0;
+  function quadro(){
+    t += 0.016;
+    mx += (alvoX - mx) * 0.04;
+    my += (alvoY - my) * 0.04;
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+    if (ambiente === 'pontos' || ambiente === 'ambos')
+    for (var i = 0; i < pontos.length; i++){
+      var p = pontos[i];
+      p.y -= p.vel;
+      if (p.y < -10) p.y = innerHeight + 10;
+
+      // parallax: ponto perto (z alto) se desloca mais que o do fundo
+      var x = p.base + mx * p.z;
+      var y = p.y + my * p.z;
+      var brilho = (0.30 + 0.34 * Math.sin(t * p.piscar + p.fase)) * p.z;
+
+      var g = ctx.createRadialGradient(x, y, 0, x, y, p.r * 5);
+      g.addColorStop(0, 'rgba(255,244,222,' + brilho + ')');
+      g.addColorStop(0.35, 'rgba(223,192,138,' + (brilho * 0.55) + ')');
+      g.addColorStop(1, 'rgba(201,164,106,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, p.r * 5, 0, 6.2832); ctx.fill();
+    }
+
+    if (ambiente === 'petalas' || ambiente === 'ambos')
+    for (var k = 0; k < petalas.length; k++){
+      var f = petalas[k];
+      f.y += f.vel;
+      f.giro += f.velGiro;
+      if (f.y > innerHeight + 30){ f.y = -30; }
+      var fx = f.base + Math.sin(t * 0.5 + f.fase) * f.balanco + mx * f.z;
+      var fy = f.y + my * f.z;
+      desenharPetala(fx, fy, f.tam, f.giro, 0.46 * f.z + 0.20, f.tom);
+    }
+
+    requestAnimationFrame(quadro);
+  }
+
+  function iniciar(){ dimensionar(); semear(); }
+  addEventListener('resize', iniciar);
+  iniciar();
+  quadro();
+})();
+</script>
+<script>
+function trocarAmbiente(valor, botao){
+  window.__setAmbiente(valor);
+  document.querySelectorAll('.seletor-ambiente button').forEach(function(b){ b.classList.remove('on') });
+  botao.classList.add('on');
+  // as pétalas CSS da landing entram junto com a opção "pétalas"
+  document.querySelector('.petalas').style.display =
+    (valor === 'pontos' || valor === 'ambos') ? '' : 'none';
+}
+</script>
+<script>
+function alternarFaixa(botao){
+  document.body.classList.toggle('sem-faixa');
+  botao.classList.toggle('on');
+}
+</script>
+<style>
+  body.sem-faixa{background:linear-gradient(180deg,var(--navy-topo) 0%,var(--navy) 100%) !important}
+</style>
+<script>
+function trocarLateral(cor, rgb, botao){
+  var r = document.documentElement.style;
+  r.setProperty('--lateral', cor);
+  r.setProperty('--lateral-transp', 'rgba(' + rgb + ',0)');
+  document.querySelectorAll('.seletor-cor button').forEach(function(b){ b.classList.remove('on') });
+  botao.classList.add('on');
+}
+</script>
+</body>
+</html>

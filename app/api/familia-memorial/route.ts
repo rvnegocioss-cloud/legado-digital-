@@ -20,6 +20,8 @@ const CAMPOS_EDITAVEIS = [
   'timeline',
   'vinculos',
   'tema',
+  'ambiente_lateral',
+  'cor_lateral',
 ] as const
 
 // Campos que o Portal da Família de fato usa (edita + updated_at/preenchido_por
@@ -40,6 +42,8 @@ const CAMPOS_LEITURA = [
   'timeline',
   'vinculos',
   'tema',
+  'ambiente_lateral',
+  'cor_lateral',
   'slug',
   'preenchido_por',
   'updated_at',

@@ -13,6 +13,7 @@ import { AcenderVela } from "@/components/public/AcenderVela";
 import { LivroAssinaturas } from "@/components/public/LivroAssinaturas";
 import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
+import AmbienteLateral, { type Ambiente, type CorLateral } from "@/components/public/AmbienteLateral";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
@@ -73,6 +74,8 @@ interface Homenagem {
   videos_galeria: string[] | null;
   galeria_fotos: string[] | null;
   tema: string;
+  ambiente_lateral: string;
+  cor_lateral: string;
   timeline: TimelineEvent[] | null;
   velas_acesas: number | null;
   vinculos: string[] | null;
@@ -271,7 +274,7 @@ export default async function PerfilMemorialPage({
   const { data: homenagem } = await supabase
     .from("homenagens_publica")
     .select(
-      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, videos_galeria, galeria_fotos, timeline, velas_acesas, vinculos, tema"
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, videos_galeria, galeria_fotos, timeline, velas_acesas, vinculos, tema, ambiente_lateral, cor_lateral"
     )
     .eq("slug", slug)
     .single();
@@ -422,6 +425,14 @@ export default async function PerfilMemorialPage({
         ${VAR_DOURADO_CLARO}:${paleta.douradoClaro};
         ${VAR_DOURADO_ESCURO}:${paleta.douradoEscuro};
       }`}</style>
+
+      {/* Decoração das faixas laterais -- escolha da família no próprio portal,
+          nunca um controle exposto ao visitante. Só desenha fora do palco de
+          conteúdo, nunca atrás de texto. */}
+      <AmbienteLateral
+        ambiente={(m.ambiente_lateral || "pontos") as Ambiente}
+        cor={(m.cor_lateral || "preto") as CorLateral}
+      />
 
       <SeletorTema temaInicial={m.tema} />
 

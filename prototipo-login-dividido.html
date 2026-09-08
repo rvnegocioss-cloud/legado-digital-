@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protótipo — Telas de acesso divididas</title>
+<style>
+  :root{
+    --navy:#0B1D2A;
+    --navy-topo:#0f2436;
+    --gold:#C9A46A;
+    --branco:#F7F5F0;
+    --texto-claro:#F5F2EB;
+    --texto-fraco:#7a8a96;
+    --cinza-texto:#5b6670;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Georgia,'Times New Roman',serif;background:#111;color:#fff}
+
+  .abas{display:flex;gap:8px;padding:14px 20px;background:#000;position:sticky;top:0;z-index:20;flex-wrap:wrap}
+  .abas button{
+    font-family:inherit;font-size:14px;padding:8px 18px;border-radius:8px;cursor:pointer;
+    background:transparent;color:#9aa;border:1px solid #333;
+  }
+  .abas button.on{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:700}
+
+  .tela{display:none;min-height:100vh}
+  /* cadastro (metade clara) fica na ESQUERDA no desktop; no celular o login vem primeiro */
+  .tela.on{display:flex;flex-direction:row-reverse}
+  @media (max-width:900px){ .tela.on{flex-direction:column} }
+
+  .lado-login{
+    flex:1;background:linear-gradient(180deg,var(--navy-topo) 0%,var(--navy) 100%);
+    display:flex;align-items:center;justify-content:center;padding:56px 40px;
+  }
+  .caixa{width:100%;max-width:380px}
+  .logo{height:86px;width:auto;display:block;margin-bottom:26px;object-fit:contain}
+  .lado-login h2{margin:0 0 6px;font-size:26px;font-weight:400;color:var(--texto-claro)}
+  .lado-login .sub{margin:0 0 28px;font-size:14px;color:var(--texto-fraco);line-height:1.5}
+  label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1.6px;color:var(--gold);margin-bottom:6px}
+  .campo{
+    width:100%;padding:12px 14px;border-radius:8px;margin-bottom:16px;font-family:inherit;font-size:15px;
+    background:rgba(255,255,255,.05);border:1px solid rgba(201,164,106,.20);color:var(--texto-claro);
+  }
+  .campo::placeholder{color:#5c6b76}
+  .btn-ouro{
+    width:100%;padding:13px;border:none;border-radius:8px;background:var(--gold);color:var(--navy);
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
+  }
+  .link-fraco{display:block;text-align:center;margin-top:14px;font-size:12.5px;color:var(--texto-fraco);text-decoration:none}
+
+  .lado-cadastro{
+    flex:1;background:var(--branco);color:#22303a;
+    display:flex;align-items:center;justify-content:center;padding:56px 40px;
+  }
+  .lado-cadastro .caixa{max-width:420px}
+  .selo{
+    display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:1.8px;
+    color:#8a6d3b;background:rgba(201,164,106,.16);padding:5px 12px;border-radius:999px;margin-bottom:14px;
+  }
+  .lado-cadastro h2{margin:0 0 8px;font-size:26px;font-weight:400;color:#1a2730}
+  .lado-cadastro .sub{margin:0 0 24px;font-size:14px;color:var(--cinza-texto);line-height:1.55}
+  .lado-cadastro label{color:#8a6d3b}
+  .campo-claro{
+    width:100%;padding:12px 14px;border-radius:8px;margin-bottom:14px;font-family:inherit;font-size:15px;
+    background:#fff;border:1px solid #ddd6c8;color:#22303a;
+  }
+  .campo-claro::placeholder{color:#a9b2ba}
+  .dupla{display:flex;gap:12px}
+  .dupla>div{flex:1}
+  .btn-navy{
+    width:100%;padding:13px;border:none;border-radius:8px;background:var(--navy);color:#fff;
+    font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;
+  }
+  .nota{margin-top:14px;font-size:12px;color:#7b858d;line-height:1.5}
+
+  .info-lista{margin:0;padding:0;list-style:none}
+  .info-lista li{
+    display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--cinza-texto);
+    line-height:1.5;padding:9px 0;border-bottom:1px solid #e6e0d4;
+  }
+  .info-lista li:last-child{border-bottom:none}
+  .num{
+    flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--gold);
+    font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="abas">
+  <button class="on" onclick="mostrar('parceiro',this)">Portal do Parceiro</button>
+  <button onclick="mostrar('familia',this)">Família — opção A (lead)</button>
+  <button onclick="mostrar('familia2',this)">Família — opção B (informativo)</button>
+</div>
+
+<section class="tela on" id="parceiro">
+  <div class="lado-login">
+    <div class="caixa">
+      <img class="logo" src="public/logo-legado-digital.svg" alt="Legado Digital" />
+      <h2>Portal do Parceiro</h2>
+      <p class="sub">Acesso pra funerárias, cemitérios e demais parceiros.</p>
+
+      <label>E-mail</label>
+      <input class="campo" placeholder="contato@suaempresa.com.br" />
+
+      <label>Senha</label>
+      <input class="campo" type="password" placeholder="senha" />
+
+      <button class="btn-ouro">Entrar</button>
+      <a class="link-fraco" href="#">Esqueceu sua senha?</a>
+      <a class="link-fraco" href="#">Voltar pro site</a>
+    </div>
+  </div>
+
+  <div class="lado-cadastro">
+    <div class="caixa">
+      <span class="selo">Ainda não é parceiro</span>
+      <h2>Leve o Legado Digital pra sua funerária</h2>
+      <p class="sub">Deixe seus dados e nossa equipe entra em contato pra apresentar como funciona.</p>
+
+      <label>Nome do responsável</label>
+      <input class="campo-claro" placeholder="Seu nome completo" />
+
+      <label>Empresa</label>
+      <input class="campo-claro" placeholder="Nome da funerária ou cemitério" />
+
+      <div class="dupla">
+        <div>
+          <label>E-mail</label>
+          <input class="campo-claro" placeholder="voce@empresa.com.br" />
+        </div>
+        <div>
+          <label>Telefone</label>
+          <input class="campo-claro" placeholder="DDD + numero" />
+        </div>
+      </div>
+
+      <label>Cidade / Estado</label>
+      <input class="campo-claro" placeholder="Uberlândia / MG" />
+
+      <button class="btn-navy">Quero conhecer</button>
+      <p class="nota">Vira um lead na Central de Comunicações e dispara e-mail pra equipe.</p>
+    </div>
+  </div>
+</section>
+
+<section class="tela" id="familia">
+  <div class="lado-login">
+    <div class="caixa">
+      <img class="logo" src="public/logo-legado-digital.svg" alt="Legado Digital" />
+      <h2>Portal da Família</h2>
+      <p class="sub">Adicione fotos, vídeos e a história de quem você ama.</p>
+
+      <label>Nome do homenageado</label>
+      <input class="campo" placeholder="Nome completo" />
+
+      <label>Senha da família</label>
+      <input class="campo" placeholder="Recebida por e-mail" />
+
+      <button class="btn-ouro">Entrar</button>
+      <a class="link-fraco" href="#">Esqueci minha senha</a>
+      <a class="link-fraco" href="#">Voltar pro site</a>
+    </div>
+  </div>
+
+  <div class="lado-cadastro">
+    <div class="caixa">
+      <span class="selo">Ainda não tem um memorial</span>
+      <h2>Quero um memorial pra minha família</h2>
+      <p class="sub">Deixe seus dados e nós indicamos uma funerária parceira na sua cidade.</p>
+
+      <label>Seu nome</label>
+      <input class="campo-claro" placeholder="Nome completo" />
+
+      <div class="dupla">
+        <div>
+          <label>E-mail</label>
+          <input class="campo-claro" placeholder="voce@email.com" />
+        </div>
+        <div>
+          <label>Telefone</label>
+          <input class="campo-claro" placeholder="DDD + numero" />
+        </div>
+      </div>
+
+      <label>Cidade / Estado</label>
+      <input class="campo-claro" placeholder="Uberlândia / MG" />
+
+      <label>Nome do homenageado (opcional)</label>
+      <input class="campo-claro" placeholder="De quem é a homenagem" />
+
+      <button class="btn-navy">Quero saber como funciona</button>
+      <p class="nota">Vira um lead de família na Central de Comunicações e dispara e-mail pra equipe.</p>
+    </div>
+  </div>
+</section>
+
+<section class="tela" id="familia2">
+  <div class="lado-login">
+    <div class="caixa">
+      <img class="logo" src="public/logo-legado-digital.svg" alt="Legado Digital" />
+      <h2>Portal da Família</h2>
+      <p class="sub">Adicione fotos, vídeos e a história de quem você ama.</p>
+
+      <label>Nome do homenageado</label>
+      <input class="campo" placeholder="Nome completo" />
+
+      <label>Senha da família</label>
+      <input class="campo" placeholder="Recebida por e-mail" />
+
+      <button class="btn-ouro">Entrar</button>
+      <a class="link-fraco" href="#">Esqueci minha senha</a>
+      <a class="link-fraco" href="#">Voltar pro site</a>
+    </div>
+  </div>
+
+  <div class="lado-cadastro">
+    <div class="caixa">
+      <span class="selo">Primeiro acesso</span>
+      <h2>Como a família recebe o acesso</h2>
+      <p class="sub">O memorial é criado pela funerária. A senha chega no e-mail cadastrado por ela.</p>
+
+      <ul class="info-lista">
+        <li><span class="num">1</span><span>A funerária cadastra o memorial e o e-mail do responsável pela família.</span></li>
+        <li><span class="num">2</span><span>O sistema envia a senha de acesso pra esse e-mail, automaticamente.</span></li>
+        <li><span class="num">3</span><span>Com a senha, a família entra aqui e monta a história: fotos, vídeos e linha do tempo.</span></li>
+      </ul>
+
+      <p class="nota">Não recebeu? Fale com a funerária que cuidou do sepultamento, ou use "Esqueci minha senha" ao lado.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+function mostrar(id, botao){
+  document.querySelectorAll('.tela').forEach(function(t){ t.classList.remove('on') });
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.abas button').forEach(function(b){ b.classList.remove('on') });
+  botao.classList.add('on');
+}
+</script>
+</body>
+</html>

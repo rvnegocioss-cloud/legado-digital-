@@ -8,6 +8,7 @@ import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
 import { LivroAssinaturas, type Assinatura } from '@/components/public/LivroAssinaturas'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
+import { AMBIENTES, CORES_LATERAIS, type Ambiente, type CorLateral } from '@/components/public/AmbienteLateral'
 import { supabase } from '@/lib/auth'
 import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
@@ -26,6 +27,8 @@ interface Memorial {
   videos_galeria: string[] | null
   galeria_fotos: string[] | null
   tema: string
+  ambiente_lateral?: string
+  cor_lateral?: string
   timeline: { year?: string; title?: string; description?: string }[] | null
   vinculos: string[] | null
   slug: string | null
@@ -110,6 +113,8 @@ export default function FamiliaEdicaoPage() {
   const [videoUrl, setVideoUrl] = useState('')
   const [videosGaleria, setVideosGaleria] = useState<string[]>([])
   const [tema, setTema] = useState('navy')
+  const [ambienteLateral, setAmbienteLateral] = useState<Ambiente>('pontos')
+  const [corLateral, setCorLateral] = useState<CorLateral>('preto')
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
   const [vinculos, setVinculos] = useState<string[]>([])
@@ -196,6 +201,8 @@ export default function FamiliaEdicaoPage() {
     setGaleria(m.galeria_fotos || [])
     setVideosGaleria(m.videos_galeria || [])
     setTema(m.tema || 'navy')
+    setAmbienteLateral((m.ambiente_lateral as Ambiente) || 'pontos')
+    setCorLateral((m.cor_lateral as CorLateral) || 'preto')
     setVinculos(m.vinculos || [])
     setTimelineEventos(
       (m.timeline || []).map((ev) => ({
@@ -223,6 +230,8 @@ export default function FamiliaEdicaoPage() {
           if (Array.isArray(r.dados.timeline)) setTimelineEventos(r.dados.timeline)
           if (Array.isArray(r.dados.vinculos)) setVinculos(r.dados.vinculos)
           if (r.dados.tema) setTema(r.dados.tema)
+          if (r.dados.ambiente_lateral) setAmbienteLateral(r.dados.ambiente_lateral as Ambiente)
+          if (r.dados.cor_lateral) setCorLateral(r.dados.cor_lateral as CorLateral)
           setRascunhoRestaurado(true)
         }
       }
@@ -242,6 +251,8 @@ export default function FamiliaEdicaoPage() {
       timeline: m.timeline,
       vinculos: m.vinculos,
       tema: m.tema,
+      ambiente_lateral: m.ambiente_lateral,
+      cor_lateral: m.cor_lateral,
     })
     setCarregando(false)
   }
@@ -256,13 +267,13 @@ export default function FamiliaEdicaoPage() {
         chaveRascunho(params.slug),
         JSON.stringify({
           salvoEm: new Date().toISOString(),
-          dados: { ...form, tema, vinculos, timeline: timelineEventos },
+          dados: { ...form, tema, ambiente_lateral: ambienteLateral, cor_lateral: corLateral, vinculos, timeline: timelineEventos },
         })
       )
     } catch {
       // navegador sem espaco ou em modo privado -- rascunho e bonus, nunca bloqueia
     }
-  }, [form, tema, vinculos, timelineEventos, carregando, sessaoInvalida, params.slug])
+  }, [form, tema, ambienteLateral, corLateral, vinculos, timelineEventos, carregando, sessaoInvalida, params.slug])
 
   // Salva sozinho 2,5s depois que a pessoa para de digitar. E o que fecha o
   // problema de raiz: nada fica pendente esperando o botao, entao nao existe
@@ -284,7 +295,7 @@ export default function FamiliaEdicaoPage() {
     }, espera)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, tema, vinculos, timelineEventos, fotoUrl, videoUrl, galeria, videosGaleria])
+  }, [form, tema, ambienteLateral, corLateral, vinculos, timelineEventos, fotoUrl, videoUrl, galeria, videosGaleria])
 
   const ROTULO_CAMPO: Record<string, string> = {
     nome_completo: 'Nome completo',
@@ -296,6 +307,8 @@ export default function FamiliaEdicaoPage() {
     timeline: 'Linha do tempo',
     vinculos: 'Vínculo/papel',
     tema: 'Tema da página',
+    ambiente_lateral: 'Ambiente das laterais',
+    cor_lateral: 'Cor das laterais',
     foto_url: 'Foto do homenageado',
     video_url: 'Vídeo',
     galeria_fotos: 'Galeria de fotos',
@@ -331,6 +344,8 @@ export default function FamiliaEdicaoPage() {
     if ('timeline' in s) setTimelineEventos((s.timeline as TimelineEvento[]) || [])
     if ('vinculos' in s) setVinculos((s.vinculos as string[]) || [])
     if ('tema' in s) setTema((s.tema as string) || 'navy')
+    if ('ambiente_lateral' in s) setAmbienteLateral((s.ambiente_lateral as Ambiente) || 'pontos')
+    if ('cor_lateral' in s) setCorLateral((s.cor_lateral as CorLateral) || 'preto')
     if ('galeria_fotos' in s) setGaleria((s.galeria_fotos as string[]) || [])
     if ('videos_galeria' in s) setVideosGaleria((s.videos_galeria as string[]) || [])
     setValoresBase((b) => ({ ...b, ...conflito.doServidor }))
@@ -366,6 +381,8 @@ export default function FamiliaEdicaoPage() {
         videos_galeria: videosGaleria,
         galeria_fotos: galeria,
         tema,
+        ambiente_lateral: ambienteLateral,
+        cor_lateral: corLateral,
         timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
         vinculos: vinculos.length > 0 ? vinculos : null,
       }),
@@ -875,6 +892,43 @@ export default function FamiliaEdicaoPage() {
                   title={p.nome}
                   className={`w-8 h-8 rounded-full ${tema === p.id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
                   style={{ background: `linear-gradient(135deg, ${p.fundoBase} 50%, ${p.dourado} 50%)` }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Ambiente das laterais</label>
+            <p className="text-xs text-zinc-400 mb-2">
+              Pontos de luz e pétalas caindo nas bordas da página, fora do texto. Só aparece em tela grande.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {AMBIENTES.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => setAmbienteLateral(a.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs ${
+                    ambienteLateral === a.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {a.nome}
+                </button>
+              ))}
+            </div>
+
+            <label className="block text-xs text-zinc-500 mb-1">Cor das laterais</label>
+            <div className="flex gap-2">
+              {(Object.keys(CORES_LATERAIS) as CorLateral[]).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setCorLateral(id)}
+                  title={CORES_LATERAIS[id].nome}
+                  className={`w-8 h-8 rounded-full ${corLateral === id ? 'ring-2 ring-white' : 'ring-1 ring-zinc-700'}`}
+                  style={{ background: CORES_LATERAIS[id].hex }}
                 />
               ))}
             </div>

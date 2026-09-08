@@ -41,3 +41,7 @@ Quem chega em `/parceiro/login` ou `/familia/login` encontra a tela dividida: de
 - Família que ainda não tem memorial: preenche o formulário de `/familia/login` e a equipe indica uma funerária parceira da região.
 
 Importante ao orientar uma família: **ela não cria o próprio acesso**. O memorial é cadastrado pela funerária, que envia a senha por e-mail. Se a família já tem memorial e perdeu a senha, oriente a usar "Esqueci minha senha" na própria tela de `/familia/login`.
+
+## Aparência do memorial (desde 2026-09-08)
+
+A família pode escolher, no próprio portal, a cor do memorial e o ambiente das laterais da página (pontos de luz, pétalas caindo, os dois ou nenhum) — em telas grandes a decoração aparece nas bordas, sem atrapalhar a leitura. Quem visita não altera nada disso, só vê o resultado escolhido pela família.
