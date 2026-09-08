@@ -595,7 +595,9 @@
   }
 
   .perfil-lateral-fixa {
-    position: sticky;
+    /* Sem sticky: o Rafael não quer nada deslizando junto com o scroll --
+       a lateral fica parada onde está. */
+    position: static;
     /* Folga no topo pra lateral nunca encostar na borda da janela. */
     top: 24px;
     max-height: calc(100vh - 48px);
@@ -678,13 +680,18 @@
 .arv-card:hover .arv-abrir{color:var(--perfil-dourado-claro)}
 
 .arv-visor{
-  position:fixed;inset:0;z-index:1000;background:#1a1410;overflow:auto;padding:16px;
+  position:fixed;inset:0;z-index:2147483000;background:#120e0a;overflow:auto;
+  padding:70px 16px 40px;
 }
 .arv-fechar{
-  position:fixed;top:14px;right:14px;z-index:5;width:42px;height:42px;border-radius:50%;
-  background:rgba(255,255,255,.92);border:1.5px solid #b8912f;color:#5a4526;
-  font-size:20px;line-height:1;cursor:pointer;font-family:inherit;
+  position:fixed;top:16px;right:16px;z-index:2147483001;
+  display:inline-flex;align-items:center;gap:8px;
+  height:42px;padding:0 18px;border-radius:999px;
+  background:#C9A46A;border:0;color:#0B1D2A;
+  font-size:13.5px;font-weight:700;line-height:1;cursor:pointer;font-family:inherit;
+  box-shadow:0 6px 20px rgba(0,0,0,.5);
 }
+.arv-fechar:hover{background:#dfc08a}
 .arv-quadro{position:relative;max-width:900px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .arv-fundo{width:100%;display:block}
 .arv-titulo{

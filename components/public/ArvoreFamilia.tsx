@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Convenções da genealogia tradicional (regra 23 do CLAUDE.md):
 //   pai à esquerda, mãe à direita (padrão brasileiro) · casal unido por linha
@@ -58,6 +58,20 @@ function anosDoMemorial(m: ArvoreDados['memorial']) {
 
 export default function ArvoreFamilia({ dados }: { dados: ArvoreDados | null }) {
   const [aberta, setAberta] = useState(false)
+
+  useEffect(() => {
+    if (!aberta) return
+    const antes = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    function tecla(e: KeyboardEvent) {
+      if (e.key === 'Escape') setAberta(false)
+    }
+    window.addEventListener('keydown', tecla)
+    return () => {
+      document.body.style.overflow = antes
+      window.removeEventListener('keydown', tecla)
+    }
+  }, [aberta])
 
   if (!dados) return null
 
@@ -172,9 +186,9 @@ export default function ArvoreFamilia({ dados }: { dados: ArvoreDados | null }) 
             type="button"
             className="arv-fechar"
             onClick={() => setAberta(false)}
-            aria-label="Fechar"
+            aria-label="Voltar pro memorial"
           >
-            ×
+            ← Voltar pro memorial
           </button>
 
           <div className="arv-quadro" onClick={(e) => e.stopPropagation()}>
