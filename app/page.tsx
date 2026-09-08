@@ -178,7 +178,7 @@ const MARCACAO = `<nav class="navbar">
   <div class="node dot" data-x="300" data-y="2620" data-t="0.574"></div>
 
   <div class="node photo" data-x="480" data-y="3559" data-t="0.769">
-    <div class="ring"><img src="/fio-da-vida/nodes/de-onde-estiver-1.png" class="node-img node-img-a node-4fotos" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-2.png" class="node-img node-img-b" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-3.png" class="node-img node-img-c" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /><img src="/fio-da-vida/nodes/de-onde-estiver-4.png" class="node-img node-img-d" style="--reveza-atraso:2.4s" alt="Mão segurando o celular com o memorial aberto" /></div>
+    <div class="ring"><img src="/fio-da-vida/nodes/portal-familia-1.png" class="node-img node-img-a node-3fotos" style="--reveza-atraso:2.4s" alt="Família editando o memorial no Portal da Família" /><img src="/fio-da-vida/nodes/portal-familia-2.png" class="node-img node-img-b" style="--reveza-atraso:2.4s" alt="Senhor vendo o memorial no tablet" /><img src="/fio-da-vida/nodes/portal-familia-3.png" class="node-img node-img-c" style="--reveza-atraso:2.4s" alt="Rapaz vendo o memorial no celular" /></div>
     <div class="cap side-left"><b>Portal da Família</b>A família recebe um acesso próprio: sobe fotos e vídeos, escreve a história, monta a linha do tempo e decide quem pode ver o memorial.</div>
   </div>
 
