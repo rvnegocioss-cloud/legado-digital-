@@ -224,8 +224,14 @@ html {
   .mem-hero {
     flex-direction: row !important;
     text-align: left !important;
-    gap: 64px;
-    padding: 96px 48px 72px !important;
+    gap: 40px;
+    padding: 96px 40px 72px !important;
+  }
+  /* Sem isto o texto encolhe até 322px e a galeria parece não ter crescido:
+     o nome e a frase precisam de largura própria, não do que sobrar. */
+  .mem-hero-texto {
+    flex: 1 1 auto;
+    min-width: 340px;
   }
   .mem-hero-texto {
     align-items: flex-start !important;

@@ -1,6 +1,6 @@
 import "./perfil.css";
 import Image from "next/image";
-import { MapPin, ShieldCheck, Lock, Flame, Route } from "lucide-react";
+import { MapPin, ShieldCheck, Lock, Flame } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
@@ -715,25 +715,6 @@ export default async function PerfilMemorialPage({
               </a>
             </div>
 
-            {localizacao?.cemiterio_nome && (
-              <div className="perfil-cartao">
-                <h3 className="perfil-cartao-titulo">
-                  <Route size={14} strokeWidth={1.5} />
-                  Onde descansa
-                </h3>
-                <p className="perfil-local-nome">{localizacao.cemiterio_nome}</p>
-                {(localizacao.quadra || localizacao.lote) && (
-                  <p className="perfil-local-detalhe">
-                    {[localizacao.quadra && `Quadra ${localizacao.quadra}`, localizacao.lote && `Túmulo ${localizacao.lote}`]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                )}
-                <a href="#localizacao" className="perfil-atalho">
-                  Ver o caminho até lá
-                </a>
-              </div>
-            )}
           </div>
         </aside>
       </div>
