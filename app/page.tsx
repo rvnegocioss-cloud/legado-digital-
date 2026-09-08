@@ -26,6 +26,16 @@ const MARCACAO = `<nav class="navbar">
       <a href="#como-funciona">Como Funciona</a>
       <a href="#faq">FAQ</a>
       <a href="/cemiterios">Cemitérios</a>
+      <div class="contato-nav">
+        <button class="link-contato" type="button" id="btnContato" aria-expanded="false">Contato
+          <svg class="chev-area" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="menu-area" id="menuContato">
+          <a href="mailto:contato@legadodigital.net">contato@legadodigital.net</a>
+          <a href="/parceiro/login#cadastro">Quero ser parceiro</a>
+          <a href="/familia/login#cadastro">Quero um memorial</a>
+        </div>
+      </div>
     </div>
     <div class="area-restrita">
       <button class="cta" type="button" id="btnArea" aria-expanded="false">Área Restrita

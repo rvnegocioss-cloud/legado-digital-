@@ -622,6 +622,16 @@ path.thread-main, path.thread-stub, #fiosDNA { opacity: 0 !important; }
 }
 /* Area Restrita: dropdown igual ao da landing real (#0B1D2A com borda dourada) */
 .area-restrita { position: relative; }
+/* "Contato" reaproveita o mesmo dropdown do "Area Restrita" -- muda so o
+   gatilho, que aqui e um link de texto e nao um botao dourado. */
+.contato-nav { position: relative; }
+.contato-nav .link-contato {
+  display: inline-flex; align-items: center; gap: 5px; border: 0; background: none;
+  cursor: pointer; font: inherit; font-size: 13.5px; color: rgba(255,255,255,0.6); padding: 0;
+}
+.contato-nav .link-contato:hover { color: var(--gold); }
+.contato-nav.aberto .chev-area { transform: rotate(180deg); }
+.contato-nav.aberto .menu-area { opacity: 1; transform: translateY(0); pointer-events: auto; }
 .area-restrita .cta { display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer; font: inherit; }
 .chev-area { transition: transform .2s ease; }
 .area-restrita.aberto .chev-area { transform: rotate(180deg); }

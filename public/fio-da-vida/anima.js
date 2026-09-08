@@ -989,3 +989,19 @@ setTimeout(function () {
   document.addEventListener('click', function (e) { if (!caixa.contains(e.target)) fechar(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fechar(); });
 })();
+
+/* dropdown "Contato" da navbar - mesmo comportamento do "Area Restrita" */
+(function () {
+  var caixa = document.querySelector('.contato-nav');
+  var botao = document.getElementById('btnContato');
+  if (!caixa || !botao) return;
+  function fechar() { caixa.classList.remove('aberto'); botao.setAttribute('aria-expanded', 'false'); }
+  botao.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var abre = !caixa.classList.contains('aberto');
+    caixa.classList.toggle('aberto', abre);
+    botao.setAttribute('aria-expanded', abre ? 'true' : 'false');
+  });
+  document.addEventListener('click', function (e) { if (!caixa.contains(e.target)) fechar(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fechar(); });
+})();
