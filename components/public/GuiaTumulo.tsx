@@ -199,7 +199,7 @@ export default function GuiaTumulo({
                 onLoad={aoCarregarMapa}
                 initialViewState={{ longitude: lapideLng!, latitude: lapideLat!, zoom: 19, pitch: 55, bearing: -20 }}
                 mapStyle={estiloMapa as any}
-                style={{ height: 260, width: '100%' }}
+                style={{ height: 480, width: '100%' }}
                 maxPitch={70}
               >
                 <NavigationControl visualizePitch showZoom position="top-right" />

@@ -633,3 +633,25 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+
+/* ---- "Como chegar" retrátil, no topo ---------------------------------- */
+/* Subiu pro começo da página a pedido do Rafael (08/09): lá embaixo ninguém
+   achava. Fechado por padrão pra não empurrar a história; o mapa só carrega
+   visualmente quando alguém abre. */
+.perfil-mapa-retratil > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.perfil-mapa-retratil > summary::-webkit-details-marker { display: none; }
+.perfil-mapa-abrir::after {
+  content: '▾';
+  margin-left: 8px;
+  font-size: 11px;
+  transition: transform .2s ease;
+  display: inline-block;
+}
+.perfil-mapa-retratil[open] .perfil-mapa-abrir::after { transform: rotate(180deg); }
+.perfil-mapa-retratil > summary:hover { color: var(--perfil-dourado-claro); }
+

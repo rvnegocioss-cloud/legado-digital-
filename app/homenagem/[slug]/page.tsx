@@ -556,6 +556,38 @@ export default async function PerfilMemorialPage({
         <RailVida marcos={marcos} anoInicio={anoNasc ? String(anoNasc) : null} anoFim={anoFalec ? String(anoFalec) : null} />
 
         <main className="perfil-coluna">
+        {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
+          <section id="localizacao" className="perfil-secao perfil-secao-midia">
+            <details className="perfil-mapa-retratil">
+                <summary className="perfil-titulo perfil-mapa-abrir">Como chegar ao túmulo</summary>
+            <GuiaTumulo
+                cemiterioNome={localizacao.cemiterio_nome}
+                cemiterioLat={localizacao.cemiterio_lat}
+                cemiterioLng={localizacao.cemiterio_lng}
+                lapideLat={localizacao.lapide_lat}
+                lapideLng={localizacao.lapide_lng}
+                quadra={localizacao.quadra}
+                lote={localizacao.lote}
+                nomeCompleto={m.nome_completo}
+                fotoUrl={fotoAssinada}
+                ortoUrl={ortoAssinado}
+                ortoMinzoom={localizacao.orto_minzoom}
+                ortoMaxzoom={localizacao.orto_maxzoom}
+                ortoBounds={localizacao.orto_bounds}
+                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
+              />
+              </details>
+            </section>
+          )}
+          {/* <details> não abre sozinho quando a âncora é acionada -- 4 linhas
+              resolvem sem transformar o hero inteiro em componente client. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                "document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href=\"#localizacao\"]');if(!a)return;var d=document.querySelector('#localizacao details');if(d)d.open=true;});",
+            }}
+          />
+
           <section id="biografia" className="perfil-secao">
             <h2 className="perfil-titulo">A história</h2>
             <TextoVerMais>
@@ -633,28 +665,6 @@ export default async function PerfilMemorialPage({
             <h2 className="perfil-titulo">Mural de memórias</h2>
             <MuralMemorias memorialId={m.id} memoriasIniciais={mural} />
           </section>
-
-          {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
-            <section id="localizacao" className="perfil-secao">
-              <h2 className="perfil-titulo">Como chegar</h2>
-              <GuiaTumulo
-                cemiterioNome={localizacao.cemiterio_nome}
-                cemiterioLat={localizacao.cemiterio_lat}
-                cemiterioLng={localizacao.cemiterio_lng}
-                lapideLat={localizacao.lapide_lat}
-                lapideLng={localizacao.lapide_lng}
-                quadra={localizacao.quadra}
-                lote={localizacao.lote}
-                nomeCompleto={m.nome_completo}
-                fotoUrl={fotoAssinada}
-                ortoUrl={ortoAssinado}
-                ortoMinzoom={localizacao.orto_minzoom}
-                ortoMaxzoom={localizacao.orto_maxzoom}
-                ortoBounds={localizacao.orto_bounds}
-                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
-              />
-            </section>
-          )}
 
           <section id="livro" className="perfil-secao">
             <h2 className="perfil-titulo">
