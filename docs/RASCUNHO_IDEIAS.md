@@ -110,3 +110,18 @@ confirmado em ata — funerária paga, não a família).
 
 **Pendência:** decidir se vira a base do book digital de vendas de verdade — troca números fictícios
 por preço decidido (ou tira os números até decidir) e print real do sistema no lugar do stock.
+
+
+## Memorial de casal (ideia guardada 2026-09-08)
+
+Achado pesquisando memoriais de fora (Online-Tribute, Keeper, Scan2Remember): marido e mulher dividem **uma página só**, com a história do casal junta em vez de dois memoriais separados que não se falam.
+
+Rafael gostou da ideia e mandou guardar — **não construir sem decisão dele**.
+
+Pontos a resolver antes:
+- Uma lápide costuma guardar os dois: casaria com o sistema de jazigo/gavetas que já existe
+- Cada um tem data de nascimento e falecimento próprias — o hero precisaria de dois blocos
+- Quem administra: hoje o acesso da família é por memorial; num casal seriam dois responsáveis ou um só?
+- QR Code: um por casal ou um por pessoa?
+
+Outras ideias da mesma pesquisa, ainda não avaliadas pelo Rafael: favoritos (música/filme/prato/time), áudio com a voz da pessoa, co-administradores, doação em nome do homenageado, datas marcadas com aviso pra família.
