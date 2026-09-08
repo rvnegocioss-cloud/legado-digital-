@@ -169,7 +169,7 @@ const MARCACAO = `<nav class="navbar">
   <div class="node dot" data-x="560" data-y="1780" data-t="0.399"></div>
 
   <div class="node photo" data-x="320" data-y="2473" data-t="0.543">
-    <div class="ring"><img src="/fio-da-vida/nodes/constelacao-1.png" class="node-img node-img-a" style="--reveza-atraso:1.6s" alt="Retratos e velas formando uma constelação" /><img src="/fio-da-vida/nodes/constelacao-2.png" class="node-img node-img-b" style="--reveza-atraso:1.6s" alt="Retratos e velas formando uma constelação" /></div>
+    <div class="ring"><img src="/fio-da-vida/nodes/qrcode-node-1.png" class="node-img node-img-a" style="--reveza-atraso:1.6s" alt="QR Code na placa do túmulo sendo lido pelo celular" /><img src="/fio-da-vida/nodes/qrcode-node-2.png" class="node-img node-img-b" style="--reveza-atraso:1.6s" alt="QR Code na placa do túmulo sendo lido pelo celular" /></div>
     <div class="cap side-right"><b>QR Code na lápide</b>Uma placa discreta com QR Code é instalada no túmulo. Quem visita aponta a câmera do celular e abre o memorial completo na hora.</div>
   </div>
 
