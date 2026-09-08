@@ -655,3 +655,104 @@
 .perfil-mapa-retratil[open] .perfil-mapa-abrir::after { transform: rotate(180deg); }
 .perfil-mapa-retratil > summary:hover { color: var(--perfil-dourado-claro); }
 
+
+/* ---- Árvore genealógica ------------------------------------------------ */
+/* Card na lateral; a árvore inteira só abre no clique. Convenções do desenho
+   ficam no componente (regra 23): pai à esquerda, casal na horizontal,
+   descendência saindo do meio do casal. */
+.arv-card{
+  width:100%;background:var(--perfil-carta);border:1px solid var(--perfil-borda);
+  border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;color:inherit;
+  text-align:center;transition:border-color .2s ease, transform .2s ease;
+}
+.arv-card:hover{border-color:var(--perfil-borda-forte);transform:translateY(-2px)}
+.arv-rotu{
+  display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:1.7px;
+  color:var(--perfil-dourado);margin-bottom:10px;
+}
+.arv-mini{
+  width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center 38%;
+  border-radius:8px;display:block;background:#f5ecd8;
+}
+.arv-abrir{display:block;margin-top:10px;font-size:11.5px;color:var(--perfil-texto-fraco)}
+.arv-card:hover .arv-abrir{color:var(--perfil-dourado-claro)}
+
+.arv-visor{
+  position:fixed;inset:0;z-index:1000;background:#1a1410;overflow:auto;padding:16px;
+}
+.arv-fechar{
+  position:fixed;top:14px;right:14px;z-index:5;width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,.92);border:1.5px solid #b8912f;color:#5a4526;
+  font-size:20px;line-height:1;cursor:pointer;font-family:inherit;
+}
+.arv-quadro{position:relative;max-width:900px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.arv-fundo{width:100%;display:block}
+.arv-titulo{
+  position:absolute;top:4.5%;left:0;right:0;text-align:center;z-index:4;
+  font-size:12px;letter-spacing:5px;text-transform:uppercase;color:#7a5f28;
+}
+/* As linhas ficam por cima da ilustração e por baixo dos retratos. */
+.arv-linhas{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.arv-linhas .l-casal{stroke:#8a6a2f;stroke-width:2.2}
+.arv-linhas .l-separado{stroke:#8a6a2f;stroke-width:2;stroke-dasharray:6 5}
+.arv-linhas .l-desc{stroke:#8a6a2f;stroke-width:1.8}
+
+.arv-slot{
+  position:absolute;transform:translate(-50%,-50%);z-index:3;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  text-decoration:none;color:inherit;transition:transform .22s cubic-bezier(.22,1,.36,1);
+}
+a.arv-slot:hover{transform:translate(-50%,-50%) scale(1.07)}
+.arv-aro{
+  width:var(--tam,70px);height:var(--tam,70px);border-radius:50%;padding:2.5px;
+  background:linear-gradient(150deg,#f4e3b8,#c9a46a 45%,#8a6a2f);
+  box-shadow:0 4px 14px rgba(0,0,0,.35);
+}
+.arv-aro-in{
+  width:100%;height:100%;border-radius:50%;background:#1d2b36;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  color:#e6d3a8;font-size:calc(var(--tam,70px) * .3);border:2px solid #f7f1e0;
+}
+.arv-aro-in img{width:100%;height:100%;object-fit:cover}
+.arv-txt{
+  background:rgba(250,244,230,.95);border:1px solid rgba(184,145,47,.5);border-radius:6px;
+  padding:3px 9px;text-align:center;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.22);
+}
+.arv-papel{
+  display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:1.4px;
+  color:#8a6a2f;margin-bottom:1px;
+}
+.arv-nome{display:block;font-size:11.5px;color:#3a2c14;line-height:1.25}
+.arv-anos{display:block;font-size:9px;color:rgba(90,69,38,.75)}
+
+.arv-slot.pendente .arv-aro{background:#c4bba4;box-shadow:none}
+.arv-slot.pendente .arv-aro-in{background:#e9e2ce;color:#8b8266;border-color:#f2ecda}
+.arv-slot.pendente .arv-txt{background:rgba(245,240,226,.82)}
+.arv-slot.pendente .arv-nome{color:rgba(58,44,20,.6)}
+.arv-slot.pendente .arv-papel{color:rgba(138,106,47,.6)}
+.arv-slot.pendente .arv-anos{font-style:italic}
+
+.arv-slot.foco .arv-aro{
+  background:linear-gradient(150deg,#fff8e6,#e6cf99 45%,#b8912f);
+  box-shadow:0 6px 20px rgba(0,0,0,.4),0 0 0 4px rgba(201,164,106,.28);
+}
+.arv-slot.foco .arv-nome{font-size:12.5px;font-weight:700}
+.arv-slot.foco .arv-papel{color:#b8912f;font-weight:700}
+
+.arv-legenda{
+  max-width:900px;margin:14px auto 0;display:flex;gap:20px;justify-content:center;
+  flex-wrap:wrap;font-size:11.5px;color:rgba(245,242,235,.62);
+}
+.arv-bolinha{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.arv-bolinha.ok{background:linear-gradient(150deg,#f4e3b8,#8a6a2f)}
+.arv-bolinha.nao{background:#c4bba4}
+.arv-tracinho{
+  display:inline-block;width:20px;height:0;border-top:2px solid #c9a46a;
+  margin-right:6px;vertical-align:3px;
+}
+.arv-tracinho.pont{border-top-style:dashed}
+
+@media (max-width: 700px){
+  .arv-txt{display:none}
+  .arv-quadro{max-width:100%}
+}

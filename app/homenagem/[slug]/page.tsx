@@ -15,6 +15,7 @@ import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
 import AmbienteLateral, { type Ambiente, type CorLateral } from "@/components/public/AmbienteLateral";
 import GaleriaTopo from "@/components/public/GaleriaTopo";
+import ArvoreFamilia, { type ArvoreDados } from "@/components/public/ArvoreFamilia";
 import TextoVerMais from "@/components/public/TextoVerMais";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
@@ -373,6 +374,21 @@ export default async function PerfilMemorialPage({
 
   const ortoAssinado = await assinarOrtomosaico(localizacao?.orto_url);
 
+  // Árvore da família: cadastrada pela família no portal dela, aqui só exibida.
+  const { data: arvoreBruta } = await supabase.rpc("obter_arvore_familia", {
+    p_homenagem_id: m.id,
+  });
+  const arvore = arvoreBruta as ArvoreDados | null;
+  const arvoreAssinada: ArvoreDados | null = arvore?.memorial
+    ? {
+        memorial: { ...arvore.memorial, foto_url: urlMidiaProtegida(arvore.memorial.foto_url) },
+        parentes: (arvore.parentes || []).map((x) => ({
+          ...x,
+          foto_url: urlMidiaProtegida(x.foto_url),
+        })),
+      }
+    : null;
+
   // ---- Régua da vida -------------------------------------------------------
   // Os marcos entram na régua na posição proporcional aos anos vividos, não
   // igualmente espaçados: assim a régua mostra que a vida teve décadas
@@ -688,6 +704,10 @@ export default async function PerfilMemorialPage({
                 Acender uma vela
               </a>
             </div>
+
+            {arvoreAssinada && (arvoreAssinada.parentes || []).length > 0 && (
+              <ArvoreFamilia dados={arvoreAssinada} />
+            )}
 
           </div>
         </aside>
