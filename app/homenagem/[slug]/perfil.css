@@ -135,9 +135,9 @@
 /* ---- Biografia: medida controlada + capitular ------------------------- */
 
 .perfil-texto {
-  /* 65-75 caracteres por linha é a regra do banco de UX. Em ch, o navegador
-     mede na fonte real — não precisa chutar pixel. */
-  max-width: 68ch;
+  /* Sem teto de caracteres: com a lateral fixa ao lado, o limite de 68ch
+     cortava a linha bem antes da borda e deixava um vão morto à direita. */
+  max-width: none;
 }
 
 .perfil-paragrafo {

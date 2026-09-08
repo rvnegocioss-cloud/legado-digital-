@@ -362,3 +362,72 @@ html {
 .guia-tumulo-popup .maplibregl-popup-close-button {
   color: #C9A46A;
 }
+
+/* ---- Galeria do topo como porta-retrato --------------------------------
+   A caixa cinza quadrada destoava do retrato redondo do hero. Aqui a mídia
+   ganha moldura dourada com relevo e passe-partout claro, e as miniaturas
+   ficam encostadas embaixo como fotos apoiadas numa prateleira. */
+.retrato-bloco { position: relative; }
+
+.retrato-cabeca {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px; font-size: 10.5px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: #C9A46A;
+}
+.retrato-cabeca button {
+  background: none; border: 0; cursor: pointer; font-family: inherit;
+  font-size: 11px; letter-spacing: 0; color: #7a8a96; text-transform: none;
+}
+.retrato-cabeca button:hover { color: #dfc08a; }
+
+.retrato-moldura {
+  position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden;
+  margin-bottom: 16px; padding: 10px; border: 0; cursor: pointer; display: block;
+  background: linear-gradient(150deg, #f6e7c0 0%, #c9a46a 36%, #8a6a2f 70%, #e2cd96 100%);
+  border-radius: 4px;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(255,248,224,.6),
+    inset 0 0 0 10px rgba(0,0,0,.12);
+}
+/* passe-partout: a faixa clara entre a moldura e a foto */
+.retrato-moldura::after {
+  content: ''; position: absolute; inset: 10px; border-radius: 2px;
+  box-shadow: inset 0 0 0 5px #f7f1e0, inset 0 0 16px rgba(0,0,0,.4);
+  pointer-events: none; z-index: 2;
+}
+.retrato-moldura > video,
+.retrato-moldura > iframe,
+.retrato-moldura > img,
+.retrato-moldura > button {
+  width: 100%; height: 100%; display: block; border: 0; background: #000;
+  object-fit: cover; border-radius: 2px;
+}
+.retrato-play { cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.retrato-play > span {
+  width: 46px; height: 46px; border-radius: 50%; background: rgba(201,164,106,.94);
+  color: #0B1D2A; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; box-shadow: 0 3px 12px rgba(0,0,0,.45); z-index: 3;
+}
+
+.retrato-tira {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px;
+  padding-top: 14px; border-top: 1px solid rgba(201,164,106,.18);
+}
+.retrato-mini {
+  aspect-ratio: 1; padding: 3px; border: 0; cursor: pointer; display: block;
+  background: linear-gradient(150deg, #eddcae, #a58347);
+  border-radius: 3px; box-shadow: 0 3px 10px rgba(0,0,0,.35);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.retrato-mini:hover { transform: translateY(-3px); box-shadow: 0 7px 18px rgba(0,0,0,.45); }
+.retrato-mini img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  border-radius: 1px; border: 1.5px solid #f7f1e0;
+}
+.retrato-mini.mais {
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(201,164,106,.14); color: #C9A46A; font-family: inherit;
+  font-size: 12.5px; box-shadow: none; border: 1px dashed rgba(201,164,106,.5);
+}
+.retrato-mini.mais:hover { background: rgba(201,164,106,.22); transform: none; }

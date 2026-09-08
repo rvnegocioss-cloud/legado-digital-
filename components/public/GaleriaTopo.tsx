@@ -48,38 +48,14 @@ export default function GaleriaTopo({
   if (total === 0) return null
 
   return (
-    <div
-      style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid var(--mem-dourado-borda, rgba(201,164,106,0.18))',
-        borderRadius: 12,
-        padding: 14,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 10,
-          fontSize: 10.5,
-          letterSpacing: 1.6,
-          textTransform: 'uppercase',
-          color: 'var(--mem-dourado, #C9A46A)',
-        }}
-      >
+    <div className="retrato-bloco">
+      <div className="retrato-cabeca">
         <span>Fotos e vídeos</span>
-        <button
-          type="button"
-          onClick={() => setVisor(0)}
-          style={{ color: '#7a8a96', fontSize: 11, letterSpacing: 0, background: 'none', border: 0, cursor: 'pointer', fontFamily: 'inherit' }}
-        >
-          ver tudo ({total})
-        </button>
+        <button type="button" onClick={() => setVisor(0)}>ver tudo ({total})</button>
       </div>
 
       {videoCapa ? (
-        <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10', borderRadius: 8, overflow: 'hidden', marginBottom: 8, background: '#000' }}>
+        <div className="retrato-moldura">
           {aberto ? (
             ehYoutube ? (
               <iframe
@@ -97,89 +73,36 @@ export default function GaleriaTopo({
               type="button"
               onClick={() => setAberto(true)}
               aria-label="Reproduzir vídeo"
+              className="retrato-play"
               style={{
-                width: '100%',
-                height: '100%',
-                border: 0,
-                cursor: 'pointer',
                 background: fotos[0]
                   ? `center/cover no-repeat url(${fotos[0]})`
                   : 'linear-gradient(135deg,#1b3040,#20384a)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
             >
-              <span
-                style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: '50%',
-                  background: 'rgba(201,164,106,0.92)',
-                  color: '#0B1D2A',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 15,
-                }}
-              >
-                ▶
-              </span>
+              <span>&#9654;</span>
             </button>
           )}
         </div>
       ) : (
         fotos[0] && (
-          <button
-            type="button"
-            onClick={() => setVisor(0)}
-            style={{ display: 'block', marginBottom: 8, padding: 0, border: 0, background: 'none', width: '100%', cursor: 'zoom-in' }}
-          >
+          <button type="button" onClick={() => setVisor(0)} className="retrato-moldura">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fotos[0]}
-              alt=""
-              style={{ width: '100%', aspectRatio: '16 / 10', objectFit: 'cover', borderRadius: 8, display: 'block' }}
-            />
+            <img src={fotos[0]} alt="" />
           </button>
         )
       )}
 
       {miniaturas.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+        <div className="retrato-tira">
           {miniaturas.map((url) => (
-            <button
-              key={url}
-              type="button"
-              onClick={() => setVisor(fotos.indexOf(url))}
-              style={{ display: 'block', padding: 0, border: 0, background: 'none', cursor: 'zoom-in' }}
-            >
+            <button key={url} type="button" onClick={() => setVisor(fotos.indexOf(url))} className="retrato-mini">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={url}
-                alt=""
-                style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 6, display: 'block' }}
-              />
+              <img src={url} alt="" />
             </button>
           ))}
           {restantes > 0 && (
-            <button
-              type="button"
-              onClick={() => setVisor(miniaturas.length)}
-              style={{
-                aspectRatio: '1',
-                borderRadius: 6,
-                border: 0,
-                background: 'rgba(201,164,106,0.14)',
-                color: 'var(--mem-dourado, #C9A46A)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 12,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
-            >
+            <button type="button" onClick={() => setVisor(miniaturas.length)} className="retrato-mini mais">
               +{restantes}
             </button>
           )}
