@@ -125,3 +125,20 @@ Pontos a resolver antes:
 - QR Code: um por casal ou um por pessoa?
 
 Outras ideias da mesma pesquisa, ainda não avaliadas pelo Rafael: favoritos (música/filme/prato/time), áudio com a voz da pessoa, co-administradores, doação em nome do homenageado, datas marcadas com aviso pra família.
+
+
+## Arvore genealogica (parada 2026-09-08)
+
+Ideia: ligar os memoriais da mesma familia numa arvore, com medalhao por pessoa e link pra quem ja tem memorial proprio.
+
+**Rafael gostou da ideia, mas nenhuma execucao visual passou.** Foram 4 tentativas no mesmo dia:
+1. Organograma com fotos redondas e linhas ligando geracoes
+2. Mesma coisa com retratos maiores e linhas curvas em SVG
+3. Arvore desenhada em SVG (tronco, galhos, folhas, medalhoes ovais dourados, moldura)
+4. Arvore com galhos que afinam por poligono e copa por recursao
+
+Gerar a arvore como imagem no ComfyUI foi descartado por ele: imagem tem posicao fixa de medalhao e cada familia tem quantidade diferente de gente -- **nao escala**.
+
+Ultimo caminho proposto e recusado: ilustracao feita direito (uma vez) com slots de medalhao pre-marcados, o codigo so encaixa quem existe.
+
+**Nao retomar sem uma referencia visual que ele aprove antes.** O gerador escalavel da tentativa 4 (galho por poligono afinado, copa recursiva, posicoes calculadas a partir dos dados) ficou salvo no scratchpad como `gerar_arvore.py` -- a matematica de layout funciona, o problema e estetico.
