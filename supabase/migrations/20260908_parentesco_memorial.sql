@@ -1,0 +1,8 @@
+-- Arvore genealogica: tabela `parentescos` (tipo do vinculo, uniao e ordem de
+-- nascimento -- o que a convencao tradicional exige pra posicionar cada um,
+-- regra 23 do CLAUDE.md) mais a funcao obter_arvore_familia.
+--
+-- Correcao aplicada no mesmo dia: homenagens.data_nascimento/falecimento sao
+-- TEXTO, nao date. O extract() original quebrava a funcao inteira e a arvore
+-- voltava vazia sem erro nenhum na pagina -- agora o ano sai por substring.
+-- (definicao completa aplicada via MCP; ver funcao no banco)
