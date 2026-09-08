@@ -202,12 +202,12 @@ html {
 @media (min-width: 1100px) {
   .mem-hero-galeria {
     display: block;
-    width: 420px;
+    width: 500px;
     flex-shrink: 0;
   }
 }
 @media (min-width: 1500px) {
-  .mem-hero-galeria { width: 520px; }
+  .mem-hero-galeria { width: 680px; }
 }
 
 /* Hero: foto empilhada com texto no mobile (default), lado a lado no desktop */
@@ -224,14 +224,14 @@ html {
   .mem-hero {
     flex-direction: row !important;
     text-align: left !important;
-    gap: 40px;
-    padding: 96px 40px 72px !important;
+    gap: 32px;
+    padding: 96px 32px 72px !important;
   }
   /* Sem isto o texto encolhe até 322px e a galeria parece não ter crescido:
      o nome e a frase precisam de largura própria, não do que sobrar. */
   .mem-hero-texto {
     flex: 1 1 auto;
-    min-width: 340px;
+    min-width: 300px;
   }
   .mem-hero-texto {
     align-items: flex-start !important;
