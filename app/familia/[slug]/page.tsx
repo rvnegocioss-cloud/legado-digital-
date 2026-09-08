@@ -612,9 +612,24 @@ export default function FamiliaEdicaoPage() {
           >
             ← Voltar pro site
           </Link>
-          <Link href="/familia/login" className="text-sm text-zinc-400 hover:text-white">
-            Sair
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* Quem está logado: a família entra pelo memorial, então o que
+                identifica a sessão é de quem é o memorial que ela administra. */}
+            <span className="flex items-center gap-2 text-sm text-zinc-300">
+              <span
+                className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-xs shrink-0"
+                style={{ color: '#C9A46A' }}
+              >
+                {(form.nome_completo || '?').charAt(0).toUpperCase()}
+              </span>
+              <span className="hidden sm:inline">
+                Família de {form.nome_completo || 'memorial'}
+              </span>
+            </span>
+            <Link href="/familia/login" className="text-sm text-zinc-400 hover:text-white">
+              Sair
+            </Link>
+          </div>
         </div>
 
         <div className="flex items-center justify-between mt-4 mb-6">

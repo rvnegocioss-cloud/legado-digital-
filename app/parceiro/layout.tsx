@@ -191,7 +191,18 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
                 <Home size={18} />
                 <span className="hidden sm:inline">Voltar pro site</span>
               </Link>
-              <span className="text-sm text-[var(--tema-zinc-400)] hidden sm:inline">{email}</span>
+              {/* Quem está logado, no mesmo padrão da Central: inicial num
+                  círculo (sempre visível, inclusive no celular) + e-mail. */}
+              <span className="flex items-center gap-2 text-sm text-[var(--tema-zinc-300)]">
+                <span
+                  className="w-7 h-7 rounded-full bg-[var(--tema-zinc-800)] flex items-center justify-center text-xs shrink-0"
+                  style={{ color: '#C9A46A' }}
+                  title={email || ''}
+                >
+                  {(email || '?').charAt(0).toUpperCase()}
+                </span>
+                <span className="hidden sm:inline">{email}</span>
+              </span>
               <button
                 onClick={alternarTema}
                 className="text-[var(--tema-zinc-400)] hover:text-white transition-colors"
