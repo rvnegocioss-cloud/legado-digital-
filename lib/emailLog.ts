@@ -6,6 +6,7 @@ export type TipoEmail =
   | 'envio_fornecedor'
   | 'convite_parceiro'
   | 'codigo_acesso_memorial'
+  | 'aviso_lead'
 
 // Fonte única do rótulo em português de cada tipo -- reaproveitado pelo
 // histórico (/admin/emails) e pelo sino de alertas do header (admin/layout.tsx),
@@ -16,6 +17,7 @@ export const TIPO_EMAIL_LABEL: Record<TipoEmail, string> = {
   envio_fornecedor: 'Envio ao fornecedor',
   convite_parceiro: 'Convite de acesso (parceiro)',
   codigo_acesso_memorial: 'Código de acesso (visitante)',
+  aviso_lead: 'Aviso de lead novo',
 }
 
 // `tipo` chega como string solta do banco (não o union type) em quem lê a

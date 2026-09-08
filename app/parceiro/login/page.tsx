@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { signIn } from '@/lib/auth'
+import FormularioLead from '@/components/public/FormularioLead'
 
 export default function ParceiroLogin() {
   const [email, setEmail] = useState('')
@@ -29,18 +30,25 @@ export default function ParceiroLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--tema-zinc-950)]">
-      <div className="w-full max-w-md p-8 space-y-6">
-        <div className="text-center">
-          <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={320} height={128} className="mx-auto h-28 w-auto object-contain mb-4" priority />
-          <h1 className="text-xl font-bold text-white">Portal do Parceiro</h1>
-          <p className="text-[var(--tema-zinc-400)] mt-2">Acesso pra funerárias e demais parceiros</p>
-        </div>
+    // Cadastro (metade clara) à esquerda no desktop; no celular o login vem
+    // primeiro — por isso row-reverse em vez de trocar a ordem do JSX.
+    <div className="min-h-screen flex flex-col lg:flex-row-reverse">
+      <div className="flex-1 flex items-center justify-center px-10 py-14 bg-gradient-to-b from-[#0f2436] to-[#0B1D2A]">
+        <div className="w-full max-w-[380px]">
+          <Image
+            src="/logo-legado-digital.svg"
+            alt="Legado Digital"
+            width={320}
+            height={128}
+            className="h-[86px] w-auto object-contain mb-6"
+            priority
+          />
+          <h1 className="text-[26px] font-normal text-[#F5F2EB] mb-1.5">Portal do Parceiro</h1>
+          <p className="text-sm text-[#7a8a96] mb-7">Acesso pra funerárias, cemitérios e demais parceiros.</p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-[var(--tema-zinc-300)]">
-              Email
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="email" className="block text-[11px] uppercase tracking-[1.6px] text-[#C9A46A] mb-1.5">
+              E-mail
             </label>
             <input
               id="email"
@@ -48,13 +56,11 @@ export default function ParceiroLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white placeholder-[var(--tema-zinc-500)] focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="contato@suaempresa.com.br"
+              className="w-full px-3.5 py-3 rounded-lg mb-4 text-[15px] bg-white/5 border border-[rgba(201,164,106,0.2)] text-[#F5F2EB] placeholder-[#5c6b76] focus:outline-none focus:border-[#C9A46A]"
             />
-          </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[var(--tema-zinc-300)]">
+            <label htmlFor="password" className="block text-[11px] uppercase tracking-[1.6px] text-[#C9A46A] mb-1.5">
               Senha
             </label>
             <input
@@ -63,29 +69,32 @@ export default function ParceiroLogin() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 w-full px-4 py-2 rounded-lg bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white placeholder-[var(--tema-zinc-500)] focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
+              className="w-full px-3.5 py-3 rounded-lg mb-4 text-[15px] bg-white/5 border border-[rgba(201,164,106,0.2)] text-[#F5F2EB] placeholder-[#5c6b76] focus:outline-none focus:border-[#C9A46A]"
             />
-          </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+            {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-branco-fixo font-medium rounded-lg transition-colors"
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-lg bg-[#C9A46A] hover:bg-[#dfc08a] disabled:opacity-60 text-[#0B1D2A] text-[15px] font-bold transition-colors"
+            >
+              {loading ? 'Entrando...' : 'Entrar'}
+            </button>
 
-          <Link href="/recuperar-senha" className="block text-center text-xs text-[var(--tema-zinc-500)] hover:text-white">
-            Esqueceu sua senha?
+            <Link href="/recuperar-senha" className="block text-center mt-3.5 text-[12.5px] text-[#7a8a96] hover:text-white">
+              Esqueceu sua senha?
+            </Link>
+          </form>
+
+          <Link href="/" className="block text-center mt-3.5 text-[12.5px] text-[#7a8a96] hover:text-white">
+            Voltar pro site
           </Link>
-        </form>
+        </div>
+      </div>
 
-        <Link href="/" className="block text-center text-xs text-[var(--tema-zinc-500)] hover:text-white">
-          ← Voltar pro site
-        </Link>
+      <div className="flex-1 flex items-center justify-center px-10 py-14 bg-[#F7F5F0]">
+        <FormularioLead tipo="parceiro" />
       </div>
     </div>
   )

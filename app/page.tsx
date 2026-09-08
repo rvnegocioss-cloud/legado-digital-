@@ -32,7 +32,6 @@ const MARCACAO = `<nav class="navbar">
         <svg class="chev-area" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="menu-area" id="menuArea">
-        <a href="/admin/login">Legado Central</a>
         <a href="/parceiro/login">Portal do Parceiro</a>
         <a href="/familia/login">Portal da Família</a>
       </div>

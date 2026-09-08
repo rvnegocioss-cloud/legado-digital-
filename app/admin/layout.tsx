@@ -58,6 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [parceiros, setParceiros] = useState<ParceiroResumo[]>([])
   const [parceirosAberto, setParceirosAberto] = useState(false)
   const [alertas, setAlertas] = useState<AlertaComunicacao[]>([])
+  const [leadsNovos, setLeadsNovos] = useState<any[]>([])
   const [alertasAberto, setAlertasAberto] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
@@ -110,7 +111,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .then(({ data }) => setAlertas((data as any) || []))
   }, [])
 
+  // Lead novo (formulários de /parceiro/login e /familia/login) também acende o
+  // sino -- é contato comercial esperando resposta, não pode ficar só na Central.
+  useEffect(() => {
+    supabase
+      .from('leads')
+      .select('id, tipo, nome, empresa, cidade, created_at')
+      .eq('lido', false)
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => setLeadsNovos((data as any) || []))
+  }, [])
+
   const alertasComErro = alertas.filter((a) => a.status === 'erro').length
+  const totalBadge = alertasComErro + leadsNovos.length
 
   // Página de login não precisa do layout admin
   if (pathname === '/admin/login') return <>{children}</>
@@ -254,15 +268,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 title="Alertas de comunicações"
               >
                 <Bell size={18} />
-                {alertasComErro > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-branco-fixo text-[10px] font-semibold flex items-center justify-center">
-                    {alertasComErro}
+                {totalBadge > 0 && (
+                  <span className={`absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full text-branco-fixo text-[10px] font-semibold flex items-center justify-center ${alertasComErro > 0 ? 'bg-red-500' : 'bg-amber-500'}`}>
+                    {totalBadge}
                   </span>
                 )}
               </button>
               {alertasAberto && (
                 <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)] shadow-lg py-1 z-50 max-h-96 overflow-y-auto">
-                  {alertas.length === 0 ? (
+                  {leadsNovos.map((l) => (
+                    <Link
+                      key={l.id}
+                      href="/admin/emails"
+                      onClick={() => setAlertasAberto(false)}
+                      className="block px-4 py-2.5 bg-amber-900/15 hover:bg-[var(--tema-zinc-800)] border-b border-[var(--tema-zinc-800)]/50"
+                    >
+                      <p className="text-xs flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-amber-500" />
+                        <span className="text-[var(--tema-zinc-300)]">
+                          Lead novo ({l.tipo === 'familia' ? 'família' : 'parceiro'})
+                        </span>
+                        <span className="text-[var(--tema-zinc-500)] ml-auto shrink-0">{tempoRelativo(l.created_at)}</span>
+                      </p>
+                      <p className="text-xs text-[var(--tema-zinc-500)] mt-0.5 truncate">
+                        {l.nome}{l.empresa ? ` — ${l.empresa}` : ''}{l.cidade ? ` · ${l.cidade}` : ''}
+                      </p>
+                    </Link>
+                  ))}
+                  {alertas.length === 0 && leadsNovos.length === 0 ? (
                     <p className="px-4 py-3 text-xs text-[var(--tema-zinc-500)]">Nenhuma comunicação registrada ainda.</p>
                   ) : (
                     alertas.map((a) => (

@@ -5,6 +5,7 @@ import { MessageCircle } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { linkWhatsApp } from '@/lib/linkWhatsApp'
 import { rotuloTipoEmail } from '@/lib/emailLog'
+import PainelLeads from '@/components/admin/PainelLeads'
 
 interface EmailEnviado {
   id: string
@@ -130,6 +131,11 @@ export default function AdminComunicacoes() {
         Contato de cada parceiro (e-mail e WhatsApp) e o contato oficial da família em cada
         memorial dele, tudo num lugar só — sem precisar abrir e-mail nenhum.
       </p>
+
+      <PainelLeads tipo="parceiro" />
+      <PainelLeads tipo="familia" />
+
+      <h2 className="text-lg font-medium text-white mb-4">Parceiros e contatos das famílias</h2>
 
       <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] divide-y divide-[var(--tema-zinc-800)] mb-10">
         {parceiros.length === 0 ? (

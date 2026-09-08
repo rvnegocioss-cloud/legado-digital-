@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
+import FormularioLead from '@/components/public/FormularioLead'
 
 interface Resultado {
   id: string
@@ -83,148 +84,158 @@ export default function FamiliaLoginPage() {
     setEnviandoRecuperacao(false)
   }
 
-  return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={280} height={112} className="mx-auto h-28 w-auto object-contain mb-4" priority />
-        <h1 className="text-xl font-bold text-white mb-1">Portal da Família</h1>
-        <p className="text-zinc-400 text-sm mb-5">
-          Adicione fotos, vídeo e a história de quem você ama.
-        </p>
+  const rotuloLabel = 'block text-[11px] uppercase tracking-[1.6px] text-[#C9A46A] mb-1.5'
+  const campoEscuro =
+    'w-full px-3.5 py-3 rounded-lg mb-4 text-[15px] bg-white/5 border border-[rgba(201,164,106,0.2)] text-[#F5F2EB] placeholder-[#5c6b76] focus:outline-none focus:border-[#C9A46A]'
 
-        {!selecionado ? (
-          <form onSubmit={buscarNome} className="space-y-3">
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Nome do homenageado</label>
+  return (
+    // Cadastro (metade clara) à esquerda no desktop; no celular o login vem
+    // primeiro — por isso row-reverse em vez de trocar a ordem do JSX.
+    <div className="min-h-screen flex flex-col lg:flex-row-reverse">
+      <div className="flex-1 flex items-center justify-center px-10 py-14 bg-gradient-to-b from-[#0f2436] to-[#0B1D2A]">
+        <div className="w-full max-w-[380px]">
+          <Image
+            src="/logo-legado-digital.svg"
+            alt="Legado Digital"
+            width={320}
+            height={128}
+            className="h-[86px] w-auto object-contain mb-6"
+            priority
+          />
+          <h1 className="text-[26px] font-normal text-[#F5F2EB] mb-1.5">Portal da Família</h1>
+          <p className="text-sm text-[#7a8a96] mb-7">Adicione fotos, vídeos e a história de quem você ama.</p>
+
+          {!selecionado ? (
+            <form onSubmit={buscarNome}>
+              <label className={rotuloLabel}>Nome do homenageado</label>
               <input
                 type="text"
                 placeholder="Nome completo"
                 value={nomeBusca}
                 onChange={(e) => setNomeBusca(e.target.value)}
                 required
-                className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
+                className={campoEscuro}
               />
-            </div>
-            <button
-              type="submit"
-              disabled={buscando}
-              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
-            >
-              {buscando ? 'Buscando...' : 'Buscar'}
-            </button>
+              <button
+                type="submit"
+                disabled={buscando}
+                className="w-full py-3.5 rounded-lg bg-[#C9A46A] hover:bg-[#dfc08a] disabled:opacity-60 text-[#0B1D2A] text-[15px] font-bold transition-colors"
+              >
+                {buscando ? 'Buscando...' : 'Buscar'}
+              </button>
 
-            {resultados !== null && resultados.length === 0 && (
-              <p className="text-zinc-500 text-sm">Nenhum memorial encontrado com esse nome.</p>
-            )}
-
-            {resultados && resultados.length > 0 && (
-              <div className="space-y-2 pt-2">
-                {resultados.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setSelecionado(r)}
-                    className="w-full flex items-center gap-3 p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-left"
-                  >
-                    {r.foto_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={urlMidiaProtegida(r.foto_url) || r.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-zinc-800" />
-                    )}
-                    <div>
-                      <div className="text-sm text-white">{r.nome_completo}</div>
-                      {r.cidade && <div className="text-xs text-zinc-500">{r.cidade}</div>}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </form>
-        ) : (
-          <form onSubmit={entrar} className="space-y-3">
-            <button
-              type="button"
-              onClick={() => { setSelecionado(null); setSenha(''); setErro('') }}
-              className="text-xs text-zinc-500 hover:text-white"
-            >
-              ← Buscar outro nome
-            </button>
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-zinc-900 border border-zinc-800">
-              {selecionado.foto_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={urlMidiaProtegida(selecionado.foto_url) || selecionado.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-zinc-800" />
+              {resultados !== null && resultados.length === 0 && (
+                <p className="text-[#7a8a96] text-sm mt-3">Nenhum memorial encontrado com esse nome.</p>
               )}
-              <div className="text-sm text-white">{selecionado.nome_completo}</div>
-            </div>
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Senha da família</label>
+
+              {resultados && resultados.length > 0 && (
+                <div className="space-y-2 pt-4">
+                  {resultados.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => setSelecionado(r)}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-[rgba(201,164,106,0.2)] hover:border-[#C9A46A] text-left"
+                    >
+                      {r.foto_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={urlMidiaProtegida(r.foto_url) || r.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-white/10" />
+                      )}
+                      <div>
+                        <div className="text-sm text-[#F5F2EB]">{r.nome_completo}</div>
+                        {r.cidade && <div className="text-xs text-[#7a8a96]">{r.cidade}</div>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </form>
+          ) : (
+            <form onSubmit={entrar}>
+              <button
+                type="button"
+                onClick={() => { setSelecionado(null); setSenha(''); setErro('') }}
+                className="text-xs text-[#7a8a96] hover:text-white mb-3"
+              >
+                ← Buscar outro nome
+              </button>
+              <div className="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-[rgba(201,164,106,0.2)] mb-4">
+                {selecionado.foto_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={urlMidiaProtegida(selecionado.foto_url) || selecionado.foto_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-white/10" />
+                )}
+                <div className="text-sm text-[#F5F2EB]">{selecionado.nome_completo}</div>
+              </div>
+
+              <label className={rotuloLabel}>Senha da família</label>
               <input
                 type="text"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
                 autoFocus
-                className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
+                className={campoEscuro}
               />
-              <p className="mt-1 text-[11px] text-zinc-600">
+              <p className="-mt-2 mb-4 text-[11px] text-[#5c6b76]">
                 A senha foi enviada por e-mail quando o memorial foi cadastrado.
               </p>
-            </div>
-            {erro && <p className="text-red-400 text-sm">{erro}</p>}
-            <button
-              type="submit"
-              disabled={entrando}
-              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white text-sm font-medium rounded-lg"
-            >
-              {entrando ? 'Entrando...' : 'Entrar'}
-            </button>
 
-            {!mostrarEsqueci ? (
+              {erro && <p className="text-red-400 text-sm mb-3">{erro}</p>}
+
               <button
-                type="button"
-                onClick={() => { setMostrarEsqueci(true); setMsgRecuperacao('') }}
-                className="block w-full text-center text-xs text-zinc-500 hover:text-white"
+                type="submit"
+                disabled={entrando}
+                className="w-full py-3.5 rounded-lg bg-[#C9A46A] hover:bg-[#dfc08a] disabled:opacity-60 text-[#0B1D2A] text-[15px] font-bold transition-colors"
               >
-                Esqueci minha senha
+                {entrando ? 'Entrando...' : 'Entrar'}
               </button>
-            ) : (
-              <div className="pt-2 border-t border-zinc-800 space-y-2">
-                <p className="text-xs text-zinc-500">
-                  Digite o e-mail cadastrado pra esse memorial — se estiver certo, mandamos uma senha nova.
-                </p>
-                <input
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={emailRecuperacao}
-                  onChange={(e) => setEmailRecuperacao(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-sm placeholder-zinc-600"
-                />
+
+              {!mostrarEsqueci ? (
                 <button
                   type="button"
-                  onClick={enviarRecuperacao}
-                  disabled={enviandoRecuperacao || !emailRecuperacao}
-                  className="w-full px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg"
+                  onClick={() => { setMostrarEsqueci(true); setMsgRecuperacao('') }}
+                  className="block w-full text-center mt-3.5 text-[12.5px] text-[#7a8a96] hover:text-white"
                 >
-                  {enviandoRecuperacao ? 'Enviando...' : 'Enviar nova senha por e-mail'}
+                  Esqueci minha senha
                 </button>
-                {msgRecuperacao && <p className="text-xs text-zinc-400">{msgRecuperacao}</p>}
-              </div>
-            )}
-          </form>
-        )}
+              ) : (
+                <div className="pt-4 mt-4 border-t border-[rgba(201,164,106,0.2)] space-y-2">
+                  <p className="text-xs text-[#7a8a96]">
+                    Digite o e-mail cadastrado pra esse memorial — se estiver certo, mandamos uma senha nova.
+                  </p>
+                  <input
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={emailRecuperacao}
+                    onChange={(e) => setEmailRecuperacao(e.target.value)}
+                    className={campoEscuro}
+                  />
+                  <button
+                    type="button"
+                    onClick={enviarRecuperacao}
+                    disabled={enviandoRecuperacao || !emailRecuperacao}
+                    className="w-full py-3 rounded-lg bg-white/10 hover:bg-white/15 disabled:opacity-60 text-[#F5F2EB] text-sm font-medium"
+                  >
+                    {enviandoRecuperacao ? 'Enviando...' : 'Enviar nova senha por e-mail'}
+                  </button>
+                  {msgRecuperacao && <p className="text-xs text-[#7a8a96]">{msgRecuperacao}</p>}
+                </div>
+              )}
+            </form>
+          )}
 
-        {!selecionado && (
-          <p className="text-center text-xs text-zinc-600 mt-4">
-            Esqueceu a senha? Busque o nome, escolha o memorial e use "Esqueci minha senha".
-          </p>
-        )}
+          <Link href="/" className="block text-center mt-4 text-[12.5px] text-[#7a8a96] hover:text-white">
+            Voltar pro site
+          </Link>
+        </div>
+      </div>
 
-        <Link href="/" className="block text-center text-xs text-zinc-500 hover:text-white mt-4">
-          ← Voltar pro site
-        </Link>
+      <div className="flex-1 flex items-center justify-center px-10 py-14 bg-[#F7F5F0]">
+        <FormularioLead tipo="familia" />
       </div>
     </div>
   )

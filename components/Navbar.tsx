@@ -15,7 +15,6 @@ const navLinks = [
 ]
 
 const areaRestritaLinks = [
-  { href: '/admin/login', label: 'Legado Central' },
   { href: '/parceiro/login', label: 'Portal do Parceiro' },
   { href: '/familia/login', label: 'Portal da Família' },
 ]
