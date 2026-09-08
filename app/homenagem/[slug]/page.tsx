@@ -705,9 +705,9 @@ export default async function PerfilMemorialPage({
               </a>
             </div>
 
-            {arvoreAssinada && (arvoreAssinada.parentes || []).length > 0 && (
-              <ArvoreFamilia dados={arvoreAssinada} />
-            )}
+            {/* O próprio homenageado já é a primeira pessoa da árvore -- ela
+                aparece mesmo sem parente cadastrado ainda. */}
+            {arvoreAssinada && <ArvoreFamilia dados={arvoreAssinada} />}
 
           </div>
         </aside>
