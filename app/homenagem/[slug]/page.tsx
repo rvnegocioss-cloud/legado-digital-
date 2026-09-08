@@ -1,6 +1,6 @@
 import "./perfil.css";
 import Image from "next/image";
-import { MapPin, ShieldCheck, Lock, Flame } from "lucide-react";
+import { MapPin, ShieldCheck, Lock } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
@@ -683,28 +683,6 @@ export default async function PerfilMemorialPage({
         {/* ---- Lateral: o que empurrava a coluna pra baixo ------------------ */}
         <aside className="perfil-lateral">
           <div className="perfil-lateral-fixa">
-            <div className="perfil-cartao">
-              <h3 className="perfil-cartao-titulo">Presença</h3>
-              <dl className="perfil-numeros">
-                <div className="perfil-numero">
-                  <dt>Velas acesas</dt>
-                  <dd>{m.velas_acesas ?? 0}</dd>
-                </div>
-                <div className="perfil-numero">
-                  <dt>Homenagens</dt>
-                  <dd>{condolencias.length}</dd>
-                </div>
-                <div className="perfil-numero">
-                  <dt>Memórias</dt>
-                  <dd>{mural.length + galeria.length}</dd>
-                </div>
-              </dl>
-              <a href="#vela" className="perfil-atalho">
-                <Flame size={14} strokeWidth={1.5} />
-                Acender uma vela
-              </a>
-            </div>
-
             {/* O próprio homenageado já é a primeira pessoa da árvore -- ela
                 aparece mesmo sem parente cadastrado ainda. */}
             {arvoreAssinada && <ArvoreFamilia dados={arvoreAssinada} />}
