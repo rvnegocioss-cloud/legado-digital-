@@ -28,8 +28,6 @@ export default function GaleriaTopo({
 
   const totalVideos = (videoCapa ? 1 : 0) + videosExtras.length
   const total = fotos.length + totalVideos
-  if (total === 0) return null
-
   const miniaturas = fotos.slice(0, 3)
   const restantes = total - miniaturas.length - (videoCapa ? 1 : 0)
 
@@ -46,6 +44,8 @@ export default function GaleriaTopo({
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
   }, [visor, itens.length])
+
+  if (total === 0) return null
 
   return (
     <div

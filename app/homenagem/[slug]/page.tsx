@@ -556,38 +556,6 @@ export default async function PerfilMemorialPage({
         <RailVida marcos={marcos} anoInicio={anoNasc ? String(anoNasc) : null} anoFim={anoFalec ? String(anoFalec) : null} />
 
         <main className="perfil-coluna">
-        {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
-          <section id="localizacao" className="perfil-secao perfil-secao-midia">
-            <details className="perfil-mapa-retratil">
-                <summary className="perfil-titulo perfil-mapa-abrir">Como chegar ao túmulo</summary>
-            <GuiaTumulo
-                cemiterioNome={localizacao.cemiterio_nome}
-                cemiterioLat={localizacao.cemiterio_lat}
-                cemiterioLng={localizacao.cemiterio_lng}
-                lapideLat={localizacao.lapide_lat}
-                lapideLng={localizacao.lapide_lng}
-                quadra={localizacao.quadra}
-                lote={localizacao.lote}
-                nomeCompleto={m.nome_completo}
-                fotoUrl={fotoAssinada}
-                ortoUrl={ortoAssinado}
-                ortoMinzoom={localizacao.orto_minzoom}
-                ortoMaxzoom={localizacao.orto_maxzoom}
-                ortoBounds={localizacao.orto_bounds}
-                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
-              />
-              </details>
-            </section>
-          )}
-          {/* <details> não abre sozinho quando a âncora é acionada -- 4 linhas
-              resolvem sem transformar o hero inteiro em componente client. */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html:
-                "document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href=\"#localizacao\"]');if(!a)return;var d=document.querySelector('#localizacao details');if(d)d.open=true;});",
-            }}
-          />
-
           <section id="biografia" className="perfil-secao">
             <h2 className="perfil-titulo">A história</h2>
             <TextoVerMais>
@@ -625,35 +593,9 @@ export default async function PerfilMemorialPage({
             </section>
           )}
 
-          {videoAssinado && (
-            <section className="perfil-secao">
-              <h2 className="perfil-titulo">Vídeo</h2>
-              <div className="perfil-video">
-                {isYoutube(m.video_url || "") ? (
-                  <iframe
-                    src={getEmbedUrl(m.video_url || "")}
-                    style={{ width: "100%", height: "100%", border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    title="Vídeo"
-                  />
-                ) : (
-                  // eslint-disable-next-line jsx-a11y/media-has-caption
-                  <video
-                    src={videoAssinado || undefined}
-                    controls
-                    preload="metadata"
-                    poster={fotoAssinada || undefined}
-                    style={{ width: "100%", height: "100%", background: "#000" }}
-                  />
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Foto e vídeo no mesmo mosaico: a seção "Mais vídeos" separada
-              deixava a mídia espalhada em dois lugares da página. O vídeo de
-              capa continua na própria seção acima, com destaque. */}
+          {/* O vídeo de capa fica SÓ no topo, ao lado do rosto; aqui embaixo
+              entram os outros vídeos e as fotos. Antes o mesmo vídeo aparecia
+              nos dois lugares. */}
           {(galeria.length > 0 || videosGaleria.length > 0) && (
             <section id="galeria" className="perfil-secao perfil-secao-midia">
               <h2 className="perfil-titulo">Fotos e vídeos</h2>
@@ -665,6 +607,38 @@ export default async function PerfilMemorialPage({
             <h2 className="perfil-titulo">Mural de memórias</h2>
             <MuralMemorias memorialId={m.id} memoriasIniciais={mural} />
           </section>
+
+        {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
+          <section id="localizacao" className="perfil-secao perfil-secao-midia">
+            <details className="perfil-mapa-retratil">
+                <summary className="perfil-titulo perfil-mapa-abrir">Como chegar ao túmulo</summary>
+            <GuiaTumulo
+                cemiterioNome={localizacao.cemiterio_nome}
+                cemiterioLat={localizacao.cemiterio_lat}
+                cemiterioLng={localizacao.cemiterio_lng}
+                lapideLat={localizacao.lapide_lat}
+                lapideLng={localizacao.lapide_lng}
+                quadra={localizacao.quadra}
+                lote={localizacao.lote}
+                nomeCompleto={m.nome_completo}
+                fotoUrl={fotoAssinada}
+                ortoUrl={ortoAssinado}
+                ortoMinzoom={localizacao.orto_minzoom}
+                ortoMaxzoom={localizacao.orto_maxzoom}
+                ortoBounds={localizacao.orto_bounds}
+                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
+              />
+              </details>
+            </section>
+          )}
+          {/* <details> não abre sozinho quando a âncora é acionada -- 4 linhas
+              resolvem sem transformar o hero inteiro em componente client. */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html:
+                "document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href=\"#localizacao\"]');if(!a)return;var d=document.querySelector('#localizacao details');if(d)d.open=true;});",
+            }}
+          />
 
           <section id="livro" className="perfil-secao">
             <h2 className="perfil-titulo">
