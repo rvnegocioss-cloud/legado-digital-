@@ -233,7 +233,7 @@ const MARCACAO = `<nav class="navbar">
   <div class="veil" style="background-image:url('/fio-da-vida/cena-velas.png');"></div>
   <div class="chamas"><canvas id="cvChamas"></canvas></div>
   <div class="flame"></div>
-  <p>Cada memorial acende o próprio ponto de luz. Juntos, viram uma constelação que não apaga.</p>
+  <p>Cada memorial acende o próprio ponto de luz. Juntos, viram uma constelação que não se apaga.</p>
 </section>
 
 <footer class="site">
