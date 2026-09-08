@@ -1,6 +1,6 @@
 import "./perfil.css";
 import Image from "next/image";
-import { MapPin, ShieldCheck, Lock, Flame, Images, Route } from "lucide-react";
+import { MapPin, ShieldCheck, Lock, Flame, Route } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
@@ -623,7 +623,7 @@ export default async function PerfilMemorialPage({
               deixava a mídia espalhada em dois lugares da página. O vídeo de
               capa continua na própria seção acima, com destaque. */}
           {(galeria.length > 0 || videosGaleria.length > 0) && (
-            <section id="galeria" className="perfil-secao">
+            <section id="galeria" className="perfil-secao perfil-secao-midia">
               <h2 className="perfil-titulo">Fotos e vídeos</h2>
               <GaleriaFotos fotos={galeria} videos={videosGaleria} />
             </section>
@@ -704,24 +704,6 @@ export default async function PerfilMemorialPage({
                 Acender uma vela
               </a>
             </div>
-
-            {galeria.length > 0 && (
-              <div className="perfil-cartao">
-                <h3 className="perfil-cartao-titulo">
-                  <Images size={14} strokeWidth={1.5} />
-                  Fotos
-                  <span className="perfil-contagem">{galeria.length}</span>
-                </h3>
-                <div className="perfil-miniaturas">
-                  {galeria.slice(0, 6).map((foto) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <a key={foto} href="#galeria" className="perfil-miniatura">
-                      <img src={foto} alt="" loading="lazy" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {localizacao?.cemiterio_nome && (
               <div className="perfil-cartao">

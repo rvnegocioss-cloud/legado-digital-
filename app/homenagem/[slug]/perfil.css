@@ -232,6 +232,15 @@
   background: #000;
 }
 
+/* Vídeo e galeria escapam da coluna de leitura e usam a faixa cheia do corpo:
+   presos na coluna (~870px) o vídeo ficava pequeno com a lateral vazia ao lado.
+   O resto do texto continua na largura de leitura, que é onde ela tem que ficar. */
+@media (min-width: 1024px) {
+  .perfil-secao-midia {
+    margin-right: calc(-1 * (var(--perfil-lateral) + var(--perfil-vao)));
+  }
+}
+
 .perfil-videos-grade {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

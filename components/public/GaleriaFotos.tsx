@@ -164,12 +164,12 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(8,23,34,0.94)',
+            background: 'rgba(6,16,24,0.97)',
             zIndex: 1000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 24,
+            padding: 0,
           }}
         >
           <button
@@ -246,9 +246,9 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
               autoPlay
               onClick={(e) => e.stopPropagation()}
               style={{
-                maxWidth: '100%',
-                maxHeight: '88vh',
-                borderRadius: 6,
+                width: '100vw',
+                height: '100vh',
+                objectFit: 'contain',
                 background: '#000',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
               }}
@@ -260,11 +260,9 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
               alt={`Item ${aberta + 1}`}
               onClick={(e) => e.stopPropagation()}
               style={{
-                maxWidth: '100%',
-                maxHeight: '88vh',
+                width: '100vw',
+                height: '100vh',
                 objectFit: 'contain',
-                borderRadius: 6,
-                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
               }}
             />
           )}
