@@ -23,8 +23,8 @@
 
 19. [ ] **Banner / fundo personalizado no perfil do memorial** (00:42:36) — Pedro sugeriu; Rafael ponderou a dificuldade de manter responsivo com imagem de tamanho variado. *(faltava na lista, achado na revisão de 08/09)*
 20. [x] **Galeria de mídia integrada** (00:45:05) — foto abrindo em pop-up maior e vídeo tocando sem poluir a interface; unificar foto+vídeo numa galeria só. *(faltava na lista)*
-21. [ ] **Guia de navegação dentro do mapa de cemitérios** (01:09:35) — o visitante precisa entender como achar e acessar o túmulo da própria família. *(faltava na lista)*
-22. [ ] **Cuidado de performance no mapa** (00:19:01) — destacar o mapa na landing sem carregar o mapa toda hora e pesar o servidor. *(faltava na lista — resolvido por enquanto: a landing usa imagem, não o mapa ao vivo)*
+21. [x] **Guia de navegação dentro do mapa de cemitérios** (01:09:35) — o visitante precisa entender como achar e acessar o túmulo da própria família. *(faltava na lista)*
+22. [x] **Cuidado de performance no mapa** (00:19:01) — destacar o mapa na landing sem carregar o mapa toda hora e pesar o servidor. *(faltava na lista — resolvido por enquanto: a landing usa imagem, não o mapa ao vivo)*
 
 ## Storytelling (direção de conteúdo, não tarefa fechada)
 
