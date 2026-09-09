@@ -44,4 +44,4 @@ Importante ao orientar uma família: **ela não cria o próprio acesso**. O memo
 
 ## Aparência do memorial (desde 2026-09-08)
 
-A família pode escolher, no próprio portal, uma imagem de capa pro topo da página (6 opções de paisagem prontas, ou nenhuma), a cor do memorial e o ambiente das laterais da página (pontos de luz, pétalas caindo, os dois ou nenhum) — em telas grandes a decoração aparece nas bordas, sem atrapalhar a leitura. Quem visita não altera nada disso, só vê o resultado escolhido pela família.
+A família pode escolher, no próprio portal, uma imagem de capa pro topo da página (6 opções de paisagem prontas, ou nenhuma), a cor do memorial e o ambiente das laterais da página (pontos de luz, pétalas caindo, os dois ou nenhum — vem desligado, e não aparece junto com a imagem de capa: a família escolhe uma das duas) — em telas grandes a decoração aparece nas bordas, sem atrapalhar a leitura. Quem visita não altera nada disso, só vê o resultado escolhido pela família.

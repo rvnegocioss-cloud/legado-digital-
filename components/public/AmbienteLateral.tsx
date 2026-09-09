@@ -49,7 +49,7 @@ interface Petala {
 }
 
 export default function AmbienteLateral({
-  ambiente = 'pontos',
+  ambiente = 'nenhum',
   cor = 'preto',
 }: {
   ambiente?: Ambiente

@@ -453,7 +453,7 @@ export default async function PerfilMemorialPage({
           nunca um controle exposto ao visitante. Só desenha fora do palco de
           conteúdo, nunca atrás de texto. */}
       <AmbienteLateral
-        ambiente={(m.ambiente_lateral || "pontos") as Ambiente}
+        ambiente={(m.ambiente_lateral || "nenhum") as Ambiente}
         cor={(m.cor_lateral || "preto") as CorLateral}
       />
 

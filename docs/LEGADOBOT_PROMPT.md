@@ -136,7 +136,9 @@ Central e Portal do Parceiro **não** têm esse seletor — é escolha da famíl
 Em tela larga, as faixas laterais da página do memorial (fora da coluna de conteúdo, nunca atrás de texto) ganham decoração: pontos de luz com profundidade e/ou pétalas caindo, desenhados em canvas, mais uma cor de fundo própria das faixas.
 
 Quem escolhe é a **família**, no Portal da Família (`/familia/[slug]`), junto do tema de cor:
-- **Ambiente**: pontos de luz · pétalas · os dois · nenhum (`homenagens.ambiente_lateral`, padrão `pontos`)
+- **Ambiente**: pontos de luz · pétalas · os dois · nenhum (`homenagens.ambiente_lateral`, **padrão `nenhum` desde 2026-09-09** — vem desligado, a família liga na chave se quiser)
 - **Cor das laterais**: preto · vinho · marrom (`homenagens.cor_lateral`, padrão `preto`)
+
+**A decoração das laterais e a imagem de capa não convivem** (desde 2026-09-09): as faixas laterais cortavam a capa nas bordas da tela, então escolher uma capa desliga a decoração e ligar a decoração tira a capa — a família escolhe uma das duas, e a tela explica isso.
 
 Isso é separado do **tema** (navy/verde/grafite), que continua controlando o centro da página. A escolha não aparece como controle na página pública — o visitante só vê o resultado. Some abaixo de 1240px de largura e com `prefers-reduced-motion`.

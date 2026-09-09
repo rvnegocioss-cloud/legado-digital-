@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memorial — wireframe da página inteira</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f7f5f0;color:#1c1c1c;font-family:'Kalam','Comic Sans MS',cursive}
+  header.topo{padding:22px 24px 4px;text-align:center}
+  header.topo h1{margin:0;font-size:26px;font-weight:700}
+  header.topo p{margin:4px 0 0;font-size:14px;color:#555}
+
+  .controles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 20px;
+    position:sticky;top:0;background:#f7f5f0;z-index:20;border-bottom:2px solid #e2ded3}
+  .controles button{font-family:inherit;font-size:13.5px;padding:6px 13px;border:2px solid #1c1c1c;
+    background:#fff;border-radius:10px;cursor:pointer}
+  .controles button.on{background:#1c1c1c;color:#fff}
+
+  .folha{max-width:1180px;margin:20px auto 40px;padding:0 20px}
+  .tela{border:2.5px solid #1c1c1c;border-radius:14px;background:#fff;overflow:hidden}
+
+  .bloco{position:relative;border-bottom:2px dashed #cfc9bb;padding:16px 18px 18px}
+  .bloco:last-child{border-bottom:0}
+  .bloco > .tag{display:inline-block;font-size:11px;background:#1c1c1c;color:#fff;
+    padding:2px 9px;border-radius:20px;margin-bottom:10px}
+  .bloco.opcional > .tag{background:#fff;color:#1c1c1c;border:2px dashed #1c1c1c}
+
+  .cx{border:2px solid #1c1c1c;border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:8px}
+  .cx.tracejada{border-style:dashed}
+  .rot{display:block;font-size:11px;color:#666;margin-bottom:3px}
+  .campo{border:2px solid #1c1c1c;border-radius:6px;padding:6px 9px;font-size:12px;background:#fff;margin-bottom:6px}
+  .campo small{display:block;color:#8a6a2f;font-size:10.5px}
+  .linha{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+  .cheio{flex:1;min-width:180px}
+
+  .midia{border:2px solid #1c1c1c;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:12px;color:#555;text-align:center;padding:6px;
+    background:repeating-linear-gradient(45deg,#fff,#fff 8px,#f2f0ea 8px,#f2f0ea 16px)}
+  .tiras{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px}
+  .tiras div{border:2px solid #1c1c1c;border-radius:5px;aspect-ratio:1;font-size:9.5px;
+    display:flex;align-items:center;justify-content:center;color:#666}
+
+  .retrato{border:2px solid #1c1c1c;border-radius:50%;aspect-ratio:1;width:110px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:11.5px;color:#555;background:#fff}
+  .botao{border:2px solid #1c1c1c;border-radius:20px;padding:4px 11px;font-size:11.5px;
+    display:inline-block;background:#fff;margin:0 5px 5px 0}
+  .botao.forte{background:#ffd76e}
+  .pilula{border:2px solid #1c1c1c;border-radius:20px;padding:2px 9px;font-size:10.5px;display:inline-block;margin-right:5px}
+
+  .duas{display:grid;grid-template-columns:1fr 300px;gap:14px}
+  @media (max-width:860px){ .duas{grid-template-columns:1fr} }
+
+  .anot{font-size:11px;color:#8a6a2f;margin:6px 0 0}
+  .quem{font-size:10.5px;color:#555;border:1.5px dotted #999;border-radius:5px;padding:1px 6px;float:right}
+
+  .legenda{max-width:1180px;margin:0 auto 60px;padding:0 20px;font-size:13px;color:#444}
+  .legenda h3{font-size:15px;margin-bottom:6px}
+  .legenda li{margin-bottom:4px}
+  .oculto{display:none !important}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <h1>Página do memorial — wireframe da página inteira</h1>
+  <p>Todos os blocos e todos os campos que existem hoje, na ordem em que aparecem. Rascunho de layout, sem cor de marca.</p>
+</header>
+
+<div class="controles">
+  <button class="on" onclick="ver('tudo',this)">Tudo</button>
+  <button onclick="ver('so-campos',this)">Só onde a família preenche</button>
+  <button onclick="alternarOpcionais(this)">Esconder blocos opcionais</button>
+</div>
+
+<div class="folha">
+<div class="tela">
+
+  <div class="bloco" data-tipo="fixo">
+    <span class="tag">1 · Menu do topo (fica grudado ao rolar)</span>
+    <div class="cx">
+      ← Legado Digital &nbsp;|&nbsp; Sobre · Linha do Tempo · Homenagens · Livro · Fotos e Vídeos · Localização
+      <div style="margin-top:8px">
+        <span class="botao">Deixar homenagem</span>
+        <span class="botao forte">Assinar livro</span>
+        <span class="botao">Compartilhar</span>
+      </div>
+    </div>
+    <p class="anot">→ "← Legado Digital" é a volta pra landing pra quem chegou pelo QR Code</p>
+  </div>
+
+  <div class="bloco opcional" data-tipo="campo">
+    <span class="tag">2 · Imagem de capa (opcional)</span>
+    <span class="quem">família escolhe</span>
+    <div class="midia" style="height:80px">faixa de paisagem atrás do retrato e do nome — 6 opções ou nenhuma</div>
+    <p class="anot">→ véu escuro por cima, senão o nome some na foto</p>
+  </div>
+
+  <div class="bloco" data-tipo="campo">
+    <span class="tag">3 · Topo: quem é</span>
+    <span class="quem">família preenche</span>
+    <div class="linha">
+      <div class="retrato">foto do rosto</div>
+      <div class="cheio">
+        <div class="campo">— EM MEMÓRIA — <small>fixo, não é campo</small></div>
+        <div class="campo">Nome completo</div>
+        <div class="campo"><span class="pilula">Pai</span><span class="pilula">Avô</span><span class="pilula">Esposo</span> <small>vínculos (opcional)</small></div>
+        <div class="linha">
+          <div class="campo cheio">Ano de nascimento — Ano de falecimento</div>
+          <div class="campo cheio">Cidade</div>
+        </div>
+        <div class="campo">"Frase preferida" <small>opcional</small></div>
+      </div>
+    </div>
+    <p class="anot">→ sem foto, entra o monograma (iniciais do nome)</p>
+  </div>
+
+  <div class="bloco" data-tipo="campo">
+    <span class="tag">4 · Vídeo e fotos do topo</span>
+    <span class="quem">família envia</span>
+    <div class="linha">
+      <div class="midia cheio" style="height:130px">vídeo de capa (1) — link do YouTube ou arquivo</div>
+      <div style="width:150px">
+        <div class="midia" style="height:60px">+ até 4 vídeos extras</div>
+        <div class="tiras"><div>foto</div><div>foto</div><div>foto</div><div>+4</div></div>
+      </div>
+    </div>
+    <p class="anot">→ clicar em qualquer um abre em tela cheia, ali mesmo</p>
+  </div>
+
+  <div class="bloco" data-tipo="fixo">
+    <span class="tag">5 · Régua da vida (lateral esquerda, só em tela grande)</span>
+    <div class="cx tracejada">1922 ——•——•——•—— 1995 &nbsp; <small>marcos da linha do tempo, clicáveis</small></div>
+  </div>
+
+  <div class="bloco duas" data-tipo="campo">
+    <div>
+      <span class="tag">6 · A história</span>
+      <span class="quem">família escreve</span>
+      <div class="cx" style="min-height:90px">
+        <span class="rot">biografia</span>
+        texto corrido, primeira letra grande.<br>Passou da altura, corta com "Ver mais".
+      </div>
+      <span class="botao">Ver mais</span>
+    </div>
+    <div>
+      <span class="tag">6b · Árvore da família (lateral)</span>
+      <span class="quem">família cadastra</span>
+      <div class="midia" style="height:150px">desenho da árvore<br>pais · avós · irmãos · cônjuge · filhos · netos</div>
+      <div class="cx" style="margin-top:6px">1 memorial · 4 na árvore <span class="botao">abrir</span></div>
+    </div>
+  </div>
+
+  <div class="bloco opcional" data-tipo="campo">
+    <span class="tag">7 · Uma vida — linha do tempo (some se estiver vazia)</span>
+    <span class="quem">família cadastra</span>
+    <div class="cx"><span class="rot">cada marco tem 3 campos</span>
+      <div class="linha">
+        <div class="campo" style="width:90px">ano</div>
+        <div class="campo cheio">título</div>
+      </div>
+      <div class="campo">descrição</div>
+    </div>
+    <div class="cx tracejada">• 1922 · Nascimento &nbsp; • 1948 · Casamento &nbsp; • 1955 · Comércio &nbsp; • 1995 · Falecimento</div>
+  </div>
+
+  <div class="bloco opcional" data-tipo="campo">
+    <span class="tag">8 · Fotos e vídeos (some se estiver vazia)</span>
+    <span class="quem">família envia</span>
+    <div class="linha">
+      <div class="midia cheio" style="height:90px">mosaico de fotos</div>
+      <div class="midia" style="width:130px;height:90px">vídeos</div>
+    </div>
+    <p class="anot">→ limite: 10 fotos e 4 vídeos por memorial</p>
+  </div>
+
+  <div class="bloco" data-tipo="visitante">
+    <span class="tag">9 · Mural de memórias</span>
+    <span class="quem">quem visita escreve</span>
+    <div class="linha">
+      <div class="campo cheio">seu nome</div>
+      <div class="campo cheio">parentesco</div>
+    </div>
+    <div class="campo">conte uma memória</div>
+    <span class="botao forte">Guardar memória</span>
+    <div class="cx tracejada" style="margin-top:8px">memórias já guardadas · cada uma com um coração pra reagir</div>
+  </div>
+
+  <div class="bloco opcional" data-tipo="fixo">
+    <span class="tag">10 · Como chegar ao túmulo (retrátil, fechado)</span>
+    <div class="cx" id="abrirMapa" style="cursor:pointer">▸ Como chegar ao túmulo</div>
+    <div class="cx tracejada" id="mapaCx" hidden>
+      <span class="rot">abriu</span>
+      <div class="midia" style="height:120px">foto aérea do cemitério + rota do portão até o túmulo + "você está aqui"</div>
+      <div style="margin-top:6px"><span class="botao forte">Rota de carro até o cemitério</span><span class="botao">Quadra 36 · Sepultura 11</span></div>
+    </div>
+    <p class="anot">→ vem do cadastro do cemitério, não da família. Só existe com túmulo vinculado</p>
+  </div>
+
+  <div class="bloco" data-tipo="visitante">
+    <span class="tag">11 · Livro de assinaturas</span>
+    <span class="quem">quem visita assina</span>
+    <div class="midia" style="height:110px">livro aberto — assinaturas à mão, em letra cursiva</div>
+    <div class="linha" style="margin-top:6px">
+      <div class="campo cheio">seu nome</div>
+      <div class="campo cheio">sua mensagem</div>
+    </div>
+    <span class="botao forte">Assinar o livro</span>
+  </div>
+
+  <div class="bloco" data-tipo="visitante">
+    <span class="tag">12 · Acender uma vela</span>
+    <span class="quem">quem visita acende</span>
+    <div class="linha">
+      <div class="midia" style="width:120px;height:130px">castiçal<br>(botão)</div>
+      <div class="midia cheio" style="height:130px">parede de 35 velas — a chama voa do castiçal até o lugar dela</div>
+    </div>
+    <div class="cx tracejada" style="margin-top:6px">contador de velas acesas · nunca desce</div>
+  </div>
+
+  <div class="bloco" data-tipo="fixo">
+    <span class="tag">13 · Rodapé</span>
+    <div class="cx" style="text-align:center">
+      [ logo Legado Digital ]<br>
+      <small>Privacidade · Termos · selos de confiança</small>
+    </div>
+  </div>
+
+  <div class="bloco opcional" data-tipo="campo">
+    <span class="tag">14 · Decoração das laterais (fora da coluna de texto)</span>
+    <span class="quem">família escolhe</span>
+    <div class="cx tracejada">pontos de luz · pétalas caindo · os dois · nenhum &nbsp;+&nbsp; cor: preto / vinho / marrom</div>
+    <p class="anot">→ só em tela grande, nunca atrás de texto</p>
+  </div>
+
+</div>
+</div>
+
+<div class="legenda">
+  <h3>Quem preenche o quê</h3>
+  <ul>
+    <li><b>Família</b> (Portal da Família): capa, retrato, nome, datas, cidade, vínculos, frase, biografia, linha do tempo, fotos, vídeos, árvore, tema, laterais.</li>
+    <li><b>Quem visita</b>: mural de memórias, livro de assinaturas, velas.</li>
+    <li><b>Central / Parceiro</b>: vínculo com o cemitério e o túmulo — é o que faz o bloco "Como chegar" existir.</li>
+  </ul>
+  <p>Bloco com rótulo de borda tracejada <b>some sozinho</b> quando não tem conteúdo — memorial recém-criado não mostra seção vazia.</p>
+</div>
+
+<script>
+function ver(modo, botao){
+  document.querySelectorAll('.controles button').forEach(function(b,i){ if(i<2) b.classList.remove('on') });
+  botao.classList.add('on');
+  document.querySelectorAll('.bloco').forEach(function(b){
+    b.classList.toggle('oculto', modo === 'so-campos' && b.dataset.tipo !== 'campo');
+  });
+}
+function alternarOpcionais(botao){
+  var escondendo = !botao.classList.contains('on');
+  document.querySelectorAll('.bloco.opcional').forEach(function(b){ b.classList.toggle('oculto', escondendo) });
+  botao.classList.toggle('on', escondendo);
+  botao.textContent = escondendo ? 'Mostrar blocos opcionais' : 'Esconder blocos opcionais';
+}
+document.getElementById('abrirMapa').addEventListener('click', function(){
+  var m = document.getElementById('mapaCx');
+  m.hidden = !m.hidden;
+  this.textContent = m.hidden ? '▸ Como chegar ao túmulo' : '▾ Como chegar ao túmulo';
+});
+</script>
+</body>
+</html>

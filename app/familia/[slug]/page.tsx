@@ -118,7 +118,7 @@ export default function FamiliaEdicaoPage() {
   const [videosGaleria, setVideosGaleria] = useState<string[]>([])
   const [tema, setTema] = useState('navy')
   const [bannerCapa, setBannerCapa] = useState<string>('')
-  const [ambienteLateral, setAmbienteLateral] = useState<Ambiente>('pontos')
+  const [ambienteLateral, setAmbienteLateral] = useState<Ambiente>('nenhum')
   const [corLateral, setCorLateral] = useState<CorLateral>('preto')
   const [galeria, setGaleria] = useState<string[]>([])
   const [timelineEventos, setTimelineEventos] = useState<TimelineEvento[]>([])
@@ -206,7 +206,7 @@ export default function FamiliaEdicaoPage() {
     setGaleria(m.galeria_fotos || [])
     setVideosGaleria(m.videos_galeria || [])
     setTema(m.tema || 'navy')
-    setAmbienteLateral((m.ambiente_lateral as Ambiente) || 'pontos')
+    setAmbienteLateral((m.ambiente_lateral as Ambiente) || 'nenhum')
     setCorLateral((m.cor_lateral as CorLateral) || 'preto')
     setBannerCapa(m.banner_capa || '')
     setVinculos(m.vinculos || [])
@@ -353,7 +353,7 @@ export default function FamiliaEdicaoPage() {
     if ('timeline' in s) setTimelineEventos((s.timeline as TimelineEvento[]) || [])
     if ('vinculos' in s) setVinculos((s.vinculos as string[]) || [])
     if ('tema' in s) setTema((s.tema as string) || 'navy')
-    if ('ambiente_lateral' in s) setAmbienteLateral((s.ambiente_lateral as Ambiente) || 'pontos')
+    if ('ambiente_lateral' in s) setAmbienteLateral((s.ambiente_lateral as Ambiente) || 'nenhum')
     if ('cor_lateral' in s) setCorLateral((s.cor_lateral as CorLateral) || 'preto')
     if ('banner_capa' in s) setBannerCapa((s.banner_capa as string) || '')
     if ('galeria_fotos' in s) setGaleria((s.galeria_fotos as string[]) || [])
@@ -924,6 +924,10 @@ export default function FamiliaEdicaoPage() {
               Fica no topo da página do memorial, atrás do retrato e do nome. Escolha uma das
               imagens abaixo — todas têm o mesmo formato, então nenhuma desalinha a página.
             </p>
+            <p className="text-[11px] text-zinc-500 mb-2">
+              A capa e a decoração das laterais não aparecem juntas — as faixas laterais cortariam a
+              imagem nas bordas. Escolher uma capa desliga a decoração.
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <button
                 type="button"
@@ -940,7 +944,13 @@ export default function FamiliaEdicaoPage() {
                 <button
                   key={b.id}
                   type="button"
-                  onClick={() => setBannerCapa(b.id)}
+                  onClick={() => {
+                    setBannerCapa(b.id)
+                    // Os dois disputam a borda da tela: a faixa lateral corta
+                    // a imagem de capa nas pontas. Escolher capa desliga a
+                    // decoração, e a tela diz isso logo abaixo.
+                    setAmbienteLateral('nenhum')
+                  }}
                   title={b.nome}
                   className={`relative rounded-lg overflow-hidden border-2 ${
                     bannerCapa === b.id ? 'border-white' : 'border-transparent hover:border-zinc-600'
@@ -974,27 +984,60 @@ export default function FamiliaEdicaoPage() {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Ambiente das laterais</label>
-            <p className="text-xs text-zinc-400 mb-2">
-              Pontos de luz e pétalas caindo nas bordas da página, fora do texto. Só aparece em tela grande.
-            </p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {AMBIENTES.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => setAmbienteLateral(a.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs ${
-                    ambienteLateral === a.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-zinc-800 text-zinc-400 hover:text-white'
+            {/* Chave de liga/desliga na frente das opções: a decoração é
+                enfeite, e enfeite tem que poder ser desligado num toque, sem
+                a família ter que descobrir que "nenhum" é a opção de desligar. */}
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="chave-laterais" className="text-xs text-zinc-500">
+                Decoração das laterais
+              </label>
+              <button
+                id="chave-laterais"
+                type="button"
+                role="switch"
+                aria-checked={ambienteLateral !== 'nenhum'}
+                onClick={() => {
+                  const ligando = ambienteLateral === 'nenhum'
+                  setAmbienteLateral(ligando ? 'pontos' : 'nenhum')
+                  if (ligando) setBannerCapa('')
+                }}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  ambienteLateral !== 'nenhum' ? 'bg-blue-600' : 'bg-zinc-700'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
+                    ambienteLateral !== 'nenhum' ? 'left-[22px]' : 'left-0.5'
                   }`}
-                >
-                  {a.nome}
-                </button>
-              ))}
+                />
+              </button>
             </div>
+            <p className="text-xs text-zinc-400 mb-2">
+              Pontos de luz e pétalas caindo nas bordas da página, fora do texto. Só aparece em tela
+              grande. {ambienteLateral === 'nenhum' ? 'Está desligada.' : 'Ligar aqui tira a imagem de capa.'}
+            </p>
 
+            {ambienteLateral !== 'nenhum' && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {AMBIENTES.filter((a) => a.id !== 'nenhum').map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setAmbienteLateral(a.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs ${
+                      ambienteLateral === a.id
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-zinc-800 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {a.nome}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {ambienteLateral !== 'nenhum' && (
+              <>
             <label className="block text-xs text-zinc-500 mb-1">Cor das laterais</label>
             <div className="flex gap-2">
               {(Object.keys(CORES_LATERAIS) as CorLateral[]).map((id) => (
@@ -1008,6 +1051,8 @@ export default function FamiliaEdicaoPage() {
                 />
               ))}
             </div>
+              </>
+            )}
           </div>
 
           <div>
