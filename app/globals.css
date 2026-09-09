@@ -431,3 +431,13 @@ html {
   font-size: 12.5px; box-shadow: none; border: 1px dashed rgba(201,164,106,.5);
 }
 .retrato-mini.mais:hover { background: rgba(201,164,106,.22); transform: none; }
+
+/* Faixa da imagem de capa do memorial (topo da página).
+   Altura própria e ninguém por cima -- a paisagem é um bloco, não papel de
+   parede atrás do conteúdo. A altura acompanha a largura da tela pra imagem
+   de 24:10 nunca aparecer esticada nem cortada demais. */
+.mem-capa-faixa {
+  position: relative;
+  width: 100%;
+  height: clamp(120px, 17vw, 240px);
+}

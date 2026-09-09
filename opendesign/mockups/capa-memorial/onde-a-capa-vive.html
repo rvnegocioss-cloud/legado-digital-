@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Onde a capa vive — 5 estruturas</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f7f5f0;color:#1c1c1c;font-family:'Kalam','Comic Sans MS',cursive}
+  header.topo{padding:20px 24px 4px;text-align:center}
+  header.topo h1{margin:0;font-size:25px;font-weight:700}
+  header.topo p{margin:4px 0 0;font-size:13.5px;color:#555}
+
+  .controles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px 20px}
+  .controles button{font-family:inherit;font-size:13.5px;padding:6px 13px;border:2px solid #1c1c1c;
+    background:#fff;border-radius:10px;cursor:pointer}
+  .controles button.on{background:#1c1c1c;color:#fff}
+
+  .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:24px;
+    padding:6px 24px 50px;max-width:1600px;margin:0 auto}
+  .grade.densa{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+
+  .opcao{background:#fff;border:2.5px solid #1c1c1c;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .opcao > h2{margin:0;padding:10px 14px;font-size:16.5px;border-bottom:2.5px solid #1c1c1c;background:#f0ede6}
+  .opcao > h2 small{display:block;font-size:12px;font-weight:400;color:#555;margin-top:2px}
+  .tela{padding:12px;flex:1}
+
+  .cx{border:2px solid #1c1c1c;border-radius:8px;padding:7px 9px;margin-bottom:7px;font-size:12.5px}
+  .cx.tracejada{border-style:dashed}
+  .barra{display:flex;gap:8px;align-items:stretch;margin-bottom:7px;flex-wrap:wrap}
+  .barra > *{margin-bottom:0}
+  .cheio{flex:1;min-width:0}
+
+  /* a "capa" é sempre a mesma textura, muda só onde ela fica */
+  .capa{border:2px solid #1c1c1c;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;color:#333;text-align:center;padding:5px;
+    background:repeating-linear-gradient(135deg,#efe9dc,#efe9dc 7px,#e2d9c6 7px,#e2d9c6 14px)}
+  .capa.sangra{border-radius:0;border-left:0;border-right:0;margin:-12px -12px 8px}
+
+  .midia{border:2px solid #1c1c1c;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;color:#555;text-align:center;padding:5px;
+    background:repeating-linear-gradient(45deg,#fff,#fff 8px,#f2f0ea 8px,#f2f0ea 16px)}
+  .tiras{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:5px}
+  .tiras div{border:2px solid #1c1c1c;border-radius:5px;aspect-ratio:1;font-size:9.5px;
+    display:flex;align-items:center;justify-content:center;color:#666}
+
+  .retrato{border:2px solid #1c1c1c;border-radius:50%;aspect-ratio:1;flex-shrink:0;background:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:#555}
+  .r-g{width:110px} .r-m{width:84px}
+
+  .botao{border:2px solid #1c1c1c;border-radius:20px;padding:4px 10px;font-size:11px;
+    display:inline-block;background:#fff;margin:0 4px 4px 0}
+  .botao.forte{background:#ffd76e}
+
+  .anot{font-size:11px;color:#8a6a2f;margin:5px 0 0}
+  .nota{font-size:11.5px;color:#444;background:#fffbe8;border-left:3px solid #ffd76e;padding:6px 9px;margin-top:8px}
+  .ruim{background:#ffecec;border-left-color:#e06b6b}
+
+  .rodape{padding:0 24px 60px;max-width:960px;margin:0 auto;font-size:13.5px;color:#444}
+  .rodape h3{font-size:15px;margin-bottom:6px}
+  .rodape li{margin-bottom:5px}
+  .sem-capa .capa{display:none !important}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <h1>Onde a imagem de capa vive — 5 estruturas</h1>
+  <p>Hoje ela é uma camada só, atrás de tudo do topo ao mesmo tempo. Estas são maneiras diferentes de resolver isso.</p>
+</header>
+
+<div class="controles">
+  <button class="on" onclick="densidade(false,this)">Lado a lado</button>
+  <button onclick="densidade(true,this)">Apertado</button>
+  <button onclick="semCapa(this)">Ver sem capa (o que não pode quebrar)</button>
+</div>
+
+<div class="grade" id="grade">
+
+  <!-- HOJE -->
+  <div class="opcao">
+    <h2>0 — Como está hoje
+      <small>Uma camada atrás do topo inteiro.</small>
+    </h2>
+    <div class="tela">
+      <div class="cx" style="text-align:center">menu do topo</div>
+      <div class="capa" style="height:230px;position:relative">
+        <div style="position:absolute;inset:8px;display:flex;gap:8px;align-items:center">
+          <div class="retrato r-m" style="background:rgba(255,255,255,.75)">retrato</div>
+          <div class="cheio" style="font-size:12px;text-align:left">
+            nome · datas · cidade<br>frase<br>
+            <span class="botao">rota</span><span class="botao">túmulo</span>
+          </div>
+          <div style="width:120px">
+            <div class="midia" style="height:70px;background:#fff">vídeo</div>
+          </div>
+        </div>
+      </div>
+      <p class="anot">→ a capa fica atrás do retrato, do texto, dos botões E do vídeo, tudo junto</p>
+      <div class="nota ruim">É isto que está feio: nada tem fundo próprio, a foto some atrás do véu, e a imagem corta reto quando o topo acaba.</div>
+    </div>
+  </div>
+
+  <!-- A -->
+  <div class="opcao">
+    <h2>A — Faixa própria, antes de tudo
+      <small>A capa é um bloco. Ninguém fica em cima dela.</small>
+    </h2>
+    <div class="tela">
+      <div class="cx" style="text-align:center">menu do topo</div>
+      <div class="capa sangra" style="height:110px">imagem de capa — de ponta a ponta, sem nada por cima</div>
+      <div class="barra" style="align-items:flex-start">
+        <div class="retrato r-m">retrato</div>
+        <div class="cheio">
+          <div style="font-size:14px;font-weight:700">Nome</div>
+          <div style="font-size:11.5px;color:#555">datas · cidade · frase</div>
+          <div style="margin-top:6px"><span class="botao forte">rota</span><span class="botao">túmulo</span></div>
+        </div>
+        <div style="width:130px">
+          <div class="midia" style="height:76px">vídeo</div>
+          <div class="tiras" style="grid-template-columns:repeat(3,1fr)"><div>f</div><div>f</div><div>+5</div></div>
+        </div>
+      </div>
+      <p class="anot">→ altura fixa da faixa, então a imagem nunca é esticada nem cortada por acaso</p>
+      <div class="nota">Mais simples de acertar e o único que não depende de véu nenhum. Ocupa altura antes do nome.</div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="opcao">
+    <h2>B — Faixa com o retrato encavalado
+      <small>O retrato monta metade na capa, metade no fundo.</small>
+    </h2>
+    <div class="tela">
+      <div class="cx" style="text-align:center">menu do topo</div>
+      <div class="capa sangra" style="height:100px">imagem de capa</div>
+      <div style="text-align:center;margin-top:-42px;position:relative">
+        <div class="retrato r-m" style="margin:0 auto">retrato</div>
+      </div>
+      <div style="text-align:center;padding:6px 0 8px">
+        <div style="font-size:15px;font-weight:700">Nome</div>
+        <div style="font-size:11.5px;color:#555">datas · cidade</div>
+        <div style="font-size:11.5px;font-style:italic;color:#444;margin-top:4px">"frase"</div>
+        <div style="margin-top:6px"><span class="botao forte">rota</span><span class="botao">túmulo</span></div>
+      </div>
+      <div class="barra">
+        <div class="midia cheio" style="height:70px">vídeo</div>
+        <div class="midia" style="width:70px;height:70px">fotos</div>
+      </div>
+      <p class="anot">→ o retrato costura os dois blocos, então a emenda deixa de existir</p>
+      <div class="nota">Padrão de perfil que todo mundo já conhece. Empurra o nome pro centro, muda a página de hoje.</div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="opcao">
+    <h2>C — Só do lado do retrato
+      <small>A capa fica na metade esquerda. Mídia em fundo limpo.</small>
+    </h2>
+    <div class="tela">
+      <div class="cx" style="text-align:center">menu do topo</div>
+      <div class="barra" style="align-items:stretch">
+        <div class="capa" style="flex:1.15;min-height:170px;position:relative">
+          <div style="position:absolute;inset:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+            <div class="retrato r-m" style="background:rgba(255,255,255,.8)">retrato</div>
+            <div style="font-size:13px;font-weight:700;margin-top:6px">Nome</div>
+            <div style="font-size:11px">datas · cidade</div>
+            <div style="margin-top:5px"><span class="botao forte">rota</span></div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div class="midia" style="height:110px">vídeo</div>
+          <div class="tiras"><div>f</div><div>f</div><div>f</div><div>+4</div></div>
+        </div>
+      </div>
+      <p class="anot">→ desmancha no meio, então não existe borda reta entre os dois lados</p>
+      <div class="nota">Separa as duas coisas pesadas: paisagem de um lado, vídeo do outro. No celular vira uma coisa embaixo da outra.</div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="opcao">
+    <h2>D — Capa emoldura, não preenche
+      <small>Fica só numa moldura fina em volta do retrato.</small>
+    </h2>
+    <div class="tela">
+      <div class="cx" style="text-align:center">menu do topo</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <div class="capa" style="width:130px;height:130px;border-radius:50%;position:relative">
+          <div class="retrato r-m" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff">retrato</div>
+        </div>
+        <div class="cheio">
+          <div style="font-size:14px;font-weight:700">Nome</div>
+          <div style="font-size:11.5px;color:#555">datas · cidade · frase</div>
+          <div style="margin-top:6px"><span class="botao forte">rota</span><span class="botao">túmulo</span></div>
+        </div>
+      </div>
+      <div class="barra">
+        <div class="midia cheio" style="height:80px">vídeo</div>
+        <div class="midia" style="width:80px;height:80px">fotos</div>
+      </div>
+      <p class="anot">→ a paisagem vira anel em volta do rosto, nada de fundo de página</p>
+      <div class="nota">Nunca briga com texto nenhum, nem no celular. Em compensação a imagem quase não aparece.</div>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="opcao">
+    <h2>E — Capa embaixo, fechando o topo
+      <small>Vira a linha que separa o topo da história.</small>
+    </h2>
+    <div class="tela">
+      <div class="cx" style="text-align:center">menu do topo</div>
+      <div class="barra" style="align-items:flex-start">
+        <div class="retrato r-m">retrato</div>
+        <div class="cheio">
+          <div style="font-size:14px;font-weight:700">Nome</div>
+          <div style="font-size:11.5px;color:#555">datas · cidade · frase</div>
+          <div style="margin-top:6px"><span class="botao forte">rota</span><span class="botao">túmulo</span></div>
+        </div>
+        <div style="width:120px">
+          <div class="midia" style="height:70px">vídeo</div>
+        </div>
+      </div>
+      <div class="capa sangra" style="height:72px;margin-top:8px;margin-bottom:8px">imagem de capa — faixa de fecho</div>
+      <div class="cx tracejada">A história · biografia começa aqui</div>
+      <p class="anot">→ a paisagem separa "quem é" de "a história", em vez de disputar com o nome</p>
+      <div class="nota">Zero risco de texto ilegível. Mas deixa de ser capa: quem abre vê a paisagem depois, não antes.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="rodape">
+  <h3>O que muda entre elas</h3>
+  <ul>
+    <li><b>A</b> — capa é um bloco com altura própria. Nada por cima, nenhum véu, nenhuma emenda.</li>
+    <li><b>B</b> — mesma faixa, mas o retrato monta em cima dela e costura os dois blocos.</li>
+    <li><b>C</b> — capa só na metade do retrato; o vídeo e as fotos ficam em fundo limpo.</li>
+    <li><b>D</b> — capa vira moldura do retrato. Some como fundo de página.</li>
+    <li><b>E</b> — capa desce e vira o fecho do topo, antes da história.</li>
+  </ul>
+  <p>O botão <b>"Ver sem capa"</b> mostra cada uma com a família que escolheu não ter capa — nenhuma pode ficar quebrada nesse caso, é o padrão do sistema.</p>
+</div>
+
+<script>
+function densidade(apertado, botao){
+  document.getElementById('grade').classList.toggle('densa', apertado);
+  document.querySelectorAll('.controles button').forEach(function(b,i){ if(i<2) b.classList.remove('on') });
+  botao.classList.add('on');
+}
+function semCapa(botao){
+  var sem = !botao.classList.contains('on');
+  document.getElementById('grade').classList.toggle('sem-capa', sem);
+  botao.classList.toggle('on', sem);
+  botao.textContent = sem ? 'Voltar a mostrar a capa' : 'Ver sem capa (o que não pode quebrar)';
+}
+</script>
+</body>
+</html>

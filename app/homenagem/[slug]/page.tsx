@@ -480,41 +480,37 @@ export default async function PerfilMemorialPage({
         </div>
       </nav>
 
-      {/* Imagem de capa: escolhida pela família num catálogo fechado, nunca
-          enviada por ela -- todas com a mesma proporção, então o topo não tem
-          como quebrar. Entra sempre como camada de fundo atrás do hero, nunca
-          no fluxo, e o véu escuro termina exatamente na cor de fundo do tema
-          pra emendar sem costura visível. */}
-      <div style={{ position: "relative" }}>
-        {banner && (
+      {/* Imagem de capa: FAIXA PRÓPRIA, com altura própria, e nada por cima.
+          Antes era uma camada atrás do hero inteiro -- passava atrás do
+          retrato, do nome, dos botões e da galeria ao mesmo tempo, exigia um
+          véu escuro pra o texto sobreviver (que matava a paisagem) e cortava
+          reto onde o hero acabava. Como bloco, a paisagem aparece inteira, o
+          texto continua no fundo do tema, e o único encontro entre os dois é
+          um desmanche suave no rodapé da faixa. */}
+      {banner && (
+        <div
+          aria-hidden
+          className="mem-capa-faixa"
+          style={{
+            backgroundImage: `url(${banner.arquivo})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center 45%",
+          }}
+        >
           <div
-            aria-hidden
             style={{
               position: "absolute",
               inset: 0,
-              zIndex: 0,
-              backgroundImage: `url(${banner.arquivo})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
+              background: `linear-gradient(180deg, rgba(6,14,20,0) 45%, ${v(
+                VAR_FUNDO_BASE,
+                CORES.fundoBase
+              )} 100%)`,
             }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: `linear-gradient(180deg, rgba(6,14,20,0.62) 0%, rgba(6,14,20,0.82) 55%, ${v(
-                  VAR_FUNDO_BASE,
-                  CORES.fundoBase
-                )} 100%)`,
-              }}
-            />
-          </div>
-        )}
+          />
+        </div>
+      )}
 
-      <header
-        className="mem-hero mem-container"
-        style={{ ...estiloTopo.hero, position: "relative", zIndex: 1 }}
-      >
+      <header className="mem-hero mem-container" style={estiloTopo.hero}>
         <div className="mem-hero-ring" style={estiloTopo.fotoGlowWrap}>
           <div style={estiloTopo.fotoGlow} />
           <div style={estiloTopo.fotoRing}>
@@ -610,7 +606,6 @@ export default async function PerfilMemorialPage({
           />
         </div>
       </header>
-      </div>
 
       {/* ---- Corpo: coluna de leitura + lateral fixa ---------------------- */}
       <div className="perfil-corpo">

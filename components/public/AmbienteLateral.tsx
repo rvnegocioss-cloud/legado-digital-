@@ -214,6 +214,12 @@ export default function AmbienteLateral({
 
   const c = CORES_LATERAIS[cor] || CORES_LATERAIS.preto
 
+  // Desligado é desligado: as faixas coloridas eram desenhadas mesmo com
+  // 'nenhum' (só a animação era condicional), e é justamente essa faixa que
+  // cortava a imagem de capa nas bordas da tela. Sai depois dos hooks, nunca
+  // antes -- return antes de hook quebra a hidratação (React #418).
+  if (ambiente === 'nenhum') return null
+
   return (
     <>
       {/* Faixas laterais coloridas: puro gradiente no fundo da página, sem
@@ -235,14 +241,12 @@ export default function AmbienteLateral({
         }}
         className="mem-faixas-laterais"
       />
-      {ambiente !== 'nenhum' && (
-        <canvas
-          ref={ref}
-          aria-hidden
-          className="mem-ambiente-canvas"
-          style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
-        />
-      )}
+      <canvas
+        ref={ref}
+        aria-hidden
+        className="mem-ambiente-canvas"
+        style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
+      />
       <style>{`
         @media (max-width: ${LARGURA_MINIMA}px) {
           .mem-faixas-laterais, .mem-ambiente-canvas { display: none; }
