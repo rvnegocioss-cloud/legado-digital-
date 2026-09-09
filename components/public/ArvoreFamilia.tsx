@@ -87,9 +87,15 @@ export default function ArvoreFamilia({ dados }: { dados: ArvoreDados | null }) 
       .filter((p) => tipos.includes(p.tipo))
       .sort((a, b) => (a.ordem ?? 999) - (b.ordem ?? 999) || (a.nascimento ?? 0) - (b.nascimento ?? 0))
 
+  const anoNascRef = dados.memorial.nascimento
+    ? new Date(dados.memorial.nascimento).getFullYear()
+    : null
+  const ordemDoMemorial = anoNascRef ?? 500
+
   const pai = um('pai')
   const mae = um('mae')
   const conjuge = um('conjuge')
+  const irmaos = porOrdem(['irmao', 'irma'])
   const filhos = porOrdem(['filho', 'filha'])
   const netos = porOrdem(['neto', 'neta'])
   const avosPat = [um('avo_paterno'), um('avo_paterna')].filter(Boolean) as Parente[]
@@ -104,8 +110,31 @@ export default function ArvoreFamilia({ dados }: { dados: ArvoreDados | null }) 
     nos.push({ chave, x, y, tam, p, ehRef })
   }
 
-  por('ref', conjuge ? 38 : 50, Y.ref, 80, null, true)
-  if (conjuge) por('conjuge', 62, Y.ref, 70, conjuge)
+  // Irmãos dividem a linha do memorial. Ordem de nascimento manda: quem vem
+  // antes fica à esquerda, e o memorial entra na posição dele nessa fila.
+  const linhaRef: { chave: string; p: Parente | null }[] = [
+    ...irmaos.map((p, i) => ({ chave: `irmao${i}`, p })),
+    { chave: 'ref', p: null },
+  ].sort((a, b) => {
+    const oa = a.p ? (a.p.ordem ?? a.p.nascimento ?? 999) : ordemDoMemorial
+    const ob = b.p ? (b.p.ordem ?? b.p.nascimento ?? 999) : ordemDoMemorial
+    return oa - ob
+  })
+
+  if (linhaRef.length === 1 && !conjuge) {
+    por('ref', 50, Y.ref, 80, null, true)
+  } else {
+    const n = linhaRef.length + (conjuge ? 1 : 0)
+    const largura = Math.min(72, 20 * n)
+    const passo = n > 1 ? largura / (n - 1) : 0
+    const x0 = 50 - largura / 2
+    linhaRef.forEach((item, i) => {
+      const ehRef = item.chave === 'ref'
+      por(item.chave, x0 + i * passo, Y.ref, ehRef ? 80 : 58, item.p, ehRef)
+    })
+    // Cônjuge fica sempre logo ao lado do memorial, no fim da fila.
+    if (conjuge) por('conjuge', x0 + linhaRef.length * passo, Y.ref, 70, conjuge)
+  }
   if (pai) por('pai', 30, Y.pais, 62, pai)
   if (mae) por('mae', 52, Y.pais, 62, mae)
 
@@ -152,7 +181,10 @@ export default function ArvoreFamilia({ dados }: { dados: ArvoreDados | null }) 
 
   if (conjuge) casal('ref', 'conjuge', conjuge.uniao)
   if (pai && mae) casal('pai', 'mae', 'casamento')
-  if (pai || mae) descendencia(pai ? 'pai' : 'mae', pai && mae ? 'mae' : null, ['ref'])
+  if (pai || mae) {
+    descendencia(pai ? 'pai' : 'mae', pai && mae ? 'mae' : null,
+      linhaRef.map((i) => i.chave))
+  }
   if (filhos.length) descendencia('ref', conjuge ? 'conjuge' : null, filhos.map((_, i) => `filho${i}`))
   if (netos.length && filhos.length) descendencia('filho0', null, netos.map((_, i) => `neto${i}`))
   if (avosPat.length === 2) {
