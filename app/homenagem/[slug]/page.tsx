@@ -456,6 +456,11 @@ export default async function PerfilMemorialPage({
 
       <nav className="mem-container" style={estiloTopo.nav}>
         <div style={estiloTopo.navLinks}>
+          {/* Sem isto o memorial era um beco: quem chega pelo QR Code não tinha
+              como conhecer o Legado Digital (regra 11). */}
+          <a href="/" style={{ ...estiloTopo.navLink, color: "var(--mem-dourado, #C9A46A)" }}>
+            ← Legado Digital
+          </a>
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
           <a href="#timeline" style={estiloTopo.navLink}>Linha do Tempo</a>
           <a href="#homenagens" style={estiloTopo.navLink}>Homenagens</a>
@@ -692,13 +697,15 @@ export default async function PerfilMemorialPage({
       </div>
 
       <footer className="perfil-rodape">
-        <Image
-          src="/logo-legado-digital.svg"
-          alt="Legado Digital"
-          width={160}
-          height={64}
-          style={{ height: 40, width: "auto" }}
-        />
+        <a href="/" aria-label="Ir para o site do Legado Digital">
+          <Image
+            src="/logo-legado-digital.svg"
+            alt="Legado Digital"
+            width={160}
+            height={64}
+            style={{ height: 40, width: "auto" }}
+          />
+        </a>
         <div className="perfil-selos">
           <span className="perfil-selo">
             <ShieldCheck size={14} strokeWidth={1.5} />
@@ -710,6 +717,7 @@ export default async function PerfilMemorialPage({
           </span>
         </div>
         <div className="perfil-rodape-links">
+          <a href="/">Conhecer o Legado Digital</a>
           <a href="/politica-de-privacidade">Privacidade</a>
           <a href="/termos-de-uso">Termos</a>
         </div>
