@@ -121,6 +121,16 @@ Todo lead cai na tabela `leads`, aparece na Central de Comunicações, acende o 
 
 O dropdown "Área Restrita" da landing tem só **Portal do Parceiro** e **Portal da Família** — o acesso da equipe (`/admin/login`) saiu do menu público de propósito, mas continua funcionando normalmente pra quem digita o endereço.
 
+## Imagem de capa do memorial (desde 2026-09-09)
+
+O topo da página do memorial pode ter uma **imagem de capa** atrás do retrato e do nome, com véu escuro que termina na cor do tema (o texto nunca perde contraste).
+
+Quem escolhe é a **família**, no Portal da Família (`/familia/[slug]`), no mesmo bloco do tema e das laterais. São 6 imagens de um **catálogo fechado** — a família não sobe imagem própria, de propósito: arquivo enviado por família varia de proporção e enquadramento e quebraria o topo. As 6 opções: amanhecer na montanha, mar ao entardecer, luz na floresta, campo dourado, céu estrelado, jardim de manhã. Todas 24:10, sem pessoa e sem texto. Também existe a opção **"Sem capa"** (padrão) — memorial que ninguém escolher continua como sempre foi.
+
+Coluna: `homenagens.banner_capa` (guarda o **id** do banner, nunca a URL — arquivo pode trocar de nome/formato sem virar link morto), nula por padrão, exposta na view `homenagens_publica`. Catálogo em `lib/bannersMemorial.ts`; arquivos em `public/banners/*.webp`. A API `/api/familia-memorial` recusa id fora do catálogo.
+
+Central e Portal do Parceiro **não** têm esse seletor — é escolha da família.
+
 ## Ambiente das laterais do memorial (desde 2026-09-08)
 
 Em tela larga, as faixas laterais da página do memorial (fora da coluna de conteúdo, nunca atrás de texto) ganham decoração: pontos de luz com profundidade e/ou pétalas caindo, desenhados em canvas, mais uma cor de fundo própria das faixas.

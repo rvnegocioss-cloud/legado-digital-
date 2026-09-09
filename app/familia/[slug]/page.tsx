@@ -10,6 +10,7 @@ import JazigoDaFamilia from '@/components/familia/JazigoDaFamilia'
 import ArvoreDaFamilia from '@/components/familia/ArvoreDaFamilia'
 import { LivroAssinaturas, type Assinatura } from '@/components/public/LivroAssinaturas'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
+import { BANNERS_MEMORIAL } from '@/lib/bannersMemorial'
 import { AMBIENTES, CORES_LATERAIS, type Ambiente, type CorLateral } from '@/components/public/AmbienteLateral'
 import { supabase } from '@/lib/auth'
 import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
@@ -31,6 +32,7 @@ interface Memorial {
   tema: string
   ambiente_lateral?: string
   cor_lateral?: string
+  banner_capa?: string | null
   timeline: { year?: string; title?: string; description?: string }[] | null
   vinculos: string[] | null
   slug: string | null
@@ -115,6 +117,7 @@ export default function FamiliaEdicaoPage() {
   const [videoUrl, setVideoUrl] = useState('')
   const [videosGaleria, setVideosGaleria] = useState<string[]>([])
   const [tema, setTema] = useState('navy')
+  const [bannerCapa, setBannerCapa] = useState<string>('')
   const [ambienteLateral, setAmbienteLateral] = useState<Ambiente>('pontos')
   const [corLateral, setCorLateral] = useState<CorLateral>('preto')
   const [galeria, setGaleria] = useState<string[]>([])
@@ -205,6 +208,7 @@ export default function FamiliaEdicaoPage() {
     setTema(m.tema || 'navy')
     setAmbienteLateral((m.ambiente_lateral as Ambiente) || 'pontos')
     setCorLateral((m.cor_lateral as CorLateral) || 'preto')
+    setBannerCapa(m.banner_capa || '')
     setVinculos(m.vinculos || [])
     setTimelineEventos(
       (m.timeline || []).map((ev) => ({
@@ -234,6 +238,7 @@ export default function FamiliaEdicaoPage() {
           if (r.dados.tema) setTema(r.dados.tema)
           if (r.dados.ambiente_lateral) setAmbienteLateral(r.dados.ambiente_lateral as Ambiente)
           if (r.dados.cor_lateral) setCorLateral(r.dados.cor_lateral as CorLateral)
+          if ('banner_capa' in r.dados) setBannerCapa((r.dados.banner_capa as string) || '')
           setRascunhoRestaurado(true)
         }
       }
@@ -255,6 +260,7 @@ export default function FamiliaEdicaoPage() {
       tema: m.tema,
       ambiente_lateral: m.ambiente_lateral,
       cor_lateral: m.cor_lateral,
+      banner_capa: m.banner_capa ?? null,
     })
     setCarregando(false)
   }
@@ -269,13 +275,13 @@ export default function FamiliaEdicaoPage() {
         chaveRascunho(params.slug),
         JSON.stringify({
           salvoEm: new Date().toISOString(),
-          dados: { ...form, tema, ambiente_lateral: ambienteLateral, cor_lateral: corLateral, vinculos, timeline: timelineEventos },
+          dados: { ...form, tema, ambiente_lateral: ambienteLateral, cor_lateral: corLateral, banner_capa: bannerCapa || null, vinculos, timeline: timelineEventos },
         })
       )
     } catch {
       // navegador sem espaco ou em modo privado -- rascunho e bonus, nunca bloqueia
     }
-  }, [form, tema, ambienteLateral, corLateral, vinculos, timelineEventos, carregando, sessaoInvalida, params.slug])
+  }, [form, tema, ambienteLateral, corLateral, bannerCapa, vinculos, timelineEventos, carregando, sessaoInvalida, params.slug])
 
   // Salva sozinho 2,5s depois que a pessoa para de digitar. E o que fecha o
   // problema de raiz: nada fica pendente esperando o botao, entao nao existe
@@ -297,7 +303,7 @@ export default function FamiliaEdicaoPage() {
     }, espera)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, tema, ambienteLateral, corLateral, vinculos, timelineEventos, fotoUrl, videoUrl, galeria, videosGaleria])
+  }, [form, tema, ambienteLateral, corLateral, bannerCapa, vinculos, timelineEventos, fotoUrl, videoUrl, galeria, videosGaleria])
 
   const ROTULO_CAMPO: Record<string, string> = {
     nome_completo: 'Nome completo',
@@ -311,6 +317,7 @@ export default function FamiliaEdicaoPage() {
     tema: 'Tema da página',
     ambiente_lateral: 'Ambiente das laterais',
     cor_lateral: 'Cor das laterais',
+    banner_capa: 'Imagem de capa',
     foto_url: 'Foto do homenageado',
     video_url: 'Vídeo',
     galeria_fotos: 'Galeria de fotos',
@@ -348,6 +355,7 @@ export default function FamiliaEdicaoPage() {
     if ('tema' in s) setTema((s.tema as string) || 'navy')
     if ('ambiente_lateral' in s) setAmbienteLateral((s.ambiente_lateral as Ambiente) || 'pontos')
     if ('cor_lateral' in s) setCorLateral((s.cor_lateral as CorLateral) || 'preto')
+    if ('banner_capa' in s) setBannerCapa((s.banner_capa as string) || '')
     if ('galeria_fotos' in s) setGaleria((s.galeria_fotos as string[]) || [])
     if ('videos_galeria' in s) setVideosGaleria((s.videos_galeria as string[]) || [])
     setValoresBase((b) => ({ ...b, ...conflito.doServidor }))
@@ -385,6 +393,7 @@ export default function FamiliaEdicaoPage() {
         tema,
         ambiente_lateral: ambienteLateral,
         cor_lateral: corLateral,
+        banner_capa: bannerCapa || null,
         timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
         vinculos: vinculos.length > 0 ? vinculos : null,
       }),
@@ -907,6 +916,44 @@ export default function FamiliaEdicaoPage() {
               className="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-white file:text-xs hover:file:bg-zinc-600 disabled:opacity-50"
             />
             {enviandoVideosGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando vídeos...</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs text-zinc-500 mb-1">Imagem de capa</label>
+            <p className="text-xs text-zinc-400 mb-2">
+              Fica no topo da página do memorial, atrás do retrato e do nome. Escolha uma das
+              imagens abaixo — todas têm o mesmo formato, então nenhuma desalinha a página.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setBannerCapa('')}
+                className={`h-[52px] rounded-lg text-xs flex items-center justify-center border-2 ${
+                  bannerCapa === ''
+                    ? 'border-white bg-zinc-800 text-white'
+                    : 'border-transparent bg-zinc-800/60 text-zinc-400 hover:text-white'
+                }`}
+              >
+                Sem capa
+              </button>
+              {BANNERS_MEMORIAL.map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => setBannerCapa(b.id)}
+                  title={b.nome}
+                  className={`relative rounded-lg overflow-hidden border-2 ${
+                    bannerCapa === b.id ? 'border-white' : 'border-transparent hover:border-zinc-600'
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={b.miniatura} alt={b.nome} className="w-full h-[52px] object-cover" />
+                  <span className="absolute inset-x-0 bottom-0 bg-black/60 text-[10px] text-white px-1 py-0.5 truncate">
+                    {b.nome}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

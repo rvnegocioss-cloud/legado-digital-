@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protótipo — banner de capa do memorial</title>
+<style>
+  :root{
+    --navy:#0B1D2A; --navy-topo:#0f2436; --navy-fundo:#081722;
+    --gold:#C9A46A; --gold-claro:#dfc08a;
+    --borda:rgba(201,164,106,0.18);
+    --texto:#F5F2EB; --corpo:#b0c0cc; --fraco:#7a8a96;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:linear-gradient(180deg,var(--navy-topo),var(--navy) 60%,var(--navy-fundo));
+    color:var(--texto);font-family:Georgia,'Times New Roman',serif;line-height:1.6;
+  }
+  .aviso{background:rgba(0,0,0,.3);border-bottom:1px solid var(--borda);padding:9px 20px;
+    font-size:12px;color:var(--fraco);text-align:center}
+  .aviso b{color:var(--gold)}
+
+  .abas{display:flex;gap:8px;padding:14px 20px;justify-content:center;flex-wrap:wrap;
+    position:sticky;top:0;background:rgba(8,23,34,.92);z-index:30;backdrop-filter:blur(6px)}
+  .abas button{font:inherit;font-size:12.5px;padding:7px 15px;border-radius:8px;cursor:pointer;
+    background:transparent;color:var(--fraco);border:1px solid #2b3d4a}
+  .abas button.on{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:700}
+
+  .tela{display:none}
+  .tela.on{display:block}
+
+  .nav{border-bottom:1px solid var(--borda);padding:14px 20px;display:flex;gap:20px;
+    justify-content:center;font-size:12.5px;color:var(--fraco);flex-wrap:wrap;
+    position:relative;z-index:3}
+
+  /* ---------- base do hero (igual nas 3 opções) ---------- */
+  .hero{position:relative;overflow:hidden}
+  .hero-conteudo{
+    position:relative;z-index:3;max-width:1320px;margin:0 auto;
+    display:flex;align-items:center;gap:32px;padding:80px 32px 64px;flex-wrap:wrap;
+  }
+  .anel{width:200px;height:200px;border-radius:50%;padding:3px;flex-shrink:0;
+    background:conic-gradient(from 0deg,var(--gold),var(--gold-claro),#a8834a,var(--gold))}
+  .anel-in{width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--navy-topo);
+    display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:46px}
+  .texto{flex:1 1 300px;min-width:280px}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2.4px;color:var(--gold)}
+  .nome{font-size:40px;font-weight:400;margin:10px 0 8px;line-height:1.15}
+  .anos{color:var(--gold-claro);font-size:16px}
+  .cidade{color:var(--corpo);font-size:13.5px;margin-top:4px}
+  .frase{border-left:2px solid var(--gold);padding-left:16px;margin:18px 0 0;
+    font-style:italic;color:var(--corpo);font-size:15.5px;max-width:520px}
+
+  /* a foto de capa entra sempre como camada de fundo, nunca no fluxo */
+  .capa{position:absolute;inset:0;z-index:0;
+    background-image:url('public/banners/banner-1.png');
+    background-size:cover;background-position:center}
+
+  /* tira de escolha, igual à que vai ficar no Portal da Família */
+  .tiras-banner{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px;max-width:1000px;margin:0 auto 18px;padding:0 20px}
+  .tiras-banner button{padding:0;border:2px solid transparent;border-radius:10px;
+    overflow:hidden;cursor:pointer;background:none;font-family:inherit;display:block}
+  .tiras-banner button:hover{border-color:var(--gold)}
+  .tiras-banner img{width:100%;aspect-ratio:24/10;object-fit:cover;display:block}
+  .tiras-banner span{display:block;padding:5px;font-size:11.5px;color:var(--fraco);
+    background:rgba(255,255,255,.04)}
+
+  /* --- A: véu escuro por cima (mais seguro pra qualquer foto) --- */
+  #a .capa::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(8,23,34,.72) 0%,rgba(8,23,34,.86) 55%,var(--navy) 100%)}
+
+  /* --- B: foto só na faixa de cima, texto no fundo sólido --- */
+  #b .hero{padding-top:280px}
+  #b .capa{bottom:auto;height:340px}
+  #b .capa::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(8,23,34,.25) 0%,rgba(8,23,34,.6) 55%,var(--navy) 100%)}
+
+  /* --- C: foto só atrás do retrato, recortada em arco --- */
+  #c .capa{
+    left:auto;right:0;width:52%;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);
+            mask-image:linear-gradient(90deg,transparent,#000 22%);
+  }
+  #c .capa::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(8,23,34,.45),rgba(8,23,34,.8))}
+  @media (max-width:860px){
+    #c .capa{width:100%;left:0}
+  }
+
+  .secao{max-width:1320px;margin:0 auto;padding:40px 32px 70px}
+  .titulo{font-size:12px;text-transform:uppercase;letter-spacing:2.4px;color:var(--gold);margin:0 0 14px}
+  .corpo{color:var(--corpo);font-size:16px;max-width:760px}
+
+  .nota{max-width:1320px;margin:0 auto;padding:0 32px 30px;font-size:12.5px;color:var(--fraco)}
+  .nota b{color:var(--gold-claro)}
+
+  .trocar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:0 20px 16px}
+  .trocar button{font:inherit;font-size:11.5px;padding:6px 12px;border-radius:999px;cursor:pointer;
+    background:transparent;color:var(--fraco);border:1px solid #2b3d4a}
+  .trocar button:hover{color:var(--texto);border-color:var(--gold)}
+  .trocar button.on{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="aviso">Protótipo — <b>banner de capa</b> no topo do memorial (sugestão do Pedro, 00:42:36)</div>
+
+<div class="abas">
+  <button class="on" onclick="ver('a',this)">A — foto cheia com véu</button>
+  <button onclick="ver('b',this)">B — faixa de cima só</button>
+  <button onclick="ver('c',this)">C — foto ao lado do retrato</button>
+  <button onclick="ver('d',this)">D — sem banner (como é hoje)</button>
+</div>
+
+<div class="trocar">
+  <span style="font-size:11.5px;color:#7a8a96;align-self:center">Banner:</span>
+  <button onclick="usar(1,this)" class="on">1 · Montanha</button>
+  <button onclick="usar(2,this)">2 · Mar</button>
+  <button onclick="usar(3,this)">3 · Floresta</button>
+  <button onclick="usar(4,this)">4 · Trigo</button>
+  <button onclick="usar(5,this)">5 · Céu estrelado</button>
+  <button onclick="usar(6,this)">6 · Jardim</button>
+</div>
+
+<div class="tiras-banner">
+  <button onclick="usar(1)"><img src="public/banners/banner-1.png" alt="Montanha" /><span>Montanha</span></button>
+  <button onclick="usar(2)"><img src="public/banners/banner-2.png" alt="Mar" /><span>Mar</span></button>
+  <button onclick="usar(3)"><img src="public/banners/banner-3.png" alt="Floresta" /><span>Floresta</span></button>
+  <button onclick="usar(4)"><img src="public/banners/banner-4.png" alt="Trigo" /><span>Trigo</span></button>
+  <button onclick="usar(5)"><img src="public/banners/banner-5.png" alt="Céu estrelado" /><span>Céu estrelado</span></button>
+  <button onclick="usar(6)"><img src="public/banners/banner-6.png" alt="Jardim" /><span>Jardim</span></button>
+</div>
+
+<!-- ============ A ============ -->
+<section class="tela on" id="a">
+  <div class="nav">Sobre · Linha do Tempo · Homenagens · Livro · Fotos e Vídeos · Localização</div>
+  <header class="hero">
+    <div class="capa"></div>
+    <div class="hero-conteudo">
+      <div class="anel"><div class="anel-in">CS</div></div>
+      <div class="texto">
+        <span class="eyebrow">— Em Memória —</span>
+        <h1 class="nome">Carlos Saraiva</h1>
+        <div class="anos">1922 — 1995</div>
+        <div class="cidade">Uberlândia</div>
+        <blockquote class="frase">"Trabalho, visão e legado"</blockquote>
+      </div>
+    </div>
+  </header>
+  <p class="nota"><b>A — foto cheia com véu.</b> A imagem cobre o topo inteiro e um véu escuro entra por cima, escurecendo pro navy até o fim. Segura qualquer foto (clara, escura, bagunçada) sem o texto sumir — é a opção que menos depende da qualidade da imagem que a família mandar.</p>
+  <div class="secao"><h2 class="titulo">A história</h2><p class="corpo">O resto da página segue igual — só o topo muda.</p></div>
+</section>
+
+<!-- ============ B ============ -->
+<section class="tela" id="b">
+  <div class="nav">Sobre · Linha do Tempo · Homenagens · Livro · Fotos e Vídeos · Localização</div>
+  <header class="hero">
+    <div class="capa"></div>
+    <div class="hero-conteudo">
+      <div class="anel"><div class="anel-in">CS</div></div>
+      <div class="texto">
+        <span class="eyebrow">— Em Memória —</span>
+        <h1 class="nome">Carlos Saraiva</h1>
+        <div class="anos">1922 — 1995</div>
+        <div class="cidade">Uberlândia</div>
+        <blockquote class="frase">"Trabalho, visão e legado"</blockquote>
+      </div>
+    </div>
+  </header>
+  <p class="nota"><b>B — faixa de cima só.</b> A foto ocupa uma faixa fixa no alto e o nome fica embaixo, sobre o fundo sólido de sempre. O texto nunca disputa com a imagem, e foto vertical não estraga o layout — mas empurra o nome pra baixo.</p>
+  <div class="secao"><h2 class="titulo">A história</h2><p class="corpo">O resto da página segue igual — só o topo muda.</p></div>
+</section>
+
+<!-- ============ C ============ -->
+<section class="tela" id="c">
+  <div class="nav">Sobre · Linha do Tempo · Homenagens · Livro · Fotos e Vídeos · Localização</div>
+  <header class="hero">
+    <div class="capa"></div>
+    <div class="hero-conteudo">
+      <div class="anel"><div class="anel-in">CS</div></div>
+      <div class="texto">
+        <span class="eyebrow">— Em Memória —</span>
+        <h1 class="nome">Carlos Saraiva</h1>
+        <div class="anos">1922 — 1995</div>
+        <div class="cidade">Uberlândia</div>
+        <blockquote class="frase">"Trabalho, visão e legado"</blockquote>
+      </div>
+    </div>
+  </header>
+  <p class="nota"><b>C — foto só de um lado.</b> A imagem fica na metade direita e desaparece num degradê antes de chegar no texto. O nome nunca fica sobre a foto. No celular vira a opção A automaticamente, porque não há duas metades.</p>
+  <div class="secao"><h2 class="titulo">A história</h2><p class="corpo">O resto da página segue igual — só o topo muda.</p></div>
+</section>
+
+<!-- ============ D ============ -->
+<section class="tela" id="d">
+  <div class="nav">Sobre · Linha do Tempo · Homenagens · Livro · Fotos e Vídeos · Localização</div>
+  <header class="hero">
+    <div class="hero-conteudo">
+      <div class="anel"><div class="anel-in">CS</div></div>
+      <div class="texto">
+        <span class="eyebrow">— Em Memória —</span>
+        <h1 class="nome">Carlos Saraiva</h1>
+        <div class="anos">1922 — 1995</div>
+        <div class="cidade">Uberlândia</div>
+        <blockquote class="frase">"Trabalho, visão e legado"</blockquote>
+      </div>
+    </div>
+  </header>
+  <p class="nota"><b>D — como está hoje.</b> Sem banner, fundo navy do tema. Está aqui pra comparação: se nenhuma das três ganhar do que já existe, não vale mexer.</p>
+  <div class="secao"><h2 class="titulo">A história</h2><p class="corpo">O resto da página segue igual — só o topo muda.</p></div>
+</section>
+
+<script>
+function ver(id, botao){
+  document.querySelectorAll('.tela').forEach(function(t){ t.classList.remove('on') });
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.abas button').forEach(function(b){ b.classList.remove('on') });
+  botao.classList.add('on');
+}
+function usar(n, botao){
+  var url = "url('public/banners/banner-" + n + ".png')";
+  document.querySelectorAll('.capa').forEach(function(c){ c.style.backgroundImage = url });
+  if (botao) {
+    document.querySelectorAll('.trocar button').forEach(function(b){ b.classList.remove('on') });
+    botao.classList.add('on');
+  }
+}
+</script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { verificarTokenFamilia } from '@/lib/familiaSessao'
 import { resolverConflito } from '@/lib/conflitoEdicao'
+import { BANNERS_MEMORIAL } from '@/lib/bannersMemorial'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -22,6 +23,7 @@ const CAMPOS_EDITAVEIS = [
   'tema',
   'ambiente_lateral',
   'cor_lateral',
+  'banner_capa',
 ] as const
 
 // Campos que o Portal da Família de fato usa (edita + updated_at/preenchido_por
@@ -44,6 +46,7 @@ const CAMPOS_LEITURA = [
   'tema',
   'ambiente_lateral',
   'cor_lateral',
+  'banner_capa',
   'slug',
   'preenchido_por',
   'updated_at',
@@ -123,6 +126,19 @@ export async function POST(req: NextRequest) {
   const payload: Record<string, unknown> = {}
   for (const campo of CAMPOS_EDITAVEIS) {
     if (campo in campos) payload[campo] = campos[campo]
+  }
+
+  // O banner é vocabulário fechado. Sem esta trava, um POST montado à mão
+  // gravaria qualquer string na coluna e a página do memorial tentaria servir
+  // um arquivo que não existe.
+  if ('banner_capa' in payload) {
+    const escolhido = payload.banner_capa
+    const valido = escolhido === null || escolhido === '' ||
+      BANNERS_MEMORIAL.some((b) => b.id === escolhido)
+    if (!valido) {
+      return NextResponse.json({ error: 'Banner de capa inválido' }, { status: 400 })
+    }
+    if (escolhido === '') payload.banner_capa = null
   }
 
   // Conflito é POR CAMPO, não pela linha inteira.

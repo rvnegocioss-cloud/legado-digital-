@@ -18,6 +18,7 @@ import GaleriaTopo from "@/components/public/GaleriaTopo";
 import ArvoreFamilia, { type ArvoreDados } from "@/components/public/ArvoreFamilia";
 import TextoVerMais from "@/components/public/TextoVerMais";
 import { SeletorTema } from "@/components/public/SeletorTema";
+import { resolverBanner } from "@/lib/bannersMemorial";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { RailVida, type MarcoVida } from "@/components/public/RailVida";
@@ -78,6 +79,7 @@ interface Homenagem {
   galeria_fotos: string[] | null;
   tema: string;
   ambiente_lateral: string;
+  banner_capa?: string | null;
   cor_lateral: string;
   timeline: TimelineEvent[] | null;
   velas_acesas: number | null;
@@ -277,7 +279,7 @@ export default async function PerfilMemorialPage({
   const { data: homenagem } = await supabase
     .from("homenagens_publica")
     .select(
-      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, videos_galeria, galeria_fotos, timeline, velas_acesas, vinculos, tema, ambiente_lateral, cor_lateral"
+      "id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, foto_url, video_url, videos_galeria, galeria_fotos, timeline, velas_acesas, vinculos, tema, ambiente_lateral, cor_lateral, banner_capa"
     )
     .eq("slug", slug)
     .single();
@@ -325,6 +327,9 @@ export default async function PerfilMemorialPage({
   const videosGaleria = urlsMidiaProtegidas(Array.isArray(m.videos_galeria) ? m.videos_galeria.filter(Boolean) : []);
   const fotoAssinada = urlMidiaProtegida(m.foto_url);
   const videoAssinado = isYoutube(m.video_url || "") ? m.video_url : urlMidiaProtegida(m.video_url);
+  // Catálogo fechado: id desconhecido vira "sem capa", nunca imagem 404.
+  const banner = resolverBanner(m.banner_capa);
+
   const paleta = PALETAS_MEMORIAL.find((p) => p.id === m.tema) ?? PALETAS_MEMORIAL[0];
 
   const [{ data: condolenciasData }, { data: muralData }, { data: localizacaoData }, { data: ruasData }] =
@@ -475,7 +480,41 @@ export default async function PerfilMemorialPage({
         </div>
       </nav>
 
-      <header className="mem-hero mem-container" style={estiloTopo.hero}>
+      {/* Imagem de capa: escolhida pela família num catálogo fechado, nunca
+          enviada por ela -- todas com a mesma proporção, então o topo não tem
+          como quebrar. Entra sempre como camada de fundo atrás do hero, nunca
+          no fluxo, e o véu escuro termina exatamente na cor de fundo do tema
+          pra emendar sem costura visível. */}
+      <div style={{ position: "relative" }}>
+        {banner && (
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 0,
+              backgroundImage: `url(${banner.arquivo})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: `linear-gradient(180deg, rgba(6,14,20,0.62) 0%, rgba(6,14,20,0.82) 55%, ${v(
+                  VAR_FUNDO_BASE,
+                  CORES.fundoBase
+                )} 100%)`,
+              }}
+            />
+          </div>
+        )}
+
+      <header
+        className="mem-hero mem-container"
+        style={{ ...estiloTopo.hero, position: "relative", zIndex: 1 }}
+      >
         <div className="mem-hero-ring" style={estiloTopo.fotoGlowWrap}>
           <div style={estiloTopo.fotoGlow} />
           <div style={estiloTopo.fotoRing}>
@@ -571,6 +610,7 @@ export default async function PerfilMemorialPage({
           />
         </div>
       </header>
+      </div>
 
       {/* ---- Corpo: coluna de leitura + lateral fixa ---------------------- */}
       <div className="perfil-corpo">
