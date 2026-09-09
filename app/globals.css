@@ -439,5 +439,16 @@ html {
 .mem-capa-faixa {
   position: relative;
   width: 100%;
-  height: clamp(120px, 17vw, 240px);
+  height: clamp(150px, 21vw, 300px);
+}
+
+/* Fundo do menu do topo em largura cheia.
+   O conteúdo do menu continua alinhado com o resto da página (1320px), mas o
+   FUNDO precisa ir de ponta a ponta: com a faixa de capa atrás, um fundo que
+   parava em 1320px virava um retângulo escuro flutuando sobre a paisagem.
+   box-shadow espalha a cor pros lados e o clip-path corta em cima e embaixo,
+   então a barra não vaza pra fora da própria altura. */
+.mem-nav-topo {
+  box-shadow: 0 0 0 100vmax var(--mem-fundo-topo, #0f2436);
+  clip-path: inset(0 -100vmax);
 }

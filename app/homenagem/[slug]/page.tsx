@@ -459,7 +459,7 @@ export default async function PerfilMemorialPage({
 
       <SeletorTema temaInicial={m.tema} />
 
-      <nav className="mem-container" style={estiloTopo.nav}>
+      <nav className="mem-container mem-nav-topo" style={estiloTopo.nav}>
         <div style={estiloTopo.navLinks}>
           {/* Sem isto o memorial era um beco: quem chega pelo QR Code não tinha
               como conhecer o Legado Digital (regra 11). */}
@@ -494,7 +494,7 @@ export default async function PerfilMemorialPage({
           style={{
             backgroundImage: `url(${banner.arquivo})`,
             backgroundSize: "cover",
-            backgroundPosition: "center 45%",
+            backgroundPosition: "center 62%",
           }}
         >
           <div
