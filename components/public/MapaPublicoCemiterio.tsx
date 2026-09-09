@@ -63,6 +63,8 @@ export default function MapaPublicoCemiterio({
   const router = useRouter()
   const mapRef = useRef<MapRef | null>(null)
   const [hover, setHover] = useState<{ lng: number; lat: number; props: PinoProps } | null>(null)
+  const [busca, setBusca] = useState('')
+  const [semResultado, setSemResultado] = useState(false)
 
   const ortomosaico = useMemo(
     () => normalizarOrtomosaico({ url: ortoUrl, minzoom: ortoMinzoom, maxzoom: ortoMaxzoom, bounds: ortoBounds }),
@@ -109,6 +111,40 @@ export default function MapaPublicoCemiterio({
     [router]
   )
 
+  // Busca dentro do próprio mapa: acha o túmulo pelo nome e voa até ele já
+  // com o card aberto. Sem isto, achar alguém num cemitério de milhares de
+  // túmulos dependia de varrer o mapa no olho.
+  const procurar = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      const termo = busca.trim().toLowerCase()
+      if (!termo) return
+
+      // Compara sem acento: quem digita "jose" tem que achar "José".
+      const limpar = (t: string) =>
+        t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      const alvo = limpar(termo)
+
+      const achado = (memoriais.features || []).find((f) => {
+        const props = f.properties as PinoProps
+        return lerMemoriais(props).some(
+          (m) => m.nome && !m.protegido && limpar(m.nome).includes(alvo)
+        )
+      })
+
+      if (!achado || achado.geometry.type !== 'Point') {
+        setSemResultado(true)
+        return
+      }
+
+      setSemResultado(false)
+      const [lng, lat] = achado.geometry.coordinates as [number, number]
+      mapRef.current?.flyTo({ center: [lng, lat], zoom: 20, duration: 1400 })
+      setHover({ lng, lat, props: achado.properties as PinoProps })
+    },
+    [busca, memoriais]
+  )
+
   // O GeoJSON serializa arrays de properties como string ao passar pelo mapa.
   function lerMemoriais(props: PinoProps): MemorialDoTumulo[] {
     const bruto = props.memoriais
@@ -126,6 +162,65 @@ export default function MapaPublicoCemiterio({
 
   return (
     <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'rgba(201,164,106,0.2)' }}>
+      {temMemoriais && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+            padding: '12px 14px',
+            background: 'rgba(11,29,42,0.55)',
+            borderBottom: `1px solid ${CORES.douradoBorda}`,
+          }}
+        >
+          <form onSubmit={procurar} style={{ display: 'flex', gap: 8, flex: '1 1 260px' }}>
+            <input
+              value={busca}
+              onChange={(e) => {
+                setBusca(e.target.value)
+                setSemResultado(false)
+              }}
+              placeholder="Procurar pelo nome de quem você visita"
+              aria-label="Procurar memorial pelo nome"
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: '9px 12px',
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.05)',
+                border: `1px solid ${CORES.douradoBorda}`,
+                color: CORES.textoForte,
+                fontFamily: 'Georgia, serif',
+                fontSize: 14,
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                padding: '9px 16px',
+                borderRadius: 8,
+                border: 0,
+                background: CORES.dourado,
+                color: CORES.fundoBase,
+                fontFamily: 'Georgia, serif',
+                fontSize: 13.5,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Achar no mapa
+            </button>
+          </form>
+
+          <p style={{ margin: 0, fontSize: 11.5, color: CORES.textoFraco, flex: '1 1 220px' }}>
+            {semResultado
+              ? 'Nenhum memorial com esse nome neste cemitério.'
+              : 'Cada cruz no mapa é um memorial. Toque numa cruz para ver quem está ali.'}
+          </p>
+        </div>
+      )}
+
       <Map
         ref={mapRef}
         onLoad={aoCarregarMapa}
@@ -232,9 +327,26 @@ export default function MapaPublicoCemiterio({
 
       <div className="p-3 text-center" style={{ background: 'rgba(11,29,42,0.4)' }}>
         {temMemoriais ? (
-          <p style={{ fontSize: 11, color: CORES.textoFraco }}>
-            {memoriais.features.length} memorial{memoriais.features.length === 1 ? '' : 'is'} publicado{memoriais.features.length === 1 ? '' : 's'} em {cemiterioNome}
-          </p>
+          <>
+            <div
+              style={{
+                display: 'flex',
+                gap: 18,
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                fontSize: 11,
+                color: CORES.textoFraco,
+                marginBottom: 6,
+              }}
+            >
+              <span>✛ cada cruz é um memorial</span>
+              <span>Arraste para andar pelo cemitério</span>
+              <span>Use + e − para aproximar</span>
+            </div>
+            <p style={{ fontSize: 11, color: CORES.textoFraco }}>
+              {memoriais.features.length} túmulo{memoriais.features.length === 1 ? '' : 's'} com memorial em {cemiterioNome}
+            </p>
+          </>
         ) : (
           <p style={{ fontSize: 11, color: CORES.textoFraco }}>Ainda não há memoriais publicados neste cemitério.</p>
         )}
