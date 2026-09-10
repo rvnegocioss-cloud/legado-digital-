@@ -57,6 +57,7 @@ interface Memorial {
   vinculos: string[] | null
   created_at: string
   updated_at: string
+  criado_por: { nome: string } | null
 }
 
 interface Cemiterio {
@@ -222,7 +223,7 @@ function FichaMemorialParceiroInner() {
     const { data: m } = await supabase
       .from('homenagens')
       .select(
-        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, videos_galeria, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, tema, lapide_id, vinculos, parceiro_id, created_at, updated_at'
+        'id, nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, biografia, slug, foto_url, video_url, videos_galeria, galeria_fotos, timeline, qr_code_url, mensagem_placa, familia_email, familia_nome_responsavel, familia_telefone, preenchido_por, tema, lapide_id, vinculos, parceiro_id, created_at, updated_at, criado_por:criado_por_usuario_id(nome)'
       )
       .eq('id', id)
       .maybeSingle()
@@ -255,7 +256,7 @@ function FichaMemorialParceiroInner() {
     }
     setLapides(lapidesData)
 
-    setMemorial(m)
+    setMemorial(m as unknown as Memorial)
     setForm({
       nome_completo: m.nome_completo,
       data_nascimento: m.data_nascimento || '',
@@ -770,6 +771,7 @@ function FichaMemorialParceiroInner() {
     placaChip,
     { label: `Galeria ${galeria.length}/${LIMITE_FOTOS}`, tom: 'neutro' },
     { label: `${usoStorageMB}MB / 500MB`, tom: usoStorageMB >= 400 ? 'amarelo' : 'neutro' },
+    ...(memorial.criado_por?.nome ? [{ label: `Cadastrado por ${memorial.criado_por.nome}`, tom: 'neutro' as const }] : []),
   ]
 
   return (

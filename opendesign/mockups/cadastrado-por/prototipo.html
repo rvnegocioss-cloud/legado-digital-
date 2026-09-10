@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protótipo — Cadastrado por</title>
+<style>
+  :root{
+    --zinc-950:#0B1D2A; --zinc-900:#10222f; --zinc-800:#1c3140; --zinc-700:#2a4353;
+    --zinc-600:#52525b; --zinc-500:#71717a; --zinc-400:#a1a1aa; --zinc-100:#f4f4f5;
+    --gold:#C9A46A;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--zinc-950);color:var(--zinc-100);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px}
+  .aviso{background:rgba(0,0,0,.35);border-bottom:1px solid var(--zinc-700);padding:9px 20px;
+    font-size:12px;color:var(--zinc-400);text-align:center}
+  .aviso b{color:var(--gold)}
+  .abas{display:flex;gap:8px;padding:14px 20px;justify-content:center;flex-wrap:wrap;
+    position:sticky;top:0;background:var(--zinc-950);z-index:30;border-bottom:1px solid var(--zinc-800)}
+  .abas button{font:inherit;font-size:12.5px;padding:7px 15px;border-radius:8px;cursor:pointer;
+    background:transparent;color:var(--zinc-400);border:1px solid var(--zinc-700)}
+  .abas button.on{background:var(--gold);color:var(--zinc-950);border-color:var(--gold);font-weight:700}
+  .tela{display:none;max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+  .tela.on{display:block}
+
+  /* ===== chip padrao (StatusFicha real) ===== */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;border-radius:6px;border:1px solid var(--zinc-800);
+    background:var(--zinc-900);padding:5px 10px;font-size:11px}
+  .chip .ponto{width:6px;height:6px;border-radius:50%}
+  .chip .rot{color:var(--zinc-400)}
+  .verde{background:#22c55e} .amarelo{background:#eab308} .neutro{background:var(--zinc-600)}
+
+  /* ===== avatar de autor ===== */
+  .autor{display:inline-flex;align-items:center;gap:6px}
+  .autor .ini{width:16px;height:16px;border-radius:50%;background:var(--gold);color:var(--zinc-950);
+    font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+  .card{border-radius:12px;background:var(--zinc-900);border:1px solid var(--zinc-800);padding:22px;margin-top:18px}
+  h1{font-size:22px;font-weight:700;margin:0}
+  .voltar{display:inline-flex;align-items:center;gap:6px;color:var(--zinc-400);font-size:13px;text-decoration:none}
+  .rotulo{font-size:12.5px;color:var(--zinc-500);margin-bottom:5px}
+  .anot{font-size:11.5px;color:#e0b978;margin-top:10px;background:rgba(201,164,106,.08);
+    border-left:2px solid var(--gold);padding:7px 10px;border-radius:0 6px 6px 0}
+
+  /* ===== lista/grid ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:16px}
+  .item{border-radius:10px;background:var(--zinc-900);border:1px solid var(--zinc-800);padding:14px}
+  .item h3{margin:0 0 4px;font-size:14.5px}
+  .item .meta{font-size:11.5px;color:var(--zinc-500);display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="aviso">Protótipo — <b>Cadastrado por</b> (vínculo automático via login, sem campo de texto)</div>
+
+<div class="abas">
+  <button class="on" onclick="ver('ficha',this)">A — Na ficha do memorial</button>
+  <button onclick="ver('lista',this)">B — Na lista de Memoriais</button>
+</div>
+
+<!-- ============ A: FICHA ============ -->
+<div class="tela on" id="ficha">
+  <a class="voltar" href="#">← Voltar pra Memoriais</a>
+
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-top:14px">
+    <h1>Carlos Saraiva</h1>
+  </div>
+
+  <div class="chips">
+    <span class="chip"><span class="ponto verde"></span><span class="rot">Público</span></span>
+    <span class="chip"><span class="ponto verde"></span><span class="rot">Acesso da família enviado</span></span>
+    <span class="chip"><span class="ponto neutro"></span><span class="rot">Conteúdo: Família</span></span>
+    <span class="chip"><span class="ponto verde"></span><span class="rot">Localização vinculada</span></span>
+    <span class="chip"><span class="ponto neutro"></span><span class="rot">Galeria 4/10</span></span>
+    <!-- NOVO -->
+    <span class="chip" style="border-color:var(--gold)">
+      <span class="autor"><span class="ini">P</span></span>
+      <span class="rot">Cadastrado por Pedro</span>
+    </span>
+  </div>
+
+  <div class="card">
+    <div class="rotulo">Como fica</div>
+    <p style="margin:0;color:var(--zinc-400);line-height:1.6">
+      Chip somente-leitura, igual aos outros da faixa de status — não é um campo de formulário, ninguém edita.
+      Grava sozinho quem estava logado quando o memorial foi criado. Passar o mouse mostra a data completa
+      ("Criado por Pedro Paulo Saraiva em 17/08/2026 às 14:32").
+    </p>
+    <div class="anot">
+      Memoriais antigos (antes dessa mudança) não têm essa informação — não é possível descobrir retroativamente
+      quem cadastrou, exceto quando você me disser manualmente (caso do Carlos Saraiva → Pedro).
+    </div>
+  </div>
+</div>
+
+<!-- ============ B: LISTA ============ -->
+<div class="tela" id="lista">
+  <h1 style="font-size:19px">Memoriais</h1>
+  <p style="color:var(--zinc-500);font-size:12.5px;margin-top:4px">
+    Cada card ganha uma linha pequena embaixo, junto da data — sem poluir o card, sem precisar abrir a ficha
+    pra saber quem cadastrou.
+  </p>
+
+  <div class="grid">
+    <div class="item">
+      <h3>Carlos Saraiva</h3>
+      <div class="meta">
+        <span class="autor"><span class="ini">P</span> Pedro</span>
+        <span>17/08/2026</span>
+      </div>
+    </div>
+    <div class="item">
+      <h3>Maria Aparecida Souza</h3>
+      <div class="meta">
+        <span class="autor"><span class="ini">R</span> Ricardo</span>
+        <span>10/09/2026</span>
+      </div>
+    </div>
+    <div class="item">
+      <h3>Antônio Ferreira Lima</h3>
+      <div class="meta">
+        <span class="autor"><span class="ini">Ra</span> Rafael</span>
+        <span>06/07/2026</span>
+      </div>
+    </div>
+    <div class="item">
+      <h3>Teste Conflito Silva</h3>
+      <div class="meta">
+        <span style="color:var(--zinc-600)">— sem registro (antes da mudança)</span>
+        <span>18/08/2026</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function ver(id, botao){
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.abas button').forEach(b => b.classList.remove('on'));
+  botao.classList.add('on');
+}
+</script>
+</body>
+</html>

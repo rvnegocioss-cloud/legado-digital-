@@ -25,6 +25,7 @@ interface Memorial {
   biografia: string | null
   slug: string | null
   parceiro_id: string | null
+  criado_por?: { nome: string } | null
   foto_url: string | null
   video_url: string | null
   videos_galeria: string[] | null
@@ -187,7 +188,7 @@ export default function DetalheMemorial() {
 
   async function load(id: string) {
     setLoading(true)
-    const { data: m } = await supabase.from('homenagens').select('*').eq('id', id).single()
+    const { data: m } = await supabase.from('homenagens').select('*, criado_por:criado_por_usuario_id(nome)').eq('id', id).single()
     setMemorial(m)
 
     supabase.auth.getSession().then(({ data: { session } }) =>
@@ -716,8 +717,9 @@ export default function DetalheMemorial() {
           <h1 className="text-2xl font-bold text-white">{memorial.nome_completo}</h1>
           <p className="text-[var(--tema-zinc-400)] text-sm mt-1">
             {parceiro
-              ? `Cadastrado por ${parceiro.nome_fantasia || parceiro.razao_social}`
-              : 'Cadastrado diretamente pela Legado Digital'}
+              ? `Vinculado a ${parceiro.nome_fantasia || parceiro.razao_social}`
+              : 'Sem parceiro vinculado'}
+            {memorial.criado_por?.nome && ` · Cadastrado por ${memorial.criado_por.nome}`}
           </p>
         </div>
         {memorial.slug && (

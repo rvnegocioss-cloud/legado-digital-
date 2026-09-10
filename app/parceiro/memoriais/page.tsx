@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase, getParceiroUser, getAdminUser } from '@/lib/auth'
+import { supabase, getParceiroUser, getAdminUser, obterUsuarioIdAtual } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
 
@@ -14,6 +14,7 @@ interface Memorial {
   qr_code_url: string | null
   preenchido_por: 'funeraria' | 'familia' | null
   created_at: string
+  criado_por: { nome: string } | null
 }
 
 const PREENCHIDO_POR_LABEL: Record<string, string> = {
@@ -84,11 +85,11 @@ function ParceiroMemoriaisInner() {
 
     const { data } = await supabase
       .from('homenagens')
-      .select('id, nome_completo, cidade, slug, qr_code_url, preenchido_por, created_at')
+      .select('id, nome_completo, cidade, slug, qr_code_url, preenchido_por, created_at, criado_por:criado_por_usuario_id(nome)')
       .eq('parceiro_id', meuParceiroId)
       .order('created_at', { ascending: false })
 
-    setMemoriais(data || [])
+    setMemoriais((data as unknown as Memorial[]) || [])
     setLoading(false)
   }
 
@@ -102,12 +103,14 @@ function ParceiroMemoriaisInner() {
 
     const id = crypto.randomUUID()
     const slug = `rascunho-${id.slice(0, 8)}`
+    const criadoPorUsuarioId = await obterUsuarioIdAtual()
     const { error } = await supabase.from('homenagens').insert({
       id,
       nome_completo: 'Novo memorial',
       slug,
       memorial_slug: slug,
       parceiro_id: parceiroId,
+      criado_por_usuario_id: criadoPorUsuarioId,
     })
 
     if (error) {
@@ -145,6 +148,7 @@ function ParceiroMemoriaisInner() {
                 <th className="text-left py-3 px-4">Cidade</th>
                 <th className="text-left py-3 px-4">Conteúdo por</th>
                 <th className="text-left py-3 px-4">Criado em</th>
+                <th className="text-left py-3 px-4">Cadastrado por</th>
                 <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
                 <th className="text-left py-3 px-4"></th>
@@ -160,6 +164,9 @@ function ParceiroMemoriaisInner() {
                   </td>
                   <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(m.created_at).toLocaleDateString('pt-BR')}
+                  </td>
+                  <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
+                    {m.criado_por?.nome || '—'}
                   </td>
                   <td className="py-3 px-4">
                     {m.slug && (

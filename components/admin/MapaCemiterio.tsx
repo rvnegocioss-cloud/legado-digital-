@@ -7,7 +7,7 @@ import { gerarSlugUnico } from '@/lib/gerarSlug'
 import MapGL, { Source, Layer, Marker, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Cross, Flag, MapPin, Crosshair, X, ChevronDown, ChevronRight, Plus, Landmark } from 'lucide-react'
-import { supabase } from '@/lib/auth'
+import { supabase, obterUsuarioIdAtual } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
@@ -872,6 +872,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(true)
     setMsg('')
     const slug = await gerarSlugUnico(supabase, nome)
+    const criadoPorUsuarioId = await obterUsuarioIdAtual()
     const { data, error } = await supabase
       .from('homenagens')
       .insert({
@@ -881,6 +882,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         lapide_id: cadastroMemorial.lapide.id,
         preenchido_por: cadastroMemorial.preenchidoPor,
         origem_cadastro: 'mapa_cemiterio',
+        criado_por_usuario_id: criadoPorUsuarioId,
       })
       .select('id')
       .single()

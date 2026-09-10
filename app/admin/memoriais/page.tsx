@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/auth'
+import { supabase, obterUsuarioIdAtual } from '@/lib/auth'
 import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
 import { gerarSlugUnico } from '@/lib/gerarSlug'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,7 @@ interface Memorial {
   slug: string | null
   created_at: string
   parceiro_id: string | null
+  criado_por: { nome: string } | null
 }
 
 interface Parceiro {
@@ -60,9 +61,9 @@ export default function AdminMemoriais() {
     setLoading(true)
     const { data } = await supabase
       .from('homenagens')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at, parceiro_id')
+      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at, parceiro_id, criado_por:criado_por_usuario_id(nome)')
       .order('created_at', { ascending: false })
-    if (data) setMemoriais(data)
+    if (data) setMemoriais(data as unknown as Memorial[])
 
     const { data: parceirosData } = await supabase
       .from('parceiros_b2b')
@@ -85,9 +86,10 @@ export default function AdminMemoriais() {
     setErro('')
 
     const slug = await gerarSlugUnico(supabase, form.nome_completo)
+    const criadoPorUsuarioId = await obterUsuarioIdAtual()
     const { data, error } = await supabase
       .from('homenagens')
-      .insert({ ...form, slug, memorial_slug: slug })
+      .insert({ ...form, slug, memorial_slug: slug, criado_por_usuario_id: criadoPorUsuarioId })
       .select()
       .single()
 
@@ -242,6 +244,7 @@ export default function AdminMemoriais() {
                               <th className="text-left py-2 px-2">Falecimento</th>
                               <th className="text-left py-2 px-2">Cidade</th>
                               <th className="text-left py-2 px-2">Criado em</th>
+                              <th className="text-left py-2 px-2">Cadastrado por</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -257,6 +260,9 @@ export default function AdminMemoriais() {
                                 <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{m.cidade || '-'}</td>
                                 <td className="py-2 px-2 text-[var(--tema-zinc-400)]">
                                   {new Date(m.created_at).toLocaleDateString('pt-BR')}
+                                </td>
+                                <td className="py-2 px-2 text-[var(--tema-zinc-400)]">
+                                  {m.criado_por?.nome || '—'}
                                 </td>
                               </tr>
                             ))}

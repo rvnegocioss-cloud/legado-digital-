@@ -83,6 +83,25 @@ export async function getParceiroUser() {
   return data
 }
 
+// Id em public.usuarios de quem está logado agora, sem se importar se é
+// staff ou parceiro -- usado só pra carimbar "quem criou" num registro novo
+// (ex: homenagens.criado_por_usuario_id). Nunca falha alto: sessão ausente
+// ou conta desativada vira null, e quem chama decide se bloqueia ou segue
+// sem o carimbo (não é dado obrigatório pra nenhuma escrita existir).
+export async function obterUsuarioIdAtual(): Promise<string | null> {
+  const user = await getCurrentUser()
+  if (!user?.email) return null
+
+  const { data } = await supabase
+    .from('usuarios')
+    .select('id, ativo')
+    .eq('email', user.email)
+    .single()
+
+  if (!data?.ativo) return null
+  return data.id
+}
+
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
