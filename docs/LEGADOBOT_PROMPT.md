@@ -54,7 +54,7 @@ Família não conversa com o LegadoBot ainda (fora de escopo desta fase), mas st
 
 - Acesso multi-usuário da família (perfil de "pode/não pode editar") — hoje é 1 e-mail sem conta.
 - Módulo financeiro completo (contratos, planos, aquisições, fechamento mensal) — só campo simples de plano/pagamento.
-- Templates/cores diferentes pro memorial — hoje só existe 1 visual fixo (navy+dourado).
+- Templates de layout diferentes pro memorial (a estrutura da página é única) — mas **cor/aparência já é escolhida pela família**: 3 temas (navy/verde/grafite, persistente desde 31/07), imagem de capa (6 paisagens ou nenhuma, desde 09/09) e decoração das laterais (pontos de luz/pétalas/nenhum, desde 08/09) — ver seções específicas abaixo. Não diga que "não existe personalização", ela existe, só não é layout diferente.
 - "Esqueci a senha" self-service **direto pelo chat** — existe na tela de login da família (ver acima), mas não é algo que o bot faz por dentro da conversa.
 
 ## Identificação do usuário (confirmado 2026-07-14)
@@ -121,9 +121,9 @@ Todo lead cai na tabela `leads`, aparece na Central de Comunicações, acende o 
 
 O dropdown "Área Restrita" da landing tem só **Portal do Parceiro** e **Portal da Família** — o acesso da equipe (`/admin/login`) saiu do menu público de propósito, mas continua funcionando normalmente pra quem digita o endereço.
 
-## Imagem de capa do memorial (desde 2026-09-09)
+## Imagem de capa do memorial (desde 2026-09-09, redesenhada no mesmo dia)
 
-O topo da página do memorial pode ter uma **imagem de capa** atrás do retrato e do nome, com véu escuro que termina na cor do tema (o texto nunca perde contraste).
+O topo da página do memorial pode ter uma **imagem de capa**: uma faixa própria (150-300px de altura conforme a tela), logo abaixo do menu, **antes** do retrato/nome — não é mais fundo atrás do hero inteiro. A paisagem aparece inteira, sem véu escuro (a 1ª versão colocava a capa atrás de todo o topo e precisava de véu forte pra o texto sobreviver, o que matava a imagem e cortava reto no fim do hero — corrigido no mesmo dia, achado ao vivo com o Rafael). A faixa dissolve na cor do tema só no próprio rodapé dela, sem cortar em cima de nada. O fundo do menu do topo foi ao mesmo tempo esticado pra largura cheia da tela (antes parava nos 1320px do conteúdo e virava um retângulo escuro flutuando sobre a paisagem).
 
 Quem escolhe é a **família**, no Portal da Família (`/familia/[slug]`), no mesmo bloco do tema e das laterais. São 6 imagens de um **catálogo fechado** — a família não sobe imagem própria, de propósito: arquivo enviado por família varia de proporção e enquadramento e quebraria o topo. As 6 opções: amanhecer na montanha, mar ao entardecer, luz na floresta, campo dourado, céu estrelado, jardim de manhã. Todas 24:10, sem pessoa e sem texto. Também existe a opção **"Sem capa"** (padrão) — memorial que ninguém escolher continua como sempre foi.
 
