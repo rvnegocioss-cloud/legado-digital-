@@ -35,6 +35,7 @@ type AlertaComunicacao = {
   tipo: string
   destinatario: string
   status: string
+  erro_msg: string | null
   created_at: string
   homenagens: { nome_completo: string } | null
 }
@@ -105,7 +106,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     supabase
       .from('emails_enviados')
-      .select('id, homenagem_id, tipo, destinatario, status, created_at, homenagens(nome_completo)')
+      .select('id, homenagem_id, tipo, destinatario, status, erro_msg, created_at, homenagens(nome_completo)')
       .order('created_at', { ascending: false })
       .limit(20)
       .then(({ data }) => setAlertas((data as any) || []))
@@ -315,6 +316,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <p className="text-xs text-[var(--tema-zinc-500)] mt-0.5 truncate">
                           {a.homenagens?.nome_completo ? `Sobre: ${a.homenagens.nome_completo}` : `Para: ${a.destinatario}`}
                         </p>
+                        {a.status === 'erro' && a.erro_msg && (
+                          <p className="text-xs text-red-400 mt-0.5 truncate">{a.erro_msg}</p>
+                        )}
                       </Link>
                     ))
                   )}
