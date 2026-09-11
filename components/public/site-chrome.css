@@ -1,0 +1,76 @@
+/* Navbar e rodapé compartilhados por toda página pública que NÃO é a landing
+   (busca, cemitérios, página do parceiro) -- cópia fiel das mesmas classes
+   de app/fio-da-vida.css (navbar/footer.site/dropdowns), pra nunca mais
+   divergir visualmente da landing real. Regra 12: nunca menor que o
+   container, nunca maior. */
+
+.site-navbar {
+  position: sticky; top: 0; z-index: 60;
+  background: linear-gradient(to bottom,
+    rgba(8,23,34,0.96) 0%, rgba(8,23,34,0.94) 70%, rgba(8,23,34,0.9) 100%);
+  border-bottom: 1px solid rgba(201,164,106,0.14);
+}
+.site-navbar .inner {
+  max-width: 1180px; margin: 0 auto; padding: 10px 24px;
+  min-height: 108px; display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 14px;
+}
+.site-navbar .volta-link {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+  color: rgba(255,255,255,0.55); font-size: 13px;
+}
+.site-navbar .volta-link:hover { color: #C9A46A; }
+.site-navbar .logo-sm { height: 86px; width: auto; }
+.site-navbar .links { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+.site-navbar .links a {
+  font-size: 13.5px; color: rgba(255,255,255,0.6); text-decoration: none;
+}
+.site-navbar .links a:hover { color: #C9A46A; }
+.site-navbar .cta {
+  background: #C9A46A; color: #0B1D2A; font-weight: 600; font-size: 13.5px;
+  padding: 10px 20px; border-radius: 7px; text-decoration: none; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; font: inherit;
+}
+@media (max-width: 760px) { .site-navbar .links { display: none; } }
+
+.site-navbar .area-restrita, .site-navbar .contato-nav { position: relative; }
+.site-navbar .contato-nav .link-contato {
+  display: inline-flex; align-items: center; gap: 5px; border: 0; background: none;
+  cursor: pointer; font: inherit; font-size: 13.5px; color: rgba(255,255,255,0.6); padding: 0;
+}
+.site-navbar .contato-nav .link-contato:hover { color: #C9A46A; }
+.site-navbar .chev-area { transition: transform .2s ease; }
+.site-navbar .aberto .chev-area { transform: rotate(180deg); }
+.site-navbar .menu-area {
+  position: absolute; right: 0; top: calc(100% + 8px); width: 224px;
+  background: #0B1D2A; border: 1px solid rgba(201,168,76,0.2); border-radius: 8px;
+  overflow: hidden; z-index: 70;
+}
+.site-navbar .menu-area a {
+  display: block; padding: 12px 16px; font-size: 14px; color: rgba(255,255,255,0.7);
+  text-decoration: none; transition: color .2s, background .2s;
+}
+.site-navbar .menu-area a:hover { color: #C9A46A; background: rgba(255,255,255,0.05); }
+
+footer.site-footer {
+  border-top: 1px solid rgba(201,164,106,0.1);
+  padding: 40px 24px 22px;
+  background: #081722;
+}
+footer.site-footer .inner { max-width: 1180px; margin: 0 auto; }
+footer.site-footer .cols {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 36px; margin-bottom: 22px;
+}
+footer.site-footer .brand-col .logo-sm { height: 62px; width: auto; margin-bottom: 8px; }
+footer.site-footer .brand-col p { color: rgba(255,255,255,0.4); font-size: 11.5px; max-width: 30ch; line-height: 1.45; }
+footer.site-footer h4 { color: #fff; font-size: 14px; font-weight: 600; margin: 0 0 14px; }
+footer.site-footer .col a, footer.site-footer .col span {
+  display: block; color: rgba(255,255,255,0.42); font-size: 12px; text-decoration: none;
+  margin-bottom: 5px;
+}
+footer.site-footer .col a:hover { color: #C9A46A; }
+footer.site-footer .bottom {
+  border-top: 1px solid rgba(201,164,106,0.1); padding-top: 14px;
+  text-align: center; color: rgba(255,255,255,0.3); font-size: 10.5px; line-height: 1.5;
+}
+@media (max-width: 700px) { footer.site-footer .cols { grid-template-columns: 1fr; } }
