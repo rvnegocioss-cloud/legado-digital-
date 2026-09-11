@@ -16,6 +16,7 @@ interface Resultado {
   foto_url: string | null
   slug: string | null
   tem_senha: boolean
+  cemiterio_nome: string | null
 }
 
 export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
@@ -130,7 +131,9 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
                   <div style={tema.placaMeta}>
                     {precisaSenha
                       ? 'Acesso restrito — senha necessária'
-                      : [periodoTexto(r.data_nascimento, r.data_falecimento), r.cidade].filter(Boolean).join(' · ')}
+                      : [periodoTexto(r.data_nascimento, r.data_falecimento), r.cidade, r.cemiterio_nome]
+                          .filter(Boolean)
+                          .join(' · ')}
                   </div>
                 </div>
               </div>

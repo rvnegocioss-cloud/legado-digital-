@@ -15,7 +15,10 @@
  */
 
 import Script from 'next/script'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import LegadoBotPublicoWidget from '@/components/LegadoBotPublicoWidget'
+import { BuscaMemorial } from '@/components/public/BuscaMemorial'
 import './fio-da-vida.css'
 
 const MARCACAO = `<nav class="navbar">
@@ -265,9 +268,40 @@ const MARCACAO = `<nav class="navbar">
 </footer>`
 
 export default function Home() {
+  // A busca volta pro hero via portal, não editando MARCACAO: a marcação do
+  // "Fio da Vida" é calibrada byte a byte (comentário no topo do arquivo) e
+  // não pode ser mexida pra caber um componente React com hooks. Em vez
+  // disso, depois que o HTML cru já está no DOM, insere um ponto de ancoragem
+  // logo após o subtítulo (".sub", dentro de "header.intro") e o React
+  // renderiza a busca ali dentro -- vira filho de verdade do flex do hero,
+  // centralizado igual ao resto, sem tocar em nenhuma linha da marcação.
+  //
+  // Achado real 2026-09-11: a busca já tinha sido embutida na landing antiga
+  // (2026-07-30) mas se perdeu quando o "Fio da Vida" substituiu a landing
+  // inteira (2026-08-25) -- ninguém percebeu porque a landing antiga também
+  // preservada em app/page_fio_antiga.tsx ainda importa o componente, só não
+  // é a página servida.
+  const [ancora, setAncora] = useState<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const sub = document.querySelector('header.intro .sub')
+    if (!sub) return
+    const div = document.createElement('div')
+    div.className = 'busca-hero'
+    sub.insertAdjacentElement('afterend', div)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- portal só
+    // pode existir depois que o nó criado aqui entra no DOM real; não tem
+    // como "sincronizar com estado externo" sem esse setState único no mount.
+    setAncora(div)
+    return () => {
+      div.remove()
+    }
+  }, [])
+
   return (
     <>
       <div className="fio-da-vida" dangerouslySetInnerHTML={{ __html: MARCACAO }} />
+      {ancora && createPortal(<BuscaMemorial />, ancora)}
       <Script src="/fio-da-vida/anima.js" strategy="afterInteractive" />
       <LegadoBotPublicoWidget />
     </>
