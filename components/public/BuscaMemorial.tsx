@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { tema, periodoTexto, CORES } from '@/lib/publicTheme'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
@@ -24,6 +25,7 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
   const [desbloqueadoId, setDesbloqueadoId] = useState<string | null>(null)
   const [senhaAbertaId, setSenhaAbertaId] = useState<string | null>(null)
   const [senhaInput, setSenhaInput] = useState('')
+  const [verSenha, setVerSenha] = useState(false)
   const [senhaErro, setSenhaErro] = useState('')
   const [verificando, setVerificando] = useState(false)
   const [erroBusca, setErroBusca] = useState('')
@@ -161,14 +163,29 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
                     onSubmit={(e) => verificarSenha(e, r.id)}
                     style={{ display: 'flex', gap: 8, marginTop: 8 }}
                   >
-                    <input
-                      type="password"
-                      value={senhaInput}
-                      onChange={(e) => setSenhaInput(e.target.value)}
-                      placeholder="Senha de acesso"
-                      style={{ ...tema.buscaInput, fontSize: 14, padding: '8px 12px' }}
-                      autoFocus
-                    />
+                    <div style={{ position: 'relative', flex: 1 }}>
+                      <input
+                        type={verSenha ? 'text' : 'password'}
+                        value={senhaInput}
+                        onChange={(e) => setSenhaInput(e.target.value)}
+                        placeholder="Senha de acesso"
+                        style={{ ...tema.buscaInput, fontSize: 14, padding: '8px 34px 8px 12px', width: '100%' }}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setVerSenha((v) => !v)}
+                        aria-label={verSenha ? 'Esconder senha' : 'Ver senha'}
+                        tabIndex={-1}
+                        style={{
+                          position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                          background: 'none', border: 0, padding: 0, cursor: 'pointer', color: CORES.textoFraco,
+                          display: 'flex',
+                        }}
+                      >
+                        {verSenha ? <EyeOff size={15} strokeWidth={1.5} /> : <Eye size={15} strokeWidth={1.5} />}
+                      </button>
+                    </div>
                     <button type="submit" style={{ ...tema.buscaBotao, padding: '0 14px' }} disabled={verificando}>
                       {verificando ? '...' : 'Entrar'}
                     </button>

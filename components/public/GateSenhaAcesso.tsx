@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 
 export function GateSenhaAcesso({
   memorialId,
@@ -10,6 +11,7 @@ export function GateSenhaAcesso({
   nomeCompleto: string
 }) {
   const [senha, setSenha] = useState('')
+  const [verSenha, setVerSenha] = useState(false)
   const [erro, setErro] = useState('')
   const [verificando, setVerificando] = useState(false)
 
@@ -50,23 +52,38 @@ export function GateSenhaAcesso({
           Acesso restrito
         </p>
         <h1 style={{ fontSize: 22, fontWeight: 400, margin: '8px 0 20px' }}>Memorial de {nomeCompleto}</h1>
-        <input
-          type="password"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          placeholder="Senha de acesso"
-          required
-          autoFocus
-          style={{
-            width: '100%',
-            padding: '10px 14px',
-            borderRadius: 8,
-            border: '1px solid rgba(201,164,106,0.3)',
-            background: 'rgba(255,255,255,0.05)',
-            color: '#fff',
-            fontSize: 15,
-          }}
-        />
+        <div style={{ position: 'relative' }}>
+          <input
+            type={verSenha ? 'text' : 'password'}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            placeholder="Senha de acesso"
+            required
+            autoFocus
+            style={{
+              width: '100%',
+              padding: '10px 38px 10px 14px',
+              borderRadius: 8,
+              border: '1px solid rgba(201,164,106,0.3)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#fff',
+              fontSize: 15,
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setVerSenha((v) => !v)}
+            aria-label={verSenha ? 'Esconder senha' : 'Ver senha'}
+            tabIndex={-1}
+            style={{
+              position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+              background: 'none', border: 0, padding: 0, cursor: 'pointer', color: '#7a8a96',
+              display: 'flex',
+            }}
+          >
+            {verSenha ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
+          </button>
+        </div>
         {erro && <p style={{ color: '#e08a8a', fontSize: 13, marginTop: 10 }}>{erro}</p>}
         <button
           type="submit"
