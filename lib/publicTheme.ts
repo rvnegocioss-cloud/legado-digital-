@@ -211,20 +211,30 @@ export function anosDestaque(nascimento: string | null, falecimento: string | nu
   return periodoTexto(nascimento, falecimento);
 }
 
+// O PostgREST deste projeto devolve created_at de timestamptz SEM sufixo Z/
+// offset (ex: "2026-08-26T01:17:32.194162", devia ser "...194162Z"). Sem
+// marcador de fuso, `new Date(...)` trata a string como HORÁRIO LOCAL de
+// quem está rodando -- servidor (Vercel, UTC) e navegador de quem visita
+// (fuso local, ex: America/Sao_Paulo) calculam INSTANTES diferentes pra
+// mesma string, não só formatos diferentes do mesmo instante. Isso é a causa
+// raiz real por trás de um "Como Chegar" parecendo não abrir: o valor sem
+// fuso vira erro de hidratação (#418), que derruba a interatividade da
+// página inteira. Achado ao vivo com Playwright em produção, 2026-09-11 --
+// confirmado batendo a string crua da API REST contra o texto renderizado.
+//
+// A coluna É timestamptz (instante real, gravado certo em UTC) -- o problema
+// é só a string perder o marcador na serialização. Corrige tratando como UTC
+// sempre que a string não trouxer fuso nenhum, sem mexer no banco.
+export function comoInstanteUtc(iso: string): Date {
+  const temFuso = /Z$|[+-]\d{2}:?\d{2}$/.test(iso);
+  return new Date(temFuso ? iso : `${iso}Z`);
+}
+
 // Data completa em pt-BR (ex: "12 de março de 1950") — usada em datas menores
 // de apoio e nas condolências. Guarda contra parse inválido.
-//
-// timeZone fixo é obrigatório: essa função formata created_at (timestamptz
-// real, não data solta), e sem fuso preso o servidor (Vercel, UTC) e o
-// navegador de quem visita (fuso local) podem calcular DIA diferente pra um
-// horário perto da meia-noite UTC -- foi exatamente essa a causa real de um
-// "Como Chegar" parecendo não abrir num memorial: o erro de hidratação (#418)
-// derruba a interatividade da página inteira, não só o texto da data. Achado
-// ao vivo com Playwright em produção, 2026-09-11 (só aparecia em memorial com
-// mural de memórias, nunca em memorial sem nenhuma).
 export function dataPtBr(d: string | null) {
   if (!d) return null;
-  const data = new Date(d);
+  const data = comoInstanteUtc(d);
   if (Number.isNaN(data.getTime())) return d;
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",

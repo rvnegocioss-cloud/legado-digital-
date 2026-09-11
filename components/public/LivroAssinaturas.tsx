@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { usaReducaoMovimento } from '@/lib/usaReducaoMovimento'
+import { comoInstanteUtc } from '@/lib/publicTheme'
 import './livro-assinaturas.css'
 
 // Livro de assinaturas de verdade: livro aberto, a pessoa digita o nome, uma
@@ -89,15 +90,13 @@ function inscrever(fn: () => void) {
   }
 }
 
-// timeZone fixo é obrigatório aqui -- sem isso, o servidor (Vercel, UTC) e o
-// navegador de quem visita (fuso local) podem calcular dias diferentes pra
-// uma mesma data perto da meia-noite, e o React acusa erro #418 (hidratação
-// não bate) -- foi exatamente essa a causa real do "Como Chegar" parecendo
-// não abrir: o erro derruba a interatividade da página inteira, não só desta
-// seção. Achado ao vivo com Playwright, 2026-09-11.
+// comoInstanteUtc trata a string crua do banco como UTC quando ela não vem
+// com Z/offset (é o caso real aqui -- ver lib/publicTheme.ts pra causa raiz
+// completa). Sem isso, `new Date(iso)` puro é ambíguo entre servidor e
+// navegador e o dia mostrado pode divergir.
 function dataCurta(iso: string) {
   try {
-    return new Date(iso).toLocaleDateString('pt-BR', {
+    return comoInstanteUtc(iso).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
