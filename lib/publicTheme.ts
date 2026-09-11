@@ -213,9 +213,23 @@ export function anosDestaque(nascimento: string | null, falecimento: string | nu
 
 // Data completa em pt-BR (ex: "12 de março de 1950") — usada em datas menores
 // de apoio e nas condolências. Guarda contra parse inválido.
+//
+// timeZone fixo é obrigatório: essa função formata created_at (timestamptz
+// real, não data solta), e sem fuso preso o servidor (Vercel, UTC) e o
+// navegador de quem visita (fuso local) podem calcular DIA diferente pra um
+// horário perto da meia-noite UTC -- foi exatamente essa a causa real de um
+// "Como Chegar" parecendo não abrir num memorial: o erro de hidratação (#418)
+// derruba a interatividade da página inteira, não só o texto da data. Achado
+// ao vivo com Playwright em produção, 2026-09-11 (só aparecia em memorial com
+// mural de memórias, nunca em memorial sem nenhuma).
 export function dataPtBr(d: string | null) {
   if (!d) return null;
   const data = new Date(d);
   if (Number.isNaN(data.getTime())) return d;
-  return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "long", year: "numeric" }).format(data);
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  }).format(data);
 }
