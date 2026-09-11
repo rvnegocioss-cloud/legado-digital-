@@ -89,9 +89,20 @@ function inscrever(fn: () => void) {
   }
 }
 
+// timeZone fixo é obrigatório aqui -- sem isso, o servidor (Vercel, UTC) e o
+// navegador de quem visita (fuso local) podem calcular dias diferentes pra
+// uma mesma data perto da meia-noite, e o React acusa erro #418 (hidratação
+// não bate) -- foi exatamente essa a causa real do "Como Chegar" parecendo
+// não abrir: o erro derruba a interatividade da página inteira, não só desta
+// seção. Achado ao vivo com Playwright, 2026-09-11.
 function dataCurta(iso: string) {
   try {
-    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+    return new Date(iso).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'America/Sao_Paulo',
+    })
   } catch {
     return ''
   }
