@@ -244,6 +244,20 @@ const css = `
 .mapa-paginas .sugestao-item .data { font-size: 0.7rem; color: var(--text-faint); margin-left: 0.5rem; }
 .mapa-paginas .sugestao-item p { margin: 0.35rem 0 0; font-size: 0.88rem; color: var(--text); white-space: pre-wrap; }
 
+.mapa-paginas .seguranca-item { display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.mapa-paginas .seguranca-item:last-child { border-bottom: 0; }
+.mapa-paginas .seguranca-item .titulo-linha { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+.mapa-paginas .seguranca-item strong { color: var(--text); font-size: 0.95rem; }
+.mapa-paginas .seguranca-item p { margin: 0; color: var(--text-muted); font-size: 0.87rem; line-height: 1.55; }
+.mapa-paginas .seguranca-item .pra-que { color: var(--text-faint); font-size: 0.8rem; margin-top: 4px; font-style: italic; }
+.mapa-paginas .seguranca-legenda { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 2.2rem; padding: 14px 16px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+.mapa-paginas .seguranca-subsecao { margin-top: 2.4rem; }
+.mapa-paginas .seguranca-subsecao:first-child { margin-top: 0; }
+.mapa-paginas .seguranca-subsecao h3 { font-family: "Iowan Old Style", Georgia, serif; font-weight: 500; font-size: 1.05rem;
+  margin: 0 0 0.2rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.7rem; }
+.mapa-paginas .seguranca-subsecao > p { color: var(--text-muted); font-size: 0.85rem; margin: 0 0 0.4rem; }
+
 .mapa-paginas footer {
   margin-top: 3rem;
   padding-top: 1.5rem;
@@ -699,6 +713,121 @@ export default function MapaPaginas() {
       <section className="section">
         <div className="section-head">
           <div>
+            <h2>Segurança</h2>
+            <p>
+              O que já está protegido no sistema, pra que serve cada proteção, e o que ainda
+              falta — em linguagem direta, sem termo técnico sem explicação. Atualizado toda vez
+              que alguma proteção nova entra ou sai (regra 4).
+            </p>
+          </div>
+        </div>
+
+        <div className="seguranca-legenda">
+          <span className="pill done">Ativo</span>
+          <span className="pill wip">Em andamento</span>
+          <span className="pill plan">Falta fazer</span>
+          <span className="pill bug">Bloqueado</span>
+        </div>
+
+        <div className="seguranca-subsecao">
+          <h3>No banco de dados (Supabase)</h3>
+          <p>Onde ficam os memoriais, famílias, parceiros e senhas.</p>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Cada parceiro só vê o próprio</strong><span className="pill done">Ativo</span></div>
+              <p>Uma funerária nunca enxerga memorial ou dado de outra funerária, mesmo tentando forçar pela URL.</p>
+              <p className="pra-que">Pra que serve: impede que um concorrente veja a carteira de clientes do outro.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Senha nunca fica visível, nem pra equipe</strong><span className="pill done">Ativo</span></div>
+              <p>Senha de acesso ao memorial e senha da família ficam guardadas de um jeito que nem o Rafael consegue ler — só confere se está certa.</p>
+              <p className="pra-que">Pra que serve: mesmo se alguém invadir o banco, não sai com senha de ninguém.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Foto/vídeo removido some de verdade</strong><span className="pill done">Ativo</span></div>
+              <p>Quando a família apaga uma foto, o arquivo é apagado do armazenamento, não só escondido da tela.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Checagem de senha vazada (HIBP)</strong><span className="pill bug">Bloqueado</span></div>
+              <p>Avisaria se alguém cadastrar uma senha que já vazou em outro site.</p>
+              <p className="pra-que">Por quê está bloqueado: exige plano pago do Supabase (Free não libera). Decisão de custo, não técnica.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="seguranca-subsecao">
+          <h3>No código (GitHub)</h3>
+          <p>Onde o sistema é escrito e guardado.</p>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Trava contra chave/senha commitada sem querer</strong><span className="pill done">Ativo</span></div>
+              <p>Se alguém tentar subir uma senha ou chave escrita no código por engano, o GitHub bloqueia o envio antes de acontecer.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Aviso de biblioteca desatualizada com falha conhecida</strong><span className="pill done">Ativo</span></div>
+              <p>Ligado em 2026-09-11 nos 2 repositórios. Antes estava desligado — o sistema usa código de terceiros que pode ter brecha descoberta depois, isso avisa e corrige sozinho.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Histórico inteiro checado atrás de chave vazada</strong><span className="pill done">Ativo</span></div>
+              <p>Rodado em 2026-09-11 em toda a história do projeto, não só o código atual (TruffleHog). Resultado: nenhuma chave real encontrada.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Leitor automático de padrão de bug de segurança</strong><span className="pill plan">Falta fazer</span></div>
+              <p>Ferramenta (Semgrep) já configurada, mas a conexão caiu e ainda não voltou.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="seguranca-subsecao">
+          <h3>Login e acesso</h3>
+          <p>Quem entra em cada parte do sistema.</p>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Central, Parceiro e Família nunca se cruzam</strong><span className="pill done">Ativo</span></div>
+              <p>Um parceiro nunca acessa o que é só da Central; uma família nunca acessa outro memorial.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Login com Google, cada um só a própria caixa</strong><span className="pill done">Ativo</span></div>
+              <p>Novo em 2026-09-11. Só conta @legadodigital.net entra, e o acesso ao Gmail/Agenda/Drive de cada pessoa é isolado — nem outro admin vê.</p>
+            </div>
+          </div>
+
+          <div className="seguranca-item">
+            <div>
+              <div className="titulo-linha"><strong>Chave de acesso ao Google sem criptografia extra</strong><span className="pill wip">Em andamento</span></div>
+              <p>O token que guarda o acesso ao e-mail de cada staff está protegido por permissão de banco, mas ainda não criptografado por cima.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-head">
+          <div>
             <h2>Sugestões dos sócios</h2>
             <p>Espaço pra Rafael, Pedro e Ricardo deixarem opinião sobre as páginas — fica registrado aqui.</p>
           </div>
@@ -740,9 +869,10 @@ export default function MapaPaginas() {
       </section>
 
       <footer>
-        Atualizado em 2026-07-09 (busca pública, sub-landing do parceiro, campo de sugestões dos
-        sócios, upload de foto do homenageado nos formulários) — os rótulos refletem o que foi
-        verificado no código e no banco, não apenas o roadmap do CLAUDE.md.
+        Atualizado em 2026-09-11 (seção Segurança nova — login com Google, Dependabot ligado,
+        TruffleHog rodado no histórico do git, checagens todas feitas ao vivo esse dia) — os
+        rótulos refletem o que foi verificado no código e no banco, não apenas o roadmap do
+        CLAUDE.md.
       </footer>
     </div>
   )

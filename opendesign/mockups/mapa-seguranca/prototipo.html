@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protótipo — Seção Segurança no Mapa</title>
+<style>
+  :root{
+    --bg: #0B1D2A; --bg-secondary: #0f2436;
+    --card: rgba(255,255,255,0.04); --card-strong: rgba(255,255,255,0.065);
+    --border: rgba(201,164,106,0.16); --border-strong: rgba(201,164,106,0.45);
+    --text: #F5F2EB; --text-muted: #a9b7c1; --text-faint: #7a8a96;
+    --gold: #C9A46A; --gold-strong: #dfc08a; --gold-tint: rgba(201,164,106,0.12);
+    --done-fg: #8fd0a8; --done-bg: rgba(143,208,168,0.1); --done-border: rgba(143,208,168,0.3);
+    --wip-fg: #dfc08a; --wip-bg: rgba(201,164,106,0.14); --wip-border: rgba(201,164,106,0.4);
+    --plan-fg: #9aa7b0; --plan-bg: rgba(154,167,176,0.08); --plan-border: rgba(154,167,176,0.28);
+    --bug-fg: #e08a8a; --bug-bg: rgba(224,138,138,0.1); --bug-border: rgba(224,138,138,0.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
+  .aviso{background:rgba(0,0,0,.35);border-bottom:1px solid var(--border);padding:9px 20px;
+    font-size:12px;color:var(--text-faint);text-align:center}
+  .aviso b{color:var(--gold)}
+  .pagina{max-width:900px;margin:0 auto;padding:40px 24px 90px}
+
+  .eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  h1{font-family:Georgia,serif;font-size:1.9rem;font-weight:500;margin:.5rem 0;color:var(--text)}
+  .sub{color:var(--text-muted);max-width:62ch;margin:0 0 3rem;font-size:.98rem}
+
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+    margin-bottom:1.6rem;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:1rem}
+  .section-head h2{font-family:Georgia,serif;font-weight:500;font-size:1.35rem;margin:0;color:var(--text)}
+  .section-head p{color:var(--text-muted);font-size:.9rem;margin:.3rem 0 0;max-width:58ch}
+
+  .pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:600;
+    letter-spacing:.03em;padding:.22rem .6rem;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+  .pill.done{color:var(--done-fg);background:var(--done-bg);border-color:var(--done-border)}
+  .pill.wip{color:var(--wip-fg);background:var(--wip-bg);border-color:var(--wip-border)}
+  .pill.plan{color:var(--plan-fg);background:var(--plan-bg);border-color:var(--plan-border)}
+  .pill.bug{color:var(--bug-fg);background:var(--bug-bg);border-color:var(--bug-border)}
+  .pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+  .item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  .item:last-child{border-bottom:0}
+  .item .conteudo{flex:1;min-width:0}
+  .item .titulo-linha{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .item strong{color:var(--text);font-size:.95rem}
+  .item p{margin:0;color:var(--text-muted);font-size:.87rem;line-height:1.55}
+  .item .pra-que{color:var(--text-faint);font-size:.8rem;margin-top:4px;font-style:italic}
+
+  .legenda{display:flex;flex-wrap:wrap;gap:.6rem;margin:2.2rem 0 3.2rem;padding:14px 16px;
+    background:var(--card);border:1px solid var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+
+<div class="aviso">Protótipo — seção <b>Segurança</b> dentro do Mapa de Páginas (<code>/admin/mapa</code>), pros sócios verem</div>
+
+<div class="pagina">
+  <span class="eyebrow">Legado Digital · Mapa</span>
+  <h1>Segurança</h1>
+  <p class="sub">
+    O que já está protegido no sistema, pra que serve cada proteção, e o que ainda falta — em
+    linguagem direta, sem termo técnico sem explicação.
+  </p>
+
+  <div class="legenda">
+    <span class="pill done">Ativo</span>
+    <span class="pill wip">Em andamento</span>
+    <span class="pill plan">Falta fazer</span>
+    <span class="pill bug">Bloqueado</span>
+  </div>
+
+  <div class="section-head">
+    <h2>No banco de dados (Supabase)</h2>
+    <p>Onde ficam os memoriais, famílias, parceiros e senhas.</p>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Cada parceiro só vê o próprio</strong><span class="pill done">Ativo</span></div>
+      <p>Uma funerária nunca enxerga memorial ou dado de outra funerária, mesmo tentando forçar pela URL.</p>
+      <p class="pra-que">Pra que serve: impede que um concorrente veja a carteira de clientes do outro.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Senha nunca fica visível, nem pra equipe</strong><span class="pill done">Ativo</span></div>
+      <p>Senha de acesso ao memorial e senha da família ficam guardadas de um jeito que nem o Rafael consegue ler — só confere se está certa.</p>
+      <p class="pra-que">Pra que serve: mesmo se alguém invadir o banco, não sai com senha de ninguém.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Foto/vídeo removido some de verdade</strong><span class="pill done">Ativo</span></div>
+      <p>Quando a família apaga uma foto, o arquivo é apagado do armazenamento, não só escondido da tela.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Checagem de senha vazada (HIBP)</strong><span class="pill bug">Bloqueado</span></div>
+      <p>Avisaria se alguém cadastrar uma senha que já vazou em outro site.</p>
+      <p class="pra-que">Por quê está bloqueado: exige plano pago do Supabase (Free não libera). Decisão de custo, não técnica.</p>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>No código (GitHub)</h2>
+    <p>Onde o sistema é escrito e guardado.</p>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Trava contra chave/senha commitada sem querer</strong><span class="pill done">Ativo</span></div>
+      <p>Se alguém tentar subir uma senha ou chave escrita no código por engano, o GitHub bloqueia o envio antes de acontecer.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Aviso de biblioteca desatualizada com falha conhecida</strong><span class="pill done">Ativo</span></div>
+      <p>Ligado hoje (11/09) nos 2 repositórios. Antes estava desligado — o sistema usa código de terceiros que pode ter brecha descoberta depois, isso avisa e corrige sozinho.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Histórico inteiro checado atrás de chave vazada</strong><span class="pill done">Ativo</span></div>
+      <p>Rodado hoje (11/09) em toda a história do projeto, não só o código atual. Resultado: nenhuma chave real encontrada.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Leitor automático de padrão de bug de segurança</strong><span class="pill plan">Falta fazer</span></div>
+      <p>Ferramenta (Semgrep) já configurada, mas a conexão caiu e ainda não voltou.</p>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Login e acesso</h2>
+    <p>Quem entra em cada parte do sistema.</p>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Central, Parceiro e Família nunca se cruzam</strong><span class="pill done">Ativo</span></div>
+      <p>Um parceiro nunca acessa o que é só da Central; uma família nunca acessa outro memorial.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Login com Google, cada um só a própria caixa</strong><span class="pill done">Ativo</span></div>
+      <p>Novo hoje (11/09). Só conta @legadodigital.net entra, e o acesso ao Gmail/Agenda/Drive de cada pessoa é isolado — nem outro admin vê.</p>
+    </div>
+  </div>
+
+  <div class="item">
+    <div class="conteudo">
+      <div class="titulo-linha"><strong>Chave de acesso ao Google sem criptografia extra</strong><span class="pill wip">Em andamento</span></div>
+      <p>O token que guarda o acesso ao e-mail de cada staff está protegido por permissão de banco, mas ainda não criptografado por cima.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
