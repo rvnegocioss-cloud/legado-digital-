@@ -818,8 +818,8 @@ export default function MapaPaginas() {
 
           <div className="seguranca-item">
             <div>
-              <div className="titulo-linha"><strong>Chave de acesso ao Google sem criptografia extra</strong><span className="pill wip">Em andamento</span></div>
-              <p>O token que guarda o acesso ao e-mail de cada staff está protegido por permissão de banco, mas ainda não criptografado por cima.</p>
+              <div className="titulo-linha"><strong>Chave de acesso ao Google criptografada</strong><span className="pill done">Ativo</span></div>
+              <p>O token que guarda o acesso ao e-mail de cada staff é criptografado antes de gravar no banco — mesmo quem tivesse acesso direto ao banco não leria o token puro.</p>
             </div>
           </div>
         </div>
