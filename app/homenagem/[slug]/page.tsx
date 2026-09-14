@@ -12,7 +12,7 @@ import { GateEmailAutorizado } from "@/components/public/GateEmailAutorizado";
 import { AcenderVela } from "@/components/public/AcenderVela";
 import { LivroAssinaturas } from "@/components/public/LivroAssinaturas";
 import { GaleriaFotos } from "@/components/public/GaleriaFotos";
-import GuiaTumulo from "@/components/public/GuiaTumuloCarregador";
+import GuiaTumuloModal from "@/components/public/GuiaTumuloModal";
 import AmbienteLateral, { type Ambiente, type CorLateral } from "@/components/public/AmbienteLateral";
 import GaleriaTopo from "@/components/public/GaleriaTopo";
 import ArvoreFamilia, { type ArvoreDados } from "@/components/public/ArvoreFamilia";
@@ -578,21 +578,22 @@ export default async function PerfilMemorialPage({
               >
                 Rota de carro até o cemitério
               </a>
-              <a
-                href="#localizacao"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "9px 16px",
-                  borderRadius: 8,
-                  border: "1px solid var(--mem-dourado, #C9A46A)",
-                  color: "var(--mem-dourado-claro, #dfc08a)",
-                  fontSize: 13,
-                  textDecoration: "none",
-                }}
-              >
-                Guia até o túmulo dentro do cemitério
-              </a>
+              <GuiaTumuloModal
+                cemiterioNome={localizacao.cemiterio_nome}
+                cemiterioLat={localizacao.cemiterio_lat}
+                cemiterioLng={localizacao.cemiterio_lng}
+                lapideLat={localizacao.lapide_lat}
+                lapideLng={localizacao.lapide_lng}
+                quadra={localizacao.quadra}
+                lote={localizacao.lote}
+                nomeCompleto={m.nome_completo}
+                fotoUrl={fotoAssinada}
+                ortoUrl={ortoAssinado}
+                ortoMinzoom={localizacao.orto_minzoom}
+                ortoMaxzoom={localizacao.orto_maxzoom}
+                ortoBounds={localizacao.orto_bounds}
+                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
+              />
             </div>
           )}
         </div>
@@ -664,37 +665,11 @@ export default async function PerfilMemorialPage({
             <MuralMemorias memorialId={m.id} memoriasIniciais={mural} />
           </section>
 
-        {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
-          <section id="localizacao" className="perfil-secao perfil-secao-midia">
-            <details className="perfil-mapa-retratil">
-                <summary className="perfil-titulo perfil-mapa-abrir">Como chegar ao túmulo</summary>
-            <GuiaTumulo
-                cemiterioNome={localizacao.cemiterio_nome}
-                cemiterioLat={localizacao.cemiterio_lat}
-                cemiterioLng={localizacao.cemiterio_lng}
-                lapideLat={localizacao.lapide_lat}
-                lapideLng={localizacao.lapide_lng}
-                quadra={localizacao.quadra}
-                lote={localizacao.lote}
-                nomeCompleto={m.nome_completo}
-                fotoUrl={fotoAssinada}
-                ortoUrl={ortoAssinado}
-                ortoMinzoom={localizacao.orto_minzoom}
-                ortoMaxzoom={localizacao.orto_maxzoom}
-                ortoBounds={localizacao.orto_bounds}
-                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
-              />
-              </details>
-            </section>
-          )}
-          {/* <details> não abre sozinho quando a âncora é acionada -- 4 linhas
-              resolvem sem transformar o hero inteiro em componente client. */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html:
-                "document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href=\"#localizacao\"]');if(!a)return;var d=document.querySelector('#localizacao details');if(d)d.open=true;});",
-            }}
-          />
+          {/* A seção "Como Chegar" que vivia aqui embaixo foi movida pro modal
+              que abre do botão no topo (GuiaTumuloModal) -- pedido do Rafael,
+              2026-09-11: ninguém achava rolando a página, tinha que clicar
+              2 vezes. O componente GuiaTumulo/GuiaTumuloCarregador em si
+              continua intocado, regra 17 -- só mudou onde é revelado. */}
 
           <section id="livro" className="perfil-secao">
             <h2 className="perfil-titulo">
