@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import GuiaTumulo from './GuiaTumuloCarregador'
 
@@ -31,20 +31,32 @@ interface Props {
 
 export default function GuiaTumuloModal(props: Props) {
   const [aberto, setAberto] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
-  // Esc fecha, e trava o scroll da página de fundo enquanto o modal tá
-  // aberto -- mesmo padrão já usado no visor de fotos (GaleriaTopo).
+  // Esc fecha, trava o scroll da página de fundo, e pede tela cheia de
+  // verdade -- no celular (uso real: gente andando no cemitério) a barra do
+  // navegador comendo espaço do mapa pequeno era o problema. Fullscreen API
+  // some com a barra onde o aparelho aceita (Android); o modal já cobre
+  // 100dvh mesmo sem isso, então funciona em qualquer aparelho (iOS não
+  // deixa um <div> pedir tela cheia, mas a área ocupada já é a tela toda).
   useEffect(() => {
     if (!aberto) return
     const antes = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    containerRef.current?.requestFullscreen?.().catch(() => {})
     function tecla(e: KeyboardEvent) {
       if (e.key === 'Escape') setAberto(false)
     }
+    function aoMudarFullscreen() {
+      if (!document.fullscreenElement) setAberto(false)
+    }
     window.addEventListener('keydown', tecla)
+    document.addEventListener('fullscreenchange', aoMudarFullscreen)
     return () => {
       document.body.style.overflow = antes
       window.removeEventListener('keydown', tecla)
+      document.removeEventListener('fullscreenchange', aoMudarFullscreen)
+      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {})
     }
   }, [aberto])
 
@@ -85,31 +97,27 @@ export default function GuiaTumuloModal(props: Props) {
 
       {aberto && (
         <div
+          ref={containerRef}
           role="dialog"
           aria-modal="true"
           aria-label={`Como chegar até ${nomeCompletoSeguro(props.nomeCompleto)}`}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setAberto(false)
-          }}
           style={{
             position: 'fixed',
             inset: 0,
             zIndex: 200,
+            width: '100vw',
+            height: '100dvh',
             background: 'rgba(6,14,20,0.92)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 20,
           }}
         >
           <div
             style={{
               width: '100%',
-              maxWidth: 960,
-              height: 'min(88vh, 760px)',
+              height: '100%',
               background: 'var(--mem-fundo-topo, #10222f)',
-              border: '1px solid rgba(201,164,106,0.25)',
-              borderRadius: 14,
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',

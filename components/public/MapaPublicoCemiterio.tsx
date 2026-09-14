@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, { Source, Layer, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import type { StyleSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useRouter } from 'next/navigation'
+import { Maximize2, Minimize2 } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
 import { normalizarOrtomosaico } from '@/lib/ortomosaico'
 import { estiloComOrtomosaico } from '@/lib/estiloSatelite'
@@ -62,9 +63,37 @@ export default function MapaPublicoCemiterio({
 }: Props) {
   const router = useRouter()
   const mapRef = useRef<MapRef | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const [hover, setHover] = useState<{ lng: number; lat: number; props: PinoProps } | null>(null)
   const [busca, setBusca] = useState('')
   const [semResultado, setSemResultado] = useState(false)
+  const [expandido, setExpandido] = useState(false)
+
+  // Tela cheia de verdade no celular -- o mapa pequeno inline não dava pra
+  // usar andando no cemitério. Fullscreen API some com a barra do navegador
+  // onde o aparelho aceita (Android); position:fixed cobrindo 100dvh é o
+  // reforço que funciona em qualquer aparelho (inclusive iOS, que não deixa
+  // um <div> pedir tela cheia).
+  useEffect(() => {
+    if (!expandido) return
+    const antes = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    containerRef.current?.requestFullscreen?.().catch(() => {})
+    function tecla(e: KeyboardEvent) {
+      if (e.key === 'Escape') setExpandido(false)
+    }
+    function aoMudarFullscreen() {
+      if (!document.fullscreenElement) setExpandido(false)
+    }
+    window.addEventListener('keydown', tecla)
+    document.addEventListener('fullscreenchange', aoMudarFullscreen)
+    return () => {
+      document.body.style.overflow = antes
+      window.removeEventListener('keydown', tecla)
+      document.removeEventListener('fullscreenchange', aoMudarFullscreen)
+      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {})
+    }
+  }, [expandido])
 
   const ortomosaico = useMemo(
     () => normalizarOrtomosaico({ url: ortoUrl, minzoom: ortoMinzoom, maxzoom: ortoMaxzoom, bounds: ortoBounds }),
@@ -161,7 +190,24 @@ export default function MapaPublicoCemiterio({
   }
 
   return (
-    <div className="rounded-xl border overflow-hidden" style={{ borderColor: 'rgba(201,164,106,0.2)' }}>
+    <div
+      ref={containerRef}
+      className={expandido ? 'overflow-hidden' : 'rounded-xl border overflow-hidden'}
+      style={
+        expandido
+          ? {
+              position: 'fixed',
+              inset: 0,
+              zIndex: 300,
+              width: '100vw',
+              height: '100dvh',
+              background: CORES.fundoBase,
+              display: 'flex',
+              flexDirection: 'column',
+            }
+          : { borderColor: 'rgba(201,164,106,0.2)' }
+      }
+    >
       {temMemoriais && (
         <div
           style={{
@@ -221,19 +267,20 @@ export default function MapaPublicoCemiterio({
         </div>
       )}
 
-      <Map
-        ref={mapRef}
-        onLoad={aoCarregarMapa}
-        initialViewState={{ longitude, latitude, zoom: ortomosaico ? 18 : 16 }}
-        mapStyle={estiloMapa as unknown as StyleSpecification}
-        style={{ height: 480, width: '100%' }}
-        interactiveLayerIds={['pinos-memorial']}
-        onMouseMove={aoMoverMouse}
-        onMouseLeave={() => setHover(null)}
-        onClick={aoClicarPino}
-        cursor={hover ? 'pointer' : 'grab'}
-      >
-        <NavigationControl visualizePitch showZoom position="top-right" />
+      <div style={{ position: 'relative', flex: expandido ? 1 : undefined, minHeight: 0 }}>
+        <Map
+          ref={mapRef}
+          onLoad={aoCarregarMapa}
+          initialViewState={{ longitude, latitude, zoom: ortomosaico ? 18 : 16 }}
+          mapStyle={estiloMapa as unknown as StyleSpecification}
+          style={{ height: expandido ? '100%' : 620, width: '100%' }}
+          interactiveLayerIds={['pinos-memorial']}
+          onMouseMove={aoMoverMouse}
+          onMouseLeave={() => setHover(null)}
+          onClick={aoClicarPino}
+          cursor={hover ? 'pointer' : 'grab'}
+        >
+          <NavigationControl visualizePitch showZoom position="top-right" />
 
         {temMemoriais && (
           <Source id="memoriais" type="geojson" data={memoriais}>
@@ -323,8 +370,36 @@ export default function MapaPublicoCemiterio({
             })()}
           </Popup>
         )}
-      </Map>
+        </Map>
 
+        <button
+          type="button"
+          onClick={() => setExpandido((v) => !v)}
+          aria-label={expandido ? 'Fechar mapa em tela cheia' : 'Abrir mapa em tela cheia'}
+          style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px',
+            borderRadius: 8,
+            border: `1px solid ${CORES.douradoBorda}`,
+            background: 'rgba(11,29,42,0.8)',
+            color: CORES.textoForte,
+            fontFamily: 'Georgia, serif',
+            fontSize: 12.5,
+            cursor: 'pointer',
+          }}
+        >
+          {expandido ? <Minimize2 size={14} strokeWidth={1.5} /> : <Maximize2 size={14} strokeWidth={1.5} />}
+          {expandido ? 'Fechar' : 'Tela cheia'}
+        </button>
+      </div>
+
+      {!expandido && (
       <div className="p-3 text-center" style={{ background: 'rgba(11,29,42,0.4)' }}>
         {temMemoriais ? (
           <>
@@ -351,6 +426,7 @@ export default function MapaPublicoCemiterio({
           <p style={{ fontSize: 11, color: CORES.textoFraco }}>Ainda não há memoriais publicados neste cemitério.</p>
         )}
       </div>
+      )}
     </div>
   )
 }
