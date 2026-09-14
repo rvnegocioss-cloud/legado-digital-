@@ -157,6 +157,24 @@ export default function GuiaTumuloModal(props: Props) {
                 borderBottom: '1px solid rgba(255,255,255,0.08)',
               }}
             >
+              <button
+                type="button"
+                onClick={() => setAberto(false)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'none',
+                  border: 0,
+                  color: 'rgba(255,255,255,0.75)',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  font: 'inherit',
+                  padding: '6px 4px',
+                }}
+              >
+                ← Voltar
+              </button>
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#fff' }}>
                 Como chegar até {props.nomeCompleto}
               </h3>
@@ -182,7 +200,15 @@ export default function GuiaTumuloModal(props: Props) {
             </div>
 
             <div ref={conteudoRef} className="gtm-mapa-full" style={{ flex: 1, minHeight: 0, padding: 14, overflowY: 'auto' }}>
-              {/* O GuiaTumulo (regra 17, intocado) nasce com o mapa numa
+              {/* O GuiaTumulo (regra 17, intocado) nasce com "Rota de carro"
+                  + o botão retrátil "Guia até o túmulo" + o mapa. Aqui dentro
+                  do modal os dois primeiros viram ruído: a rota de carro já
+                  tem botão próprio fora do modal (separado, pedido do
+                  Rafael), e o retrátil não faz sentido quando o mapa já abre
+                  sozinho em tela cheia. Escondidos só visualmente, via CSS
+                  escopado a este modal -- o componente protegido continua
+                  renderizando os dois por dentro, só não aparecem aqui.
+                  O GuiaTumulo (regra 17, intocado) nasce com o mapa numa
                   altura fixa pequena (480px) -- fazia sentido na seção de
                   baixo, mas aqui dentro do modal em tela cheia sobrava
                   espaço em volta e o mapa parecia cortado/pequeno. Em vez
@@ -191,7 +217,9 @@ export default function GuiaTumuloModal(props: Props) {
                   -- mudar lá quebraria aquela página), a regra abaixo mira
                   só o elemento do mapa por classe, só dentro deste modal. */}
               <style>{`
-                .gtm-mapa-full .maplibregl-map { height: calc(100dvh - 230px) !important; }
+                .gtm-mapa-full > div > a:first-child { display: none; }
+                .gtm-mapa-full > div > div > button:first-child { display: none; }
+                .gtm-mapa-full .maplibregl-map { height: calc(100dvh - 170px) !important; }
               `}</style>
               <GuiaTumulo
                 cemiterioNome={props.cemiterioNome}
