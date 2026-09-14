@@ -32,6 +32,7 @@ interface Props {
 export default function GuiaTumuloModal(props: Props) {
   const [aberto, setAberto] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const conteudoRef = useRef<HTMLDivElement | null>(null)
 
   // Esc fecha, trava o scroll da página de fundo, e pede tela cheia de
   // verdade -- no celular (uso real: gente andando no cemitério) a barra do
@@ -58,6 +59,30 @@ export default function GuiaTumuloModal(props: Props) {
       document.removeEventListener('fullscreenchange', aoMudarFullscreen)
       if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {})
     }
+  }, [aberto])
+
+  // O GuiaTumulo (intocado, regra 17) nasce com o mapa recolhido atrás de um
+  // botão próprio -- fazia sentido lá embaixo na página, mas aqui dentro do
+  // modal vira 1 clique pra abrir + 1 clique pra ver o mapa. Em vez de mexer
+  // no componente protegido, simulamos o clique dele mesmo assim que aparece
+  // no DOM (dynamic import ssr:false -- por isso o polling, não dá pra saber
+  // exatamente quando ele monta).
+  useEffect(() => {
+    if (!aberto) return
+    let clicado = false
+    const tentar = setInterval(() => {
+      if (clicado) return
+      const botoes = conteudoRef.current?.querySelectorAll('button') ?? []
+      for (const b of botoes) {
+        if (b.textContent?.includes('Guia até o túmulo dentro do cemitério')) {
+          b.click()
+          clicado = true
+          clearInterval(tentar)
+          break
+        }
+      }
+    }, 100)
+    return () => clearInterval(tentar)
   }, [aberto])
 
   // O link "Localização" do menu do topo apontava pra seção que não existe
@@ -156,7 +181,18 @@ export default function GuiaTumuloModal(props: Props) {
               </button>
             </div>
 
-            <div style={{ flex: 1, minHeight: 0, padding: 14, overflowY: 'auto' }}>
+            <div ref={conteudoRef} className="gtm-mapa-full" style={{ flex: 1, minHeight: 0, padding: 14, overflowY: 'auto' }}>
+              {/* O GuiaTumulo (regra 17, intocado) nasce com o mapa numa
+                  altura fixa pequena (480px) -- fazia sentido na seção de
+                  baixo, mas aqui dentro do modal em tela cheia sobrava
+                  espaço em volta e o mapa parecia cortado/pequeno. Em vez
+                  de mexer na altura dentro do componente (ele é
+                  compartilhado com a página clássica preservada, regra 21
+                  -- mudar lá quebraria aquela página), a regra abaixo mira
+                  só o elemento do mapa por classe, só dentro deste modal. */}
+              <style>{`
+                .gtm-mapa-full .maplibregl-map { height: calc(100dvh - 230px) !important; }
+              `}</style>
               <GuiaTumulo
                 cemiterioNome={props.cemiterioNome}
                 cemiterioLat={props.cemiterioLat}
