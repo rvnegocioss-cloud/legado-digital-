@@ -462,9 +462,16 @@ export default async function PerfilMemorialPage({
       <nav className="mem-container mem-nav-topo" style={estiloTopo.nav}>
         <div style={estiloTopo.navLinks}>
           {/* Sem isto o memorial era um beco: quem chega pelo QR Code não tinha
-              como conhecer o Legado Digital (regra 11). */}
-          <a href="/" style={{ ...estiloTopo.navLink, color: "var(--mem-dourado, #C9A46A)" }}>
-            ← Legado Digital
+              como conhecer o Legado Digital (regra 11). Logo real (regra 12),
+              mesmo tamanho usado no nav das outras páginas públicas
+              (busca/cemitérios/parceiro) -- aqui só tinha texto. */}
+          <a
+            href="/"
+            aria-label="Ir para o site do Legado Digital"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--mem-dourado, #C9A46A)" }}
+          >
+            <span style={{ fontSize: 15 }}>←</span>
+            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} style={{ height: 34, width: "auto" }} />
           </a>
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
           <a href="#timeline" style={estiloTopo.navLink}>Linha do Tempo</a>
@@ -490,11 +497,15 @@ export default async function PerfilMemorialPage({
       {banner && (
         <div
           aria-hidden
-          className="mem-capa-faixa"
+          className="mem-capa-faixa mem-container"
           style={{
+            margin: "0 auto",
+            padding: "0 20px",
             backgroundImage: `url(${banner.arquivo})`,
             backgroundSize: "cover",
             backgroundPosition: "center 62%",
+            backgroundOrigin: "content-box",
+            borderRadius: 16,
           }}
         >
           <div
