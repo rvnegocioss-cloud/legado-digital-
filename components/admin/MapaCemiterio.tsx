@@ -75,6 +75,20 @@ interface Homenagem {
   lapide_id: string | null
 }
 
+// Gaveta é a fonte de verdade do vínculo memorial↔jazigo (2026-09-15,
+// correção pedida pelo Rafael) -- homenagens.lapide_id continua existindo
+// (o "Como Chegar" público depende dele, regra 17) mas passa a ser
+// sincronizado automaticamente a partir da gaveta, nunca editado à mão.
+interface Gaveta {
+  id: string
+  lapide_id: string
+  codigo: string
+  linha: number
+  coluna: number
+  homenagem_id: string | null
+  homenagens: { id: string; nome_completo: string; foto_url: string | null; slug: string | null } | null
+}
+
 // Ancoras visuais do mapa impresso da prefeitura (Capela, Administracao,
 // Sanitarios, Velorio...). Servem pra casar a numeracao oficial de quadra
 // com a geometria real do ortomosaico -- sem elas, so da pra inferir a
@@ -150,6 +164,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [cemiterio, setCemiterio] = useState<Cemiterio | null>(null)
   const [lapides, setLapides] = useState<Lapide[]>([])
   const [homenagens, setHomenagens] = useState<Homenagem[]>([])
+  const [gavetas, setGavetas] = useState<Gaveta[]>([])
   const [quadras, setQuadras] = useState<Quadra[]>([])
   const [filas, setFilas] = useState<Fila[]>([])
   const [ruas, setRuas] = useState<Rua[]>([])
@@ -297,7 +312,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
   async function carregar() {
     setCarregando(true)
-    const [{ data: c }, { data: l }, { data: h }, { data: geo }, { data: pr }] = await Promise.all([
+    const [{ data: c }, { data: l }, { data: h }, { data: geo }, { data: pr }, { data: gv }] = await Promise.all([
       supabase
         .from('cemiterios')
         .select('id, nome, latitude, longitude, ortomosaico_url, ortomosaico_minzoom, ortomosaico_maxzoom, ortomosaico_bounds, entrada_latitude, entrada_longitude')
@@ -322,11 +337,19 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .select('id, nome, latitude, longitude, geometria_revisada')
         .eq('cemiterio_id', cemiterioId)
         .order('nome'),
+      // Gaveta é a fonte de verdade do vínculo (2026-09-15) -- é daqui que
+      // vem a lista de TODOS os memoriais de um jazigo, não só o primeiro.
+      supabase
+        .from('gavetas')
+        .select('id, lapide_id, codigo, linha, coluna, homenagem_id, homenagens(id, nome_completo, foto_url, slug), lapides!inner(cemiterio_id)')
+        .eq('lapides.cemiterio_id', cemiterioId)
+        .order('linha', { ascending: true }),
     ])
     setCemiterio(c)
     setLapides(l || [])
     setHomenagens(h || [])
     setPontosRef(pr || [])
+    setGavetas((gv as any) || [])
 
     const geoData = geo as {
       quadras?: { features: { properties: { id: string; numero: number; nome: string | null; situacao: string; geometria_revisada: boolean }; geometry: Quadra['poligono'] }[] }
@@ -411,6 +434,31 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const lapidesComCoordenada = lapides.filter((l) => l.latitude != null && l.longitude != null)
   const lapidesSemCoordenada = lapides.filter((l) => l.latitude == null || l.longitude == null)
   const homenagemPorLapide = new Map(homenagens.map((h) => [h.lapide_id, h]))
+
+  // Gaveta é a fonte de verdade (2026-09-15) -- um jazigo pode ter vários
+  // memoriais (uma gaveta cada), então isso é uma lista, não um único valor
+  // como homenagemPorLapide acima (que só mostrava o último vinculado).
+  const gavetasPorJazigo = useMemo(() => {
+    const m = new Map<string, Gaveta[]>()
+    for (const g of gavetas) {
+      const lista = m.get(g.lapide_id) || []
+      lista.push(g)
+      m.set(g.lapide_id, lista)
+    }
+    for (const lista of m.values()) lista.sort((a, b) => a.linha - b.linha)
+    return m
+  }, [gavetas])
+
+  const memoriaisPorJazigo = useMemo(() => {
+    const m = new Map<string, { gaveta: Gaveta; homenagem: NonNullable<Gaveta['homenagens']> }[]>()
+    for (const g of gavetas) {
+      if (!g.homenagem_id || !g.homenagens) continue
+      const lista = m.get(g.lapide_id) || []
+      lista.push({ gaveta: g, homenagem: g.homenagens })
+      m.set(g.lapide_id, lista)
+    }
+    return m
+  }, [gavetas])
 
   // Memoriais ja vinculados, agrupados por fileira -- o painel da quadra passa a
   // mostrar "Tumulo 11 -- Carlos Saraiva" em vez de so a contagem de tumulos.
@@ -863,13 +911,21 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   }
 
   // Cadastro minimo do memorial, feito em campo com o celular na mao: so o
-  // nome completo. Nasce ja vinculado ao tumulo clicado e com slug
-  // definitivo (nunca 'rascunho-', que a limpeza automatica de 2h apaga).
+  // nome completo. Nasce ja vinculado a uma gaveta livre do jazigo (a
+  // primeira disponivel -- fluxo rapido de campo, sem pedir escolha) e com
+  // slug definitivo (nunca 'rascunho-', que a limpeza automatica de 2h apaga).
+  // O campo direto (homenagens.lapide_id) e sincronizado junto, automatico
+  // -- ninguem mais escreve nele a mao (2026-09-15, gaveta e a fonte real).
   async function salvarCadastroMemorial() {
     if (!cadastroMemorial) return
     const nome = cadastroMemorial.nome.trim()
     if (!nome) {
       setMsg('Nome completo é obrigatório.')
+      return
+    }
+    const gavetaLivre = (gavetasPorJazigo.get(cadastroMemorial.lapide.id) || []).find((g) => !g.homenagem_id)
+    if (!gavetaLivre) {
+      setMsg('Esse jazigo não tem gaveta livre — crie mais uma em Jazigos → Gavetas antes de cadastrar.')
       return
     }
 
@@ -893,40 +949,77 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
     if (error) {
       setMsg(error.message)
-    } else {
-      setMsg(
-        `Memorial de ${nome} criado no túmulo ${cadastroMemorial.lapide.identificacao}. ` +
-          (cadastroMemorial.preenchidoPor === 'familia'
-            ? 'Aguardando a família preencher o resto.'
-            : 'Falta completar os dados — aparece no alerta do Dashboard.')
-      )
-      setCadastroMemorial(null)
-      await carregar()
-      if (data) router.push(`/admin/memoriais/${data.id}`)
-    }
-    setSalvando(false)
-  }
-
-  async function vincularMemorial(memorialId: string, nomeMemorial: string, jaTinhaLapide: boolean) {
-    if (!vincularEm) return
-    if (
-      jaTinhaLapide &&
-      !confirm(`"${nomeMemorial}" já está vinculado a outro túmulo. Mover ele pra ${vincularEm.identificacao}?`)
-    ) {
+      setSalvando(false)
       return
     }
 
+    const { error: erroGaveta } = await supabase.from('gavetas').update({ homenagem_id: data.id }).eq('id', gavetaLivre.id)
+    if (erroGaveta) {
+      setMsg(`Memorial criado, mas não consegui vincular na gaveta: ${erroGaveta.message}`)
+      setSalvando(false)
+      return
+    }
+
+    setMsg(
+      `Memorial de ${nome} criado no jazigo ${cadastroMemorial.lapide.identificacao} (${gavetaLivre.codigo}). ` +
+        (cadastroMemorial.preenchidoPor === 'familia'
+          ? 'Aguardando a família preencher o resto.'
+          : 'Falta completar os dados — aparece no alerta do Dashboard.')
+    )
+    setCadastroMemorial(null)
+    await carregar()
+    router.push(`/admin/memoriais/${data.id}`)
+    setSalvando(false)
+  }
+
+  // Escolha da gaveta antes de confirmar o vinculo -- a familia/staff decide
+  // o numero, o sistema so sugere a proxima livre (pedido do Rafael,
+  // 2026-09-15). memorialEscolhido fica em espera ate escolher a gaveta.
+  const [memorialEscolhido, setMemorialEscolhido] = useState<{ id: string; nome: string; jaTinhaLapide: boolean } | null>(null)
+
+  async function vincularMemorial(memorialId: string, nomeMemorial: string, gavetaId: string) {
+    if (!vincularEm) return
     setSalvando(true)
     setMsg('')
+    // Gaveta primeiro, campo direto sincronizado logo depois -- os dois
+    // sempre juntos, nunca um sem o outro (causa raiz do bug de 15/09).
+    const { error: erroGaveta } = await supabase.from('gavetas').update({ homenagem_id: memorialId }).eq('id', gavetaId)
+    if (erroGaveta) {
+      setMsg(erroGaveta.message)
+      setSalvando(false)
+      return
+    }
     const { error } = await supabase.from('homenagens').update({ lapide_id: vincularEm.id }).eq('id', memorialId)
     if (error) setMsg(error.message)
     else {
-      setMsg(`"${nomeMemorial}" vinculado ao túmulo ${vincularEm.identificacao}.`)
+      setMsg(`"${nomeMemorial}" vinculado ao jazigo ${vincularEm.identificacao}.`)
       setVincularEm(null)
+      setMemorialEscolhido(null)
       setBuscaVinculo('')
       setResultadosVinculo([])
       await carregar()
     }
+    setSalvando(false)
+  }
+
+  // Desvincular: limpa a gaveta e o campo direto junto -- nunca um sem o
+  // outro, mesma regra do vincular.
+  async function desvincularMemorial(gavetaId: string, nomeMemorial: string) {
+    if (!confirm(`Desvincular "${nomeMemorial}" deste jazigo?`)) return
+    setSalvando(true)
+    setMsg('')
+    const gaveta = gavetas.find((g) => g.id === gavetaId)
+    const { error: erroGaveta } = await supabase.from('gavetas').update({ homenagem_id: null }).eq('id', gavetaId)
+    if (erroGaveta) {
+      setMsg(erroGaveta.message)
+      setSalvando(false)
+      return
+    }
+    if (gaveta?.homenagem_id) {
+      await supabase.from('homenagens').update({ lapide_id: null }).eq('id', gaveta.homenagem_id)
+    }
+    setMsg(`"${nomeMemorial}" desvinculado.`)
+    await carregar()
     setSalvando(false)
   }
 
@@ -2455,65 +2548,95 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   onClose={() => setLapideSelecionada(null)}
                   closeButton
                 >
-                  <div style={{ minWidth: 180 }}>
+                  <div style={{ minWidth: 200 }}>
                     {(() => {
-                      const h = homenagemPorLapide.get(lapideSelecionada.id)
+                      // Jazigo pode ter vários memoriais (uma gaveta cada) --
+                      // a lista vem de gavetas, não mais de um único campo
+                      // (2026-09-15, correção pedida pelo Rafael).
+                      const memoriaisDoJazigo = memoriaisPorJazigo.get(lapideSelecionada.id) || []
+                      const gavetasLivres = (gavetasPorJazigo.get(lapideSelecionada.id) || []).filter((g) => !g.homenagem_id)
                       return (
                         <>
                           <p style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
-                            {lapideSelecionada.identificacao}
+                            Jazigo {lapideSelecionada.identificacao}
                             {lapideSelecionada.quadra && ` · Q${lapideSelecionada.quadra}`}
                             {lapideSelecionada.lote && ` L${lapideSelecionada.lote}`}
                           </p>
-                          {h ? (
-                            <p style={{ fontSize: 12, margin: '4px 0' }}>{h.nome_completo}</p>
-                          ) : (
-                            <>
-                              <p style={{ fontSize: 11, color: '#888', margin: '4px 0 6px' }}>Sem memorial vinculado</p>
-                              {editavel && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 4 }}>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setCadastroMemorial({ lapide: lapideSelecionada, nome: '', preenchidoPor: 'familia' })
-                                      setLapideSelecionada(null)
-                                    }}
-                                    style={{
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      color: '#a15c00',
-                                      background: 'none',
-                                      border: 'none',
-                                      padding: 0,
-                                      textAlign: 'left',
-                                      cursor: 'pointer',
-                                    }}
-                                  >
-                                    + Criar memorial aqui
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setVincularEm(lapideSelecionada)
-                                      setBuscaVinculo('')
-                                      setResultadosVinculo([])
-                                      setLapideSelecionada(null)
-                                    }}
-                                    style={{
-                                      fontSize: 12,
-                                      color: '#0B5FFF',
-                                      background: 'none',
-                                      border: 'none',
-                                      padding: 0,
-                                      textAlign: 'left',
-                                      cursor: 'pointer',
-                                    }}
-                                  >
-                                    Vincular memorial existente
-                                  </button>
+
+                          {memoriaisDoJazigo.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '6px 0' }}>
+                              {memoriaisDoJazigo.map(({ gaveta, homenagem }) => (
+                                <div key={gaveta.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                  <div>
+                                    <a href={`/admin/memoriais/${homenagem.id}`} style={{ fontSize: 12, fontWeight: 600, color: 'inherit' }}>
+                                      {homenagem.nome_completo}
+                                    </a>
+                                    <p style={{ fontSize: 10, color: '#888', margin: 0 }}>{gaveta.codigo}</p>
+                                  </div>
+                                  {editavel && (
+                                    <button
+                                      type="button"
+                                      onClick={() => desvincularMemorial(gaveta.id, homenagem.nome_completo)}
+                                      style={{ fontSize: 10, color: '#c00', background: 'none', border: 'none', padding: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                    >
+                                      Desvincular
+                                    </button>
+                                  )}
                                 </div>
-                              )}
-                            </>
+                              ))}
+                            </div>
+                          ) : (
+                            <p style={{ fontSize: 11, color: '#888', margin: '4px 0 6px' }}>Sem memorial vinculado</p>
+                          )}
+
+                          {editavel && gavetasLivres.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 4 }}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCadastroMemorial({ lapide: lapideSelecionada, nome: '', preenchidoPor: 'familia' })
+                                  setLapideSelecionada(null)
+                                }}
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  color: '#a15c00',
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: 0,
+                                  textAlign: 'left',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                + Criar memorial aqui
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setVincularEm(lapideSelecionada)
+                                  setMemorialEscolhido(null)
+                                  setBuscaVinculo('')
+                                  setResultadosVinculo([])
+                                  setLapideSelecionada(null)
+                                }}
+                                style={{
+                                  fontSize: 12,
+                                  color: '#0B5FFF',
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: 0,
+                                  textAlign: 'left',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Vincular memorial existente
+                              </button>
+                            </div>
+                          )}
+                          {editavel && gavetasLivres.length === 0 && (
+                            <p style={{ fontSize: 10, color: '#888', margin: '4px 0' }}>
+                              Sem gaveta livre — crie mais uma em Jazigos → Gavetas.
+                            </p>
                           )}
 
                           {lapideSelecionada.foto_face_url && (
@@ -2569,11 +2692,6 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           )}
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-                            {h && (
-                              <a href={`/admin/memoriais/${h.id}`} style={{ fontSize: 12, color: '#0B5FFF' }}>
-                                Abrir memorial →
-                              </a>
-                            )}
                             <a
                               href={
                                 modo === 'leitura'
@@ -2656,6 +2774,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                             type="button"
                             onClick={() => {
                               setVincularEm(menuContexto.lapide)
+                              setMemorialEscolhido(null)
                               setBuscaVinculo('')
                               setResultadosVinculo([])
                               setMenuContexto(null)
@@ -2717,12 +2836,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               </>
             )}
 
-            {vincularEm && (
+            {vincularEm && !memorialEscolhido && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
                 <div className="w-full max-w-sm rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-700)] p-4">
                   <h3 className="text-sm font-semibold text-white mb-1">Vincular memorial existente</h3>
                   <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
-                    Busca no cadastro pelo nome do homenageado e liga ele ao túmulo {vincularEm.identificacao}.
+                    Busca no cadastro pelo nome do homenageado e liga ele ao jazigo {vincularEm.identificacao}.
                   </p>
 
                   <input
@@ -2752,13 +2871,21 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                             <button
                               type="button"
                               disabled={salvando}
-                              onClick={() => vincularMemorial(m.id, m.nome_completo, m.lapide_id != null)}
+                              onClick={() => {
+                                if (
+                                  m.lapide_id != null &&
+                                  !confirm(`"${m.nome_completo}" já está vinculado a outro jazigo. Mover ele pra ${vincularEm.identificacao}?`)
+                                ) {
+                                  return
+                                }
+                                setMemorialEscolhido({ id: m.id, nome: m.nome_completo, jaTinhaLapide: m.lapide_id != null })
+                              }}
                               className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
                             >
                               <span className="text-[var(--tema-zinc-200)]">{m.nome_completo}</span>
                               {m.lapide_id && (
                                 <span className="block text-[10px]" style={{ color: '#fbbf24' }}>
-                                  já está em outro túmulo — vincular aqui vai movê-lo
+                                  já está em outro jazigo — vincular aqui vai movê-lo
                                 </span>
                               )}
                             </button>
@@ -2774,6 +2901,43 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
                   >
                     Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Passo 2: escolher em qual gaveta -- a família/staff decide o
+                número, o sistema só sugere a próxima livre (pedido do
+                Rafael, 2026-09-15). */}
+            {vincularEm && memorialEscolhido && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                <div className="w-full max-w-sm rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-700)] p-4">
+                  <h3 className="text-sm font-semibold text-white mb-1">Em qual gaveta?</h3>
+                  <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
+                    &quot;{memorialEscolhido.nome}&quot; no jazigo {vincularEm.identificacao}.
+                  </p>
+                  <div className="flex flex-col gap-1.5 mb-3">
+                    {(gavetasPorJazigo.get(vincularEm.id) || []).map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        disabled={salvando || !!g.homenagem_id}
+                        onClick={() => vincularMemorial(memorialEscolhido.id, memorialEscolhido.nome, g.id)}
+                        className="w-full text-left text-xs px-2 py-1.5 rounded border border-[var(--tema-zinc-700)] hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
+                      >
+                        <span className="text-[var(--tema-zinc-200)]">{g.codigo}</span>
+                        {g.homenagem_id && g.homenagens && (
+                          <span className="block text-[10px] text-[var(--tema-zinc-500)]">ocupada — {g.homenagens.nome_completo}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMemorialEscolhido(null)}
+                    className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
+                  >
+                    Voltar
                   </button>
                 </div>
               </div>
