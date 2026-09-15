@@ -194,6 +194,36 @@ const estiloTopo = {
     borderRadius: 4,
     whiteSpace: "nowrap",
   },
+  // Faixa 1 (site nav) -- mesmo visual da faixa sticky de sempre, só sem
+  // prender no topo ao rolar (regra do wireframe: "a faixa gruda no topo,
+  // o cabeçalho do site não").
+  navTopo: {
+    margin: "0 auto",
+    padding: "12px 20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 14,
+    borderBottom: `1px solid ${CORES.douradoBorda}`,
+    background: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+  },
+  // Faixa 2 (migalhas)
+  migalhas: {
+    margin: "0 auto",
+    padding: "9px 20px",
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 6,
+    fontSize: 11.5,
+    color: CORES.textoFraco,
+    borderBottom: `1px solid ${CORES.douradoBorda}`,
+  },
+  migalhaLink: { color: CORES.textoFraco, textDecoration: "none" },
+  migalhaSep: { color: CORES.textoFraco, opacity: 0.5 },
+  migalhaAtual: { color: CORES.textoFraco },
+  migalhaAtualForte: { color: v(VAR_DOURADO_CLARO, CORES.douradoClaro), fontWeight: 600 },
   hero: {
     margin: "0 auto",
     padding: "64px 20px 40px",
@@ -461,23 +491,56 @@ export default async function PerfilMemorialPage({
 
       <SeletorTema temaInicial={m.tema} />
 
+      {/* Faixa 1: nav do site -- copiado do wireframe do Pedro (14/09/2026),
+          pra quem chega pelo QR conhecer o resto do site sem sair do
+          memorial. Não gruda ao rolar (só a faixa 3 gruda). Logo/voltar
+          intocados (VoltarLink), só ganharam companhia ao lado. */}
+      <nav className="mem-container mem-nav-topo" style={estiloTopo.navTopo}>
+        <VoltarLink
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--mem-dourado, #C9A46A)" }}
+          logoStyle={{ height: 64, width: "auto" }}
+        />
+        <div style={estiloTopo.navLinks}>
+          <a href="/busca" style={estiloTopo.navLink}>Buscar memorial</a>
+          <a href="/cemiterios" style={estiloTopo.navLink}>Cemitérios</a>
+          <a href="/#como-funciona" style={estiloTopo.navLink}>Como funciona</a>
+          <a href="/parceiro/login" style={estiloTopo.navLink}>Para parceiros</a>
+        </div>
+      </nav>
+
+      {/* Faixa 2: migalhas -- caminho de volta pra quem chegou direto pelo QR
+          e nunca esteve no site. Nível de jazigo fica de fora até
+          /jazigo/[slug] existir de verdade (plano do wireframe, não
+          construído ainda) -- sem linkar pra rota que não responde. */}
+      <div className="mem-container" style={estiloTopo.migalhas}>
+        <a href="/" style={estiloTopo.migalhaLink}>Início</a>
+        {localizacao?.cemiterio_nome ? (
+          <>
+            <span style={estiloTopo.migalhaSep}>›</span>
+            <a href="/cemiterios" style={estiloTopo.migalhaLink}>Cemitérios</a>
+            <span style={estiloTopo.migalhaSep}>›</span>
+            <span style={estiloTopo.migalhaAtual}>{localizacao.cemiterio_nome}</span>
+          </>
+        ) : (
+          <>
+            <span style={estiloTopo.migalhaSep}>›</span>
+            <a href="/busca" style={estiloTopo.migalhaLink}>Memoriais</a>
+          </>
+        )}
+        <span style={estiloTopo.migalhaSep}>›</span>
+        <span style={estiloTopo.migalhaAtualForte}>{m.nome_completo}</span>
+      </div>
+
+      {/* Faixa 3: sub-navegação da própria página -- a faixa sticky de
+          sempre, só com os rótulos do wireframe (Uma vida / Fotos) e as
+          ações de participação reunidas do mesmo lado. */}
       <nav className="mem-container mem-nav-topo" style={estiloTopo.nav}>
         <div style={estiloTopo.navLinks}>
-          {/* Sem isto o memorial era um beco: quem chega pelo QR Code não tinha
-              como conhecer o Legado Digital (regra 11). Logo real (regra 12),
-              mesmo tamanho usado no nav das outras páginas públicas
-              (busca/cemitérios/parceiro). Volta pra página anterior de
-              verdade (busca, mapa do cemitério) em vez de sempre pro site --
-              pedido do Rafael. */}
-          <VoltarLink
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--mem-dourado, #C9A46A)" }}
-            logoStyle={{ height: 86, width: "auto" }}
-          />
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
-          <a href="#timeline" style={estiloTopo.navLink}>Linha do Tempo</a>
+          <a href="#timeline" style={estiloTopo.navLink}>Uma vida</a>
+          <a href="#galeria" style={estiloTopo.navLink}>Fotos</a>
           <a href="#homenagens" style={estiloTopo.navLink}>Homenagens</a>
           <a href="#livro" style={estiloTopo.navLink}>Livro</a>
-          <a href="#galeria" style={estiloTopo.navLink}>Fotos e Vídeos</a>
           <a href="#localizacao" style={estiloTopo.navLink}>Localização</a>
         </div>
         <div style={estiloTopo.navAcoes}>
