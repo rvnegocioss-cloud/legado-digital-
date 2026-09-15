@@ -27,6 +27,10 @@ interface Props {
   ortoMaxzoom: number | null
   ortoBounds: number[] | null
   rotaCoordenadas: [number, number][] | null
+  // Estilo do botão-gatilho, opcional -- default é o pill de sempre. O card
+  // de identidade do memorial (2026-09-15) passa o próprio estilo pra ficar
+  // igual ao botão "Rota de carro" ao lado, sem duplicar o modal inteiro.
+  estiloBotao?: React.CSSProperties
 }
 
 export default function GuiaTumuloModal(props: Props) {
@@ -104,18 +108,20 @@ export default function GuiaTumuloModal(props: Props) {
       <button
         type="button"
         onClick={() => setAberto(true)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          padding: '9px 16px',
-          borderRadius: 8,
-          border: '1px solid var(--mem-dourado, #C9A46A)',
-          background: 'transparent',
-          color: 'var(--mem-dourado-claro, #dfc08a)',
-          fontSize: 13,
-          font: 'inherit',
-          cursor: 'pointer',
-        }}
+        style={
+          props.estiloBotao ?? {
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '9px 16px',
+            borderRadius: 8,
+            border: '1px solid var(--mem-dourado, #C9A46A)',
+            background: 'transparent',
+            color: 'var(--mem-dourado-claro, #dfc08a)',
+            fontSize: 13,
+            font: 'inherit',
+            cursor: 'pointer',
+          }
+        }
       >
         Guia até o túmulo dentro do cemitério
       </button>

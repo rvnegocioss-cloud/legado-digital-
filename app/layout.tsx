@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Caveat } from "next/font/google";
+import { Inter, Playfair_Display, Caveat, Cinzel } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -11,6 +11,13 @@ const inter = Inter({
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif",
+});
+
+// Só pro card de identidade do hero do memorial (app/homenagem/[slug]/page.tsx),
+// copiado do wireframe do Pedro (14/09/2026) -- não usada em mais nada.
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  variable: "--font-cinzel",
 });
 
 // Só pra assinatura cursiva do Livro de Assinaturas — não usada em mais nada da página.
@@ -41,7 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${playfair.variable} ${caveat.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} ${caveat.variable} ${cinzel.variable} h-full antialiased`}
     >
       <head>
         <link rel="icon" href="/favicon.ico" />

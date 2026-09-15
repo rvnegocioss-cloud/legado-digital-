@@ -296,6 +296,78 @@ const estiloTopo = {
     maxWidth: 540,
     textAlign: "center" as const,
   },
+
+  // ---- Card de identidade (copiado do wireframe do Pedro, 14/09/2026) ----
+  // Substitui o hero solto de antes: foto + nome + dados dentro de uma
+  // caixa com borda, sem o glow atrás da foto. Os 2 botões de baixo (que
+  // no protótipo eram vela/homenagem) viram Rota/Guia -- essas ações já
+  // existem em seções próprias mais abaixo na página, intocadas.
+  fichaCard: {
+    width: "100%",
+    maxWidth: 360,
+    background: "linear-gradient(180deg, rgba(201,164,106,0.05), transparent 40%), rgba(255,255,255,0.03)",
+    border: `1px solid ${CORES.douradoBorda}`,
+    borderRadius: 10,
+    padding: "28px 24px 24px",
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    textAlign: "center" as const,
+  },
+  fotoRingSemGlow: { position: "relative" as const, width: 190, height: 190, marginBottom: 18 },
+  eyebrowFicha: {
+    fontSize: 10.5,
+    textTransform: "uppercase" as const,
+    letterSpacing: 1.8,
+    color: CORES.textoFraco,
+    margin: "0 0 6px",
+  },
+  nomeFicha: {
+    fontFamily: "var(--font-cinzel), Georgia, serif",
+    fontSize: 23,
+    fontWeight: 600,
+    color: CORES.textoForte,
+    margin: "0 0 6px",
+    lineHeight: 1.2,
+  },
+  papeisFicha: { fontSize: 12, letterSpacing: 0.4, color: v(VAR_DOURADO_CLARO, CORES.douradoClaro), margin: "0 0 10px" },
+  anosFicha: { fontSize: 15, color: v(VAR_DOURADO, CORES.dourado), margin: "0 0 4px" },
+  cidadeFicha: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 5,
+    justifyContent: "center" as const,
+    fontSize: 12.5,
+    color: CORES.textoFraco,
+    margin: "0 0 14px",
+  },
+  fraseFicha: { fontStyle: "italic" as const, fontSize: 14, color: CORES.textoCorpo, margin: "0 0 18px", lineHeight: 1.5 },
+  botoesFicha: { display: "flex", flexDirection: "column" as const, gap: 8, width: "100%" },
+  botaoFichaPrimario: {
+    display: "block",
+    textAlign: "center" as const,
+    padding: "11px 14px",
+    borderRadius: 5,
+    fontSize: 13,
+    fontWeight: 600,
+    textDecoration: "none",
+    background: v(VAR_DOURADO, CORES.dourado),
+    color: v(VAR_FUNDO_TOPO, CORES.fundoTopo),
+  },
+  botaoFichaSecundario: {
+    display: "block",
+    width: "100%",
+    textAlign: "center" as const,
+    padding: "11px 14px",
+    borderRadius: 5,
+    fontSize: 13,
+    fontWeight: 600,
+    border: `1px solid ${v(VAR_DOURADO, CORES.dourado)}`,
+    background: "transparent",
+    color: v(VAR_DOURADO_CLARO, CORES.douradoClaro),
+    cursor: "pointer",
+    font: "inherit",
+  },
 } as const;
 
 export default async function PerfilMemorialPage({
@@ -569,90 +641,74 @@ export default async function PerfilMemorialPage({
             <div aria-hidden className="mem-capa-fundo mem-capa-veu" />
           </>
         )}
-        <div className="mem-hero-ring" style={estiloTopo.fotoGlowWrap}>
-          <div style={estiloTopo.fotoGlow} />
-          <div style={estiloTopo.fotoRing}>
-            <div style={estiloTopo.fotoInner}>
-              {fotoAssinada ? (
-                <FotoRetratoTelaCheia src={fotoAssinada} alt={m.nome_completo} style={estiloTopo.foto} />
-              ) : (
-                <span style={estiloTopo.monograma}>{iniciais}</span>
-              )}
-            </div>
-          </div>
-        </div>
-
+        {/* Card de identidade -- copiado do wireframe do Pedro (14/09/2026),
+            confirmado com o Rafael por print anotado: foto sem glow, nome em
+            Cinzel menor, papéis em texto puro (sem pill), botões de baixo
+            viram Rota/Guia (vela e homenagem continuam nas seções próprias
+            mais abaixo, intocadas). */}
         <div className="mem-hero-texto">
-          <div style={estiloTopo.eyebrowLinha}>
-            <span style={estiloTopo.hairlineCurta} />
-            <span style={estiloTopo.eyebrow}>Em Memória</span>
-            <span style={estiloTopo.hairlineCurta} />
+          <div style={estiloTopo.fichaCard}>
+            <div style={estiloTopo.fotoRingSemGlow}>
+              <div style={estiloTopo.fotoRing}>
+                <div style={estiloTopo.fotoInner}>
+                  {fotoAssinada ? (
+                    <FotoRetratoTelaCheia src={fotoAssinada} alt={m.nome_completo} style={estiloTopo.foto} />
+                  ) : (
+                    <span style={estiloTopo.monograma}>{iniciais}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <p style={estiloTopo.eyebrowFicha}>Em memória de</p>
+            <h1 style={estiloTopo.nomeFicha}>{m.nome_completo}</h1>
+            {Array.isArray(m.vinculos) && m.vinculos.length > 0 && (
+              <p style={estiloTopo.papeisFicha}>{m.vinculos.join(" · ")}</p>
+            )}
+            {anos && <p style={estiloTopo.anosFicha}>{anos}</p>}
+            {m.cidade && (
+              <p style={estiloTopo.cidadeFicha}>
+                <MapPin size={13} strokeWidth={1.5} />
+                <span>{m.cidade}</span>
+              </p>
+            )}
+            {m.frase_preferida && (
+              <p style={estiloTopo.fraseFicha}>&ldquo;{m.frase_preferida}&rdquo;</p>
+            )}
+
+            {/* Os mesmos dois caminhos que já existem na seção Localização, só
+                que puxados pro topo -- lá embaixo ninguém achava. A lógica do
+                mapa/rota continua intocada (regra 17): aqui é só atalho. */}
+            {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
+              <div style={estiloTopo.botoesFicha}>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${localizacao.cemiterio_lat},${localizacao.cemiterio_lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={estiloTopo.botaoFichaPrimario}
+                >
+                  Rota de carro até o cemitério
+                </a>
+                <GuiaTumuloModal
+                  cemiterioNome={localizacao.cemiterio_nome}
+                  cemiterioLat={localizacao.cemiterio_lat}
+                  cemiterioLng={localizacao.cemiterio_lng}
+                  lapideLat={localizacao.lapide_lat}
+                  lapideLng={localizacao.lapide_lng}
+                  quadra={localizacao.quadra}
+                  lote={localizacao.lote}
+                  nomeCompleto={m.nome_completo}
+                  fotoUrl={fotoAssinada}
+                  ortoUrl={ortoAssinado}
+                  ortoMinzoom={localizacao.orto_minzoom}
+                  ortoMaxzoom={localizacao.orto_maxzoom}
+                  ortoBounds={localizacao.orto_bounds}
+                  rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
+                  estiloBotao={estiloTopo.botaoFichaSecundario}
+                />
+              </div>
+            )}
           </div>
-
-          <h1 style={estiloTopo.nome}>{m.nome_completo}</h1>
-          {Array.isArray(m.vinculos) && m.vinculos.length > 0 && (
-            <div style={estiloTopo.vinculosWrap}>
-              {m.vinculos.map((x) => (
-                <span key={x} style={estiloTopo.vinculoBadge}>{x}</span>
-              ))}
-            </div>
-          )}
-          {anos && <div style={estiloTopo.anos}>{anos}</div>}
-          {m.cidade && (
-            <div style={estiloTopo.cidade}>
-              <MapPin size={14} strokeWidth={1.5} />
-              <span>{m.cidade}</span>
-            </div>
-          )}
-
-          {m.frase_preferida && (
-            <div style={estiloTopo.fraseWrap}>
-              <span style={estiloTopo.hairlineCurta} />
-              <blockquote style={estiloTopo.frase}>&ldquo;{m.frase_preferida}&rdquo;</blockquote>
-            </div>
-          )}
-
-          {/* Os mesmos dois caminhos que já existem na seção Localização, só
-              que puxados pro topo -- lá embaixo ninguém achava. A lógica do
-              mapa/rota continua intocada (regra 17): aqui é só atalho. */}
-          {localizacao?.cemiterio_lat != null && localizacao?.cemiterio_lng != null && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 18, alignItems: "flex-start" }}>
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${localizacao.cemiterio_lat},${localizacao.cemiterio_lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  padding: "9px 16px",
-                  borderRadius: 8,
-                  background: "var(--mem-dourado, #C9A46A)",
-                  color: "var(--mem-fundo-base, #0B1D2A)",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  textDecoration: "none",
-                }}
-              >
-                Rota de carro até o cemitério
-              </a>
-              <GuiaTumuloModal
-                cemiterioNome={localizacao.cemiterio_nome}
-                cemiterioLat={localizacao.cemiterio_lat}
-                cemiterioLng={localizacao.cemiterio_lng}
-                lapideLat={localizacao.lapide_lat}
-                lapideLng={localizacao.lapide_lng}
-                quadra={localizacao.quadra}
-                lote={localizacao.lote}
-                nomeCompleto={m.nome_completo}
-                fotoUrl={fotoAssinada}
-                ortoUrl={ortoAssinado}
-                ortoMinzoom={localizacao.orto_minzoom}
-                ortoMaxzoom={localizacao.orto_maxzoom}
-                ortoBounds={localizacao.orto_bounds}
-                rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
-              />
-            </div>
-          )}
         </div>
 
         <div className="mem-hero-galeria">
