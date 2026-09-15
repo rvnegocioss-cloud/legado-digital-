@@ -207,7 +207,7 @@ export default function LapidesCemiterio() {
         ← Voltar pra Cemitérios
       </Link>
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-white">Lápides — {cemiterioNome}</h1>
+        <h1 className="text-2xl font-bold text-white">Jazigos — {cemiterioNome}</h1>
         <Link
           href={`/admin/cemiterios/${id}/mapa`}
           className="text-sm font-medium px-3 py-1.5 rounded-lg"
@@ -661,7 +661,7 @@ export default function LapidesCemiterio() {
             disabled={salvando}
             className="text-xs px-3 py-1.5 rounded bg-amber-700 text-branco-fixo hover:bg-amber-600 disabled:opacity-40"
           >
-            {salvando ? 'Salvando...' : '+ Adicionar lápide fora de fileira'}
+            {salvando ? 'Salvando...' : '+ Adicionar jazigo fora de fileira'}
           </button>
         </form>
       </details>

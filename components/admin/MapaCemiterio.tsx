@@ -1890,7 +1890,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
           ← Voltar pra Cemitérios
         </Link>
         <Link href={`/admin/cemiterios/${cemiterioId}/lapides`} className="text-sm inline-block" style={{ color: '#C9A46A' }}>
-          Ver Lápides deste cemitério →
+          Ver Jazigos deste cemitério →
         </Link>
       </div>
       <h1 className="text-2xl font-bold text-white mb-1">Mapa — {cemiterio.nome}</h1>
@@ -3064,7 +3064,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 </p>
                 <p>
                   <strong>Marcar o túmulo como conferido:</strong> clique no pino e suba a <strong>foto do túmulo</strong>. Só quem esteve lá tem
-                  essa foto — por isso ela é o que confirma. Depois disso o quadradinho dele na tela de <strong>Lápides</strong> fica com contorno
+                  essa foto — por isso ela é o que confirma. Depois disso o quadradinho dele na tela de <strong>Jazigos</strong> fica com contorno
                   sólido e bolinha verde, e a foto aparece ao passar o mouse no pino.
                 </p>
               </div>

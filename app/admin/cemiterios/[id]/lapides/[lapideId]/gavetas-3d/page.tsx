@@ -54,7 +54,7 @@ export default function GavetasLapide3D() {
   return (
     <div>
       <Link href={`/admin/cemiterios/${id}/lapides`} className="text-[var(--tema-zinc-400)] hover:text-white text-sm mb-4 inline-block">
-        ← Voltar pra Lápides
+        ← Voltar pra Jazigos
       </Link>
       <h1 className="text-2xl font-bold text-white mb-1">Jazigo Gavetas 3D — {lapideNome}</h1>
       <p className="text-[var(--tema-zinc-400)] text-sm mb-6">

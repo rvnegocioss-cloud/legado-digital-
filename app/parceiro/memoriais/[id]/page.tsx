@@ -879,7 +879,7 @@ function FichaMemorialParceiroInner() {
                       ))}
                     </select>
                   </CampoFicha>
-                  <CampoFicha label="Lápide" className="w-48">
+                  <CampoFicha label="Jazigo" className="w-48">
                     <select
                       value={form.lapide_id}
                       onChange={(e) => {
@@ -889,7 +889,7 @@ function FichaMemorialParceiroInner() {
                       disabled={!cemiterioSelecionadoId}
                       className="flex h-9 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-1.5 text-sm text-white disabled:opacity-50"
                     >
-                      <option value="">Sem lápide vinculada</option>
+                      <option value="">Sem jazigo vinculado</option>
                       {(() => {
                         const doCemiterio = lapides.filter((l) => l.cemiterio_id === cemiterioSelecionadoId)
                         const comFileira = doCemiterio.filter((l) => l.fila_id)

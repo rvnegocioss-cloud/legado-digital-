@@ -963,7 +963,7 @@ export default function DetalheMemorial() {
               </select>
             </div>
             <div className="flex-1">
-              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Lápide</label>
+              <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Jazigo</label>
               <select
                 value={form.lapide_id}
                 onChange={(e) => {
@@ -973,7 +973,7 @@ export default function DetalheMemorial() {
                 disabled={!cemiterioSelecionadoId}
                 className="flex h-10 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white disabled:opacity-50"
               >
-                <option value="">Sem lápide vinculada</option>
+                <option value="">Sem jazigo vinculado</option>
                 {(() => {
                   const doCemiterio = lapides.filter((l) => l.cemiterio_id === cemiterioSelecionadoId)
                   const comFileira = doCemiterio.filter((l) => l.fila_id)

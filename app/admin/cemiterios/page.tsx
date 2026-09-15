@@ -246,7 +246,7 @@ export default function AdminCemiterios() {
               <tr className="text-[var(--tema-zinc-400)] border-b border-[var(--tema-zinc-800)]">
                 <th className="text-left py-3 px-4">Nome</th>
                 <th className="text-left py-3 px-4">Mapa</th>
-                <th className="text-left py-3 px-4">Lápides</th>
+                <th className="text-left py-3 px-4">Jazigos</th>
                 <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Cidade/UF</th>
                 <th className="text-left py-3 px-4">Status</th>
@@ -265,7 +265,7 @@ export default function AdminCemiterios() {
                   </td>
                   <td className="py-3 px-4">
                     <Link href={`/admin/cemiterios/${c.id}/lapides`} className="text-xs font-medium" style={{ color: '#C9A46A' }}>
-                      Lápides
+                      Jazigos
                     </Link>
                   </td>
                   <td className="py-3 px-4 text-[var(--tema-zinc-300)] capitalize">{c.tipo}</td>

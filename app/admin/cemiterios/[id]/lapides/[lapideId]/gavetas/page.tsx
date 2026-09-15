@@ -125,7 +125,7 @@ export default function GavetasLapide() {
   return (
     <div>
       <Link href={`/admin/cemiterios/${id}/lapides`} className="text-[var(--tema-zinc-400)] hover:text-white text-sm mb-4 inline-block">
-        ← Voltar pra Lápides
+        ← Voltar pra Jazigos
       </Link>
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
         <h1 className="text-2xl font-bold text-white">Gavetas — {lapideNome}</h1>
