@@ -57,7 +57,7 @@ function CemiteriosParceiroInner() {
     if (meuParceiroId) {
       const { data: memoriais } = await supabase
         .from('homenagens')
-        .select('id, lapides(cemiterio_id)')
+        .select('id, lapides!homenagens_lapide_id_fkey(cemiterio_id)')
         .eq('parceiro_id', meuParceiroId)
       const contagem: Record<string, number> = {}
       ;(memoriais || []).forEach((m: any) => {

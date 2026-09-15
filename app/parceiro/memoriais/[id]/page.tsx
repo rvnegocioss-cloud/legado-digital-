@@ -192,7 +192,7 @@ function FichaMemorialParceiroInner() {
     if (!cemiterioSelecionadoId) return
     supabase
       .from('lapides')
-      .select('id, identificacao, codigo, cemiterio_id, fila_id, quadras(numero), filas(numero), homenagens(id)')
+      .select('id, identificacao, codigo, cemiterio_id, fila_id, quadras(numero), filas(numero), homenagens!homenagens_lapide_id_fkey(id)')
       .eq('cemiterio_id', cemiterioSelecionadoId)
       .limit(5000)
       .then(({ data }) => {
@@ -245,7 +245,7 @@ function FichaMemorialParceiroInner() {
     if (m.lapide_id) {
       const { data: lapideAtual } = await supabase
         .from('lapides')
-        .select('id, identificacao, codigo, cemiterio_id, fila_id, quadras(numero), filas(numero), homenagens(id)')
+        .select('id, identificacao, codigo, cemiterio_id, fila_id, quadras(numero), filas(numero), homenagens!homenagens_lapide_id_fkey(id)')
         .eq('id', m.lapide_id)
         .single()
       if (lapideAtual) {

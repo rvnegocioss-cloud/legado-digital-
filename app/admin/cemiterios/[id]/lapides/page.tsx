@@ -97,7 +97,7 @@ export default function LapidesCemiterio() {
       supabase.rpc('obter_arvore_lapides_cemiterio', { p_cemiterio_id: id }),
       supabase
         .from('lapides')
-        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, created_at, homenagens(id, nome_completo)')
+        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, created_at, homenagens!homenagens_lapide_id_fkey(id, nome_completo)')
         .eq('cemiterio_id', id)
         .is('fila_id', null)
         .order('created_at', { ascending: false })
@@ -122,7 +122,7 @@ export default function LapidesCemiterio() {
       setCarregandoFila(filaId)
       const { data, error } = await supabase
         .from('lapides')
-        .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens(id, nome_completo)')
+        .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo)')
         .eq('fila_id', filaId)
         .order('numero', { ascending: true })
       if (error) setErro(error.message)
@@ -139,7 +139,7 @@ export default function LapidesCemiterio() {
     }
     const { data } = await supabase
       .from('lapides')
-      .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens(id, nome_completo)')
+      .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo)')
       .eq('cemiterio_id', id)
       .not('codigo', 'is', null)
       .ilike('codigo', `%${termo.trim()}%`)

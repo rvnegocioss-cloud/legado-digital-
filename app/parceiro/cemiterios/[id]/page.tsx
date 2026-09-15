@@ -57,7 +57,7 @@ function CemiterioParceiroDetalheInner() {
     if (meuParceiroId) {
       const { data } = await supabase
         .from('homenagens')
-        .select('id, nome_completo, slug, lapide_id, lapides!inner(codigo, fila_id, cemiterio_id)')
+        .select('id, nome_completo, slug, lapide_id, lapides!homenagens_lapide_id_fkey!inner(codigo, fila_id, cemiterio_id)')
         .eq('parceiro_id', meuParceiroId)
         .eq('lapides.cemiterio_id', id)
         .order('nome_completo')

@@ -308,9 +308,13 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .select('id, identificacao, codigo, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero, foto_face_url, gps_referencia_latitude, gps_referencia_longitude')
         .eq('cemiterio_id', cemiterioId)
         .limit(20000),
+      // Relação nomeada (!homenagens_lapide_id_fkey): desde que lapides ganhou
+      // gestor_homenagem_id (08/09) existem 2 FKs entre homenagens e lapides,
+      // e o PostgREST recusa o embed ambíguo (erro PGRST201) sem dizer qual
+      // usar -- por isso o mapa parava de mostrar quem já tinha memorial.
       supabase
         .from('homenagens')
-        .select('id, nome_completo, foto_url, slug, lapide_id, lapides!inner(cemiterio_id)')
+        .select('id, nome_completo, foto_url, slug, lapide_id, lapides!homenagens_lapide_id_fkey!inner(cemiterio_id)')
         .eq('lapides.cemiterio_id', cemiterioId),
       supabase.rpc('obter_geojson_cemiterio', { p_cemiterio_id: cemiterioId }),
       supabase
@@ -1379,7 +1383,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   async function buscarLapidesDaQuadra(quadraId: string): Promise<LapideEdicao[] | null> {
     const { data, error } = await supabase
       .from('lapides')
-      .select('id, numero, fila_id, codigo, latitude, longitude, situacao, homenagens(id)')
+      .select('id, numero, fila_id, codigo, latitude, longitude, situacao, homenagens!homenagens_lapide_id_fkey(id)')
       .eq('quadra_id', quadraId)
       .not('latitude', 'is', null)
       .order('numero')
