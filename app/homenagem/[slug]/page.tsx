@@ -21,7 +21,6 @@ import { SeletorTema } from "@/components/public/SeletorTema";
 import { resolverBanner } from "@/lib/bannersMemorial";
 import FotoRetratoTelaCheia from "@/components/public/FotoRetratoTelaCheia";
 import VoltarLink from "@/components/public/VoltarLink";
-import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { RailVida, type MarcoVida } from "@/components/public/RailVida";
 import { CORES, anosDestaque } from "@/lib/publicTheme";
@@ -52,10 +51,12 @@ import {
 // coluna só, na mesma ordem da base.
 //
 // Componentes reaproveitados sem UMA alteração: AcenderVela (regra 20),
-// GuiaTumulo (regra 17), GaleriaFotos, MuralMemorias, SeletorTema e
-// BotaoCompartilhar. O Livro de Assinaturas e proprio desta variante
+// GuiaTumulo (regra 17), GaleriaFotos, SeletorTema e BotaoCompartilhar.
+// O Livro de Assinaturas e proprio desta variante
 // (components/public/LivroAssinaturas.tsx) -- a base segue com a lista de
-// cartoes de sempre, intocada.
+// cartoes de sempre, intocada. Mural de memórias (MuralMemorias.tsx) saiu
+// da página em 2026-09-15 (pedido do Rafael) -- componente continua
+// existindo no repo, só não é mais chamado aqui.
 
 const v = (nomeVar: string, valorPadrao: string) => `var(${nomeVar}, ${valorPadrao})`;
 
@@ -436,16 +437,16 @@ export default async function PerfilMemorialPage({
 
   const paleta = PALETAS_MEMORIAL.find((p) => p.id === m.tema) ?? PALETAS_MEMORIAL[0];
 
-  const [{ data: condolenciasData }, { data: muralData }, { data: localizacaoData }, { data: ruasData }] =
+  // Mural de memórias saiu da página (2026-09-15, pedido do Rafael) -- o
+  // Livro de assinaturas (componente customizado, muitas rodadas de trabalho)
+  // fica como a única seção de homenagem, intocado. Registro que já existia
+  // no mural (ex: Pedro Saraiva · neto) continua no banco, só não aparece
+  // mais aqui -- decisão consciente, migrar pro livro fica pra depois.
+  const [{ data: condolenciasData }, { data: localizacaoData }, { data: ruasData }] =
     await Promise.all([
       supabase
         .from("condolencias")
         .select("id, visitor_name, message, created_at")
-        .eq("homenagem_id", m.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("mural_memorias")
-        .select("id, nome, parentesco, texto, foto_url, coracoes, created_at")
         .eq("homenagem_id", m.id)
         .order("created_at", { ascending: false }),
       supabase.rpc("obter_localizacao_memorial", { p_slug: slug }).maybeSingle(),
@@ -453,7 +454,6 @@ export default async function PerfilMemorialPage({
     ]);
 
   const condolencias = (condolenciasData || []) as Condolencia[];
-  const mural = muralData || [];
   const localizacao = localizacaoData as {
     cemiterio_nome: string;
     cemiterio_lat: number | null;
@@ -611,12 +611,10 @@ export default async function PerfilMemorialPage({
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
           <a href="#timeline" style={estiloTopo.navLink}>Uma vida</a>
           <a href="#galeria" style={estiloTopo.navLink}>Fotos</a>
-          <a href="#homenagens" style={estiloTopo.navLink}>Homenagens</a>
-          <a href="#livro" style={estiloTopo.navLink}>Livro</a>
+          <a href="#livro" style={estiloTopo.navLink}>Homenagens</a>
           <a href="#localizacao" style={estiloTopo.navLink}>Localização</a>
         </div>
         <div style={estiloTopo.navAcoes}>
-          <a href="#homenagens" style={estiloTopo.navBotaoFantasma}>Deixar homenagem</a>
           <a href="#livro" style={estiloTopo.navBotaoDourado}>Assinar livro</a>
           <BotaoCompartilhar nome={m.nome_completo} />
         </div>
@@ -772,11 +770,6 @@ export default async function PerfilMemorialPage({
               <GaleriaFotos fotos={galeria} videos={videosGaleria} />
             </section>
           )}
-
-          <section id="homenagens" className="perfil-secao">
-            <h2 className="perfil-titulo">Mural de memórias</h2>
-            <MuralMemorias memorialId={m.id} memoriasIniciais={mural} />
-          </section>
 
           {/* A seção "Como Chegar" que vivia aqui embaixo foi movida pro modal
               que abre do botão no topo (GuiaTumuloModal) -- pedido do Rafael,

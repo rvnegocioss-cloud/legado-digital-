@@ -5,16 +5,13 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
 
 // Padrão de mosaico assimétrico (alguns itens ocupam 2 colunas/2 linhas) —
-// repete em ciclo se a galeria tiver mais fotos que o padrão.
-const MOSAICO_A = [
+// repete em ciclo se a galeria tiver mais fotos que o padrão. Só um padrão
+// fixo -- o toggle "MOSAICO A/B" era ferramenta de teste que ficou visível
+// pro visitante por engano (achado real, 2026-09-15).
+const MOSAICO = [
   { col: 2, row: 2 }, { col: 1, row: 1 }, { col: 1, row: 1 }, { col: 1, row: 2 },
   { col: 1, row: 1 }, { col: 2, row: 1 }, { col: 1, row: 1 }, { col: 1, row: 1 },
   { col: 1, row: 1 }, { col: 1, row: 2 },
-]
-const MOSAICO_B = [
-  { col: 1, row: 1 }, { col: 2, row: 2 }, { col: 1, row: 1 }, { col: 1, row: 1 },
-  { col: 1, row: 2 }, { col: 1, row: 1 }, { col: 2, row: 1 }, { col: 1, row: 1 },
-  { col: 1, row: 2 }, { col: 1, row: 1 },
 ]
 
 // Galeria unificada: foto e vídeo no mesmo mosaico e no mesmo pop-up, em vez
@@ -29,7 +26,6 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
   // ocupa o bloco grande de abertura.
   const itens = [...videos, ...fotos]
   const [aberta, setAberta] = useState<number | null>(null)
-  const [variacao, setVariacao] = useState<'a' | 'b'>('a')
   const [colunas, setColunas] = useState(4)
 
   useEffect(() => {
@@ -52,43 +48,18 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
     return () => window.removeEventListener('keydown', aoTeclar)
   }, [aberta, itens.length])
 
-  const padrao = variacao === 'a' ? MOSAICO_A : MOSAICO_B
-
   return (
     <>
-      {itens.length > 3 && (
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginBottom: 12 }}>
-          {(['a', 'b'] as const).map((v) => (
-            <button
-              key={v}
-              onClick={() => setVariacao(v)}
-              style={{
-                background: variacao === v ? CORES.dourado : 'transparent',
-                color: variacao === v ? CORES.fundoBase : CORES.dourado,
-                border: `1px solid ${CORES.dourado}`,
-                borderRadius: 6,
-                padding: '5px 12px',
-                fontSize: 11,
-                letterSpacing: 1,
-                cursor: 'pointer',
-              }}
-            >
-              MOSAICO {v.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      )}
-
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${colunas}, 1fr)`,
-          gridAutoRows: colunas === 2 ? 78 : 100,
-          gap: 8,
+          gridAutoRows: colunas === 2 ? 96 : 130,
+          gap: 10,
         }}
       >
         {itens.map((url, i) => {
-          const span = padrao[i % padrao.length]
+          const span = MOSAICO[i % MOSAICO.length]
           const col = Math.min(span.col, colunas)
           const estilo = {
             gridColumn: `span ${col}`,
