@@ -1,6 +1,7 @@
 import "./perfil.css";
 import Image from "next/image";
-import { MapPin, ShieldCheck, Lock } from "lucide-react";
+import { MapPin } from "lucide-react";
+import SiteFooter from "@/components/public/SiteFooter";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
@@ -701,32 +702,7 @@ export default async function PerfilMemorialPage({
         </aside>
       </div>
 
-      <footer className="perfil-rodape">
-        <a href="/" aria-label="Ir para o site do Legado Digital">
-          <Image
-            src="/logo-legado-digital.svg"
-            alt="Legado Digital"
-            width={160}
-            height={64}
-            style={{ height: 40, width: "auto" }}
-          />
-        </a>
-        <div className="perfil-selos">
-          <span className="perfil-selo">
-            <ShieldCheck size={14} strokeWidth={1.5} />
-            Privacidade garantida
-          </span>
-          <span className="perfil-selo">
-            <Lock size={14} strokeWidth={1.5} />
-            Homenagens passam por moderação
-          </span>
-        </div>
-        <div className="perfil-rodape-links">
-          <a href="/">Conhecer o Legado Digital</a>
-          <a href="/politica-de-privacidade">Privacidade</a>
-          <a href="/termos-de-uso">Termos</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
