@@ -91,7 +91,11 @@ async function backupViaApi() {
     'quadras', 'filas', 'ruas_cemiterio', 'lapides', 'gavetas', 'homenagens',
     'homenagens_seguranca', 'homenagens_emails_autorizados', 'memorial_email_codigos',
     'memorial_visitantes', 'condolencias', 'mural_memorias', 'emails_enviados',
-    'configuracoes_sistema', 'mapa_sugestoes'
+    'configuracoes_sistema', 'mapa_sugestoes',
+    // Faltavam: parentescos guarda a arvore da familia, pontos_referencia e
+    // edicao_sessoes vieram depois da lista original. google_tokens fica de
+    // fora de proposito -- token OAuth nao vai pra arquivo solto no Desktop.
+    'parentescos', 'pontos_referencia_cemiterio', 'memorial_edicao_sessoes', 'leads'
   ];
 
   const backupContent = [];
