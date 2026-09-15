@@ -668,7 +668,10 @@
 @media (min-width:700px){
   .perfil-midia-familia-grid{grid-template-columns:1fr 1fr;}
 }
-.perfil-familia-coluna .arv-card{max-width:none;}
+/* Árvore encolhida (pedido do Rafael: "diminui essa árvore") -- as fotos
+   ficaram com tiles maiores (2 colunas em vez de 3, ver GaleriaFotos.tsx)
+   pra ocupar o espaço que a árvore, menor, deixou de tomar. */
+.perfil-familia-coluna .arv-card{max-width:280px;}
 .arv-rotu{
   display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:1.7px;
   color:var(--perfil-dourado);margin-bottom:10px;

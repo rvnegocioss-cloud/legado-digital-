@@ -24,13 +24,14 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
   const itens = [...videos, ...fotos]
   const [aberta, setAberta] = useState<number | null>(null)
   // Sempre divide a largura com a árvore genealógica desde 2026-09-15 (2
-  // colunas simétricas, opção 5 dos wireframes) -- 3 colunas cabe melhor
-  // nessa metade do que os 4 de quando a galeria era sozinha e larga.
-  const [colunas, setColunas] = useState(3)
+  // colunas simétricas, opção 5 dos wireframes). 2 colunas (era 3) faz os
+  // tiles maiores -- preenche a altura da coluna em vez de sobrar vão
+  // embaixo, agora que o card da árvore ao lado ficou menor.
+  const [colunas, setColunas] = useState(2)
 
   useEffect(() => {
     function ajustarColunas() {
-      setColunas(window.innerWidth < 700 ? 2 : 3)
+      setColunas(2)
     }
     ajustarColunas()
     window.addEventListener('resize', ajustarColunas)
