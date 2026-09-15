@@ -4,15 +4,12 @@ import { useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
 
-// Padrão de mosaico assimétrico (alguns itens ocupam 2 colunas/2 linhas) —
-// repete em ciclo se a galeria tiver mais fotos que o padrão. Só um padrão
-// fixo -- o toggle "MOSAICO A/B" era ferramenta de teste que ficou visível
-// pro visitante por engano (achado real, 2026-09-15).
-const MOSAICO = [
-  { col: 2, row: 2 }, { col: 1, row: 1 }, { col: 1, row: 1 }, { col: 1, row: 2 },
-  { col: 1, row: 1 }, { col: 2, row: 1 }, { col: 1, row: 1 }, { col: 1, row: 1 },
-  { col: 1, row: 1 }, { col: 1, row: 2 },
-]
+// Grade uniforme, sem span variado -- achado real 2026-09-15 (2 rodadas):
+// o mosaico assimétrico (blocos de 1-2 colunas/linhas) deixava buracos de
+// verdade quando a quantidade de itens não fechava o padrão (com 5 fotos,
+// sobravam 2 células vazias no fim -- CSS Grid não recua um bloco de
+// tamanho maior pra preencher célula que ficou pequena demais). Todo item
+// é 1:1, mesma posição/seção de sempre.
 
 // Galeria unificada: foto e vídeo no mesmo mosaico e no mesmo pop-up, em vez
 // de vídeo numa seção separada lá embaixo. `videos` é opcional -- quem já
@@ -26,11 +23,14 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
   // ocupa o bloco grande de abertura.
   const itens = [...videos, ...fotos]
   const [aberta, setAberta] = useState<number | null>(null)
-  const [colunas, setColunas] = useState(4)
+  // Sempre divide a largura com a árvore genealógica desde 2026-09-15 (2
+  // colunas simétricas, opção 5 dos wireframes) -- 3 colunas cabe melhor
+  // nessa metade do que os 4 de quando a galeria era sozinha e larga.
+  const [colunas, setColunas] = useState(3)
 
   useEffect(() => {
     function ajustarColunas() {
-      setColunas(window.innerWidth < 768 ? 2 : 4)
+      setColunas(window.innerWidth < 700 ? 2 : 3)
     }
     ajustarColunas()
     window.addEventListener('resize', ajustarColunas)
@@ -54,16 +54,12 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
         style={{
           display: 'grid',
           gridTemplateColumns: `repeat(${colunas}, 1fr)`,
-          gridAutoRows: colunas === 2 ? 96 : 130,
           gap: 10,
         }}
       >
         {itens.map((url, i) => {
-          const span = MOSAICO[i % MOSAICO.length]
-          const col = Math.min(span.col, colunas)
           const estilo = {
-            gridColumn: `span ${col}`,
-            gridRow: `span ${span.row}`,
+            aspectRatio: '1',
             width: '100%',
             height: '100%',
             objectFit: 'cover' as const,
