@@ -91,7 +91,8 @@ export default function LapidesCemiterio() {
 
   async function carregar() {
     setCarregando(true)
-    const [{ data: cemiterio }, { data: arv }, { data: orfasData }] = await Promise.all([
+    setErro('')
+    const [{ data: cemiterio, error: erroCemiterio }, { data: arv, error: erroArv }, { data: orfasData, error: erroOrfas }] = await Promise.all([
       supabase.from('cemiterios').select('nome').eq('id', id).single(),
       supabase.rpc('obter_arvore_lapides_cemiterio', { p_cemiterio_id: id }),
       supabase
@@ -102,6 +103,11 @@ export default function LapidesCemiterio() {
         .order('created_at', { ascending: false })
         .limit(200),
     ])
+    // Antes essas 3 chamadas falhavam em silêncio -- a tela simplesmente
+    // ficava sem os quadradinhos, sem nenhuma pista do motivo. Agora, se
+    // qualquer uma falhar (RLS, RPC, rede), o erro real aparece na tela.
+    const erroReal = erroCemiterio || erroArv || erroOrfas
+    if (erroReal) setErro(erroReal.message || String(erroReal))
     setCemiterioNome(cemiterio?.nome || '')
     setArvore(arv as any)
     setOrfas((orfasData as any) || [])
@@ -114,11 +120,12 @@ export default function LapidesCemiterio() {
     setExpandidas((s) => ({ ...s, [filaId]: abrindo }))
     if (abrindo && !tumulosPorFila[filaId]) {
       setCarregandoFila(filaId)
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('lapides')
         .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens(id, nome_completo)')
         .eq('fila_id', filaId)
         .order('numero', { ascending: true })
+      if (error) setErro(error.message)
       setTumulosPorFila((s) => ({ ...s, [filaId]: (data as any) || [] }))
       setCarregandoFila(null)
     }
@@ -212,6 +219,12 @@ export default function LapidesCemiterio() {
       <p className="text-[var(--tema-zinc-400)] text-sm mb-3">
         Organizado por Quadra → Fileira → Túmulo, do jeito que foi mapeado. Clica numa fileira pra ver os túmulos dela.
       </p>
+
+      {erro && (
+        <div className="rounded-lg border border-red-800 bg-red-950/40 px-4 py-3 mb-4 text-sm text-red-300">
+          <strong>Erro ao carregar:</strong> {erro}
+        </div>
+      )}
 
       <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-6">
         <h2 className="text-sm font-semibold text-white mb-1">Como ler os quadradinhos</h2>
