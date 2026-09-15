@@ -19,6 +19,7 @@ import ArvoreFamilia, { type ArvoreDados } from "@/components/public/ArvoreFamil
 import TextoVerMais from "@/components/public/TextoVerMais";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { resolverBanner } from "@/lib/bannersMemorial";
+import FotoRetratoTelaCheia from "@/components/public/FotoRetratoTelaCheia";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { RailVida, type MarcoVida } from "@/components/public/RailVida";
@@ -471,7 +472,7 @@ export default async function PerfilMemorialPage({
             style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--mem-dourado, #C9A46A)" }}
           >
             <span style={{ fontSize: 15 }}>←</span>
-            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} style={{ height: 34, width: "auto" }} />
+            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} style={{ height: 86, width: "auto" }} />
           </a>
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
           <a href="#timeline" style={estiloTopo.navLink}>Linha do Tempo</a>
@@ -487,48 +488,31 @@ export default async function PerfilMemorialPage({
         </div>
       </nav>
 
-      {/* Imagem de capa: FAIXA PRÓPRIA, com altura própria, e nada por cima.
-          Antes era uma camada atrás do hero inteiro -- passava atrás do
-          retrato, do nome, dos botões e da galeria ao mesmo tempo, exigia um
-          véu escuro pra o texto sobreviver (que matava a paisagem) e cortava
-          reto onde o hero acabava. Como bloco, a paisagem aparece inteira, o
-          texto continua no fundo do tema, e o único encontro entre os dois é
-          um desmanche suave no rodapé da faixa. */}
-      {banner && (
-        <div
-          aria-hidden
-          className="mem-capa-faixa mem-container"
-          style={{
-            margin: "0 auto",
-            padding: "0 20px",
-            backgroundImage: `url(${banner.arquivo})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center 62%",
-            backgroundOrigin: "content-box",
-            borderRadius: 16,
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: `linear-gradient(180deg, rgba(6,14,20,0) 45%, ${v(
-                VAR_FUNDO_BASE,
-                CORES.fundoBase
-              )} 100%)`,
-            }}
-          />
-        </div>
-      )}
-
-      <header className="mem-hero mem-container" style={estiloTopo.hero}>
+      {/* Imagem de capa = FUNDO do topo (pedido do Rafael, 2026-09-15): fica
+          atrás do retrato e do bloco de fotos/vídeo, contida na largura da
+          página (mesmo container do nav/hero, nunca de ponta a ponta). O véu
+          deixa a paisagem aparecer em cima e escurece rumo ao fim do bloco,
+          pra nome/datas/botões nunca perderem contraste. */}
+      <header
+        className={`mem-hero mem-container${banner ? " mem-hero-com-capa" : ""}`}
+        style={estiloTopo.hero}
+      >
+        {banner && (
+          <>
+            <div
+              aria-hidden
+              className="mem-capa-fundo"
+              style={{ backgroundImage: `url(${banner.arquivo})` }}
+            />
+            <div aria-hidden className="mem-capa-fundo mem-capa-veu" />
+          </>
+        )}
         <div className="mem-hero-ring" style={estiloTopo.fotoGlowWrap}>
           <div style={estiloTopo.fotoGlow} />
           <div style={estiloTopo.fotoRing}>
             <div style={estiloTopo.fotoInner}>
               {fotoAssinada ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={fotoAssinada} alt={m.nome_completo} style={estiloTopo.foto} />
+                <FotoRetratoTelaCheia src={fotoAssinada} alt={m.nome_completo} style={estiloTopo.foto} />
               ) : (
                 <span style={estiloTopo.monograma}>{iniciais}</span>
               )}
