@@ -303,53 +303,77 @@ const estiloTopo = {
   // caixa com borda, sem o glow atrás da foto. Os 2 botões de baixo (que
   // no protótipo eram vela/homenagem) viram Rota/Guia -- essas ações já
   // existem em seções próprias mais abaixo na página, intocadas.
+  //
+  // Largura proporcional, não fixa (achado real 2026-09-15: 360px fixo
+  // dentro de um container flex:1 deixava ~180-250px de fundo vazio entre
+  // o card e a galeria, em telas largas). Sem cap fixo, só o que a coluna
+  // (.mem-hero-texto, flex:1) já entrega -- o card preenche igual à
+  // galeria ao lado, cada um na sua proporção natural do espaço restante.
+  // Elementos internos em clamp(), mesma técnica de .mem-hero-ring em
+  // globals.css -- crescem junto com a largura real da tela, não em saltos.
   fichaCard: {
     width: "100%",
-    maxWidth: 360,
     background: "linear-gradient(180deg, rgba(201,164,106,0.05), transparent 40%), rgba(255,255,255,0.03)",
     border: `1px solid ${CORES.douradoBorda}`,
     borderRadius: 10,
-    padding: "28px 24px 24px",
+    padding: "clamp(28px, 3vw, 40px) clamp(24px, 3vw, 36px) clamp(24px, 2.4vw, 32px)",
     display: "flex",
     flexDirection: "column" as const,
     alignItems: "center",
     textAlign: "center" as const,
   },
-  fotoRingSemGlow: { position: "relative" as const, width: 190, height: 190, marginBottom: 18 },
+  fotoRingSemGlow: {
+    position: "relative" as const,
+    width: "clamp(170px, 15vw, 240px)",
+    height: "clamp(170px, 15vw, 240px)",
+    marginBottom: 18,
+  },
   eyebrowFicha: {
-    fontSize: 10.5,
+    fontSize: 11,
     textTransform: "uppercase" as const,
     letterSpacing: 1.8,
     color: CORES.textoFraco,
-    margin: "0 0 6px",
+    margin: "0 0 8px",
   },
   nomeFicha: {
     fontFamily: "var(--font-cinzel), Georgia, serif",
-    fontSize: 23,
+    fontSize: "clamp(22px, 2.2vw, 32px)",
     fontWeight: 600,
     color: CORES.textoForte,
-    margin: "0 0 6px",
+    margin: "0 0 8px",
     lineHeight: 1.2,
   },
-  papeisFicha: { fontSize: 12, letterSpacing: 0.4, color: v(VAR_DOURADO_CLARO, CORES.douradoClaro), margin: "0 0 10px" },
-  anosFicha: { fontSize: 15, color: v(VAR_DOURADO, CORES.dourado), margin: "0 0 4px" },
+  papeisFicha: {
+    fontSize: "clamp(12px, 1vw, 14px)",
+    letterSpacing: 0.4,
+    color: v(VAR_DOURADO_CLARO, CORES.douradoClaro),
+    margin: "0 0 12px",
+  },
+  anosFicha: { fontSize: "clamp(15px, 1.3vw, 19px)", color: v(VAR_DOURADO, CORES.dourado), margin: "0 0 5px" },
   cidadeFicha: {
     display: "inline-flex",
     alignItems: "center",
     gap: 5,
     justifyContent: "center" as const,
-    fontSize: 12.5,
+    fontSize: "clamp(12.5px, 1vw, 14px)",
     color: CORES.textoFraco,
-    margin: "0 0 14px",
+    margin: "0 0 16px",
   },
-  fraseFicha: { fontStyle: "italic" as const, fontSize: 14, color: CORES.textoCorpo, margin: "0 0 18px", lineHeight: 1.5 },
-  botoesFicha: { display: "flex", flexDirection: "column" as const, gap: 8, width: "100%" },
+  fraseFicha: {
+    fontStyle: "italic" as const,
+    fontSize: "clamp(14px, 1.2vw, 17px)",
+    color: CORES.textoCorpo,
+    margin: "0 0 22px",
+    lineHeight: 1.5,
+    maxWidth: "36ch",
+  },
+  botoesFicha: { display: "flex", flexDirection: "column" as const, gap: 10, width: "100%" },
   botaoFichaPrimario: {
     display: "block",
     textAlign: "center" as const,
-    padding: "11px 14px",
-    borderRadius: 5,
-    fontSize: 13,
+    padding: "clamp(11px, 1vw, 14px) 16px",
+    borderRadius: 6,
+    fontSize: "clamp(13px, 1vw, 14.5px)",
     fontWeight: 600,
     textDecoration: "none",
     background: v(VAR_DOURADO, CORES.dourado),
@@ -359,9 +383,9 @@ const estiloTopo = {
     display: "block",
     width: "100%",
     textAlign: "center" as const,
-    padding: "11px 14px",
-    borderRadius: 5,
-    fontSize: 13,
+    padding: "clamp(11px, 1vw, 14px) 16px",
+    borderRadius: 6,
+    fontSize: "clamp(13px, 1vw, 14.5px)",
     fontWeight: 600,
     border: `1px solid ${v(VAR_DOURADO, CORES.dourado)}`,
     background: "transparent",
