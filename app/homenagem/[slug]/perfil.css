@@ -643,11 +643,15 @@
 
 
 /* ---- Árvore genealógica ------------------------------------------------ */
-/* Card na lateral; a árvore inteira só abre no clique. Convenções do desenho
-   ficam no componente (regra 23): pai à esquerda, casal na horizontal,
-   descendência saindo do meio do casal. */
+/* Card teaser fechado; a árvore inteira só abre no clique. Convenções do
+   desenho ficam no componente (regra 23): pai à esquerda, casal na
+   horizontal, descendência saindo do meio do casal.
+   max-width fixo (achado real 2026-09-15): width:100% foi calibrado pra
+   quando este card vivia na lateral de 320px -- na seção "Família" da
+   coluna de leitura (~900px+), a mesma regra virava uma foto de árvore
+   gigante ocupando a tela inteira em vez de um teaser compacto. */
 .arv-card{
-  width:100%;background:var(--perfil-carta);border:1px solid var(--perfil-borda);
+  width:100%;max-width:340px;background:var(--perfil-carta);border:1px solid var(--perfil-borda);
   border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;color:inherit;
   text-align:center;transition:border-color .2s ease, transform .2s ease;
 }
