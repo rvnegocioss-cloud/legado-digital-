@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
@@ -617,12 +618,17 @@ export default function FamiliaEdicaoPage() {
     <div className="min-h-screen bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white border border-zinc-700 bg-zinc-900 hover:border-zinc-500"
-          >
-            ← Voltar pro site
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" aria-label="Ir para a página inicial">
+              <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} className="h-12 w-auto" />
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white border border-zinc-700 bg-zinc-900 hover:border-zinc-500"
+            >
+              ← Voltar pro site
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
             {/* Quem está logado: a família entra pelo memorial, então o que
                 identifica a sessão é de quem é o memorial que ela administra. */}
@@ -1090,6 +1096,12 @@ export default function FamiliaEdicaoPage() {
             </div>
           </div>
         </div>
+
+        <footer className="mt-10 pt-6 border-t border-zinc-800 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-zinc-500">
+          <span>© {new Date().getFullYear()} Legado Digital</span>
+          <Link href="/politica-de-privacidade" className="hover:text-zinc-300">Privacidade</Link>
+          <Link href="/termos-de-uso" className="hover:text-zinc-300">Termos de Uso</Link>
+        </footer>
       </div>
     </div>
   )

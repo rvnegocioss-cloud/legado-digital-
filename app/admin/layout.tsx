@@ -362,6 +362,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             via portal direto em document.body, fora dessa árvore. */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto bg-[var(--tema-zinc-950)]">
           {children}
+          <footer className="mt-10 pt-5 border-t border-[var(--tema-zinc-800)] flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[var(--tema-zinc-500)]">
+            <span>© {new Date().getFullYear()} Legado Digital</span>
+            <Link href="/politica-de-privacidade" className="hover:text-[var(--tema-zinc-300)]">Privacidade</Link>
+            <Link href="/termos-de-uso" className="hover:text-[var(--tema-zinc-300)]">Termos de Uso</Link>
+          </footer>
         </main>
       </div>
       <LegadoBotWidget />

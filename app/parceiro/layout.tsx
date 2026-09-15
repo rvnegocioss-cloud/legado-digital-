@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getParceiroUser, getAdminUser, signOut, supabase } from '@/lib/auth'
 import { useTema } from '@/lib/useTema'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
@@ -156,6 +157,9 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
+              <Link href="/" aria-label="Ir para a página inicial" className="flex items-center">
+                <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} className="h-9 w-auto" />
+              </Link>
               <span className="text-lg font-bold text-blue-400">{nomeParceiro}</span>
               <div className="hidden md:flex items-center gap-1">
                 {navItems.map((item) => (
@@ -222,6 +226,13 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <footer className="border-t border-[var(--tema-zinc-800)] py-5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[var(--tema-zinc-500)]">
+          <span>© {new Date().getFullYear()} Legado Digital</span>
+          <Link href="/politica-de-privacidade" className="hover:text-[var(--tema-zinc-300)]">Privacidade</Link>
+          <Link href="/termos-de-uso" className="hover:text-[var(--tema-zinc-300)]">Termos de Uso</Link>
+        </div>
+      </footer>
       <LegadoBotWidget />
     </div>
   )
