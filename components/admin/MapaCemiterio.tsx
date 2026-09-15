@@ -2496,7 +2496,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 )
               })()}
 
-              {lapideHover && lapideHover.id !== lapideSelecionada?.id && (
+              {/* Card de hover some por completo enquanto tiver um jazigo
+                  aberto (clicado) -- os túmulos ficam bem próximos uns dos
+                  outros no mapa, então antes os 2 cards apareciam lado a
+                  lado, um do vizinho e outro do selecionado (achado real,
+                  2026-09-15). */}
+              {lapideHover && !lapideSelecionada && (
                 <Popup
                   longitude={lapideHover.longitude!}
                   latitude={lapideHover.latitude!}
@@ -2553,17 +2558,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                             {homenagemPorLapide.get(lapideHover.id)?.nome_completo}
                           </p>
                         </>
-                      ) : lapideHover.foto_face_url ? (
+                      ) : (
                         <>
                           <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
-                            Túmulo
+                            Jazigo
                           </p>
                           <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
                             {lapideHover.identificacao}
                           </p>
                         </>
-                      ) : (
-                        <p style={{ fontSize: 12, margin: 0, fontWeight: 600, color: '#a15c00' }}>Ocupado — outro parceiro</p>
                       )}
                     </div>
                   </div>
