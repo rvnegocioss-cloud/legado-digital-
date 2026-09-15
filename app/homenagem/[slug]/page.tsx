@@ -788,24 +788,28 @@ export default async function PerfilMemorialPage({
 
           {/* O vídeo de capa fica SÓ no topo, ao lado do rosto; aqui embaixo
               entram os outros vídeos e as fotos. Antes o mesmo vídeo aparecia
-              nos dois lugares. */}
-          {(galeria.length > 0 || videosGaleria.length > 0) && (
-            <section id="galeria" className="perfil-secao perfil-secao-midia">
-              <h2 className="perfil-titulo">Fotos e vídeos</h2>
-              <GaleriaFotos fotos={galeria} videos={videosGaleria} />
-            </section>
-          )}
+              nos dois lugares.
 
-          {/* Família saiu da lateral fixa pra virar seção própria aqui, ordem
-              do wireframe do Pedro (Sobre/Uma vida/Fotos/Família/Homenagens/
-              Localização) -- pedido do Rafael, 2026-09-15: "muda a árvore
-              dali, procura outro lugar". O componente já nasce retrátil
-              (card fechado, só abre em tela cheia no clique) -- isso não
-              mudou, só a posição na página. */}
-          {arvoreAssinada && (
-            <section id="familia" className="perfil-secao">
-              <h2 className="perfil-titulo">Família</h2>
-              <ArvoreFamilia dados={arvoreAssinada} />
+              Fotos+Família em 2 colunas simétricas (opção 5 dos wireframes
+              aprovados pelo Rafael, opendesign/mockups/mosaico-familia --
+              regra 24 do CLAUDE.md). Antes eram 2 seções separadas, a de
+              Família sozinha lá embaixo com o card retrátil boiando cercado
+              de espaço vazio. Agora dividem a mesma faixa, largura 50/50,
+              mesma altura -- nenhum dos dois cresce mais que o outro, então
+              nunca sobra vão de um lado só. */}
+          {(galeria.length > 0 || videosGaleria.length > 0 || arvoreAssinada) && (
+            <section id="galeria" className="perfil-secao perfil-secao-midia">
+              <h2 className="perfil-titulo">Fotos, vídeos e família</h2>
+              <div className="perfil-midia-familia-grid">
+                {(galeria.length > 0 || videosGaleria.length > 0) && (
+                  <GaleriaFotos fotos={galeria} videos={videosGaleria} />
+                )}
+                {arvoreAssinada && (
+                  <div id="familia" className="perfil-familia-coluna">
+                    <ArvoreFamilia dados={arvoreAssinada} />
+                  </div>
+                )}
+              </div>
             </section>
           )}
 

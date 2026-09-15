@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mosaico + Família — 5 estruturas</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:#f7f5f0;color:#1c1c1c;
+    font-family:'Kalam','Comic Sans MS',cursive;
+  }
+  header{padding:22px 24px 6px;text-align:center}
+  header h1{margin:0;font-size:26px;font-weight:700}
+  header p{margin:4px 0 0;font-size:14px;color:#555}
+
+  .grade{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+    gap:26px;padding:10px 24px 60px;max-width:1700px;margin:0 auto;
+  }
+
+  .opcao{background:#fff;border:2.5px solid #1c1c1c;border-radius:14px;overflow:hidden}
+  .opcao > h2{
+    margin:0;padding:10px 14px;font-size:17px;border-bottom:2.5px solid #1c1c1c;
+    background:#f0ede6;
+  }
+  .opcao > h2 small{display:block;font-size:12.5px;font-weight:400;color:#555;margin-top:2px}
+  .tela{padding:16px}
+
+  .cx{border:2px solid #1c1c1c;border-radius:8px;padding:8px;margin-bottom:8px;font-size:12.5px}
+  .cx.tracejada{border-style:dashed}
+  .rot{font-size:11px;color:#666;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+
+  .foto{
+    border:2px solid #1c1c1c;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;color:#666;
+    background:repeating-linear-gradient(45deg,#fff,#fff 7px,#f2f0ea 7px,#f2f0ea 14px);
+  }
+  .arv{
+    border:2px solid #1c1c1c;border-radius:6px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    font-size:11.5px;color:#666;background:#fdf6e3;
+    text-align:center;padding:6px;
+  }
+  .arv b{font-size:12px;color:#1c1c1c}
+
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+
+  .nota{
+    font-size:11.5px;color:#444;background:#fffbe8;border-left:3px solid #ffd76e;
+    padding:6px 9px;margin-top:10px;
+  }
+
+  .rodape{padding:0 24px 50px;max-width:900px;margin:0 auto;font-size:13.5px;color:#444}
+  .rodape h3{font-size:15px;margin-bottom:6px}
+  .rodape li{margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Fotos e vídeos + Família — 5 estruturas</h1>
+  <p>Problema real (print anotado do Rafael): mosaico assimétrico deixa buraco vazio embaixo, e o card da árvore fica isolado, sozinho, longe, com espaço morto em volta. Ele pediu explicitamente pra árvore ficar "do lado" do mosaico, ocupando o vão.</p>
+</header>
+
+<div class="grade">
+
+  <div class="opcao">
+    <h2>1 · Grade uniforme + árvore como último quadro<small>Mesma grade, sem span variado — a árvore entra como mais um item, do mesmo tamanho dos outros</small></h2>
+    <div class="tela">
+      <span class="rot">Fotos e vídeos</span>
+      <div class="grid4">
+        <div class="foto" style="aspect-ratio:1">foto</div>
+        <div class="foto" style="aspect-ratio:1">foto</div>
+        <div class="foto" style="aspect-ratio:1">▶ vídeo</div>
+        <div class="foto" style="aspect-ratio:1">foto</div>
+        <div class="foto" style="aspect-ratio:1">foto</div>
+        <div class="foto" style="aspect-ratio:1">foto</div>
+        <div class="arv" style="aspect-ratio:1">🌳<b>Família</b>4 na árvore</div>
+        <div class="foto" style="aspect-ratio:1">+2</div>
+      </div>
+      <div class="nota">Zero seção "Família" separada lá embaixo — o card de entrada dela mora dentro do próprio mosaico, mesma grade, mesmo tamanho de quadro. Clique abre a árvore igual já abre hoje.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>2 · Mosaico à esquerda + árvore como painel lateral<small>2 colunas: fotos ocupam a grade, árvore vira card vertical alto ao lado — preenche o vão sem virar quadro igual às fotos</small></h2>
+    <div class="tela">
+      <span class="rot">Fotos, vídeos e família</span>
+      <div style="display:grid;grid-template-columns:2.4fr 1fr;gap:10px">
+        <div class="grid3">
+          <div class="foto" style="aspect-ratio:1;grid-column:span 2;grid-row:span 2">foto grande</div>
+          <div class="foto" style="aspect-ratio:1">▶</div>
+          <div class="foto" style="aspect-ratio:1">foto</div>
+          <div class="foto" style="aspect-ratio:1">foto</div>
+          <div class="foto" style="aspect-ratio:1">+1</div>
+        </div>
+        <div class="arv" style="height:100%">🌳<b>Árvore<br>genealógica</b>1 memorial<br>4 na árvore<br><u>abrir</u></div>
+      </div>
+      <div class="nota">A altura do painel da árvore acompanha a altura do mosaico inteiro (grid-row:span de todas as linhas) — não sobra vão embaixo porque os dois elementos crescem juntos.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>3 · Fileira única (carrossel) + árvore no fim da fileira<small>Sem grade 2D — tudo numa linha horizontal só, rolável. A árvore é o último cartão da fileira, mesma altura de todos</small></h2>
+    <div class="tela">
+      <span class="rot">Fotos, vídeos e família — role pro lado →</span>
+      <div style="display:flex;gap:8px;overflow-x:auto">
+        <div class="foto" style="width:160px;height:120px;flex-shrink:0">foto</div>
+        <div class="foto" style="width:160px;height:120px;flex-shrink:0">▶ vídeo</div>
+        <div class="foto" style="width:160px;height:120px;flex-shrink:0">foto</div>
+        <div class="foto" style="width:160px;height:120px;flex-shrink:0">foto</div>
+        <div class="arv" style="width:160px;height:120px;flex-shrink:0">🌳<b>Família</b>ver árvore</div>
+      </div>
+      <div class="nota">Nunca sobra buraco — cada cartão tem largura fixa, a fileira só cresce pro lado. Perde a leitura "mosaico bonito" parado na tela, ganha em nunca ter vão. Bom em celular também, sem mudar de layout.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>4 · Destaque grande + tira de miniaturas (inclui a árvore)<small>1 foto/vídeo grande em cima, fileira de miniaturas embaixo — a árvore é uma miniatura a mais na tira, não uma seção à parte</small></h2>
+    <div class="tela">
+      <span class="rot">Fotos, vídeos e família</span>
+      <div class="foto" style="aspect-ratio:16/9;margin-bottom:6px">▶ vídeo em destaque</div>
+      <div style="display:flex;gap:6px">
+        <div class="foto" style="width:90px;height:70px;flex-shrink:0">foto</div>
+        <div class="foto" style="width:90px;height:70px;flex-shrink:0">foto</div>
+        <div class="foto" style="width:90px;height:70px;flex-shrink:0">foto</div>
+        <div class="arv" style="width:90px;height:70px;flex-shrink:0;font-size:9.5px">🌳 família</div>
+        <div class="foto" style="width:90px;height:70px;flex-shrink:0">+2</div>
+      </div>
+      <div class="nota">Mesmo padrão já usado no card do topo (retrato-tira) — reaproveita uma linguagem visual que já existe na página, só que agora incluindo a árvore como uma das miniaturas.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>5 · Duas colunas simétricas: fotos | família<small>Metade a metade, sem hierarquia entre os dois — o mosaico ocupa 50% da largura, a árvore ocupa os outros 50%, ambos com o mesmo peso visual</small></h2>
+    <div class="tela">
+      <span class="rot">Fotos, vídeos e família</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
+        <div class="grid3">
+          <div class="foto" style="aspect-ratio:1">foto</div>
+          <div class="foto" style="aspect-ratio:1">▶</div>
+          <div class="foto" style="aspect-ratio:1">foto</div>
+          <div class="foto" style="aspect-ratio:1">foto</div>
+          <div class="foto" style="aspect-ratio:1">+2</div>
+        </div>
+        <div class="arv" style="aspect-ratio:4/3">🌳<b>Árvore genealógica</b>1 memorial · 4 na árvore<br><u>toque para abrir</u></div>
+      </div>
+      <div class="nota">A única opção onde "Família" continua lendo como assunto próprio (não vira só mais uma foto) mas sem sobrar vão, porque os dois lados são desenhados pra ocupar a mesma largura sempre.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="rodape">
+  <h3>Pra decidir</h3>
+  <ul>
+    <li><b>1 e 4</b> tratam a árvore como só mais uma peça de mídia — mais discreto, cabe fácil, mas "Família" perde destaque próprio.</li>
+    <li><b>2 e 5</b> mantêm a árvore como assunto separado, lado a lado com as fotos — resolve o vão E mantém hierarquia, mas exige a coluna da árvore crescer junto com o mosaico (senão volta o mesmo problema de hoje).</li>
+    <li><b>3</b> é a única que nunca tem vão em nenhuma quantidade de fotos, mas muda o formato de mosaico pra fileira — mais parecido com Instagram Stories que com álbum de fotos.</li>
+  </ul>
+</div>
+
+</body>
+</html>

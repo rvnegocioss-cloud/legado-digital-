@@ -656,6 +656,19 @@
   text-align:center;transition:border-color .2s ease, transform .2s ease;
 }
 .arv-card:hover{border-color:var(--perfil-borda-forte);transform:translateY(-2px)}
+
+/* Fotos+Família em 2 colunas simétricas (opção 5 dos wireframes aprovados,
+   opendesign/mockups/mosaico-familia, regra 24) -- dentro dessa coluna
+   específica o card volta a ocupar a largura inteira (sem o max-width:340
+   de teaser solto), porque aqui a largura JÁ é metade da seção, não a
+   coluna de leitura inteira. */
+.perfil-midia-familia-grid{
+  display:grid;grid-template-columns:1fr;gap:20px;align-items:start;
+}
+@media (min-width:700px){
+  .perfil-midia-familia-grid{grid-template-columns:1fr 1fr;}
+}
+.perfil-familia-coluna .arv-card{max-width:none;}
 .arv-rotu{
   display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:1.7px;
   color:var(--perfil-dourado);margin-bottom:10px;
