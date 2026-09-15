@@ -55,7 +55,15 @@
 footer.site-footer {
   border-top: 1px solid rgba(201,164,106,0.1);
   padding: 40px 24px 22px;
-  background: #081722;
+  /* var() com fallback: #081722 continua valendo em toda página que não
+     define --mem-fundo-profundo (busca/cemitérios/parceiro/landing --
+     comportamento 100% igual a antes). Só a página do memorial define essa
+     variável (troca de paleta ao vivo via SeletorTema), e só lá o rodapé
+     passa a acompanhar a cor -- sem precisar de uma regra separada (uma
+     tentativa anterior com seletor .perfil-page à parte simplesmente não
+     apareceu no CSS final de produção, bug do minificador não investigado
+     a fundo; essa abordagem de 1 arquivo só resolveu de primeira). */
+  background: var(--mem-fundo-profundo, #081722);
 }
 footer.site-footer .inner { max-width: 1180px; margin: 0 auto; }
 footer.site-footer .cols {

@@ -1,5 +1,4 @@
 import "./perfil.css";
-import Image from "next/image";
 import { MapPin } from "lucide-react";
 import SiteFooter from "@/components/public/SiteFooter";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
@@ -21,6 +20,7 @@ import TextoVerMais from "@/components/public/TextoVerMais";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { resolverBanner } from "@/lib/bannersMemorial";
 import FotoRetratoTelaCheia from "@/components/public/FotoRetratoTelaCheia";
+import VoltarLink from "@/components/public/VoltarLink";
 import { MuralMemorias } from "@/components/public/MuralMemorias";
 import { BotaoCompartilhar } from "@/components/public/BotaoCompartilhar";
 import { RailVida, type MarcoVida } from "@/components/public/RailVida";
@@ -466,15 +466,13 @@ export default async function PerfilMemorialPage({
           {/* Sem isto o memorial era um beco: quem chega pelo QR Code não tinha
               como conhecer o Legado Digital (regra 11). Logo real (regra 12),
               mesmo tamanho usado no nav das outras páginas públicas
-              (busca/cemitérios/parceiro) -- aqui só tinha texto. */}
-          <a
-            href="/"
-            aria-label="Ir para o site do Legado Digital"
+              (busca/cemitérios/parceiro). Volta pra página anterior de
+              verdade (busca, mapa do cemitério) em vez de sempre pro site --
+              pedido do Rafael. */}
+          <VoltarLink
             style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--mem-dourado, #C9A46A)" }}
-          >
-            <span style={{ fontSize: 15 }}>←</span>
-            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} style={{ height: 86, width: "auto" }} />
-          </a>
+            logoStyle={{ height: 86, width: "auto" }}
+          />
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
           <a href="#timeline" style={estiloTopo.navLink}>Linha do Tempo</a>
           <a href="#homenagens" style={estiloTopo.navLink}>Homenagens</a>

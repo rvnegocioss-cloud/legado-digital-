@@ -179,16 +179,6 @@ html {
 
 /* ===== Página do Memorial (app/homenagem/[slug]) ===== */
 
-/* O rodapé (SiteFooter, compartilhado com busca/cemitérios/parceiro) nasce
-   com fundo fixo #081722 -- certo nas outras páginas, mas aqui o memorial
-   troca de paleta ao vivo (SeletorTema: navy/verde/grafite) e o rodapé
-   ficava preso na cor antiga. Só aqui, escopado por .perfil-page (nunca em
-   site-chrome.css, que é o rodapé real das outras páginas), o fundo segue
-   a mesma variável que o resto da página já usa. */
-.perfil-page footer.site-footer {
-  background: var(--mem-fundo-profundo, #081722);
-}
-
 /* Largura do container — 520px mobile / 1100px desktop (bate com o mockup) */
 .mem-container {
   max-width: 520px;
