@@ -790,46 +790,35 @@ export default async function PerfilMemorialPage({
               entram os outros vídeos e as fotos. Antes o mesmo vídeo aparecia
               nos dois lugares.
 
-              Fotos+Família em 2 colunas simétricas (opção 5 dos wireframes
-              aprovados pelo Rafael, opendesign/mockups/mosaico-familia --
-              regra 24 do CLAUDE.md). Antes eram 2 seções separadas, a de
-              Família sozinha lá embaixo com o card retrátil boiando cercado
-              de espaço vazio. Agora dividem a mesma faixa, largura 50/50,
-              mesma altura -- nenhum dos dois cresce mais que o outro, então
-              nunca sobra vão de um lado só. */}
+              Grade única (pedido do Rafael, print anotado numerando 1-4 as
+              fotos e 5 a árvore): fotos e árvore são tiles do MESMO tamanho,
+              na MESMA grade -- não 2 colunas separadas (opção 5 anterior
+              deixava desnível de altura entre os dois lados, o próprio
+              Rafael voltou atrás depois de ver ao vivo). */}
           {(galeria.length > 0 || videosGaleria.length > 0 || arvoreAssinada) && (
             <section id="galeria" className="perfil-secao perfil-secao-midia">
               <h2 className="perfil-titulo">Fotos, vídeos e família</h2>
-              <div className="perfil-midia-familia-grid">
-                {(galeria.length > 0 || videosGaleria.length > 0) && (
-                  <GaleriaFotos fotos={galeria} videos={videosGaleria} />
-                )}
-                {arvoreAssinada && (
-                  <div id="familia" className="perfil-familia-coluna">
-                    <ArvoreFamilia dados={arvoreAssinada} />
-                    {/* Árvore ficou pequena de propósito (pedido do Rafael) --
-                        essa lista preenche o resto da coluna com conteúdo de
-                        verdade (mesmos parentes já carregados pra árvore, sem
-                        query nova), em vez de deixar vão do lado. Mesma ideia
-                        do wireframe do Pedro (texto de parentesco ao lado da
-                        prévia da árvore). */}
-                    {arvoreAssinada.parentes.length > 0 && (
-                      <ul className="perfil-familia-lista">
-                        {arvoreAssinada.parentes.map((p) => (
-                          <li key={p.id}>
-                            <span className="perfil-familia-papel">{ROTULO_PARENTESCO[p.tipo] || p.tipo}</span>
-                            {p.tem_memorial && p.slug ? (
-                              <a href={`/homenagem/${p.slug}`}>{p.nome}</a>
-                            ) : (
-                              <span>{p.nome}</span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
+              <div id="familia">
+                <GaleriaFotos
+                  fotos={galeria}
+                  videos={videosGaleria}
+                  extra={arvoreAssinada ? <ArvoreFamilia dados={arvoreAssinada} /> : null}
+                />
               </div>
+              {arvoreAssinada && arvoreAssinada.parentes.length > 0 && (
+                <ul className="perfil-familia-lista">
+                  {arvoreAssinada.parentes.map((p) => (
+                    <li key={p.id}>
+                      <span className="perfil-familia-papel">{ROTULO_PARENTESCO[p.tipo] || p.tipo}</span>
+                      {p.tem_memorial && p.slug ? (
+                        <a href={`/homenagem/${p.slug}`}>{p.nome}</a>
+                      ) : (
+                        <span>{p.nome}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           )}
 

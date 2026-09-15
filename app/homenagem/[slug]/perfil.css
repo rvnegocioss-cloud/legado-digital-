@@ -657,28 +657,27 @@
 }
 .arv-card:hover{border-color:var(--perfil-borda-forte);transform:translateY(-2px)}
 
-/* Fotos+Família em 2 colunas simétricas (opção 5 dos wireframes aprovados,
-   opendesign/mockups/mosaico-familia, regra 24) -- dentro dessa coluna
-   específica o card volta a ocupar a largura inteira (sem o max-width:340
-   de teaser solto), porque aqui a largura JÁ é metade da seção, não a
-   coluna de leitura inteira. */
-.perfil-midia-familia-grid{
-  display:grid;grid-template-columns:1fr;gap:20px;align-items:start;
+/* Grade única (pedido do Rafael, 2026-09-15: "1 ao 4 fotos, o 5 a árvore")
+   -- a árvore vira um tile do MESMO tamanho que as fotos, dentro da mesma
+   grade de GaleriaFotos.tsx (prop `extra`), não uma coluna separada. A
+   opção anterior (2 colunas simétricas) deixava desnível de altura entre
+   os dois lados -- essa versão nunca desalinha, porque é uma única grade
+   com células iguais. O card recolhido (.arv-card) preenche o tile
+   quadrado por inteiro, texto condensado pra caber. */
+.perfil-familia-tile .arv-card{
+  position:absolute;inset:0;max-width:none;width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:8px;border:0;border-radius:0;background:var(--perfil-carta-alta);
 }
-@media (min-width:700px){
-  .perfil-midia-familia-grid{grid-template-columns:1fr 1fr;}
-}
-/* Árvore encolhida (pedido do Rafael: "diminui essa árvore") -- as fotos
-   ficaram com tiles maiores (2 colunas em vez de 3, ver GaleriaFotos.tsx).
-   O card sozinho não preenche mais a coluna -- a lista de parentesco ao
-   lado é o que fecha o espaço com conteúdo de verdade, não CSS esticado. */
-.perfil-familia-coluna{
-  display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;
-}
-.perfil-familia-coluna .arv-card{max-width:280px;flex-shrink:0;}
+.perfil-familia-tile .arv-rotu{font-size:8.5px;letter-spacing:1px;margin-bottom:4px}
+.perfil-familia-tile .arv-mini{flex:1;height:auto;aspect-ratio:auto;min-height:0}
+.perfil-familia-tile .arv-abrir{font-size:9px;margin-top:4px}
+
+/* Lista de parentesco abaixo da grade -- conteúdo de verdade (mesmos dados
+   já carregados pra árvore), não decoração. */
 .perfil-familia-lista{
-  list-style:none;margin:0;padding:0;flex:1;min-width:160px;
-  display:flex;flex-direction:column;gap:10px;
+  list-style:none;margin:20px 0 0;padding:0;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 20px;
 }
 .perfil-familia-lista li{
   font-size:13px;line-height:1.4;border-bottom:1px solid var(--perfil-borda);

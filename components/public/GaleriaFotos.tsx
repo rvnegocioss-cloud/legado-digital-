@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
 
@@ -18,20 +18,27 @@ function ehVideo(url: string) {
   return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url)
 }
 
-export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?: string[] }) {
+export function GaleriaFotos({
+  fotos,
+  videos = [],
+  extra,
+}: {
+  fotos: string[]
+  videos?: string[]
+  /** Tile extra do MESMO tamanho no fim da grade -- a árvore genealógica
+   *  entra como mais um item, não como coluna separada (pedido do Rafael,
+   *  2026-09-15: "1 ao 4 fotos, o 5 a árvore", grade única). */
+  extra?: ReactNode
+}) {
   // Vídeo primeiro: é o que a família mais quer mostrar, e no mosaico ele
   // ocupa o bloco grande de abertura.
   const itens = [...videos, ...fotos]
   const [aberta, setAberta] = useState<number | null>(null)
-  // Sempre divide a largura com a árvore genealógica desde 2026-09-15 (2
-  // colunas simétricas, opção 5 dos wireframes). 2 colunas (era 3) faz os
-  // tiles maiores -- preenche a altura da coluna em vez de sobrar vão
-  // embaixo, agora que o card da árvore ao lado ficou menor.
-  const [colunas, setColunas] = useState(2)
+  const [colunas, setColunas] = useState(3)
 
   useEffect(() => {
     function ajustarColunas() {
-      setColunas(2)
+      setColunas(window.innerWidth < 700 ? 2 : 3)
     }
     ajustarColunas()
     window.addEventListener('resize', ajustarColunas)
@@ -124,6 +131,20 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
             />
           )
         })}
+        {extra && (
+          <div
+            className="perfil-familia-tile"
+            style={{
+              aspectRatio: '1',
+              borderRadius: 6,
+              border: `1px solid ${CORES.douradoBorda}`,
+              overflow: 'hidden',
+              position: 'relative',
+            }}
+          >
+            {extra}
+          </div>
+        )}
       </div>
 
       {aberta !== null && (
