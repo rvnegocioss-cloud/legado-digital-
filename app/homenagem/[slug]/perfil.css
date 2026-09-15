@@ -232,15 +232,6 @@
   background: #000;
 }
 
-/* Vídeo e galeria escapam da coluna de leitura e usam a faixa cheia do corpo:
-   presos na coluna (~870px) o vídeo ficava pequeno com a lateral vazia ao lado.
-   O resto do texto continua na largura de leitura, que é onde ela tem que ficar. */
-@media (min-width: 1024px) {
-  .perfil-secao-midia {
-    margin-right: calc(-1 * (var(--perfil-lateral) + var(--perfil-vao)));
-  }
-}
-
 .perfil-videos-grade {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -589,22 +580,15 @@
    1024px: entra a lateral.  1360px: entra a régua da vida.
    ========================================================================= */
 
+/* A lateral fixa (árvore genealógica) saiu do corpo em 2026-09-15 (pedido
+   do Rafael: "muda a árvore dali") -- virou seção própria "Família" na
+   coluna de leitura. Grid perdeu a 3ª faixa (var(--perfil-lateral)); classes
+   .perfil-lateral/.perfil-lateral-fixa ficaram sem uso, não removidas do
+   arquivo pra não quebrar se algo ainda referenciar. */
 @media (min-width: 1024px) {
   .perfil-corpo {
-    grid-template-columns: minmax(0, 1fr) var(--perfil-lateral);
+    grid-template-columns: minmax(0, 1fr);
   }
-
-  .perfil-lateral-fixa {
-    /* Sem sticky: o Rafael não quer nada deslizando junto com o scroll --
-       a lateral fica parada onde está. */
-    position: static;
-    /* Folga no topo pra lateral nunca encostar na borda da janela. */
-    top: 24px;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-
 }
 
 @media (min-width: 1360px) {
@@ -613,7 +597,7 @@
   }
 
   .perfil-corpo {
-    grid-template-columns: 56px minmax(0, 1fr) var(--perfil-lateral);
+    grid-template-columns: 56px minmax(0, 1fr);
   }
 
   .perfil-rail {

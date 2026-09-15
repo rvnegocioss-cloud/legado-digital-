@@ -635,6 +635,7 @@ export default async function PerfilMemorialPage({
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
           <a href="#timeline" style={estiloTopo.navLink}>Uma vida</a>
           <a href="#galeria" style={estiloTopo.navLink}>Fotos</a>
+          <a href="#familia" style={estiloTopo.navLink}>Família</a>
           <a href="#livro" style={estiloTopo.navLink}>Homenagens</a>
           <a href="#localizacao" style={estiloTopo.navLink}>Localização</a>
         </div>
@@ -795,6 +796,19 @@ export default async function PerfilMemorialPage({
             </section>
           )}
 
+          {/* Família saiu da lateral fixa pra virar seção própria aqui, ordem
+              do wireframe do Pedro (Sobre/Uma vida/Fotos/Família/Homenagens/
+              Localização) -- pedido do Rafael, 2026-09-15: "muda a árvore
+              dali, procura outro lugar". O componente já nasce retrátil
+              (card fechado, só abre em tela cheia no clique) -- isso não
+              mudou, só a posição na página. */}
+          {arvoreAssinada && (
+            <section id="familia" className="perfil-secao">
+              <h2 className="perfil-titulo">Família</h2>
+              <ArvoreFamilia dados={arvoreAssinada} />
+            </section>
+          )}
+
           {/* A seção "Como Chegar" que vivia aqui embaixo foi movida pro modal
               que abre do botão no topo (GuiaTumuloModal) -- pedido do Rafael,
               2026-09-11: ninguém achava rolando a página, tinha que clicar
@@ -824,16 +838,6 @@ export default async function PerfilMemorialPage({
             <AcenderVela slug={slug} velasIniciais={m.velas_acesas ?? 0} />
           </section>
         </main>
-
-        {/* ---- Lateral: o que empurrava a coluna pra baixo ------------------ */}
-        <aside className="perfil-lateral">
-          <div className="perfil-lateral-fixa">
-            {/* O próprio homenageado já é a primeira pessoa da árvore -- ela
-                aparece mesmo sem parente cadastrado ainda. */}
-            {arvoreAssinada && <ArvoreFamilia dados={arvoreAssinada} />}
-
-          </div>
-        </aside>
       </div>
 
       <SiteFooter />
