@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
 
@@ -18,32 +18,16 @@ function ehVideo(url: string) {
   return /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url)
 }
 
-export function GaleriaFotos({
-  fotos,
-  videos = [],
-  extra,
-}: {
-  fotos: string[]
-  videos?: string[]
-  /** Tile extra do MESMO tamanho no fim da grade -- a árvore genealógica
-   *  entra como mais um item, não como coluna separada (pedido do Rafael,
-   *  2026-09-15: "1 ao 4 fotos, o 5 a árvore", grade única). */
-  extra?: ReactNode
-}) {
+export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?: string[] }) {
   // Vídeo primeiro: é o que a família mais quer mostrar, e no mosaico ele
   // ocupa o bloco grande de abertura.
   const itens = [...videos, ...fotos]
   const [aberta, setAberta] = useState<number | null>(null)
-  const [colunas, setColunas] = useState(3)
-
-  useEffect(() => {
-    function ajustarColunas() {
-      setColunas(window.innerWidth < 700 ? 2 : 3)
-    }
-    ajustarColunas()
-    window.addEventListener('resize', ajustarColunas)
-    return () => window.removeEventListener('resize', ajustarColunas)
-  }, [])
+  // 2 colunas = tiles grandes, e a conta fecha sozinha com qualquer
+  // quantidade PAR de fotos (4 fotos = 2 fileiras cheias). A árvore saiu
+  // da grade de propósito (faixa própria embaixo, ver page.tsx) -- enquanto
+  // ela era o 5º tile, 5 itens em 3 colunas sempre deixavam 1 célula vazia.
+  const [colunas] = useState(2)
 
   useEffect(() => {
     if (aberta === null) return
@@ -131,20 +115,6 @@ export function GaleriaFotos({
             />
           )
         })}
-        {extra && (
-          <div
-            className="perfil-familia-tile"
-            style={{
-              aspectRatio: '1',
-              borderRadius: 6,
-              border: `1px solid ${CORES.douradoBorda}`,
-              overflow: 'hidden',
-              position: 'relative',
-            }}
-          >
-            {extra}
-          </div>
-        )}
       </div>
 
       {aberta !== null && (

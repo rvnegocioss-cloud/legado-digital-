@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mosaico de fotos + árvore genealógica — 5 estruturas</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f7f5f0;color:#1c1c1c;font-family:'Kalam','Comic Sans MS',cursive}
+
+  header{padding:24px 24px 4px;text-align:center}
+  header h1{margin:0;font-size:26px;font-weight:700}
+  header p{margin:6px auto 0;font-size:14px;color:#555;max-width:760px;line-height:1.5}
+
+  .conta{
+    max-width:760px;margin:14px auto 0;background:#fff;border:2.5px solid #1c1c1c;
+    border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.6;
+  }
+  .conta b{background:#ffd76e;padding:0 4px}
+
+  .grade{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));
+    gap:26px;padding:22px 24px 60px;max-width:1700px;margin:0 auto;
+  }
+
+  .opcao{background:#fff;border:2.5px solid #1c1c1c;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .opcao > h2{margin:0;padding:10px 14px;font-size:17px;border-bottom:2.5px solid #1c1c1c;background:#f0ede6}
+  .opcao > h2 small{display:block;font-size:12.5px;font-weight:400;color:#555;margin-top:2px}
+  .tela{padding:16px;flex:1}
+
+  .rot{font-size:11px;color:#666;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+
+  .g{display:grid;gap:7px}
+  .cel{
+    border:2px solid #1c1c1c;border-radius:6px;min-height:64px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;color:#555;
+    background:repeating-linear-gradient(45deg,#fff,#fff 7px,#f2f0ea 7px,#f2f0ea 14px);
+  }
+  .cel.arv{
+    background:#fdf6e3;color:#1c1c1c;font-weight:700;border-width:3px;
+    flex-direction:column;gap:2px;text-align:center;line-height:1.2;
+  }
+  .cel.arv small{font-weight:400;font-size:10.5px;color:#666}
+  .cel.buraco{
+    border-style:dashed;border-color:#c00;color:#c00;font-weight:700;
+    background:repeating-linear-gradient(45deg,#fff5f5,#fff5f5 7px,#ffe9e9 7px,#ffe9e9 14px);
+  }
+
+  .nota{font-size:11.5px;color:#444;background:#fffbe8;border-left:3px solid #ffd76e;padding:7px 10px;margin-top:12px;line-height:1.5}
+  .nota.ruim{background:#fff3f3;border-left-color:#c00}
+  .selo{
+    display:inline-block;font-size:10.5px;background:#1c1c1c;color:#fff;
+    border-radius:20px;padding:2px 10px;margin-bottom:8px;
+  }
+  .selo.hoje{background:#c00}
+
+  .rodape{padding:0 24px 60px;max-width:900px;margin:0 auto;font-size:13.5px;color:#444;line-height:1.6}
+  .rodape h3{font-size:16px;margin:0 0 8px}
+  .rodape li{margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mosaico de fotos + árvore genealógica</h1>
+  <p>Pedido: as fotos e a árvore na mesma grade, mesmo tamanho — "1 ao 4 fotos, o 5 a árvore". O que está no ar agora tem um buraco, e a causa é aritmética, não estilo.</p>
+</header>
+
+<div class="conta">
+  <b>A conta:</b> hoje são <b>4 fotos + 1 árvore = 5 células</b> numa grade de <b>3 colunas</b>.
+  5 ÷ 3 = 1 fileira cheia + 2 células na segunda → <b>sobra 1 célula vazia</b>. Sempre.
+  Grade só fecha sem buraco quando o total de células é múltiplo do número de colunas:
+  com 3 colunas precisa de 3, 6, 9…; com 2 colunas, 4, 6, 8…; com 5 colunas, 5, 10…
+  As opções abaixo resolvem isso de jeitos estruturalmente diferentes.
+</div>
+
+<div class="grade">
+
+  <div class="opcao">
+    <h2>0 · O que está no ar agora (referência do problema)<small>4 fotos + árvore, 3 colunas — o buraco é a 6ª célula que ninguém preenche</small></h2>
+    <div class="tela">
+      <span class="selo hoje">no ar hoje</span>
+      <div class="g" style="grid-template-columns:repeat(3,1fr)">
+        <div class="cel">foto 1</div>
+        <div class="cel">foto 2</div>
+        <div class="cel">foto 3</div>
+        <div class="cel">foto 4</div>
+        <div class="cel arv">árvore <small>item 5</small></div>
+        <div class="cel buraco">buraco</div>
+      </div>
+      <div class="nota ruim">5 itens em 3 colunas nunca fecha. Só some o buraco se mudar o número de colunas, o número de células ocupadas, ou o que entra na última posição.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>1 · Árvore ocupa 2 células<small>Ela vira o item largo do fim da fileira — 4 fotos + árvore(2) = 6 células em 3 colunas</small></h2>
+    <div class="tela">
+      <span class="selo">6 células · 3 colunas · fecha certo</span>
+      <div class="g" style="grid-template-columns:repeat(3,1fr)">
+        <div class="cel">foto 1</div>
+        <div class="cel">foto 2</div>
+        <div class="cel">foto 3</div>
+        <div class="cel">foto 4</div>
+        <div class="cel arv" style="grid-column:span 2">árvore <small>ocupa 2 colunas</small></div>
+      </div>
+      <div class="nota">Conta fecha com qualquer número PAR de fotos. Com número ímpar de fotos volta a sobrar — daria pra resolver mandando a árvore ocupar 1 ou 2 células conforme a paridade.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>2 · Tudo numa fileira só<small>5 colunas, 5 itens — a árvore é a última coluna, nenhuma segunda fileira pra sobrar</small></h2>
+    <div class="tela">
+      <span class="selo">5 células · 5 colunas · fecha certo</span>
+      <div class="g" style="grid-template-columns:repeat(5,1fr)">
+        <div class="cel" style="min-height:90px">foto 1</div>
+        <div class="cel" style="min-height:90px">foto 2</div>
+        <div class="cel" style="min-height:90px">foto 3</div>
+        <div class="cel" style="min-height:90px">foto 4</div>
+        <div class="cel arv" style="min-height:90px">árvore</div>
+      </div>
+      <div class="nota">Nunca tem buraco com qualquer quantidade, porque as colunas acompanham a quantidade de itens. Em troca, os tiles ficam menores e no celular vira rolagem lateral.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>3 · Árvore grande (2×2) com fotos ao redor<small>Árvore em destaque ocupando 4 células + 4 fotos = 8 células em 4 colunas</small></h2>
+    <div class="tela">
+      <span class="selo">8 células · 4 colunas · fecha certo</span>
+      <div class="g" style="grid-template-columns:repeat(4,1fr)">
+        <div class="cel arv" style="grid-column:span 2;grid-row:span 2">árvore <small>destaque 2×2</small></div>
+        <div class="cel">foto 1</div>
+        <div class="cel">foto 2</div>
+        <div class="cel">foto 3</div>
+        <div class="cel">foto 4</div>
+      </div>
+      <div class="nota">A árvore volta a ser o elemento mais pesado da seção (era o que você quis diminuir antes) — fica aqui só como alternativa estrutural, não como recomendação.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>4 · Fotos em bloco fechado + árvore como faixa embaixo<small>Fotos 2×2 (fecha sozinho) e a árvore numa faixa larga própria, largura cheia</small></h2>
+    <div class="tela">
+      <span class="selo">4 células · 2 colunas + faixa · fecha certo</span>
+      <div class="g" style="grid-template-columns:repeat(2,1fr)">
+        <div class="cel" style="min-height:74px">foto 1</div>
+        <div class="cel" style="min-height:74px">foto 2</div>
+        <div class="cel" style="min-height:74px">foto 3</div>
+        <div class="cel" style="min-height:74px">foto 4</div>
+      </div>
+      <div class="cel arv" style="margin-top:7px;min-height:58px">árvore genealógica <small>faixa de largura cheia — clique abre a árvore</small></div>
+      <div class="nota">Fotos e árvore param de disputar a mesma régua: o bloco de fotos fecha sozinho (qualquer quantidade par) e a árvore nunca depende da conta das fotos.</div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>5 · Colunas acompanham a quantidade<small>Sem número fixo de colunas: o código escolhe o divisor que fecha (4 fotos+árvore = 5 → 5 col; 5 fotos+árvore = 6 → 3 col)</small></h2>
+    <div class="tela">
+      <span class="selo">regra, não layout fixo</span>
+      <div class="g" style="grid-template-columns:repeat(3,1fr);margin-bottom:9px">
+        <div class="cel">foto 1</div>
+        <div class="cel">foto 2</div>
+        <div class="cel">foto 3</div>
+        <div class="cel">foto 4</div>
+        <div class="cel">foto 5</div>
+        <div class="cel arv">árvore</div>
+      </div>
+      <p style="font-size:11.5px;color:#666;margin:0 0 8px">6 itens → 3 colunas, 2 fileiras cheias</p>
+      <div class="g" style="grid-template-columns:repeat(4,1fr)">
+        <div class="cel">foto 1</div>
+        <div class="cel">foto 2</div>
+        <div class="cel">foto 3</div>
+        <div class="cel arv">árvore</div>
+      </div>
+      <p style="font-size:11.5px;color:#666;margin:8px 0 0">4 itens → 4 colunas, 1 fileira cheia</p>
+      <div class="nota">Regra fixa: escolher o número de colunas a partir do total de itens (nunca o contrário). Nunca sobra célula em nenhuma quantidade, mas o tamanho dos tiles muda conforme a família sobe ou remove foto.</div>
+    </div>
+  </div>
+
+  <div class="opcao" style="border-color:#1d7a3c">
+    <h2 style="background:#eaf6ee;border-bottom-color:#1d7a3c">6 · Fotos grandes + árvore pequena no fim<small>Ideia do Rafael: as 4 fotos ganham o espaço todo (2 colunas, tiles grandes) e a árvore fica como peça pequena no fim, fora da conta da grade</small></h2>
+    <div class="tela">
+      <span class="selo" style="background:#1d7a3c">4 fotos grandes · árvore pequena · sem buraco</span>
+      <div class="g" style="grid-template-columns:repeat(2,1fr)">
+        <div class="cel" style="min-height:104px">foto 1 <small style="color:#888">&nbsp;(grande)</small></div>
+        <div class="cel" style="min-height:104px">foto 2</div>
+        <div class="cel" style="min-height:104px">foto 3</div>
+        <div class="cel" style="min-height:104px">foto 4</div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:9px;align-items:stretch">
+        <div class="cel arv" style="width:120px;flex-shrink:0;min-height:74px;font-size:11px">árvore <small>pequena</small></div>
+        <div style="flex:1;border:2px dashed #1c1c1c;border-radius:6px;padding:8px 10px;font-size:11.5px;color:#555;line-height:1.5">
+          <b style="font-size:10.5px;letter-spacing:1px">MÃE</b> Orlandina "Dica" Saraiva<br>
+          <b style="font-size:10.5px;letter-spacing:1px">PAI</b> Gumercindo Saraiva Kappel
+          <div style="font-size:10.5px;color:#888;margin-top:4px">lista de parentesco ocupa o resto da faixa</div>
+        </div>
+      </div>
+      <div class="nota">As fotos fecham sozinhas (4 em 2 colunas = 2 fileiras cheias, sem sobra) e a árvore sai da conta da grade — vira uma peça pequena numa faixa própria, com a lista de parentesco preenchendo o resto da linha. Buraco impossível: nenhuma das duas partes depende da quantidade da outra.</div>
+      <div class="nota" style="background:#eaf6ee;border-left-color:#1d7a3c">Variação: se a família não tiver parentesco cadastrado, a faixa da árvore fica só com a árvore pequena à esquerda e o espaço à direita vira o botão "abrir a árvore" em texto — continua sem célula vazia, porque é faixa livre, não grade.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="rodape">
+  <h3>Resumo pra escolher</h3>
+  <ul>
+    <li><b>1</b> mantém o desenho de hoje e só alarga a árvore — a mudança menor possível.</li>
+    <li><b>2</b> nunca tem buraco em nenhuma quantidade, mas encolhe todo mundo.</li>
+    <li><b>3</b> dá destaque à árvore de novo (o oposto do "diminui a árvore").</li>
+    <li><b>4</b> separa as duas contas — fotos fecham entre si, árvore vira faixa independente.</li>
+    <li><b>5</b> é regra de código, não layout: colunas derivadas da quantidade, buraco impossível por construção.</li>
+  </ul>
+</div>
+
+</body>
+</html>

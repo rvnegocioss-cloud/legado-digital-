@@ -790,34 +790,38 @@ export default async function PerfilMemorialPage({
               entram os outros vídeos e as fotos. Antes o mesmo vídeo aparecia
               nos dois lugares.
 
-              Grade única (pedido do Rafael, print anotado numerando 1-4 as
-              fotos e 5 a árvore): fotos e árvore são tiles do MESMO tamanho,
-              na MESMA grade -- não 2 colunas separadas (opção 5 anterior
-              deixava desnível de altura entre os dois lados, o próprio
-              Rafael voltou atrás depois de ver ao vivo). */}
+              Fotos grandes + árvore pequena no fim (opção 6 dos wireframes,
+              opendesign/mockups/mosaico-arvore -- ideia do próprio Rafael).
+              As fotos ficam em 2 colunas de tiles grandes e fecham sozinhas
+              (4 fotos = 2 fileiras cheias); a árvore SAI da grade e vira uma
+              peça pequena numa faixa própria embaixo, com a lista de
+              parentesco preenchendo o resto da linha. Enquanto a árvore era
+              o 5º tile da grade, 5 itens em 3 colunas sempre deixavam uma
+              célula vazia -- a conta nunca fechava. */}
           {(galeria.length > 0 || videosGaleria.length > 0 || arvoreAssinada) && (
             <section id="galeria" className="perfil-secao perfil-secao-midia">
               <h2 className="perfil-titulo">Fotos, vídeos e família</h2>
-              <div id="familia">
-                <GaleriaFotos
-                  fotos={galeria}
-                  videos={videosGaleria}
-                  extra={arvoreAssinada ? <ArvoreFamilia dados={arvoreAssinada} /> : null}
-                />
-              </div>
-              {arvoreAssinada && arvoreAssinada.parentes.length > 0 && (
-                <ul className="perfil-familia-lista">
-                  {arvoreAssinada.parentes.map((p) => (
-                    <li key={p.id}>
-                      <span className="perfil-familia-papel">{ROTULO_PARENTESCO[p.tipo] || p.tipo}</span>
-                      {p.tem_memorial && p.slug ? (
-                        <a href={`/homenagem/${p.slug}`}>{p.nome}</a>
-                      ) : (
-                        <span>{p.nome}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+              {(galeria.length > 0 || videosGaleria.length > 0) && (
+                <GaleriaFotos fotos={galeria} videos={videosGaleria} />
+              )}
+              {arvoreAssinada && (
+                <div id="familia" className="perfil-familia-faixa">
+                  <ArvoreFamilia dados={arvoreAssinada} />
+                  {arvoreAssinada.parentes.length > 0 && (
+                    <ul className="perfil-familia-lista">
+                      {arvoreAssinada.parentes.map((p) => (
+                        <li key={p.id}>
+                          <span className="perfil-familia-papel">{ROTULO_PARENTESCO[p.tipo] || p.tipo}</span>
+                          {p.tem_memorial && p.slug ? (
+                            <a href={`/homenagem/${p.slug}`}>{p.nome}</a>
+                          ) : (
+                            <span>{p.nome}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               )}
             </section>
           )}
