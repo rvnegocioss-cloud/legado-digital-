@@ -87,6 +87,10 @@ interface Gaveta {
   coluna: number
   homenagem_id: string | null
   homenagens: { id: string; nome_completo: string; foto_url: string | null; slug: string | null } | null
+  // Pessoa enterrada sem memorial digital ainda (ex: parente antigo que a
+  // família cadastrou pelo nome). Fica vazio quando homenagem_id é
+  // preenchido -- a pessoa "virou" memorial (2026-09-15).
+  nome_sem_memorial: string | null
 }
 
 // Ancoras visuais do mapa impresso da prefeitura (Capela, Administracao,
@@ -194,7 +198,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   // sem sair do mapa. lapide null = clicou em espaco vazio (cria avulso).
   const router = useRouter()
   const [menuContexto, setMenuContexto] = useState<{ x: number; y: number; lapide: Lapide | null; lat: number; lng: number } | null>(null)
-  const [cadastroMemorial, setCadastroMemorial] = useState<{ lapide: Lapide; nome: string; preenchidoPor: 'funeraria' | 'familia' } | null>(null)
+  // gavetaId opcional: quando vem de um nome sem memorial já ocupando uma
+  // gaveta, o memorial novo tem que nascer NESSA gaveta (não numa livre
+  // qualquer) -- é a mesma pessoa virando memorial, não uma pessoa a mais.
+  const [cadastroMemorial, setCadastroMemorial] = useState<{ lapide: Lapide; nome: string; preenchidoPor: 'funeraria' | 'familia'; gavetaId?: string } | null>(null)
   // Vincular memorial que JA existe no cadastro a este tumulo -- busca por
   // nome no banco (nao lista tudo em memoria: memorial e a tabela que mais
   // cresce, e o cemiterio pode ter dezenas de milhares).
@@ -341,7 +348,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       // vem a lista de TODOS os memoriais de um jazigo, não só o primeiro.
       supabase
         .from('gavetas')
-        .select('id, lapide_id, codigo, linha, coluna, homenagem_id, homenagens(id, nome_completo, foto_url, slug), lapides!inner(cemiterio_id)')
+        .select('id, lapide_id, codigo, linha, coluna, homenagem_id, nome_sem_memorial, homenagens(id, nome_completo, foto_url, slug), lapides!inner(cemiterio_id)')
         .eq('lapides.cemiterio_id', cemiterioId)
         .order('linha', { ascending: true }),
     ])
@@ -923,8 +930,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       setMsg('Nome completo é obrigatório.')
       return
     }
-    const gavetaLivre = (gavetasPorJazigo.get(cadastroMemorial.lapide.id) || []).find((g) => !g.homenagem_id)
-    if (!gavetaLivre) {
+    // Se veio de um nome sem memorial, a gaveta é a dele mesmo (a pessoa
+    // "vira" memorial, não é gente a mais) -- senão, pega a primeira livre.
+    const gavetaAlvo = cadastroMemorial.gavetaId
+      ? gavetas.find((g) => g.id === cadastroMemorial.gavetaId)
+      : (gavetasPorJazigo.get(cadastroMemorial.lapide.id) || []).find((g) => !g.homenagem_id && !g.nome_sem_memorial)
+    if (!gavetaAlvo) {
       setMsg('Esse jazigo não tem gaveta livre — crie mais uma em Jazigos → Gavetas antes de cadastrar.')
       return
     }
@@ -953,7 +964,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       return
     }
 
-    const { error: erroGaveta } = await supabase.from('gavetas').update({ homenagem_id: data.id }).eq('id', gavetaLivre.id)
+    const { error: erroGaveta } = await supabase
+      .from('gavetas')
+      .update({ homenagem_id: data.id, nome_sem_memorial: null })
+      .eq('id', gavetaAlvo.id)
     if (erroGaveta) {
       setMsg(`Memorial criado, mas não consegui vincular na gaveta: ${erroGaveta.message}`)
       setSalvando(false)
@@ -961,7 +975,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }
 
     setMsg(
-      `Memorial de ${nome} criado no jazigo ${cadastroMemorial.lapide.identificacao} (${gavetaLivre.codigo}). ` +
+      `Memorial de ${nome} criado no jazigo ${cadastroMemorial.lapide.identificacao} (${gavetaAlvo.codigo}). ` +
         (cadastroMemorial.preenchidoPor === 'familia'
           ? 'Aguardando a família preencher o resto.'
           : 'Falta completar os dados — aparece no alerta do Dashboard.')
@@ -1020,6 +1034,23 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }
     setMsg(`"${nomeMemorial}" desvinculado.`)
     await carregar()
+    setSalvando(false)
+  }
+
+  // Nome sem memorial: gente enterrada no jazigo que ainda não tem página
+  // digital (ex: parente antigo). Aparece no card como texto simples, com
+  // atalho pra virar memorial de verdade depois (2026-09-15).
+  async function adicionarNomeSemMemorial(lapideId: string, gavetaId: string) {
+    const nome = prompt('Nome de quem está enterrado aqui (sem criar memorial ainda):')?.trim()
+    if (!nome) return
+    setSalvando(true)
+    setMsg('')
+    const { error } = await supabase.from('gavetas').update({ nome_sem_memorial: nome }).eq('id', gavetaId)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(`"${nome}" adicionado ao jazigo.`)
+      await carregar()
+    }
     setSalvando(false)
   }
 
@@ -2516,7 +2547,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       {homenagemPorLapide.get(lapideHover.id) ? (
                         <>
                           <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
-                            Homenageado(a)
+                            Jazigo
                           </p>
                           <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
                             {homenagemPorLapide.get(lapideHover.id)?.nome_completo}
@@ -2554,7 +2585,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       // a lista vem de gavetas, não mais de um único campo
                       // (2026-09-15, correção pedida pelo Rafael).
                       const memoriaisDoJazigo = memoriaisPorJazigo.get(lapideSelecionada.id) || []
-                      const gavetasLivres = (gavetasPorJazigo.get(lapideSelecionada.id) || []).filter((g) => !g.homenagem_id)
+                      const todasGavetas = gavetasPorJazigo.get(lapideSelecionada.id) || []
+                      // Sem memorial e sem nome ainda = de verdade livre, pra
+                      // "criar aqui" ou "vincular existente". Gaveta com só
+                      // nome já está ocupada por alguém (2026-09-15).
+                      const gavetasLivres = todasGavetas.filter((g) => !g.homenagem_id && !g.nome_sem_memorial)
+                      const nomesSemMemorial = todasGavetas.filter((g) => !g.homenagem_id && g.nome_sem_memorial)
                       return (
                         <>
                           <p style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
@@ -2563,7 +2599,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                             {lapideSelecionada.lote && ` L${lapideSelecionada.lote}`}
                           </p>
 
-                          {memoriaisDoJazigo.length > 0 ? (
+                          {memoriaisDoJazigo.length > 0 || nomesSemMemorial.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '6px 0' }}>
                               {memoriaisDoJazigo.map(({ gaveta, homenagem }) => (
                                 <div key={gaveta.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -2571,7 +2607,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                     <a href={`/admin/memoriais/${homenagem.id}`} style={{ fontSize: 12, fontWeight: 600, color: 'inherit' }}>
                                       {homenagem.nome_completo}
                                     </a>
-                                    <p style={{ fontSize: 10, color: '#888', margin: 0 }}>{gaveta.codigo}</p>
+                                    {editavel && <p style={{ fontSize: 10, color: '#888', margin: 0 }}>{gaveta.codigo}</p>}
                                   </div>
                                   {editavel && (
                                     <button
@@ -2580,6 +2616,30 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                       style={{ fontSize: 10, color: '#c00', background: 'none', border: 'none', padding: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
                                     >
                                       Desvincular
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+                              {/* Gente enterrada ali sem memorial digital ainda --
+                                  aparece só o nome, com atalho pra criar o
+                                  memorial já vinculado na mesma gaveta
+                                  (2026-09-15). */}
+                              {nomesSemMemorial.map((gaveta) => (
+                                <div key={gaveta.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                  <div>
+                                    <p style={{ fontSize: 12, margin: 0, color: '#ccc' }}>{gaveta.nome_sem_memorial}</p>
+                                    {editavel && <p style={{ fontSize: 10, color: '#888', margin: 0 }}>{gaveta.codigo} · sem memorial</p>}
+                                  </div>
+                                  {editavel && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setCadastroMemorial({ lapide: lapideSelecionada, nome: gaveta.nome_sem_memorial || '', preenchidoPor: 'familia', gavetaId: gaveta.id })
+                                        setLapideSelecionada(null)
+                                      }}
+                                      style={{ fontSize: 10, color: '#a15c00', background: 'none', border: 'none', padding: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                    >
+                                      Criar memorial
                                     </button>
                                   )}
                                 </div>
@@ -2630,6 +2690,21 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                 }}
                               >
                                 Vincular memorial existente
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => adicionarNomeSemMemorial(lapideSelecionada.id, gavetasLivres[0].id)}
+                                style={{
+                                  fontSize: 12,
+                                  color: '#888',
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: 0,
+                                  textAlign: 'left',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                + Adicionar nome (sem memorial)
                               </button>
                             </div>
                           )}
@@ -2692,17 +2767,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           )}
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-                            <a
-                              href={
-                                modo === 'leitura'
-                                  ? `/parceiro/cemiterios/${cemiterioId}/lapides/${lapideSelecionada.id}/gavetas-3d`
-                                  : `/admin/cemiterios/${cemiterioId}/lapides/${lapideSelecionada.id}/gavetas-3d`
-                              }
-                              style={{ fontSize: 12, color: '#0B5FFF' }}
-                            >
-                              Gavetas 3D →
-                            </a>
-                            {/* Atalho direto pro cadastro: sem ele a pessoa sai
+                            {/* Gavetas 3D saiu do card do mapa (pedido do Rafael,
+                                2026-09-15) -- fica só dentro da tela do Jazigo
+                                em Cemitérios, não precisa duplicar aqui.
+                                Atalho direto pro cadastro: sem ele a pessoa sai
                                 do mapa e procura o túmulo de novo no menu. */}
                             {modo !== 'leitura' && (
                               <a
@@ -2946,9 +3014,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             {cadastroMemorial && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
                 <div className="w-full max-w-sm rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-700)] p-4">
-                  <h3 className="text-sm font-semibold text-white mb-1">Cadastrar memorial</h3>
+                  <h3 className="text-sm font-semibold text-white mb-1">
+                    {cadastroMemorial.gavetaId ? 'Criar memorial' : 'Cadastrar memorial'}
+                  </h3>
                   <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
-                    Túmulo {cadastroMemorial.lapide.identificacao}. Só o nome é obrigatório agora — o resto (datas, foto, história) você completa
+                    Jazigo {cadastroMemorial.lapide.identificacao}. Só o nome é obrigatório agora — o resto (datas, foto, história) você completa
                     depois na ficha.
                   </p>
 
