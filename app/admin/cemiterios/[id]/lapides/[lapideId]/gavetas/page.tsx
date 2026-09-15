@@ -19,15 +19,21 @@ interface Gaveta {
   linha: number
   coluna: number
   homenagem_id: string | null
+  nome_sem_memorial: string | null
   observacoes: string | null
   homenagens: Homenagem | null
 }
 
-const FORM_INICIAL = { codigo: '', linha: '1', coluna: '1', homenagem_id: '', observacoes: '' }
+const FORM_INICIAL = { codigo: '', linha: '1', coluna: '1', homenagem_id: '', nome_sem_memorial: '', observacoes: '' }
 
 export default function GavetasLapide() {
   const { id, lapideId } = useParams<{ id: string; lapideId: string }>()
+  const [lapideCodigo, setLapideCodigo] = useState('')
+  // Nome do jazigo ("Jazigo Família Saraiva") -- é o título do card do mapa,
+  // e esta é a única tela onde ele se edita (2026-09-15).
   const [lapideNome, setLapideNome] = useState('')
+  const [editandoNome, setEditandoNome] = useState(false)
+  const [nomeInput, setNomeInput] = useState('')
   const [gavetas, setGavetas] = useState<Gaveta[]>([])
   const [homenagens, setHomenagens] = useState<Homenagem[]>([])
   const [loading, setLoading] = useState(true)
@@ -38,12 +44,13 @@ export default function GavetasLapide() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data: lapide } = await supabase.from('lapides').select('identificacao').eq('id', lapideId).single()
-    setLapideNome(lapide?.identificacao || '')
+    const { data: lapide } = await supabase.from('lapides').select('identificacao, nome').eq('id', lapideId).single()
+    setLapideCodigo(lapide?.identificacao || '')
+    setLapideNome(lapide?.nome || '')
 
     const { data } = await supabase
       .from('gavetas')
-      .select('id, codigo, linha, coluna, homenagem_id, observacoes, homenagens(id, nome_completo, slug)')
+      .select('id, codigo, linha, coluna, homenagem_id, nome_sem_memorial, observacoes, homenagens(id, nome_completo, slug)')
       .eq('lapide_id', lapideId)
       .order('linha', { ascending: true })
       .order('coluna', { ascending: true })
@@ -73,11 +80,14 @@ export default function GavetasLapide() {
     setSalvando(true)
     setErro('')
 
+    // Memorial vinculado manda: quem virou memorial não é mais "só um nome"
+    // -- guardar os dois faria a mesma pessoa aparecer duas vezes no card.
     const payload = {
       codigo: form.codigo,
       linha: parseInt(form.linha, 10) || 1,
       coluna: parseInt(form.coluna, 10) || 1,
       homenagem_id: form.homenagem_id || null,
+      nome_sem_memorial: form.homenagem_id ? null : form.nome_sem_memorial.trim() || null,
       observacoes: form.observacoes || null,
     }
 
@@ -104,9 +114,23 @@ export default function GavetasLapide() {
       linha: String(g.linha),
       coluna: String(g.coluna),
       homenagem_id: g.homenagem_id || '',
+      nome_sem_memorial: g.nome_sem_memorial || '',
       observacoes: g.observacoes || '',
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function salvarNomeJazigo() {
+    const nome = nomeInput.trim()
+    setSalvando(true)
+    setErro('')
+    const { error } = await supabase.from('lapides').update({ nome: nome || null }).eq('id', lapideId)
+    if (error) setErro(error.message)
+    else {
+      setLapideNome(nome)
+      setEditandoNome(false)
+    }
+    setSalvando(false)
   }
 
   function cancelarEdicao() {
@@ -128,7 +152,7 @@ export default function GavetasLapide() {
         ← Voltar pra Jazigos
       </Link>
       <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-white">Gavetas — {lapideNome}</h1>
+        <h1 className="text-2xl font-bold text-white">{lapideNome || `Jazigo ${lapideCodigo}`}</h1>
         <Link
           href={`/admin/cemiterios/${id}/lapides/${lapideId}/gavetas-3d`}
           className="text-sm font-medium px-3 py-1.5 rounded-lg"
@@ -137,8 +161,50 @@ export default function GavetasLapide() {
           Ver Gavetas 3D →
         </Link>
       </div>
+
+      {/* Nome do jazigo: é o título que aparece no card do mapa. Sem nome, o
+          card cai no código técnico (Q36-R01-T011), que não diz nada pra quem
+          olha (2026-09-15). */}
+      {editandoNome ? (
+        <div className="flex items-center gap-2 mb-2 max-w-lg">
+          <Input
+            autoFocus
+            placeholder="Ex: Jazigo Família Saraiva"
+            value={nomeInput}
+            onChange={(e) => setNomeInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') salvarNomeJazigo()
+              if (e.key === 'Escape') setEditandoNome(false)
+            }}
+            className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
+          />
+          <Button type="button" onClick={salvarNomeJazigo} disabled={salvando}>
+            Salvar
+          </Button>
+          <button type="button" onClick={() => setEditandoNome(false)} className="text-sm text-[var(--tema-zinc-400)] hover:text-white">
+            Cancelar
+          </button>
+        </div>
+      ) : (
+        <p className="text-[var(--tema-zinc-400)] text-sm mb-2">
+          Código do jazigo: {lapideCodigo} ·{' '}
+          <button
+            type="button"
+            onClick={() => {
+              setNomeInput(lapideNome)
+              setEditandoNome(true)
+            }}
+            className="underline"
+            style={{ color: '#C9A46A' }}
+          >
+            {lapideNome ? 'Renomear jazigo' : 'Dar nome ao jazigo'}
+          </button>
+        </p>
+      )}
+
       <p className="text-[var(--tema-zinc-400)] text-sm mb-8">
-        Cada gaveta é uma posição física dentro do jazigo. Vincule um memorial já cadastrado pra marcar quem está ali.
+        Cada gaveta é uma posição física dentro do jazigo. Vincule um memorial já cadastrado pra marcar quem está ali — ou,
+        se a pessoa ainda não tem memorial, escreva só o nome dela.
       </p>
 
       <form onSubmit={salvar} className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 mb-8 space-y-3 max-w-lg">
@@ -201,6 +267,23 @@ export default function GavetasLapide() {
               : 'Só aparecem os memoriais já vinculados a este túmulo.'}
           </p>
         </div>
+        {/* Quem está enterrado ali mas ainda não tem memorial digital (parente
+            antigo, por exemplo). Aparece no card do mapa como texto, sem link.
+            Some quando a gaveta ganha memorial -- é a mesma pessoa. */}
+        {!form.homenagem_id && (
+          <div>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome de quem está aqui (sem memorial ainda)</label>
+            <Input
+              placeholder="Ex: Maria Saraiva"
+              value={form.nome_sem_memorial}
+              onChange={(e) => setForm({ ...form, nome_sem_memorial: e.target.value })}
+              className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
+            />
+            <p className="text-[11px] text-[var(--tema-zinc-500)] mt-1">
+              Aparece no mapa junto com os outros do jazigo. Deixe vazio se a gaveta está vaga.
+            </p>
+          </div>
+        )}
         <div>
           <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Observações</label>
           <Input
@@ -248,6 +331,11 @@ export default function GavetasLapide() {
                       <Link href={`/homenagem/${g.homenagens.slug}`} className="hover:underline" style={{ color: '#C9A46A' }}>
                         {g.homenagens.nome_completo}
                       </Link>
+                    ) : g.nome_sem_memorial ? (
+                      <span className="text-[var(--tema-zinc-300)]">
+                        {g.nome_sem_memorial}
+                        <span className="text-[var(--tema-zinc-500)] text-xs"> · sem memorial</span>
+                      </span>
                     ) : (
                       <span className="text-[var(--tema-zinc-500)]">Vaga</span>
                     )}

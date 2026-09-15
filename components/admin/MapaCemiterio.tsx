@@ -54,6 +54,9 @@ interface Cemiterio {
 interface Lapide {
   id: string
   identificacao: string
+  // Nome do jazigo ("Jazigo Família Saraiva") -- é o título do card do mapa.
+  // Vazio cai no código técnico (2026-09-15).
+  nome: string | null
   codigo: string | null
   quadra: string | null
   lote: string | null
@@ -176,7 +179,6 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [modoTestarRota, setModoTestarRota] = useState(false)
   const [rotaTeste, setRotaTeste] = useState<ResultadoRota | null>(null)
   const [lapideSelecionada, setLapideSelecionada] = useState<Lapide | null>(null)
-  const [lapideHover, setLapideHover] = useState<Lapide | null>(null)
   const [temMemorialGeo, setTemMemorialGeo] = useState<Record<string, boolean>>({})
   const [modoMarcar, setModoMarcar] = useState(false)
   const [lapideParaMarcar, setLapideParaMarcar] = useState<Lapide | null>(null)
@@ -327,7 +329,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .single(),
       supabase
         .from('lapides')
-        .select('id, identificacao, codigo, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero, foto_face_url, gps_referencia_latitude, gps_referencia_longitude')
+        .select('id, identificacao, nome, codigo, quadra, lote, latitude, longitude, coordenada_origem, fila_id, numero, foto_face_url, gps_referencia_latitude, gps_referencia_longitude')
         .eq('cemiterio_id', cemiterioId)
         .limit(20000),
       // Relação nomeada (!homenagens_lapide_id_fkey): desde que lapides ganhou
@@ -860,23 +862,14 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     const feature = e.features?.[0]
     if (feature?.properties?.lapideId) {
       const lapide = lapides.find((l) => l.id === feature.properties!.lapideId)
-      if (lapide) setLapideSelecionada(lapide)
+      // Card só abre em jazigo que JÁ tem memorial (pedido do Rafael,
+      // 2026-09-15). Túmulo vazio não abre nada -- criar memorial ali
+      // continua sendo pelo botão direito, não por um card que existiria
+      // só pra dizer que está vazio.
+      const temMemorial = lapide != null && (memoriaisPorJazigo.get(lapide.id)?.length || 0) > 0
+      setLapideSelecionada(temMemorial ? lapide! : null)
     } else {
       setLapideSelecionada(null)
-    }
-  }
-
-  function aoMoverMouseMapa(e: MapLayerMouseEvent) {
-    const feature = e.features?.[0]
-    if (feature?.properties?.lapideId) {
-      const lapide = lapides.find((l) => l.id === feature.properties!.lapideId)
-      // Mostra o card quando ha memorial vinculado OU foto da face do tumulo
-      // (foto sozinha ja identifica o tumulo em campo, mesmo antes de existir
-      // memorial -- e o caso do mapeamento de quadra em andamento).
-      const temCard = lapide && (homenagemPorLapide.get(lapide.id) || temMemorialGeo[lapide.id] || lapide.foto_face_url)
-      setLapideHover(temCard ? lapide : null)
-    } else {
-      setLapideHover(null)
     }
   }
 
@@ -1034,23 +1027,6 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }
     setMsg(`"${nomeMemorial}" desvinculado.`)
     await carregar()
-    setSalvando(false)
-  }
-
-  // Nome sem memorial: gente enterrada no jazigo que ainda não tem página
-  // digital (ex: parente antigo). Aparece no card como texto simples, com
-  // atalho pra virar memorial de verdade depois (2026-09-15).
-  async function adicionarNomeSemMemorial(lapideId: string, gavetaId: string) {
-    const nome = prompt('Nome de quem está enterrado aqui (sem criar memorial ainda):')?.trim()
-    if (!nome) return
-    setSalvando(true)
-    setMsg('')
-    const { error } = await supabase.from('gavetas').update({ nome_sem_memorial: nome }).eq('id', gavetaId)
-    if (error) setMsg(error.message)
-    else {
-      setMsg(`"${nome}" adicionado ao jazigo.`)
-      await carregar()
-    }
     setSalvando(false)
   }
 
@@ -2053,7 +2029,6 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               interactiveLayerIds={['lapides-pinos']}
               onClick={aoClicarMapa}
               onContextMenu={aoBotaoDireitoMapa}
-              onMouseMove={aoMoverMouseMapa}
             >
               <NavigationControl showZoom position="top-right" />
 
@@ -2496,243 +2471,176 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 )
               })()}
 
-              {/* Card de hover some por completo enquanto tiver um jazigo
-                  aberto (clicado) -- os túmulos ficam bem próximos uns dos
-                  outros no mapa, então antes os 2 cards apareciam lado a
-                  lado, um do vizinho e outro do selecionado (achado real,
-                  2026-09-15). */}
-              {lapideHover && !lapideSelecionada && (
-                <Popup
-                  longitude={lapideHover.longitude!}
-                  latitude={lapideHover.latitude!}
-                  anchor="bottom"
-                  offset={12}
-                  closeButton={false}
-                  closeOnClick={false}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 160 }}>
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: '50%',
-                        padding: 2,
-                        flexShrink: 0,
-                        background: 'conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          borderRadius: '50%',
-                          overflow: 'hidden',
-                          background: '#0B1D2A',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        {(homenagemPorLapide.get(lapideHover.id)?.foto_url || lapideHover.foto_face_url) ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={
-                              urlMidiaProtegida(homenagemPorLapide.get(lapideHover.id)?.foto_url) ||
-                              urlMidiaProtegida(lapideHover.foto_face_url)!
-                            }
-                            alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <Cross size={16} strokeWidth={1.5} style={{ color: '#C9A46A' }} />
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      {homenagemPorLapide.get(lapideHover.id) ? (
-                        <>
-                          <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
-                            Jazigo
-                          </p>
-                          <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
-                            {homenagemPorLapide.get(lapideHover.id)?.nome_completo}
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#a15c00' }}>
-                            Jazigo
-                          </p>
-                          <p style={{ fontSize: 13, margin: '2px 0 0', fontWeight: 600 }}>
-                            {lapideHover.identificacao}
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </Popup>
-              )}
+              {/* Não existe mais card de passar o mouse neste mapa (pedido do
+                  Rafael, 2026-09-15): aqui é tela de trabalho, e o card de
+                  clique já mostra tudo. O card pequeno continua existindo no
+                  Portal da Família e no mapa público, onde só o nome basta. */}
 
-              {lapideSelecionada && (
+              {/* Card do jazigo. Só abre onde já existe memorial, e mostra
+                  quem está enterrado ali: nome do jazigo no topo, depois cada
+                  gaveta com seu ocupante -- quem tem memorial vira link pra
+                  página pública dele, quem não tem fica como texto. Editar de
+                  verdade (gaveta, nome, ocupante) acontece na página do
+                  jazigo, não aqui (pedido do Rafael, 2026-09-15). */}
+              {lapideSelecionada && (memoriaisPorJazigo.get(lapideSelecionada.id)?.length || 0) > 0 && (
                 <Popup
                   longitude={lapideSelecionada.longitude!}
                   latitude={lapideSelecionada.latitude!}
                   anchor="bottom"
                   offset={12}
+                  maxWidth="252px"
                   onClose={() => setLapideSelecionada(null)}
                   closeButton
+                  closeOnClick={false}
                 >
-                  <div style={{ minWidth: 200 }}>
+                  {/* Cor explícita no container: o popup do MapLibre tem fundo
+                      branco fixo, e sem isso o texto herda a cor clara do tema
+                      escuro da Central e some no branco (achado real: o nome do
+                      homenageado estava lá, invisível). */}
+                  <div style={{ width: 212, color: '#0B1D2A', lineHeight: 1.35 }}>
                     {(() => {
-                      // Jazigo pode ter vários memoriais (uma gaveta cada) --
-                      // a lista vem de gavetas, não mais de um único campo
-                      // (2026-09-15, correção pedida pelo Rafael).
                       const memoriaisDoJazigo = memoriaisPorJazigo.get(lapideSelecionada.id) || []
                       const todasGavetas = gavetasPorJazigo.get(lapideSelecionada.id) || []
-                      // Sem memorial e sem nome ainda = de verdade livre, pra
-                      // "criar aqui" ou "vincular existente". Gaveta com só
-                      // nome já está ocupada por alguém (2026-09-15).
-                      const gavetasLivres = todasGavetas.filter((g) => !g.homenagem_id && !g.nome_sem_memorial)
                       const nomesSemMemorial = todasGavetas.filter((g) => !g.homenagem_id && g.nome_sem_memorial)
+                      const rotuloGaveta = (g: Gaveta) => `G${g.linha}`
                       return (
                         <>
-                          <p style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>
-                            Jazigo {lapideSelecionada.identificacao}
-                            {lapideSelecionada.quadra && ` · Q${lapideSelecionada.quadra}`}
-                            {lapideSelecionada.lote && ` L${lapideSelecionada.lote}`}
+                          <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: 600, margin: 0, color: '#A9824B' }}>
+                            Jazigo
+                          </p>
+                          <p style={{ fontSize: 14, fontWeight: 700, margin: '2px 0 0', color: '#0B1D2A' }}>
+                            {lapideSelecionada.nome || lapideSelecionada.identificacao}
                           </p>
 
-                          {memoriaisDoJazigo.length > 0 || nomesSemMemorial.length > 0 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '6px 0' }}>
-                              {memoriaisDoJazigo.map(({ gaveta, homenagem }) => (
-                                <div key={gaveta.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                  <div>
-                                    <a href={`/admin/memoriais/${homenagem.id}`} style={{ fontSize: 12, fontWeight: 600, color: 'inherit' }}>
-                                      {homenagem.nome_completo}
-                                    </a>
-                                    {editavel && <p style={{ fontSize: 10, color: '#888', margin: 0 }}>{gaveta.codigo}</p>}
+                          <div style={{ height: 1, background: '#E6E2DA', margin: '8px 0' }} />
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                            {memoriaisDoJazigo.map(({ gaveta, homenagem }) => (
+                              <div key={gaveta.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div
+                                  style={{
+                                    width: 30,
+                                    height: 30,
+                                    borderRadius: '50%',
+                                    padding: 1.5,
+                                    flexShrink: 0,
+                                    background: 'conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A)',
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      width: '100%',
+                                      height: '100%',
+                                      borderRadius: '50%',
+                                      overflow: 'hidden',
+                                      background: '#0B1D2A',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                  >
+                                    {homenagem.foto_url ? (
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      <img
+                                        src={urlMidiaProtegida(homenagem.foto_url)!}
+                                        alt=""
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                      />
+                                    ) : (
+                                      <Cross size={13} strokeWidth={1.5} style={{ color: '#C9A46A' }} />
+                                    )}
                                   </div>
-                                  {editavel && (
-                                    <button
-                                      type="button"
-                                      onClick={() => desvincularMemorial(gaveta.id, homenagem.nome_completo)}
-                                      style={{ fontSize: 10, color: '#c00', background: 'none', border: 'none', padding: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                                    >
-                                      Desvincular
-                                    </button>
-                                  )}
                                 </div>
-                              ))}
-                              {/* Gente enterrada ali sem memorial digital ainda --
-                                  aparece só o nome, com atalho pra criar o
-                                  memorial já vinculado na mesma gaveta
-                                  (2026-09-15). */}
-                              {nomesSemMemorial.map((gaveta) => (
-                                <div key={gaveta.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                  <div>
-                                    <p style={{ fontSize: 12, margin: 0, color: '#ccc' }}>{gaveta.nome_sem_memorial}</p>
-                                    {editavel && <p style={{ fontSize: 10, color: '#888', margin: 0 }}>{gaveta.codigo} · sem memorial</p>}
-                                  </div>
-                                  {editavel && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setCadastroMemorial({ lapide: lapideSelecionada, nome: gaveta.nome_sem_memorial || '', preenchidoPor: 'familia', gavetaId: gaveta.id })
-                                        setLapideSelecionada(null)
-                                      }}
-                                      style={{ fontSize: 10, color: '#a15c00', background: 'none', border: 'none', padding: 0, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                                    >
-                                      Criar memorial
-                                    </button>
-                                  )}
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <span style={{ fontSize: 9, fontWeight: 700, color: '#A9824B', letterSpacing: 0.5 }}>
+                                    {rotuloGaveta(gaveta)}
+                                  </span>
+                                  {/* Leva pra página pública do memorial, não
+                                      pra ficha de edição (pedido do Rafael). */}
+                                  <a
+                                    href={`/homenagem/${homenagem.slug}`}
+                                    style={{
+                                      display: 'block',
+                                      fontSize: 12.5,
+                                      fontWeight: 600,
+                                      color: '#0B1D2A',
+                                      textDecoration: 'underline',
+                                      textDecorationColor: '#C9A46A',
+                                      textUnderlineOffset: 2,
+                                    }}
+                                  >
+                                    {homenagem.nome_completo}
+                                  </a>
                                 </div>
-                              ))}
+                                {editavel && (
+                                  <button
+                                    type="button"
+                                    title="Desvincular deste jazigo"
+                                    onClick={() => desvincularMemorial(gaveta.id, homenagem.nome_completo)}
+                                    style={{ fontSize: 9, color: '#B91C1C', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
+                                  >
+                                    Desvincular
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+
+                            {nomesSemMemorial.map((gaveta) => (
+                              <div key={gaveta.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 30, flexShrink: 0 }} />
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <span style={{ fontSize: 9, fontWeight: 700, color: '#A9824B', letterSpacing: 0.5 }}>
+                                    {rotuloGaveta(gaveta)}
+                                  </span>
+                                  <p style={{ fontSize: 12.5, margin: 0, color: '#4B5563' }}>{gaveta.nome_sem_memorial}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div style={{ height: 1, background: '#E6E2DA', margin: '8px 0' }} />
+
+                          {/* Foto da lápide: só anexar e tirar. Trocar é tirar
+                              e anexar de novo -- não precisa de botão próprio. */}
+                          {lapideSelecionada.foto_face_url ? (
+                            <div style={{ position: 'relative' }}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={urlMidiaProtegida(lapideSelecionada.foto_face_url) || lapideSelecionada.foto_face_url}
+                                alt="Foto da lápide"
+                                style={{ width: '100%', height: 64, objectFit: 'cover', borderRadius: 5, display: 'block' }}
+                              />
+                              {editavel && (
+                                <button
+                                  type="button"
+                                  title="Tirar a foto da lápide"
+                                  disabled={removendoFoto === lapideSelecionada.id}
+                                  onClick={() => removerFotoTumulo(lapideSelecionada.id)}
+                                  style={{
+                                    position: 'absolute',
+                                    top: 4,
+                                    right: 4,
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: '50%',
+                                    background: 'rgba(11,29,42,0.78)',
+                                    color: '#fff',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: 0,
+                                  }}
+                                >
+                                  <X size={12} strokeWidth={2} />
+                                </button>
+                              )}
                             </div>
                           ) : (
-                            <p style={{ fontSize: 11, color: '#888', margin: '4px 0 6px' }}>Sem memorial vinculado</p>
-                          )}
-
-                          {editavel && gavetasLivres.length > 0 && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 4 }}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setCadastroMemorial({ lapide: lapideSelecionada, nome: '', preenchidoPor: 'familia' })
-                                  setLapideSelecionada(null)
-                                }}
-                                style={{
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  color: '#a15c00',
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: 0,
-                                  textAlign: 'left',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                + Criar memorial aqui
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setVincularEm(lapideSelecionada)
-                                  setMemorialEscolhido(null)
-                                  setBuscaVinculo('')
-                                  setResultadosVinculo([])
-                                  setLapideSelecionada(null)
-                                }}
-                                style={{
-                                  fontSize: 12,
-                                  color: '#0B5FFF',
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: 0,
-                                  textAlign: 'left',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                Vincular memorial existente
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => adicionarNomeSemMemorial(lapideSelecionada.id, gavetasLivres[0].id)}
-                                style={{
-                                  fontSize: 12,
-                                  color: '#888',
-                                  background: 'none',
-                                  border: 'none',
-                                  padding: 0,
-                                  textAlign: 'left',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                + Adicionar nome (sem memorial)
-                              </button>
-                            </div>
-                          )}
-                          {editavel && gavetasLivres.length === 0 && (
-                            <p style={{ fontSize: 10, color: '#888', margin: '4px 0' }}>
-                              Sem gaveta livre — crie mais uma em Jazigos → Gavetas.
-                            </p>
-                          )}
-
-                          {lapideSelecionada.foto_face_url && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={urlMidiaProtegida(lapideSelecionada.foto_face_url) || lapideSelecionada.foto_face_url}
-                              alt=""
-                              style={{ width: '100%', maxWidth: 200, borderRadius: 6, margin: '6px 0', display: 'block' }}
-                            />
-                          )}
-                          {editavel && (
-                            <>
-                              <label style={{ fontSize: 11, color: '#0B5FFF', cursor: 'pointer', display: 'block', marginTop: 4 }}>
-                                {subindoFoto === lapideSelecionada.id
-                                  ? 'Enviando foto...'
-                                  : lapideSelecionada.foto_face_url
-                                    ? 'Trocar foto do túmulo'
-                                    : 'Adicionar foto do túmulo'}
+                            editavel && (
+                              <label style={{ fontSize: 11, color: '#0B5FFF', cursor: 'pointer', display: 'block' }}>
+                                {subindoFoto === lapideSelecionada.id ? 'Enviando foto...' : 'Anexar foto da lápide'}
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -2745,56 +2653,46 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                   }}
                                 />
                               </label>
-                              {lapideSelecionada.foto_face_url && (
-                                <button
-                                  type="button"
-                                  disabled={removendoFoto === lapideSelecionada.id}
-                                  onClick={() => removerFotoTumulo(lapideSelecionada.id)}
-                                  style={{
-                                    fontSize: 11,
-                                    color: '#B91C1C',
-                                    background: 'none',
-                                    border: 'none',
-                                    padding: 0,
-                                    marginTop: 4,
-                                    cursor: 'pointer',
-                                    display: 'block',
-                                  }}
-                                >
-                                  {removendoFoto === lapideSelecionada.id
-                                    ? 'Removendo...'
-                                    : 'Remover foto (volta a não conferido)'}
-                                </button>
-                              )}
-                            </>
+                            )
                           )}
 
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-                            {/* Gavetas 3D saiu do card do mapa (pedido do Rafael,
-                                2026-09-15) -- fica só dentro da tela do Jazigo
-                                em Cemitérios, não precisa duplicar aqui.
-                                Atalho direto pro cadastro: sem ele a pessoa sai
-                                do mapa e procura o túmulo de novo no menu. */}
-                            {modo !== 'leitura' && (
+                          {editavel && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 8 }}>
+                              {/* O resto da edição (gavetas, nome do jazigo,
+                                  quem está em cada uma) mora na página do
+                                  jazigo -- o card só leva até lá. */}
                               <a
                                 href={`/admin/cemiterios/${cemiterioId}/lapides/${lapideSelecionada.id}/gavetas`}
-                                style={{ fontSize: 12, color: '#0B5FFF' }}
+                                style={{ fontSize: 12, fontWeight: 600, color: '#0B5FFF' }}
                               >
-                                Cadastrar gavetas →
+                                Abrir página do jazigo →
                               </a>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setModoMarcar(true)
-                                setLapideParaMarcar(lapideSelecionada)
-                                setLapideSelecionada(null)
-                              }}
-                              style={{ fontSize: 12, color: '#a15c00', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                            >
-                              Mover pino
-                            </button>
-                          </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setVincularEm(lapideSelecionada)
+                                  setMemorialEscolhido(null)
+                                  setBuscaVinculo('')
+                                  setResultadosVinculo([])
+                                  setLapideSelecionada(null)
+                                }}
+                                style={{ fontSize: 11.5, color: '#0B5FFF', background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+                              >
+                                Vincular memorial existente
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setModoMarcar(true)
+                                  setLapideParaMarcar(lapideSelecionada)
+                                  setLapideSelecionada(null)
+                                }}
+                                style={{ fontSize: 11.5, color: '#A9824B', background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+                              >
+                                Mover pino
+                              </button>
+                            </div>
+                          )}
                         </>
                       )
                     })()}
@@ -2816,17 +2714,17 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       <p className="px-3 py-1.5 text-[10px] uppercase tracking-wide text-[var(--tema-zinc-500)] border-b border-[var(--tema-zinc-800)]">
                         {menuContexto.lapide.identificacao}
                       </p>
-                      {homenagemPorLapide.get(menuContexto.lapide.id) ? (
+                      {(memoriaisPorJazigo.get(menuContexto.lapide.id)?.length || 0) > 0 ? (
                         <button
                           type="button"
                           onClick={() => {
-                            const h = homenagemPorLapide.get(menuContexto.lapide!.id)!
+                            const l = menuContexto.lapide!
                             setMenuContexto(null)
-                            router.push(`/admin/memoriais/${h.id}`)
+                            setLapideSelecionada(l)
                           }}
                           className="w-full text-left px-3 py-2 text-xs text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
                         >
-                          Abrir memorial de {homenagemPorLapide.get(menuContexto.lapide.id)!.nome_completo}
+                          Ver quem está no jazigo
                         </button>
                       ) : (
                         <>
@@ -2856,16 +2754,16 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           </button>
                         </>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLapideSelecionada(menuContexto.lapide)
-                          setMenuContexto(null)
-                        }}
-                        className="w-full text-left px-3 py-2 text-xs text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
+                      {/* Túmulo sem memorial não abre card nenhum (regra de
+                          2026-09-15) -- foto, gavetas e nome do jazigo se
+                          editam na página do jazigo. */}
+                      <Link
+                        href={`/admin/cemiterios/${cemiterioId}/lapides/${menuContexto.lapide.id}/gavetas`}
+                        onClick={() => setMenuContexto(null)}
+                        className="block w-full text-left px-3 py-2 text-xs text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
                       >
-                        Foto do túmulo / detalhes
-                      </button>
+                        Abrir página do jazigo →
+                      </Link>
                       <button
                         type="button"
                         onClick={() => {
