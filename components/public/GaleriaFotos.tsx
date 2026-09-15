@@ -23,11 +23,23 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
   // ocupa o bloco grande de abertura.
   const itens = [...videos, ...fotos]
   const [aberta, setAberta] = useState<number | null>(null)
-  // 2 colunas = tiles grandes, e a conta fecha sozinha com qualquer
-  // quantidade PAR de fotos (4 fotos = 2 fileiras cheias). A árvore saiu
-  // da grade de propósito (faixa própria embaixo, ver page.tsx) -- enquanto
-  // ela era o 5º tile, 5 itens em 3 colunas sempre deixavam 1 célula vazia.
-  const [colunas] = useState(2)
+  // 4 colunas: mantém o tile no tamanho proporcional de antes (~290px na
+  // largura de leitura), nem miniatura nem foto gigante ocupando a tela.
+  // 2 colunas deixavam cada foto com ~600px -- "ficou imenso" (Rafael).
+  // A última foto estica pra fechar a fileira quando a conta não bate
+  // (5 fotos em 4 colunas: a 5ª ocupa as 4 células restantes), então nunca
+  // sobra célula vazia em nenhuma quantidade.
+  const [colunas, setColunas] = useState(4)
+
+  useEffect(() => {
+    function ajustarColunas() {
+      const l = window.innerWidth
+      setColunas(l < 620 ? 2 : l < 1100 ? 3 : 4)
+    }
+    ajustarColunas()
+    window.addEventListener('resize', ajustarColunas)
+    return () => window.removeEventListener('resize', ajustarColunas)
+  }, [])
 
   useEffect(() => {
     if (aberta === null) return
