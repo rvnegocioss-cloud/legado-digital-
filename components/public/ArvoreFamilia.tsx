@@ -36,7 +36,7 @@ export interface ArvoreDados {
 // é a mais antiga -- é como a árvore do fundo foi desenhada.
 const Y = { netos: 16, filhos: 27, ref: 46, pais: 62, avos: 78 }
 
-const ROTULO: Record<string, string> = {
+export const ROTULO: Record<string, string> = {
   pai: 'Pai', mae: 'Mãe', conjuge: 'Cônjuge',
   filho: 'Filho', filha: 'Filha', irmao: 'Irmão', irma: 'Irmã',
   avo_paterno: 'Avô paterno', avo_paterna: 'Avó paterna',

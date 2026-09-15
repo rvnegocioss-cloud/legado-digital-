@@ -15,7 +15,7 @@ import { GaleriaFotos } from "@/components/public/GaleriaFotos";
 import GuiaTumuloModal from "@/components/public/GuiaTumuloModal";
 import AmbienteLateral, { type Ambiente, type CorLateral } from "@/components/public/AmbienteLateral";
 import GaleriaTopo from "@/components/public/GaleriaTopo";
-import ArvoreFamilia, { type ArvoreDados } from "@/components/public/ArvoreFamilia";
+import ArvoreFamilia, { ROTULO as ROTULO_PARENTESCO, type ArvoreDados } from "@/components/public/ArvoreFamilia";
 import TextoVerMais from "@/components/public/TextoVerMais";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { resolverBanner } from "@/lib/bannersMemorial";
@@ -807,6 +807,26 @@ export default async function PerfilMemorialPage({
                 {arvoreAssinada && (
                   <div id="familia" className="perfil-familia-coluna">
                     <ArvoreFamilia dados={arvoreAssinada} />
+                    {/* Árvore ficou pequena de propósito (pedido do Rafael) --
+                        essa lista preenche o resto da coluna com conteúdo de
+                        verdade (mesmos parentes já carregados pra árvore, sem
+                        query nova), em vez de deixar vão do lado. Mesma ideia
+                        do wireframe do Pedro (texto de parentesco ao lado da
+                        prévia da árvore). */}
+                    {arvoreAssinada.parentes.length > 0 && (
+                      <ul className="perfil-familia-lista">
+                        {arvoreAssinada.parentes.map((p) => (
+                          <li key={p.id}>
+                            <span className="perfil-familia-papel">{ROTULO_PARENTESCO[p.tipo] || p.tipo}</span>
+                            {p.tem_memorial && p.slug ? (
+                              <a href={`/homenagem/${p.slug}`}>{p.nome}</a>
+                            ) : (
+                              <span>{p.nome}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 )}
               </div>

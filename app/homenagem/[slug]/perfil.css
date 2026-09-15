@@ -669,9 +669,27 @@
   .perfil-midia-familia-grid{grid-template-columns:1fr 1fr;}
 }
 /* Árvore encolhida (pedido do Rafael: "diminui essa árvore") -- as fotos
-   ficaram com tiles maiores (2 colunas em vez de 3, ver GaleriaFotos.tsx)
-   pra ocupar o espaço que a árvore, menor, deixou de tomar. */
-.perfil-familia-coluna .arv-card{max-width:280px;}
+   ficaram com tiles maiores (2 colunas em vez de 3, ver GaleriaFotos.tsx).
+   O card sozinho não preenche mais a coluna -- a lista de parentesco ao
+   lado é o que fecha o espaço com conteúdo de verdade, não CSS esticado. */
+.perfil-familia-coluna{
+  display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;
+}
+.perfil-familia-coluna .arv-card{max-width:280px;flex-shrink:0;}
+.perfil-familia-lista{
+  list-style:none;margin:0;padding:0;flex:1;min-width:160px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.perfil-familia-lista li{
+  font-size:13px;line-height:1.4;border-bottom:1px solid var(--perfil-borda);
+  padding-bottom:8px;
+}
+.perfil-familia-papel{
+  display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:1.4px;
+  color:var(--perfil-dourado);margin-bottom:2px;
+}
+.perfil-familia-lista a{color:var(--perfil-texto);text-decoration:none}
+.perfil-familia-lista a:hover{color:var(--perfil-dourado-claro)}
 .arv-rotu{
   display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:1.7px;
   color:var(--perfil-dourado);margin-bottom:10px;
