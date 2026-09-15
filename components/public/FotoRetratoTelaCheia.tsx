@@ -56,6 +56,7 @@ export default function FotoRetratoTelaCheia({ src, alt, style }: Props) {
         type="button"
         onClick={() => setAberto(true)}
         aria-label={`Ver foto de ${alt} em tela cheia`}
+        title=""
         style={{ all: 'unset', display: 'block', width: '100%', height: '100%', cursor: 'zoom-in' }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
