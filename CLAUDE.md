@@ -300,6 +300,20 @@ Se o SMTP falhar (ex: DKIM não propagado ainda), a API retorna a senha na respo
 
 **Ainda falta:** "esqueci a senha" da família (hoje só reemissão manual).
 
+**Estrutura da tela — abas, um tema por vez (2026-09-16).** A página era tudo empilhado numa coluna sem fim; virou **barra de abas no topo**: `Memoriais · Fotos e vídeos · Jazigo · Árvore · Privacidade · Assinaturas`. Cada aba abre sozinha na largura toda, e **dentro da aba não existe retrátil** — foi assim que o "tá tudo enorme" se resolveu: nada mais compete por altura na mesma tela. O Jazigo aparece junto da aba Memoriais (é o contexto da família) e também tem aba própria. Antes de chegar aqui foram testadas e descartadas 2 tentativas: 2 colunas com Fotos preenchendo o vazio da direita, e acordeão com tudo retrátil — o Rafael reprovou as duas por continuarem longas.
+
+**Identidade é da família, não do homenageado.** Topo mostra "PORTAL DA FAMÍLIA" + o nome do jazigo (`lapides.nome`, ex: "Jazigo Família Saraiva"); sem nome ainda, cai em "Família de [nome do homenageado]". A seção **Memoriais** lista a família inteira do jazigo com retrato em esfera (anel dourado em gradiente cônico, mesmo padrão do card do mapa) — quem está sendo editado em destaque, os outros linkam pra própria página pública.
+
+**Campo "Família (pode deixar em branco)"** no formulário grava no **mesmo dado que nomeia o jazigo** (`lapides.nome`), via `POST /api/familia-jazigo` no `onBlur`. Não existem dois nomes de família concorrendo — são dois lugares de editar o mesmo campo (o outro é o card do Jazigo).
+
+**A família edita o jazigo** (mudou 2026-09-15/16, antes era só visualização): dá nome ao jazigo e escreve quem está enterrado nas gavetas que ainda não têm memorial. **Criar/remover gaveta e mexer em gaveta que já tem memorial continuam só do parceiro/staff** — gaveta com memorial pode ser de outra família (regra 22). A trava está no servidor (`/api/familia-jazigo` POST): só o jazigo do próprio memorial (lido de `homenagens.lapide_id`, nunca de id mandado no corpo), só gavetas daquele jazigo, só gaveta sem `homenagem_id`.
+
+**Assinaturas não renderiza mais o livro** — é só a lista de quem assinou com "remover" do lado (`DELETE /api/memorial-condolencia`). O livro desenhado continua na página pública do memorial.
+
+**Modo ajuda** (`components/familia/ModoAjuda.tsx`) — botão no cabeçalho que liga as dicas de uma vez; ligado, cada campo ganha um "?" dourado que mostra um card explicando pra que serve (hover no desktop, toque no celular). Desligado (padrão), a tela fica idêntica, sem ícone nenhum. A escolha fica lembrada no navegador (`localStorage`, chave `legado-modo-ajuda`).
+
+**Bug corrigido 2026-09-16 — aviso falso de "rascunho recuperado":** o próprio carregamento da página (`setForm` com os dados do servidor) disparava o autosave de rascunho local, gravando no `localStorage` um rascunho idêntico ao que já estava salvo. Na visita seguinte isso aparecia como "recuperei o que você tinha escrito e ainda não estava salvo", sem a família ter editado nada. O autosave de rascunho agora só liga depois que o carregamento assenta (`setTimeout(0)` num ref).
+
 **Cadastro do responsável por CPF (modo teste apenas)** — campo CPF + "Consultar CPF" (`POST /api/admin/consultar-cpf`, provedor `cpfcnpj.com.br`, token de teste) preenche Nome automaticamente; CPF nunca é persistido. **Existe na Central e no Portal do Parceiro** (2026-07-29 — Rafael notou que faltava no Portal do Parceiro, adicionado igual à Central; rota liberada pra parceiro dono do memorial também, antes era staff-only). **Não é produção ainda** — falta token de produção e resolver IP fixo exigido pelo provedor vs IP de egress dinâmico da Vercel (bloqueio técnico sem solução ainda). Plano com decisões em `docs/RASCUNHO_IDEIAS.md`.
 
 ## Página do Memorial (`/homenagem/[slug]`) — como funciona
