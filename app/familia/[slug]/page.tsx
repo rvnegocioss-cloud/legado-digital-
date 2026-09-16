@@ -136,6 +136,12 @@ export default function FamiliaEdicaoPage() {
   // e o clique no botao brigando seria conflito criado por nos mesmos).
   const salvandoRef = useRef(false)
   const primeiroRenderRef = useRef(true)
+  // O carregamento inicial faz setForm/setTema/etc com o que veio do servidor
+  // -- sem essa trava, o autosave de rascunho local via esse MESMO carregamento
+  // como se fosse a família digitando, grava um "rascunho" idêntico ao servidor,
+  // e na visita seguinte a tela mostrava "recuperei o que você tinha escrito"
+  // sem ninguém ter editado nada (achado real, reportado pelo Rafael).
+  const rascunhoHabilitadoRef = useRef(false)
   const ultimoSalvoRef = useRef(0)
   const [erro, setErro] = useState('')
   const [enviandoFoto, setEnviandoFoto] = useState(false)
@@ -271,11 +277,26 @@ export default function FamiliaEdicaoPage() {
     setCarregando(false)
   }
 
+  // Assim que o carregamento termina, espera um tick antes de habilitar o
+  // autosave de rascunho -- o próprio setForm(dadosDoServidor) do carregar()
+  // dispara o efeito abaixo, e sem essa espera ele gravava rascunho no mesmo
+  // instante em que a página abria.
+  useEffect(() => {
+    if (carregando) {
+      rascunhoHabilitadoRef.current = false
+      return
+    }
+    const t = setTimeout(() => {
+      rascunhoHabilitadoRef.current = true
+    }, 0)
+    return () => clearTimeout(t)
+  }, [carregando])
+
   // Guarda o que esta na tela no proprio navegador. Nao substitui o salvar --
   // e a rede pra que texto digitado nunca se perca por conflito, queda de
   // internet ou aba fechada sem querer.
   useEffect(() => {
-    if (carregando || sessaoInvalida) return
+    if (carregando || sessaoInvalida || !rascunhoHabilitadoRef.current) return
     try {
       localStorage.setItem(
         chaveRascunho(params.slug),
