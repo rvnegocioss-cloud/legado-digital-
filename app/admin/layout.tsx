@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart, Handshake, Sun, Moon } from 'lucide-react'
 import { getAdminUser, signOut, supabase } from '@/lib/auth'
 import { rotuloTipoEmail } from '@/lib/emailLog'
 import { useTema } from '@/lib/useTema'
@@ -160,6 +160,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/emails', label: 'Comunicações', Icon: Mail },
     { href: '/admin/mapa', label: 'Mapa', Icon: Map },
     { href: '/busca', label: 'Página Pública', Icon: Search },
+    // Atalho pros dois portais externos, lado a lado. Antes só o da Família
+    // existia aqui; pro do Parceiro o staff tinha que escolher uma empresa no
+    // menu "Parceiros" do topo -- sem parceiro cadastrado não havia caminho
+    // nenhum (2026-09-16, pedido do Rafael).
+    { href: '/parceiro/login', label: 'Portal do Parceiro', Icon: Handshake },
     { href: '/familia/login', label: 'Portal da Família', Icon: Heart },
     { href: '/', label: 'Voltar pro Site', Icon: Home },
   ]

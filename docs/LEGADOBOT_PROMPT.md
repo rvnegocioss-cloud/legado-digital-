@@ -98,6 +98,8 @@ Rotas conhecidas — Central (staff, `Admin Legado Digital`/`Operador Legado Dig
 - `/admin/usuarios` — Usuários
 - `/admin/emails` — Central de Comunicações (leads de parceiro e de família ficam aqui)
 - `/admin/mapa` — Mapa dos ambientes
+- `/parceiro/login` — Portal do Parceiro (atalho no menu lateral da Central, ao lado do Portal da Família, desde 2026-09-16). Pra entrar no portal **de uma empresa específica** em modo Central, sem logar de novo, o caminho continua sendo o menu "Parceiros" no topo da Central.
+- `/familia/login` — Portal da Família (atalho no menu lateral da Central)
 - `/admin/manual` — Manual do sistema
 - `/familia/login` — Portal da Família (busca por nome + senha da família; staff prefere o botão "Acessar Portal da Família" na ficha do memorial, que entra sem senha)
 - `/` — Site institucional (landing page)
