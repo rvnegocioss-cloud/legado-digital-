@@ -66,7 +66,6 @@ export default function MapaPublicoCemiterio({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [hover, setHover] = useState<{ lng: number; lat: number; props: PinoProps } | null>(null)
   const [busca, setBusca] = useState('')
-  const [semResultado, setSemResultado] = useState(false)
   const [expandido, setExpandido] = useState(false)
 
   // Tela cheia de verdade no celular -- o mapa pequeno inline não dava pra
@@ -140,39 +139,39 @@ export default function MapaPublicoCemiterio({
     [router]
   )
 
-  // Busca dentro do próprio mapa: acha o túmulo pelo nome e voa até ele já
-  // com o card aberto. Sem isto, achar alguém num cemitério de milhares de
-  // túmulos dependia de varrer o mapa no olho.
-  const procurar = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault()
-      const termo = busca.trim().toLowerCase()
-      if (!termo) return
+  // Busca dentro do próprio mapa: os nomes vão aparecendo enquanto a pessoa
+  // digita, e escolher um voa até o túmulo com o card aberto (regra do Rafael,
+  // 2026-09-15 -- antes exigia clicar em "Achar no mapa" e ia sempre no 1º
+  // resultado, sem mostrar os outros). Aqui não há consulta ao banco: os
+  // memoriais já vieram junto com o mapa, então o filtro é em memória.
+  const sugestoes = useMemo(() => {
+    const termo = busca.trim()
+    if (termo.length < 2) return []
 
-      // Compara sem acento: quem digita "jose" tem que achar "José".
-      const limpar = (t: string) =>
-        t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-      const alvo = limpar(termo)
+    // Compara sem acento: quem digita "jose" tem que achar "José".
+    const limpar = (t: string) =>
+      t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    const alvo = limpar(termo)
 
-      const achado = (memoriais.features || []).find((f) => {
-        const props = f.properties as PinoProps
-        return lerMemoriais(props).some(
-          (m) => m.nome && !m.protegido && limpar(m.nome).includes(alvo)
-        )
-      })
-
-      if (!achado || achado.geometry.type !== 'Point') {
-        setSemResultado(true)
-        return
+    const achados: { nome: string; lng: number; lat: number; props: PinoProps }[] = []
+    for (const f of memoriais.features || []) {
+      if (f.geometry.type !== 'Point') continue
+      const props = f.properties as PinoProps
+      for (const m of lerMemoriais(props)) {
+        if (!m.nome || m.protegido || !limpar(m.nome).includes(alvo)) continue
+        const [lng, lat] = f.geometry.coordinates as [number, number]
+        achados.push({ nome: m.nome, lng, lat, props })
+        if (achados.length >= 8) return achados
       }
+    }
+    return achados
+  }, [busca, memoriais])
 
-      setSemResultado(false)
-      const [lng, lat] = achado.geometry.coordinates as [number, number]
-      mapRef.current?.flyTo({ center: [lng, lat], zoom: 20, duration: 1400 })
-      setHover({ lng, lat, props: achado.properties as PinoProps })
-    },
-    [busca, memoriais]
-  )
+  const irPara = useCallback((s: { lng: number; lat: number; props: PinoProps }) => {
+    mapRef.current?.flyTo({ center: [s.lng, s.lat], zoom: 20, duration: 1400 })
+    setHover({ lng: s.lng, lat: s.lat, props: s.props })
+    setBusca('')
+  }, [])
 
   // O GeoJSON serializa arrays de properties como string ao passar pelo mapa.
   function lerMemoriais(props: PinoProps): MemorialDoTumulo[] {
@@ -220,18 +219,15 @@ export default function MapaPublicoCemiterio({
             borderBottom: `1px solid ${CORES.douradoBorda}`,
           }}
         >
-          <form onSubmit={procurar} style={{ display: 'flex', gap: 8, flex: '1 1 260px' }}>
+          <div style={{ position: 'relative', flex: '1 1 260px' }}>
             <input
               value={busca}
-              onChange={(e) => {
-                setBusca(e.target.value)
-                setSemResultado(false)
-              }}
-              placeholder="Procurar pelo nome de quem você visita"
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Comece a digitar o nome de quem você visita"
               aria-label="Procurar memorial pelo nome"
+              autoComplete="off"
               style={{
-                flex: 1,
-                minWidth: 0,
+                width: '100%',
                 padding: '9px 12px',
                 borderRadius: 8,
                 background: 'rgba(255,255,255,0.05)',
@@ -241,28 +237,55 @@ export default function MapaPublicoCemiterio({
                 fontSize: 14,
               }}
             />
-            <button
-              type="submit"
-              style={{
-                padding: '9px 16px',
-                borderRadius: 8,
-                border: 0,
-                background: CORES.dourado,
-                color: CORES.fundoBase,
-                fontFamily: 'Georgia, serif',
-                fontSize: 13.5,
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              Achar no mapa
-            </button>
-          </form>
+            {busca.trim().length >= 2 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 4px)',
+                  left: 0,
+                  right: 0,
+                  zIndex: 5,
+                  borderRadius: 8,
+                  overflow: 'hidden',
+                  background: '#0f2436',
+                  border: `1px solid ${CORES.douradoBorda}`,
+                  boxShadow: '0 10px 28px rgba(0,0,0,0.45)',
+                }}
+              >
+                {sugestoes.length === 0 ? (
+                  <p style={{ margin: 0, padding: '9px 12px', fontSize: 12.5, color: CORES.textoFraco }}>
+                    Nenhum memorial com esse nome neste cemitério.
+                  </p>
+                ) : (
+                  sugestoes.map((s, i) => (
+                    <button
+                      key={`${s.nome}-${i}`}
+                      type="button"
+                      onClick={() => irPara(s)}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '8px 12px',
+                        background: 'none',
+                        border: 0,
+                        borderTop: i === 0 ? 0 : `1px solid ${CORES.douradoBorda}`,
+                        color: CORES.textoForte,
+                        fontFamily: 'Georgia, serif',
+                        fontSize: 13.5,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {s.nome}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
 
           <p style={{ margin: 0, fontSize: 11.5, color: CORES.textoFraco, flex: '1 1 220px' }}>
-            {semResultado
-              ? 'Nenhum memorial com esse nome neste cemitério.'
-              : 'Cada cruz no mapa é um memorial. Toque numa cruz para ver quem está ali.'}
+            Cada cruz no mapa é um memorial. Toque numa cruz para ver quem está ali.
           </p>
         </div>
       )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -32,19 +32,34 @@ export default function FamiliaLoginPage() {
   const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false)
   const [msgRecuperacao, setMsgRecuperacao] = useState('')
 
-  async function buscarNome(e: React.FormEvent) {
-    e.preventDefault()
+  // Busca enquanto digita: a lista vai se formando sozinha a partir da 2ª
+  // letra, sem apertar botão nenhum (pedido do Rafael, 2026-09-15). Espera
+  // 300ms depois da última tecla pra não disparar uma consulta por caractere.
+  useEffect(() => {
     const nome = nomeBusca.trim()
-    if (!nome) return
+    if (selecionado) return
+    if (nome.length < 2) {
+      setResultados(null)
+      setBuscando(false)
+      return
+    }
+
+    let cancelado = false
     setBuscando(true)
-    setErro('')
-    setSelecionado(null)
+    const timer = setTimeout(async () => {
+      const { data } = await supabase.rpc('buscar_homenagens_publicas', { termo: nome })
+      // Resposta de uma busca antiga não pode sobrescrever a lista atual --
+      // quem digita rápido dispara várias, e elas não voltam em ordem.
+      if (cancelado) return
+      setResultados((data || []) as Resultado[])
+      setBuscando(false)
+    }, 300)
 
-    const { data } = await supabase.rpc('buscar_homenagens_publicas', { termo: nome })
-
-    setResultados((data || []) as Resultado[])
-    setBuscando(false)
-  }
+    return () => {
+      cancelado = true
+      clearTimeout(timer)
+    }
+  }, [nomeBusca, selecionado])
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault()
@@ -106,26 +121,21 @@ export default function FamiliaLoginPage() {
           <p className="text-sm text-[#7a8a96] mb-7">Adicione fotos, vídeos e a história de quem você ama.</p>
 
           {!selecionado ? (
-            <form onSubmit={buscarNome}>
+            <form onSubmit={(e) => e.preventDefault()}>
               <label className={rotuloLabel}>Nome do homenageado</label>
               <input
                 type="text"
-                placeholder="Nome completo"
+                placeholder="Comece a digitar o nome"
                 value={nomeBusca}
                 onChange={(e) => setNomeBusca(e.target.value)}
-                required
+                autoComplete="off"
                 className={campoEscuro}
               />
-              <button
-                type="submit"
-                disabled={buscando}
-                className="w-full py-3.5 rounded-lg bg-[#C9A46A] hover:bg-[#dfc08a] disabled:opacity-60 text-[#0B1D2A] text-[15px] font-bold transition-colors"
-              >
-                {buscando ? 'Buscando...' : 'Buscar'}
-              </button>
 
-              {resultados !== null && resultados.length === 0 && (
-                <p className="text-[#7a8a96] text-sm mt-3">Nenhum memorial encontrado com esse nome.</p>
+              {buscando && <p className="text-[#7a8a96] text-sm">Buscando...</p>}
+
+              {!buscando && resultados !== null && resultados.length === 0 && (
+                <p className="text-[#7a8a96] text-sm">Nenhum memorial encontrado com esse nome.</p>
               )}
 
               {resultados && resultados.length > 0 && (

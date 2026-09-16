@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { ChevronDown, ChevronRight, X } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { corDaFila } from '@/lib/coresFila'
+import { useBuscaDebounce } from '@/lib/useBuscaDebounce'
 
 interface ArvoreFila {
   id: string
@@ -71,7 +72,6 @@ export default function LapidesCemiterio() {
   const [tumuloSelecionado, setTumuloSelecionado] = useState<LapideChip | null>(null)
 
   const [busca, setBusca] = useState('')
-  const [resultadoBusca, setResultadoBusca] = useState<LapideChip[] | null>(null)
 
   const [vinculando, setVinculando] = useState<LapideOrfa | null>(null)
   const [quadraVinculo, setQuadraVinculo] = useState('')
@@ -131,22 +131,20 @@ export default function LapidesCemiterio() {
     }
   }
 
-  async function buscarPorCodigo(termo: string) {
-    setBusca(termo)
-    if (termo.trim().length < 2) {
-      setResultadoBusca(null)
-      return
-    }
+  // Antes saía uma consulta por tecla digitada. O hook espera a pessoa parar
+  // de digitar e descarta resposta de busca antiga (2026-09-15).
+  const { resultados: resultadoBusca, buscando } = useBuscaDebounce<LapideChip>(busca, async (termo) => {
     const { data } = await supabase
       .from('lapides')
       .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo)')
       .eq('cemiterio_id', id)
       .not('codigo', 'is', null)
-      .ilike('codigo', `%${termo.trim()}%`)
+      .ilike('codigo', `%${termo}%`)
       .order('codigo')
       .limit(50)
-    setResultadoBusca((data as any) || [])
-  }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return ((data as any) || []) as LapideChip[]
+  })
 
   const quadraDoVinculo = arvore?.quadras.find((q) => q.id === quadraVinculo)
 
@@ -275,16 +273,19 @@ export default function LapidesCemiterio() {
         <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Buscar por código (ex: Q01-R02)</label>
         <input
           value={busca}
-          onChange={(e) => buscarPorCodigo(e.target.value)}
-          placeholder="Digite o código do túmulo"
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Comece a digitar o código do túmulo"
+          autoComplete="off"
           className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-3 py-2 text-sm text-white"
         />
-        {resultadoBusca && (
+        {(resultadoBusca || buscando) && (
           <div className="mt-2 rounded-lg bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] max-h-56 overflow-y-auto">
-            {resultadoBusca.length === 0 ? (
+            {buscando ? (
+              <p className="text-xs text-[var(--tema-zinc-500)] p-3">Buscando...</p>
+            ) : resultadoBusca!.length === 0 ? (
               <p className="text-xs text-[var(--tema-zinc-500)] p-3">Nenhum túmulo com esse código.</p>
             ) : (
-              resultadoBusca.map((l) => (
+              resultadoBusca!.map((l) => (
                 <button
                   key={l.id}
                   onClick={() => setTumuloSelecionado(l)}

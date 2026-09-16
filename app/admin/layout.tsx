@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -58,6 +58,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { tema, alternarTema } = useTema()
   const [parceiros, setParceiros] = useState<ParceiroResumo[]>([])
   const [parceirosAberto, setParceirosAberto] = useState(false)
+  const [filtroParceiro, setFiltroParceiro] = useState('')
+  const parceirosFiltrados = useMemo(() => {
+    const termo = filtroParceiro.trim().toLowerCase()
+    if (!termo) return parceiros
+    return parceiros.filter((p) => nomeDoParceiro(p).toLowerCase().includes(termo))
+  }, [filtroParceiro, parceiros])
   const [alertas, setAlertas] = useState<AlertaComunicacao[]>([])
   const [leadsNovos, setLeadsNovos] = useState<any[]>([])
   const [alertasAberto, setAlertasAberto] = useState(false)
@@ -231,21 +237,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <ChevronDown size={14} />
               </button>
               {parceirosAberto && (
-                <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)] shadow-lg py-1 z-50 max-h-80 overflow-y-auto">
-                  {parceiros.length === 0 ? (
-                    <p className="px-4 py-2 text-xs text-[var(--tema-zinc-500)]">Nenhum parceiro cadastrado ainda.</p>
-                  ) : (
-                    parceiros.map((p) => (
-                      <Link
-                        key={p.id}
-                        href={`/parceiro?parceiro_id=${p.id}`}
-                        onClick={() => setParceirosAberto(false)}
-                        className="block px-4 py-2 text-sm text-[var(--tema-zinc-300)] hover:text-white hover:bg-[var(--tema-zinc-800)]"
-                      >
-                        {nomeDoParceiro(p)}
-                      </Link>
-                    ))
-                  )}
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)] shadow-lg z-50">
+                  {/* Filtro por digitação: com dezenas de parceiros, rolar uma
+                      lista de 80px de altura não é achar nada (2026-09-15). */}
+                  <div className="p-2 border-b border-[var(--tema-zinc-800)]">
+                    <input
+                      autoFocus
+                      value={filtroParceiro}
+                      onChange={(e) => setFiltroParceiro(e.target.value)}
+                      placeholder="Comece a digitar o nome"
+                      autoComplete="off"
+                      className="w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-2.5 py-1.5 text-sm text-white"
+                    />
+                  </div>
+                  <div className="py-1 max-h-72 overflow-y-auto">
+                    {parceirosFiltrados.length === 0 ? (
+                      <p className="px-4 py-2 text-xs text-[var(--tema-zinc-500)]">
+                        {parceiros.length === 0 ? 'Nenhum parceiro cadastrado ainda.' : 'Nenhum parceiro com esse nome.'}
+                      </p>
+                    ) : (
+                      parceirosFiltrados.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/parceiro?parceiro_id=${p.id}`}
+                          onClick={() => {
+                            setParceirosAberto(false)
+                            setFiltroParceiro('')
+                          }}
+                          className="block px-4 py-2 text-sm text-[var(--tema-zinc-300)] hover:text-white hover:bg-[var(--tema-zinc-800)]"
+                        >
+                          {nomeDoParceiro(p)}
+                        </Link>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
             </div>

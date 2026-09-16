@@ -14,6 +14,7 @@ import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
+import { SelecaoJazigo, type JazigoEscolhido } from '@/components/admin/SelecaoJazigo'
 
 interface Memorial {
   id: string
@@ -47,17 +48,6 @@ interface Memorial {
 interface Cemiterio {
   id: string
   nome: string
-}
-
-interface Lapide {
-  id: string
-  identificacao: string
-  codigo: string | null
-  cemiterio_id: string
-  fila_id: string | null
-  quadras: { numero: number } | null
-  filas: { numero: number } | null
-  homenagens: { id: string }[]
 }
 
 const LIMITE_FOTOS = 4 // MVP — revisar conforme plano de storage contratado
@@ -104,7 +94,7 @@ export default function DetalheMemorial() {
     lapide_id: '',
   })
   const [cemiterios, setCemiterios] = useState<Cemiterio[]>([])
-  const [lapides, setLapides] = useState<Lapide[]>([])
+  const [jazigoEscolhido, setJazigoEscolhido] = useState<JazigoEscolhido | null>(null)
   const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
   const [confirmoVinculoLapide, setConfirmoVinculoLapide] = useState(false)
   const [vinculos, setVinculos] = useState<string[]>([])
@@ -169,23 +159,6 @@ export default function DetalheMemorial() {
     if (params.id) load(params.id)
   }, [params.id])
 
-  // Dropdown de lapide so carrega as do cemiterio escolhido -- nunca todas de
-  // uma vez (mesmo motivo do load() acima, teto de 1000 linhas do PostgREST).
-  useEffect(() => {
-    if (!cemiterioSelecionadoId) return
-    supabase
-      .from('lapides')
-      .select('id, identificacao, codigo, cemiterio_id, fila_id, quadras(numero), filas(numero), homenagens!homenagens_lapide_id_fkey(id)')
-      .eq('cemiterio_id', cemiterioSelecionadoId)
-      .limit(5000)
-      .then(({ data }) => {
-        setLapides((atual) => {
-          const semEsseCemiterio = atual.filter((l) => l.cemiterio_id !== cemiterioSelecionadoId)
-          return [...semEsseCemiterio, ...((data as unknown as Lapide[]) || [])]
-        })
-      })
-  }, [cemiterioSelecionadoId])
-
   async function load(id: string) {
     setLoading(true)
     const { data: m } = await supabase.from('homenagens').select('*, criado_por:criado_por_usuario_id(nome)').eq('id', id).single()
@@ -217,20 +190,17 @@ export default function DetalheMemorial() {
     const { data: cemiteriosData } = await supabase.from('cemiterios').select('id, nome').order('nome')
     setCemiterios(cemiteriosData || [])
 
-    // Nunca carregar lapides de todos os cemiterios de uma vez (estoura o teto
-    // de 1000 linhas do PostgREST silenciosamente em cemiterio grande) --
-    // busca so a lapide ja vinculada (se tiver) pra saber o cemiterio dela,
-    // o resto do dropdown carrega filtrado quando o staff escolhe o cemiterio.
-    let lapidesData: Lapide[] = []
+    // So a lapide ja vinculada, pra saber de qual cemiterio ela e -- o campo de
+    // jazigo busca sob demanda a partir dai (SelecaoJazigo).
+    let cemiterioDaLapide = ''
     if (m?.lapide_id) {
       const { data: lapideAtual } = await supabase
         .from('lapides')
-        .select('id, identificacao, codigo, cemiterio_id, fila_id, quadras(numero), filas(numero), homenagens!homenagens_lapide_id_fkey(id)')
+        .select('cemiterio_id')
         .eq('id', m.lapide_id)
-        .single()
-      if (lapideAtual) lapidesData = [lapideAtual as unknown as Lapide]
+        .maybeSingle()
+      cemiterioDaLapide = lapideAtual?.cemiterio_id || ''
     }
-    setLapides(lapidesData)
 
     if (m) {
       setForm({
@@ -242,10 +212,7 @@ export default function DetalheMemorial() {
         biografia: m.biografia || '',
         lapide_id: m.lapide_id || '',
       })
-      if (m.lapide_id) {
-        const lapideAtual = (lapidesData || []).find((l) => l.id === m.lapide_id)
-        if (lapideAtual) setCemiterioSelecionadoId(lapideAtual.cemiterio_id)
-      }
+      if (cemiterioDaLapide) setCemiterioSelecionadoId(cemiterioDaLapide)
       setVinculos(m.vinculos || [])
       setFotoUrl(m.foto_url || '')
       setVideoUrl(m.video_url || '')
@@ -520,8 +487,7 @@ export default function DetalheMemorial() {
     }
 
     if (form.lapide_id && form.lapide_id !== memorial?.lapide_id) {
-      const lapideEscolhida = lapides.find((l) => l.id === form.lapide_id)
-      const arriscado = lapideEscolhida && (!lapideEscolhida.fila_id || lapideEscolhida.homenagens.length > 0)
+      const arriscado = jazigoEscolhido && (!jazigoEscolhido.fila_id || jazigoEscolhido.totalMemoriais > 0)
       if (arriscado && !confirmoVinculoLapide) {
         setErro('Confirma o túmulo antes de salvar (caixa vermelha acima do formulário) -- esse túmulo está fora de fileira ou já tem memorial vinculado.')
         setSalvando(false)
@@ -964,65 +930,29 @@ export default function DetalheMemorial() {
             </div>
             <div className="flex-1">
               <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Jazigo</label>
-              <select
-                value={form.lapide_id}
-                onChange={(e) => {
-                  setForm({ ...form, lapide_id: e.target.value })
+              <SelecaoJazigo
+                cemiterioId={cemiterioSelecionadoId}
+                valorId={form.lapide_id}
+                onEscolher={(j) => {
+                  setForm({ ...form, lapide_id: j?.id || '' })
+                  setJazigoEscolhido(j)
                   setConfirmoVinculoLapide(false)
                 }}
-                disabled={!cemiterioSelecionadoId}
-                className="flex h-10 w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white disabled:opacity-50"
-              >
-                <option value="">Sem jazigo vinculado</option>
-                {(() => {
-                  const doCemiterio = lapides.filter((l) => l.cemiterio_id === cemiterioSelecionadoId)
-                  const comFileira = doCemiterio.filter((l) => l.fila_id)
-                  const semFileira = doCemiterio.filter((l) => !l.fila_id)
-                  const grupos = new Map<string, Lapide[]>()
-                  comFileira.forEach((l) => {
-                    const chave = `Quadra ${l.quadras?.numero ?? '?'} · Fileira ${l.filas?.numero ?? '?'}`
-                    grupos.set(chave, [...(grupos.get(chave) || []), l])
-                  })
-                  return (
-                    <>
-                      {[...grupos.entries()].map(([chave, itens]) => (
-                        <optgroup key={chave} label={chave}>
-                          {itens.map((l) => (
-                            <option key={l.id} value={l.id}>
-                              {l.codigo || l.identificacao}
-                              {l.homenagens.length > 0 ? ` (já tem ${l.homenagens.length} memorial)` : ''}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                      {semFileira.length > 0 && (
-                        <optgroup label="⚠ Fora de fileira — confirmar antes">
-                          {semFileira.map((l) => (
-                            <option key={l.id} value={l.id}>
-                              {l.identificacao}
-                              {l.homenagens.length > 0 ? ` (já tem ${l.homenagens.length} memorial)` : ''}
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </>
-                  )
-                })()}
-              </select>
+              />
             </div>
           </div>
 
           {(() => {
             if (!form.lapide_id || form.lapide_id === memorial?.lapide_id) return null
-            const l = lapides.find((x) => x.id === form.lapide_id)
+            const l = jazigoEscolhido
             if (!l) return null
-            const arriscado = !l.fila_id || l.homenagens.length > 0
+            const arriscado = !l.fila_id || l.totalMemoriais > 0
             if (!arriscado) return null
             return (
               <div className="rounded-lg bg-red-950/30 border border-red-900/40 px-3 py-2 space-y-2">
                 <p className="text-xs text-red-300">
                   {!l.fila_id && 'Esse túmulo está fora de fileira (sem quadra/fileira vinculada). '}
-                  {l.homenagens.length > 0 && `Esse túmulo já tem ${l.homenagens.length} memorial(is) vinculado(s). `}
+                  {l.totalMemoriais > 0 && `Esse túmulo já tem ${l.totalMemoriais} memorial(is) vinculado(s). `}
                   Confere se é o túmulo certo antes de salvar.
                 </p>
                 <label className="flex items-center gap-2 text-xs text-red-200">

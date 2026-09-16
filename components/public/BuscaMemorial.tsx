@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { tema, periodoTexto, CORES } from '@/lib/publicTheme'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
+import { useBuscaDebounce } from '@/lib/useBuscaDebounce'
 
 interface Resultado {
   id: string
@@ -21,8 +22,6 @@ interface Resultado {
 
 export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
   const [termo, setTermo] = useState('')
-  const [resultados, setResultados] = useState<Resultado[] | null>(null)
-  const [buscando, setBuscando] = useState(false)
   const [desbloqueadoId, setDesbloqueadoId] = useState<string | null>(null)
   const [senhaAbertaId, setSenhaAbertaId] = useState<string | null>(null)
   const [senhaInput, setSenhaInput] = useState('')
@@ -31,31 +30,27 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
   const [verificando, setVerificando] = useState(false)
   const [erroBusca, setErroBusca] = useState('')
 
-  async function buscar(e: React.FormEvent) {
-    e.preventDefault()
-    const nome = termo.trim()
-    if (!nome) return
-    setBuscando(true)
-    setResultados(null)
-    setSenhaAbertaId(null)
-    setDesbloqueadoId(null)
-    setErroBusca('')
-
+  // A lista se forma enquanto a pessoa digita, a partir da 2ª letra -- sem
+  // botão "Buscar" (regra do Rafael, 2026-09-15).
+  const { resultados, buscando } = useBuscaDebounce<Resultado>(termo, async (nome) => {
     const { data, error } = await supabase.rpc('buscar_homenagens_publicas', {
       termo: nome,
       p_parceiro_id: parceiroId || null,
     })
-
     if (error) {
       setErroBusca('Não foi possível buscar agora. Tente de novo em instantes.')
-      setResultados([])
-      setBuscando(false)
-      return
+      return []
     }
+    setErroBusca('')
+    return (data || []) as Resultado[]
+  })
 
-    setResultados((data || []) as Resultado[])
-    setBuscando(false)
-  }
+  // Trocar o termo derruba qualquer memorial que já tinha sido destravado --
+  // senão a senha digitada pra um memorial seguiria valendo na lista seguinte.
+  useEffect(() => {
+    setSenhaAbertaId(null)
+    setDesbloqueadoId(null)
+  }, [termo])
 
   async function verificarSenha(e: React.FormEvent, memorialId: string) {
     e.preventDefault()
@@ -80,7 +75,7 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
 
   return (
     <div>
-      <form onSubmit={buscar} style={tema.buscaForm}>
+      <form onSubmit={(e) => e.preventDefault()} style={tema.buscaForm}>
         <label htmlFor="q" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>
           Nome do homenageado
         </label>
@@ -89,24 +84,24 @@ export function BuscaMemorial({ parceiroId }: { parceiroId?: string }) {
           type="text"
           value={termo}
           onChange={(e) => setTermo(e.target.value)}
-          placeholder="Nome completo do homenageado"
-          style={tema.buscaInput}
+          placeholder="Comece a digitar o nome"
+          autoComplete="off"
+          style={{ ...tema.buscaInput, flex: 1 }}
         />
-        <button type="submit" style={tema.buscaBotao} disabled={buscando}>
-          {buscando ? 'Buscando...' : 'Buscar'}
-        </button>
       </form>
 
       {erroBusca && <p style={{ color: '#e08a8a', marginTop: 14 }}>{erroBusca}</p>}
 
-      {!erroBusca && resultados !== null && resultados.length === 0 && (
+      {buscando && <p style={tema.vazio}>Buscando...</p>}
+
+      {!erroBusca && !buscando && resultados !== null && resultados.length === 0 && (
         <p style={tema.vazio}>
           Nenhum memorial encontrado com o nome &ldquo;{termo}&rdquo;. Confira a grafia e tente de novo.
         </p>
       )}
 
-      {resultados === null && (
-        <p style={tema.vazio}>Digite o nome completo de quem você procura.</p>
+      {!buscando && resultados === null && (
+        <p style={tema.vazio}>Digite o nome de quem você procura.</p>
       )}
 
       {resultados && resultados.length > 0 && (
