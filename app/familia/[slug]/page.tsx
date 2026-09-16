@@ -782,13 +782,22 @@ export default function FamiliaEdicaoPage() {
         )}
 
         <div id="memoriais" className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start scroll-mt-4">
-          <form onSubmit={salvar} className="lg:col-span-7 rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-3">
-            {/* MEMORIAIS: a família inteira do jazigo, não só quem está sendo
-                editado. Quem tem memorial aparece com retrato na esfera; o que
-                está aberto pra edição fica em destaque, os outros levam pra
-                própria página (2026-09-16, wireframe aprovado). */}
+          <form onSubmit={salvar} className="lg:col-span-7 rounded-xl bg-zinc-900 border border-zinc-800">
+            {/* MEMORIAIS é retrátil igual as outras seções, só que já aberto:
+                é a seção principal, mas quem quiser fechar pra enxergar a
+                página inteira consegue (wireframe aprovado). */}
+            <details open className="group">
+              <summary className="flex items-center gap-2 p-6 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Memoriais</h2>
+                <span className="text-xs text-zinc-500 flex-1 truncate">{form.nome_completo}</span>
+                <span className="text-xs text-zinc-500 group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <div className="px-6 pb-6 space-y-3">
+            {/* A família inteira do jazigo, não só quem está sendo editado.
+                Quem tem memorial aparece com retrato na esfera; o que está
+                aberto pra edição fica em destaque, os outros levam pra própria
+                página (2026-09-16, wireframe aprovado). */}
             <div className="pb-3 mb-1 border-b border-zinc-800">
-              <p className="text-[11px] uppercase tracking-wide text-zinc-500 mb-2">Memoriais</p>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-3">
                   <span
@@ -917,7 +926,21 @@ export default function FamiliaEdicaoPage() {
               />
             </div>
 
-            <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
+            {/* A linha do tempo cresce um bloco por evento -- aberta, ela
+                sozinha empurra o resto do formulário pra bem longe. Fechada
+                por padrão, com a contagem no título. */}
+            <details className="rounded-md border border-zinc-800 group">
+              <summary className="flex items-center gap-2 px-3 py-2.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <span className="text-xs text-zinc-400">Linha do tempo</span>
+                <span className="text-xs text-zinc-500 flex-1">
+                  {timelineEventos.length === 0 ? 'Nenhum evento ainda' : `${timelineEventos.length} evento${timelineEventos.length === 1 ? '' : 's'}`}
+                </span>
+                <span className="text-xs text-zinc-500 group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <div className="px-3 pb-3">
+                <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
+              </div>
+            </details>
 
             {conflito && (
               <div className="rounded-lg border border-amber-800/60 bg-amber-950/30 px-4 py-3 space-y-2">
@@ -964,6 +987,8 @@ export default function FamiliaEdicaoPage() {
             >
               {salvando ? 'Salvando...' : 'Salvar alterações'}
             </button>
+              </div>
+            </details>
           </form>
 
           <div className="lg:col-span-5 space-y-4">
@@ -987,8 +1012,15 @@ export default function FamiliaEdicaoPage() {
               )}
             </div>
 
-            <div id="fotos" className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-4 scroll-mt-4">
-              <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Fotos, vídeos e aparência</h2>
+            <details open id="fotos" className="rounded-xl bg-zinc-900 border border-zinc-800 scroll-mt-4 group">
+              <summary className="flex items-center gap-2 p-6 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Fotos e vídeos</h2>
+                <span className="text-xs text-zinc-500 flex-1">
+                  {galeria.length + (fotoUrl ? 1 : 0)} foto{galeria.length + (fotoUrl ? 1 : 0) === 1 ? '' : 's'} · {usoStorageMB}MB
+                </span>
+                <span className="text-xs text-zinc-500 group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <div className="px-6 pb-6 space-y-4">
           <div className="pb-4 border-b border-zinc-800 mb-4">
             <p className="text-xs text-zinc-500">Armazenamento: {usoStorageMB}MB / 500MB</p>
             <div className="flex items-center gap-2 mt-1">
@@ -1235,7 +1267,8 @@ export default function FamiliaEdicaoPage() {
             />
             {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
           </div>
-            </div>
+              </div>
+            </details>
 
             {/* Árvore, Privacidade e Assinaturas: retráteis, fechados por
                 padrão, com o estado resumido no próprio título -- dá pra
