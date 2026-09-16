@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface Homenagem {
   id: string
@@ -34,6 +35,13 @@ export default function GavetasLapide() {
   const [lapideNome, setLapideNome] = useState('')
   const [editandoNome, setEditandoNome] = useState(false)
   const [nomeInput, setNomeInput] = useState('')
+  // Foto da face do túmulo (o que está gravado na pedra). Captura de drone é
+  // reta de cima e nunca mostra a face vertical, então a foto de perto é a
+  // única forma de identificar o túmulo -- e a prova de que alguém esteve lá,
+  // por isso ela é o que marca o túmulo como conferido em campo.
+  const [fotoLapide, setFotoLapide] = useState<string | null>(null)
+  const [subindoFoto, setSubindoFoto] = useState(false)
+  const [removendoFoto, setRemovendoFoto] = useState(false)
   const [gavetas, setGavetas] = useState<Gaveta[]>([])
   const [homenagens, setHomenagens] = useState<Homenagem[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,9 +52,10 @@ export default function GavetasLapide() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data: lapide } = await supabase.from('lapides').select('identificacao, nome').eq('id', lapideId).single()
+    const { data: lapide } = await supabase.from('lapides').select('identificacao, nome, foto_face_url').eq('id', lapideId).single()
     setLapideCodigo(lapide?.identificacao || '')
     setLapideNome(lapide?.nome || '')
+    setFotoLapide(lapide?.foto_face_url || null)
 
     const { data } = await supabase
       .from('gavetas')
@@ -118,6 +127,62 @@ export default function GavetasLapide() {
       observacoes: g.observacoes || '',
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function subirFotoLapide(arquivo: File) {
+    setSubindoFoto(true)
+    setErro('')
+    try {
+      const caminho = `tumulos/${id}/${lapideId}/${Date.now()}-${arquivo.name}`
+      const { error: erroUpload } = await supabase.storage.from('memoriais').upload(caminho, arquivo, { upsert: true })
+      if (erroUpload) throw erroUpload
+      const { data } = supabase.storage.from('memoriais').getPublicUrl(caminho)
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      // Foto de perto só existe se alguém esteve no túmulo fisicamente --
+      // então subir a foto confirma o túmulo (pino verde no mapa).
+      const { error } = await supabase
+        .from('lapides')
+        .update({
+          foto_face_url: data.publicUrl,
+          situacao: 'confirmada',
+          confirmada_em: new Date().toISOString(),
+          confirmada_por: session?.user?.id || null,
+        })
+        .eq('id', lapideId)
+      if (error) throw error
+      setFotoLapide(data.publicUrl)
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao enviar a foto.')
+    }
+    setSubindoFoto(false)
+  }
+
+  // Tirar a foto devolve o túmulo pra "não conferido" (a rota faz os dois numa
+  // transação só) -- senão o mapa seguiria com pino verde sem nada sustentando.
+  async function removerFotoLapide() {
+    setRemovendoFoto(true)
+    setErro('')
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      const res = await fetch('/api/remover-arquivo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ recurso: 'foto_tumulo', id: lapideId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Não foi possível remover a foto')
+      setFotoLapide(null)
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao remover a foto.')
+    }
+    setRemovendoFoto(false)
   }
 
   async function salvarNomeJazigo() {
@@ -202,10 +267,54 @@ export default function GavetasLapide() {
         </p>
       )}
 
-      <p className="text-[var(--tema-zinc-400)] text-sm mb-8">
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-6">
         Cada gaveta é uma posição física dentro do jazigo. Vincule um memorial já cadastrado pra marcar quem está ali — ou,
         se a pessoa ainda não tem memorial, escreva só o nome dela.
       </p>
+
+      {/* Foto da lápide: é ela que aparece no topo do card do jazigo no mapa,
+          e é o que marca o túmulo como conferido em campo (2026-09-15). */}
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 mb-8 max-w-lg">
+        <h2 className="text-sm font-semibold text-white mb-1">Foto da lápide</h2>
+        <p className="text-[11px] text-[var(--tema-zinc-500)] mb-3">
+          Tirada de perto, no cemitério. Aparece no topo do card deste jazigo no mapa e marca o túmulo como conferido em campo —
+          foto de drone é reta de cima e nunca mostra o nome gravado na pedra.
+        </p>
+        {fotoLapide && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={urlMidiaProtegida(fotoLapide) || fotoLapide}
+            alt="Foto da lápide"
+            className="w-full max-w-xs rounded-lg mb-3"
+          />
+        )}
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="text-sm font-medium cursor-pointer" style={{ color: '#C9A46A' }}>
+            {subindoFoto ? 'Enviando...' : fotoLapide ? 'Trocar foto' : 'Anexar foto da lápide'}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={subindoFoto}
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) subirFotoLapide(f)
+                e.target.value = ''
+              }}
+            />
+          </label>
+          {fotoLapide && (
+            <button
+              type="button"
+              disabled={removendoFoto}
+              onClick={removerFotoLapide}
+              className="text-sm text-[var(--tema-zinc-500)] hover:text-red-400"
+            >
+              {removendoFoto ? 'Removendo...' : 'Remover foto (volta a não conferido)'}
+            </button>
+          )}
+        </div>
+      </div>
 
       <form onSubmit={salvar} className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 mb-8 space-y-3 max-w-lg">
         {editandoId && (

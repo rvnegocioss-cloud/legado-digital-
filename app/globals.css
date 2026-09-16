@@ -363,6 +363,40 @@ html {
   color: #C9A46A;
 }
 
+/* ---- Card do jazigo no mapa da Central ---------------------------------
+   O MapLibre impõe fonte e fundo branco próprios dentro do popup, então o
+   card saía com uma fonte que não é a do projeto e destoava de toda a
+   Central (achado real, 2026-09-15). Aqui ele passa a ser navy com borda
+   dourada e verde, na fonte do projeto. */
+.card-jazigo .maplibregl-popup-content {
+  font-family: var(--font-sans), 'Inter', sans-serif;
+  background: #0f2436;
+  /* Borda dourada e verde: a borda em si é transparente e o gradiente entra
+     por baixo, senão não dá pra ter duas cores numa borda só. */
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  background-image: linear-gradient(#0f2436, #0f2436),
+    linear-gradient(135deg, #C9A46A 0%, #C9A46A 45%, #22c55e 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  padding: 0;
+  overflow: hidden;
+}
+.card-jazigo .maplibregl-popup-tip {
+  border-top-color: #0f2436 !important;
+  border-bottom-color: #0f2436 !important;
+}
+.card-jazigo .maplibregl-popup-close-button {
+  color: #C9A46A;
+  font-size: 17px;
+  line-height: 1;
+  padding: 2px 6px 4px;
+  /* A foto ocupa o topo inteiro -- sem o fundo o X some em cima dela. */
+  background: rgba(11, 29, 42, 0.6);
+  border-radius: 0 10px 0 8px;
+}
+
 /* ---- Galeria do topo como porta-retrato --------------------------------
    A caixa cinza quadrada destoava do retrato redondo do hero. Aqui a mídia
    ganha moldura dourada com relevo e passe-partout claro, e as miniaturas
