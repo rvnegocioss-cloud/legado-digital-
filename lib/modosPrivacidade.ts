@@ -37,17 +37,21 @@ export const ROTULOS_MODO: Record<ModoGate, { titulo: string; descricao: string 
     titulo: 'Aberto',
     descricao: 'Qualquer pessoa com acesso liberado pelos canais abaixo entra direto, sem pedir nada.',
   },
+  // As 3 travas abaixo protegem o CONTEÚDO da página, não a identidade do
+  // túmulo: o nome e a foto continuam aparecendo no mapa público, porque o
+  // nome já está gravado na pedra, à vista de quem passa no cemitério. Quem
+  // não quer aparecer em lugar nenhum usa "Oculto" ou desliga a busca.
   senha: {
     titulo: 'Com senha',
-    descricao: 'Pede uma senha antes de entrar. A família ou a funerária define a senha.',
+    descricao: 'Pede uma senha antes de entrar. A família ou a funerária define a senha. O nome e a foto continuam aparecendo no mapa do cemitério — só o conteúdo da página fica protegido.',
   },
   cadastro: {
     titulo: 'Com identificação',
-    descricao: 'Pede nome e e-mail antes de entrar — sem verificação, é só um registro de quem visitou. Não é controle de acesso de verdade.',
+    descricao: 'Pede nome e e-mail antes de entrar — sem verificação, é só um registro de quem visitou. Não é controle de acesso de verdade. O nome e a foto continuam aparecendo no mapa do cemitério.',
   },
   email: {
     titulo: 'Lista de e-mails autorizados',
-    descricao: 'Só quem estiver numa lista de e-mails definida pela família consegue entrar, confirmando com um código enviado por e-mail.',
+    descricao: 'Só quem estiver numa lista de e-mails definida pela família consegue entrar, confirmando com um código enviado por e-mail. O nome e a foto continuam aparecendo no mapa do cemitério.',
   },
   oculto: {
     titulo: 'Oculto',

@@ -35,6 +35,9 @@ interface MemorialDoTumulo {
 interface PinoProps extends MemorialDoTumulo {
   total?: number
   lapide_codigo?: string | null
+  // Nome do jazigo ("Jazigo Família Saraiva"). Com mais de um memorial no
+  // mesmo túmulo, é assim que o card se apresenta (2026-09-16).
+  jazigo_nome?: string | null
   memoriais?: MemorialDoTumulo[] | string
 }
 
@@ -158,7 +161,10 @@ export default function MapaPublicoCemiterio({
       if (f.geometry.type !== 'Point') continue
       const props = f.properties as PinoProps
       for (const m of lerMemoriais(props)) {
-        if (!m.nome || m.protegido || !limpar(m.nome).includes(alvo)) continue
+        // Memorial com senha também é achável pelo nome: quem procura a
+        // sepultura da própria família precisa achar o túmulo no mapa, e a
+        // senha continua sendo pedida ao abrir a página.
+        if (!m.nome || !limpar(m.nome).includes(alvo)) continue
         const [lng, lat] = f.geometry.coordinates as [number, number]
         achados.push({ nome: m.nome, lng, lat, props })
         if (achados.length >= 8) return achados
@@ -329,19 +335,23 @@ export default function MapaPublicoCemiterio({
               const varios = lista.length > 1
               return (
                 <div style={{ minWidth: 190, maxWidth: 260, fontFamily: 'Georgia, serif' }}>
+                  {/* Túmulo com mais de um memorial se apresenta pelo nome da
+                      família, não por uma contagem seca (2026-09-16). Sem nome
+                      de jazigo cadastrado, cai na contagem de sempre. */}
                   {varios && (
                     <p
                       style={{
-                        fontSize: 10,
-                        letterSpacing: 1.2,
-                        textTransform: 'uppercase',
-                        color: '#8a6d3b',
+                        fontSize: hover.props.jazigo_nome ? 12.5 : 10,
+                        letterSpacing: hover.props.jazigo_nome ? 0 : 1.2,
+                        textTransform: hover.props.jazigo_nome ? 'none' : 'uppercase',
+                        fontWeight: hover.props.jazigo_nome ? 700 : 400,
+                        color: hover.props.jazigo_nome ? '#1a1a1a' : '#8a6d3b',
                         margin: '0 0 8px',
                         paddingBottom: 6,
                         borderBottom: '1px solid rgba(0,0,0,0.08)',
                       }}
                     >
-                      {lista.length} memoriais neste túmulo
+                      {hover.props.jazigo_nome || `${lista.length} memoriais neste túmulo`}
                     </p>
                   )}
 
@@ -378,11 +388,15 @@ export default function MapaPublicoCemiterio({
                           )}
                         </div>
                         <div style={{ minWidth: 0 }}>
+                          {/* O nome aparece sempre, inclusive em memorial com
+                              senha: a trava protege o CONTEÚDO da página, não
+                              de quem é o túmulo -- o nome já está gravado na
+                              pedra, à vista de quem passa (2026-09-16). */}
                           <p style={{ fontSize: 13, margin: 0, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {mem.protegido ? 'Memorial protegido' : mem.nome}
+                            {mem.nome}
                           </p>
                           <p style={{ fontSize: 10.5, margin: 0, color: '#666' }}>
-                            {mem.protegido ? 'Toque para pedir acesso' : 'Toque para ver o memorial'}
+                            {mem.protegido ? 'Toque para entrar com a senha' : 'Toque para ver o memorial'}
                           </p>
                         </div>
                       </a>
