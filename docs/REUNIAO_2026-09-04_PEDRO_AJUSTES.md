@@ -17,11 +17,11 @@
 8. [x] Redimensionar campos de mídia pra acomodar vídeo/slide automático — substituir a galeria lateral por espaço visual centralizado
 9. [x] Ajustar texto: corrigir extensão pra caber nos componentes, implementar "ver mais" em vez de cortar/estourar
 10. [x] Adicionar indicação de usuário logado na interface (mostrar quem é o responsável pela sessão)
-11. [ ] **Aguardando Pedro**: wireframe do posicionamento de rota/mapa/textos na tela principal do memorial — não mexe até o wireframe chegar
+11. [x] ~~**Aguardando Pedro**~~: wireframe do posicionamento de rota/mapa/textos na tela principal do memorial — **wireframe chegou e foi aplicado em 14/09/2026** (card de identidade, nav do site e botões Rota/Guia), confirmado com o Rafael por print anotado. Ver `app/homenagem/[slug]/page.tsx` (linhas com "copiado do wireframe do Pedro").
 
 18. [x] "Como Chegar" ficou escondido demais (lá embaixo) — subir um atalho pra ele mais perto do topo (só um botão que desce até a seção, ou destaca ela — **não mexe na lógica interna do mapa/rota**, regra 17, só a posição/visibilidade do link)
 
-19. [ ] **Banner / fundo personalizado no perfil do memorial** (00:42:36) — Pedro sugeriu; Rafael ponderou a dificuldade de manter responsivo com imagem de tamanho variado. *(faltava na lista, achado na revisão de 08/09)*
+19. [x] **Banner / fundo personalizado no perfil do memorial** (00:42:36) — **feito em 09/09/2026.** A preocupação do Rafael com responsividade foi resolvida por construção: em vez de a família subir arquivo próprio (proporção/peso variáveis, quebraria o topo), existe um **catálogo fechado de 6 paisagens** já no formato certo (`lib/bannersMemorial.ts`), que ela escolhe no Portal da Família. A capa é o fundo do topo, atrás do retrato, com véu que termina na cor do tema. Capa e decoração das laterais são mutuamente exclusivas.
 20. [x] **Galeria de mídia integrada** (00:45:05) — foto abrindo em pop-up maior e vídeo tocando sem poluir a interface; unificar foto+vídeo numa galeria só. *(faltava na lista)*
 21. [x] **Guia de navegação dentro do mapa de cemitérios** (01:09:35) — o visitante precisa entender como achar e acessar o túmulo da própria família. *(faltava na lista)*
 22. [x] **Cuidado de performance no mapa** (00:19:01) — destacar o mapa na landing sem carregar o mapa toda hora e pesar o servidor. *(faltava na lista — resolvido por enquanto: a landing usa imagem, não o mapa ao vivo)*
@@ -43,7 +43,7 @@
 
 ## Jazigos e gavetas (Portal da Família)
 
-12. [x] Jazigo + gavetas 3D visíveis no Portal da Família — **só visualização** (confirmado 08/09: quem cadastra é o parceiro) e no Portal do Parceiro
+12. [x] Jazigo + gavetas 3D visíveis no Portal da Família e no Portal do Parceiro. ⚠️ **Regra mudou em 15-16/09/2026, a pedido do Rafael:** deixou de ser "só visualização" pra família. Ela passou a poder **dar nome ao jazigo** ("Jazigo Família Saraiva", que virou a identidade do topo do portal) e **escrever o nome de quem está enterrado nas gavetas que ainda não têm memorial**. O que continua sendo só do parceiro/staff: **criar e remover gaveta**, e mexer em gaveta que já tem memorial (pode ser de outra família — ver regra 22).
 13. [x] Restringir cadastro de gaveta: só aparecem memoriais já vinculados ao jazigo selecionado (esconder campo irrelevante)
 14. [x] Atalho direto no mapa → cadastro de gavetas no Portal da Família
 15. [x] Regra de vínculo: quem cria o 1º memorial daquele jazigo vira o gestor de todos os memoriais vinculados a ele
