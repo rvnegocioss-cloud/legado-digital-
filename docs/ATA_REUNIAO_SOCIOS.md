@@ -11,10 +11,10 @@ Fonte: transcrição Gemini do Google Drive ("Reunião iniciada às 2026_07_16 1
 ### Rafael Abrão
 - [x] Menu sanfona (lateral expansível/retrátil)
 - [ ] Teste de e-mail depois do domínio definido — domínio (`legadodigital.net`) resolvido, teste ainda falta
-- [ ] Corrigir busca familiar no portal com acesso restrito por senha — status atual não conferido
+- [x] **Corrigir busca familiar no portal com acesso restrito por senha** — diagnosticado e corrigido em 16/09/2026. A busca da tela de login usava a mesma função da busca pública, que esconde memorial com `modo_gate = 'oculto'` ou busca desligada. Resultado: a família que escondia o próprio memorial não conseguia mais achá-lo pra entrar, mesmo sabendo a senha. Agora `/api/familia-login` aceita **nome + senha** (sem slug), procurando sem filtro de privacidade e conferindo a senha — com resposta genérica pra ninguém descobrir memorial escondido testando nomes.
 - [x] Cadastro de parceiros com validação via Receita Federal (CNPJ)
 - [ ] Landing page separada voltada pra família (estrutura própria, não a principal)
-- [ ] Pesquisar alternativa ao Google Maps pro mapeamento interno
+- [x] **Pesquisar alternativa ao Google Maps pro mapeamento interno** — resolvido desde 04/08/2026, só não estava marcado aqui. O projeto **não usa Google Maps em lugar nenhum**: o mapeamento interno roda em **MapLibre GL** com **ortomosaico real de drone** servido em **PMTiles** (arquivo único em storage estático, sem servidor de tiles), mais satélite Esri como fundo quando o cemitério ainda não tem voo. Detalhe técnico em `docs/mapa.md`.
 - [ ] Finalizar etapas pendentes antes da readequação visual
 - [ ] Ajustar design profissional (depois de finalizar estrutura + computador novo)
 
