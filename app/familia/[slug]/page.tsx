@@ -16,6 +16,7 @@ import { AMBIENTES, CORES_LATERAIS, type Ambiente, type CorLateral } from '@/com
 import { supabase } from '@/lib/auth'
 import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
+import { ModoAjudaProvider, BotaoModoAjuda, Dica } from '@/components/familia/ModoAjuda'
 import type { ModoGate } from '@/lib/modosPrivacidade'
 
 interface Memorial {
@@ -615,6 +616,7 @@ export default function FamiliaEdicaoPage() {
   }
 
   return (
+    <ModoAjudaProvider>
     <div className="min-h-screen bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -630,6 +632,7 @@ export default function FamiliaEdicaoPage() {
             </Link>
           </div>
           <div className="flex items-center gap-3">
+            <BotaoModoAjuda />
             {/* Quem está logado: a família entra pelo memorial, então o que
                 identifica a sessão é de quem é o memorial que ela administra. */}
             <span className="flex items-center gap-2 text-sm text-zinc-300">
@@ -698,7 +701,7 @@ export default function FamiliaEdicaoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
           <form onSubmit={salvar} className="lg:col-span-7 rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-3">
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Nome completo</label>
+              <label className="block text-xs text-zinc-500 mb-1">Nome completo<Dica texto="O nome completo de quem está sendo homenageado. Aparece em destaque no topo da página do memorial." /></label>
               <input
                 type="text"
                 required
@@ -709,7 +712,7 @@ export default function FamiliaEdicaoPage() {
             </div>
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="block text-xs text-zinc-500 mb-1">Data de nascimento</label>
+                <label className="block text-xs text-zinc-500 mb-1">Data de nascimento<Dica texto="Dia, mês e ano de nascimento. Se não souber o dia exato, pode deixar em branco." /></label>
                 <input
                   type="text"
                   placeholder="DD/MM/AAAA"
@@ -719,7 +722,7 @@ export default function FamiliaEdicaoPage() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-xs text-zinc-500 mb-1">Data de falecimento</label>
+                <label className="block text-xs text-zinc-500 mb-1">Data de falecimento<Dica texto="Data do falecimento. Aparece junto com a de nascimento na página do memorial." /></label>
                 <input
                   type="text"
                   placeholder="DD/MM/AAAA"
@@ -730,11 +733,11 @@ export default function FamiliaEdicaoPage() {
               </div>
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Vínculo/papel (ex: Pai, Avó — aparece perto do nome na página)</label>
+              <label className="block text-xs text-zinc-500 mb-1">Vínculo/papel (ex: Pai, Avó — aparece perto do nome na página)<Dica texto="Como essa pessoa era chamada pela família — Pai, Mãe, Avô, Esposa... Pode adicionar mais de um." /></label>
               <VinculosEditor value={vinculos} onChange={setVinculos} />
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Cidade</label>
+              <label className="block text-xs text-zinc-500 mb-1">Cidade<Dica texto="Cidade onde a pessoa viveu ou faleceu. Aparece embaixo do nome na página do memorial." /></label>
               <input
                 type="text"
                 value={form.cidade}
@@ -743,7 +746,7 @@ export default function FamiliaEdicaoPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Frase preferida</label>
+              <label className="block text-xs text-zinc-500 mb-1">Frase preferida<Dica texto="Uma frase, ditado ou pensamento que marcava essa pessoa. Aparece em destaque na página, como uma citação." /></label>
               <input
                 type="text"
                 value={form.frase_preferida}
@@ -752,7 +755,7 @@ export default function FamiliaEdicaoPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-500 mb-1">Biografia</label>
+              <label className="block text-xs text-zinc-500 mb-1">Biografia<Dica texto="Conte a história de vida dessa pessoa: onde nasceu, o que fazia, como era. É o texto principal da página do memorial." /></label>
               <textarea
                 rows={4}
                 value={form.biografia}
@@ -830,7 +833,7 @@ export default function FamiliaEdicaoPage() {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)</label>
+            <label className="block text-xs text-zinc-500 mb-1">Foto do homenageado (máx 10MB)<Dica texto="A foto principal, que aparece no topo do memorial e nos mapas do cemitério. De preferência um retrato de rosto, bem iluminado." /></label>
             <p className="text-xs text-zinc-400 mb-2">JPEG, PNG ou GIF</p>
             {fotoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -847,7 +850,7 @@ export default function FamiliaEdicaoPage() {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)</label>
+            <label className="block text-xs text-zinc-500 mb-1">Vídeo (máx 50MB)<Dica texto="O vídeo principal do memorial — um momento marcante, uma homenagem ou um vídeo antigo da pessoa." /></label>
             <p className="text-xs text-zinc-400 mb-2">MP4, WebM ou QuickTime</p>
             {videoUrl && <video src={urlMidiaProtegida(videoUrl) || videoUrl} controls className="w-full rounded-md mb-2 max-h-48 bg-black" />}
             <input
@@ -862,7 +865,7 @@ export default function FamiliaEdicaoPage() {
 
           <div>
             <label className="block text-xs text-zinc-500 mb-1">
-              Galeria de vídeos ({videosGaleria.length}/{LIMITE_VIDEOS})
+              Galeria de vídeos ({videosGaleria.length}/{LIMITE_VIDEOS})<Dica texto="Vídeos extras, além do principal. Aparecem numa seção própria na página do memorial." />
             </label>
             <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_VIDEOS} vídeos além do vídeo principal, máx 100MB cada</p>
             {videosGaleria.length > 0 && (
@@ -893,7 +896,7 @@ export default function FamiliaEdicaoPage() {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Imagem de capa</label>
+            <label className="block text-xs text-zinc-500 mb-1">Imagem de capa<Dica texto="Um fundo atrás do retrato, no topo da página. A família escolhe entre imagens prontas, não sobe arquivo próprio." /></label>
             <p className="text-xs text-zinc-400 mb-2">
               Fica no topo da página do memorial, atrás do retrato e do nome. Escolha uma das
               imagens abaixo — todas têm o mesmo formato, então nenhuma desalinha a página.
@@ -941,7 +944,7 @@ export default function FamiliaEdicaoPage() {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">Tema da página pública</label>
+            <label className="block text-xs text-zinc-500 mb-1">Tema da página pública<Dica texto="A cor de fundo e os detalhes dourados de toda a página do memorial." /></label>
             <p className="text-xs text-zinc-400 mb-2">Cor de fundo e detalhes dourados da página do memorial</p>
             <div className="flex gap-2">
               {PALETAS_MEMORIAL.map((p) => (
@@ -963,7 +966,7 @@ export default function FamiliaEdicaoPage() {
                 a família ter que descobrir que "nenhum" é a opção de desligar. */}
             <div className="flex items-center justify-between mb-1">
               <label htmlFor="chave-laterais" className="text-xs text-zinc-500">
-                Decoração das laterais
+                Decoração das laterais<Dica texto="Pontos de luz e pétalas nas bordas da página, em telas grandes. Não combina com imagem de capa — só uma das duas fica ligada." />
               </label>
               <button
                 id="chave-laterais"
@@ -1031,7 +1034,7 @@ export default function FamiliaEdicaoPage() {
 
           <div>
             <label className="block text-xs text-zinc-500 mb-1">
-              Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})
+              Galeria de fotos ({galeria.length}/{LIMITE_FOTOS})<Dica texto="Fotos extras, além da foto principal. Aparecem numa galeria própria na página do memorial." />
             </label>
             <p className="text-xs text-zinc-400 mb-2">Até {LIMITE_FOTOS} fotos, máx 10MB cada</p>
             {galeria.length > 0 && (
@@ -1105,5 +1108,6 @@ export default function FamiliaEdicaoPage() {
         </footer>
       </div>
     </div>
+    </ModoAjudaProvider>
   )
 }
