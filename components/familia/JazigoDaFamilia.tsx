@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-interface Gaveta {
+export interface Gaveta {
   id: string
   codigo: string | null
   linha: number | null
@@ -46,10 +46,10 @@ export default function JazigoDaFamilia({
 }: {
   slug: string
   memorialId: string
-  // A página inteira mostra o nome do jazigo como identidade da família no
-  // topo -- em vez de duplicar a mesma busca, este componente avisa o pai
-  // assim que carrega (2026-09-16).
-  onJazigo?: (jazigo: { nome: string | null } | null) => void
+  // A página inteira usa o jazigo em dois lugares (identidade da família no
+  // topo e a lista de memoriais do jazigo) -- em vez de duplicar a mesma
+  // busca, este componente avisa o pai assim que carrega (2026-09-16).
+  onJazigo?: (jazigo: { nome: string | null; gavetas: Gaveta[] } | null) => void
 }) {
   const [jazigo, setJazigo] = useState<Jazigo | null>(null)
   const [carregando, setCarregando] = useState(true)
@@ -64,7 +64,7 @@ export default function JazigoDaFamilia({
       .then((r) => r.json())
       .then((j) => {
         setJazigo(j.jazigo || null)
-        onJazigo?.(j.jazigo ? { nome: j.jazigo.nome } : null)
+        onJazigo?.(j.jazigo ? { nome: j.jazigo.nome, gavetas: j.jazigo.gavetas || [] } : null)
       })
       .catch(() => setJazigo(null))
   }

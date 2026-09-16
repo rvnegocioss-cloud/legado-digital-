@@ -9,7 +9,7 @@ import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
 import JazigoDaFamilia from '@/components/familia/JazigoDaFamilia'
 import ArvoreDaFamilia from '@/components/familia/ArvoreDaFamilia'
-import { LivroAssinaturas, type Assinatura } from '@/components/public/LivroAssinaturas'
+import { type Assinatura } from '@/components/public/LivroAssinaturas'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
 import { BANNERS_MEMORIAL } from '@/lib/bannersMemorial'
 import { AMBIENTES, CORES_LATERAIS, type Ambiente, type CorLateral } from '@/components/public/AmbienteLateral'
@@ -173,6 +173,14 @@ export default function FamiliaEdicaoPage() {
   // no topo da página, no lugar de "Editar memorial de X". Vem do mesmo
   // card que a família já usa pra nomear o jazigo (2026-09-16).
   const [nomeJazigo, setNomeJazigo] = useState<string | null>(null)
+  const [nomeFamilia, setNomeFamilia] = useState('')
+  const [salvandoFamilia, setSalvandoFamilia] = useState(false)
+  // Os outros memoriais do mesmo jazigo -- a seção Memoriais lista a família
+  // inteira, não só quem está sendo editado.
+  const [memoriaisDoJazigo, setMemoriaisDoJazigo] = useState<
+    { id: string; nome: string | null; slug: string | null }[]
+  >([])
+  const [removendoAssinaturaId, setRemovendoAssinaturaId] = useState<string | null>(null)
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -387,6 +395,35 @@ export default function FamiliaEdicaoPage() {
     if ('videos_galeria' in s) setVideosGaleria((s.videos_galeria as string[]) || [])
     setValoresBase((b) => ({ ...b, ...conflito.doServidor }))
     setConflito(null)
+  }
+
+  // Nome da família = nome do jazigo (lapides.nome). É o mesmo dado que a
+  // família já nomeia no card do Jazigo -- não existem dois nomes de família
+  // concorrendo, só dois lugares de editar o mesmo.
+  async function salvarNomeFamilia() {
+    if ((nomeFamilia || '') === (nomeJazigo || '')) return
+    setSalvandoFamilia(true)
+    try {
+      const res = await fetch('/api/familia-jazigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: params.slug, nome: nomeFamilia }),
+      })
+      if (res.ok) setNomeJazigo(nomeFamilia.trim() || null)
+    } catch {}
+    setSalvandoFamilia(false)
+  }
+
+  async function removerAssinatura(id: string) {
+    setRemovendoAssinaturaId(id)
+    const res = await fetch('/api/memorial-condolencia', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      // Quem autoriza é o cookie de família, checado no servidor.
+      body: JSON.stringify({ memorialId, id }),
+    })
+    if (res.ok) setAssinaturas((atual) => atual.filter((a) => a.id !== id))
+    setRemovendoAssinaturaId(null)
   }
 
   function descartarRascunho() {
@@ -746,25 +783,57 @@ export default function FamiliaEdicaoPage() {
 
         <div id="memoriais" className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start scroll-mt-4">
           <form onSubmit={salvar} className="lg:col-span-7 rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-3">
-            <div className="flex items-center gap-3 pb-3 mb-1 border-b border-zinc-800">
-              <span
-                className="w-11 h-11 rounded-full shrink-0 p-[2px]"
-                style={{ background: 'conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A)' }}
-              >
-                <span className="w-full h-full rounded-full overflow-hidden bg-zinc-950 flex items-center justify-center">
-                  {fotoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={urlMidiaProtegida(fotoUrl) || fotoUrl} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-semibold" style={{ color: '#C9A46A' }}>
-                      {(form.nome_completo || '?').charAt(0).toUpperCase()}
+            {/* MEMORIAIS: a família inteira do jazigo, não só quem está sendo
+                editado. Quem tem memorial aparece com retrato na esfera; o que
+                está aberto pra edição fica em destaque, os outros levam pra
+                própria página (2026-09-16, wireframe aprovado). */}
+            <div className="pb-3 mb-1 border-b border-zinc-800">
+              <p className="text-[11px] uppercase tracking-wide text-zinc-500 mb-2">Memoriais</p>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-3">
+                  <span
+                    className="w-10 h-10 rounded-full shrink-0 p-[2px]"
+                    style={{ background: 'conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A)' }}
+                  >
+                    <span className="w-full h-full rounded-full overflow-hidden bg-zinc-950 flex items-center justify-center">
+                      {fotoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={urlMidiaProtegida(fotoUrl) || fotoUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-sm font-semibold" style={{ color: '#C9A46A' }}>
+                          {(form.nome_completo || '?').charAt(0).toUpperCase()}
+                        </span>
+                      )}
                     </span>
-                  )}
-                </span>
-              </span>
-              <div>
-                <p className="text-[11px] uppercase tracking-wide text-zinc-500">Memoriais</p>
-                <p className="text-sm font-semibold text-white">{form.nome_completo || 'Novo memorial'}</p>
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{form.nome_completo || 'Novo memorial'}</p>
+                    <p className="text-[11px]" style={{ color: '#C9A46A' }}>editando agora</p>
+                  </div>
+                </div>
+
+                {memoriaisDoJazigo.map((m) => (
+                  <a
+                    key={m.id}
+                    href={m.slug ? `/homenagem/${m.slug}` : '#'}
+                    className="flex items-center gap-3 opacity-60 hover:opacity-100"
+                  >
+                    <span
+                      className="w-10 h-10 rounded-full shrink-0 p-[2px]"
+                      style={{ background: 'conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A)' }}
+                    >
+                      <span className="w-full h-full rounded-full overflow-hidden bg-zinc-950 flex items-center justify-center">
+                        <span className="text-sm font-semibold" style={{ color: '#C9A46A' }}>
+                          {(m.nome || '?').charAt(0).toUpperCase()}
+                        </span>
+                      </span>
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-white">{m.nome}</p>
+                      <p className="text-[11px] text-zinc-500">ver página →</p>
+                    </div>
+                  </a>
+                ))}
               </div>
             </div>
             <div>
@@ -776,6 +845,21 @@ export default function FamiliaEdicaoPage() {
                 onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
                 className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
               />
+            </div>
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1">
+                Família (pode deixar em branco)
+                <Dica texto="O nome da família, ex: Família Saraiva Oliveira. Aparece no topo deste portal e é o mesmo nome que identifica o jazigo. Pode deixar vazio." />
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Família Saraiva Oliveira"
+                value={nomeFamilia}
+                onChange={(e) => setNomeFamilia(e.target.value)}
+                onBlur={salvarNomeFamilia}
+                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
+              />
+              {salvandoFamilia && <p className="text-[11px] text-zinc-500 mt-1">Salvando...</p>}
             </div>
             <div className="flex gap-3">
               <div className="flex-1">
@@ -803,23 +887,25 @@ export default function FamiliaEdicaoPage() {
               <label className="block text-xs text-zinc-500 mb-1">Vínculo/papel (ex: Pai, Avó — aparece perto do nome na página)<Dica texto="Como essa pessoa era chamada pela família — Pai, Mãe, Avô, Esposa... Pode adicionar mais de um." /></label>
               <VinculosEditor value={vinculos} onChange={setVinculos} />
             </div>
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Cidade<Dica texto="Cidade onde a pessoa viveu ou faleceu. Aparece embaixo do nome na página do memorial." /></label>
-              <input
-                type="text"
-                value={form.cidade}
-                onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1">Frase preferida<Dica texto="Uma frase, ditado ou pensamento que marcava essa pessoa. Aparece em destaque na página, como uma citação." /></label>
-              <input
-                type="text"
-                value={form.frase_preferida}
-                onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-                className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
-              />
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-xs text-zinc-500 mb-1">Cidade<Dica texto="Cidade onde a pessoa viveu ou faleceu. Aparece embaixo do nome na página do memorial." /></label>
+                <input
+                  type="text"
+                  value={form.cidade}
+                  onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs text-zinc-500 mb-1">Frase preferida<Dica texto="Uma frase, ditado ou pensamento que marcava essa pessoa. Aparece em destaque na página, como uma citação." /></label>
+                <input
+                  type="text"
+                  value={form.frase_preferida}
+                  onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
+                  className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-xs text-zinc-500 mb-1">Biografia<Dica texto="Conte a história de vida dessa pessoa: onde nasceu, o que fazia, como era. É o texto principal da página do memorial." /></label>
@@ -883,7 +969,21 @@ export default function FamiliaEdicaoPage() {
           <div className="lg:col-span-5 space-y-4">
             <div id="jazigo" className="scroll-mt-4">
               {memorialId && (
-                <JazigoDaFamilia slug={params.slug} memorialId={memorialId} onJazigo={(j) => setNomeJazigo(j?.nome || null)} />
+                <JazigoDaFamilia
+                  slug={params.slug}
+                  memorialId={memorialId}
+                  onJazigo={(j) => {
+                    setNomeJazigo(j?.nome || null)
+                    setNomeFamilia(j?.nome || '')
+                    // Os outros memoriais do jazigo -- o que está sendo editado
+                    // já aparece em destaque, não se repete na lista.
+                    setMemoriaisDoJazigo(
+                      (j?.gavetas || [])
+                        .filter((g) => g.homenagem_id && g.homenagem_id !== memorialId)
+                        .map((g) => ({ id: g.homenagem_id as string, nome: g.nome, slug: g.slug }))
+                    )
+                  }}
+                />
               )}
             </div>
 
@@ -1136,43 +1236,86 @@ export default function FamiliaEdicaoPage() {
             {enviandoGaleria && <p className="text-xs text-zinc-500 mt-1">Enviando fotos...</p>}
           </div>
             </div>
-          </div>
-        </div>
 
-            <div id="arvore" className="scroll-mt-4">
-              {memorialId && <ArvoreDaFamilia slug={params.slug} />}
-            </div>
+            {/* Árvore, Privacidade e Assinaturas: retráteis, fechados por
+                padrão, com o estado resumido no próprio título -- dá pra
+                entender a coluna sem abrir nada (wireframe aprovado). */}
+            <details id="arvore" className="rounded-xl bg-zinc-900 border border-zinc-800 scroll-mt-4 group">
+              <summary className="flex items-center gap-2 p-6 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Árvore da família</h2>
+                <span className="text-xs text-zinc-500 flex-1">Quem é parente de quem</span>
+                <span className="text-xs text-zinc-500 group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <div className="px-6 pb-6 -mt-2">
+                {memorialId && <ArvoreDaFamilia slug={params.slug} />}
+              </div>
+            </details>
 
             {memorialId && (
-              <div id="privacidade" className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 scroll-mt-4">
-                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
-                <PrivacidadeFamilia
-                  memorialId={memorialId}
-                  modoGateInicial={modoGate}
-                  buscaHabilitadaInicial={buscaHabilitada}
-                  linkHabilitadoInicial={linkHabilitado}
-                  qrcodeHabilitadoInicial={qrcodeHabilitado}
-                  temSenhaAcessoInicial={temSenhaAcesso}
-                />
-              </div>
+              <details id="privacidade" className="rounded-xl bg-zinc-900 border border-zinc-800 scroll-mt-4 group">
+                <summary className="flex items-center gap-2 p-6 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Privacidade</h2>
+                  <span className="text-xs text-zinc-500 flex-1">
+                    {temSenhaAcesso ? 'Protegido por senha' : buscaHabilitada ? 'Aberto' : 'Fora da busca'}
+                  </span>
+                  <span className="text-xs text-zinc-500 group-open:rotate-180 transition-transform">▾</span>
+                </summary>
+                <div className="px-6 pb-6 -mt-2">
+                  <PrivacidadeFamilia
+                    memorialId={memorialId}
+                    modoGateInicial={modoGate}
+                    buscaHabilitadaInicial={buscaHabilitada}
+                    linkHabilitadoInicial={linkHabilitado}
+                    qrcodeHabilitadoInicial={qrcodeHabilitado}
+                    temSenhaAcessoInicial={temSenhaAcesso}
+                  />
+                </div>
+              </details>
             )}
 
-            <div id="assinaturas" className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 scroll-mt-4">
-              <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-1">
-                Livro de assinaturas
-              </h2>
-              <p className="text-xs text-zinc-500 mb-4">
-                É o mesmo livro que aparece na página do memorial. Aqui você pode remover qualquer
-                assinatura — clique no nome de quem assinou.
-              </p>
-              <LivroAssinaturas
-                memorialId={memorialId}
-                assinaturasIniciais={assinaturas}
-                nomeHomenageado={(form.nome_completo || '').split(' ')[0] || 'ele'}
-                moderar
-              />
-            </div>
-
+            {/* Só a lista de quem assinou, pra remover. O livro inteiro fica
+                na página do memorial -- aqui ele não precisa ser desenhado de
+                novo (pedido do Rafael, 2026-09-16). */}
+            <details id="assinaturas" className="rounded-xl bg-zinc-900 border border-zinc-800 scroll-mt-4 group">
+              <summary className="flex items-center gap-2 p-6 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Assinaturas</h2>
+                <span className="text-xs text-zinc-500 flex-1">
+                  {assinaturas.length === 0
+                    ? 'Nenhuma ainda'
+                    : `${assinaturas.length} · remover`}
+                </span>
+                <span className="text-xs text-zinc-500 group-open:rotate-180 transition-transform">▾</span>
+              </summary>
+              <div className="px-6 pb-6 -mt-2">
+                <p className="text-xs text-zinc-500 mb-3">
+                  Quem assinou o livro na página do memorial. Remova só o que for indevido.
+                </p>
+                {assinaturas.length === 0 ? (
+                  <p className="text-sm text-zinc-500">Ninguém assinou o livro ainda.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {assinaturas.map((a) => (
+                      <div
+                        key={a.id}
+                        className="flex items-center justify-between gap-3 border-b border-zinc-800 last:border-0 pb-1.5"
+                      >
+                        <span className="text-sm text-zinc-300 truncate">{a.visitor_name}</span>
+                        <button
+                          type="button"
+                          disabled={removendoAssinaturaId === a.id}
+                          onClick={() => removerAssinatura(a.id)}
+                          className="text-xs text-zinc-500 hover:text-red-400 shrink-0"
+                        >
+                          {removendoAssinaturaId === a.id ? 'removendo...' : 'remover'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </details>
+          </div>
+        </div>
 
         <footer className="mt-10 pt-6 border-t border-zinc-800 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-zinc-500">
           <span>© {new Date().getFullYear()} Legado Digital</span>
