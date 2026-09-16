@@ -70,6 +70,9 @@ function ParceiroDashboardInner() {
   const searchParams = useSearchParams()
   const parceiroIdParam = searchParams.get('parceiro_id')
 
+  // Abas no topo, mesmo padrão aprovado no Portal da Família e na ficha do
+  // parceiro (2026-09-16): um tema por vez, sem nada empilhado embaixo.
+  const [aba, setAba] = useState<'resumo' | 'memoriais' | 'pagina'>('resumo')
   const [parceiro, setParceiro] = useState<ParceiroInfo | null>(null)
   const [totalMemoriais, setTotalMemoriais] = useState(0)
   const [memoriaisQr, setMemoriaisQr] = useState<MemorialQr[]>([])
@@ -220,10 +223,32 @@ function ParceiroDashboardInner() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-8">
+      <h1 className="text-2xl font-bold text-white mb-6">
         Dashboard — {parceiro.nome_fantasia || parceiro.razao_social}
       </h1>
 
+      <nav className="flex items-center gap-1 flex-wrap border-b border-[var(--tema-zinc-800)] mb-6 -mx-1">
+        {([
+          ['resumo', 'Resumo'],
+          ['memoriais', 'Memoriais e QR Codes'],
+          ['pagina', 'Página Pública'],
+        ] as const).map(([id, rotulo]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setAba(id)}
+            className={`px-3 py-2.5 text-sm border-b-2 -mb-px transition-colors ${
+              aba === id
+                ? 'border-[#C9A46A] text-white font-medium'
+                : 'border-transparent text-[var(--tema-zinc-400)] hover:text-white'
+            }`}
+          >
+            {rotulo}
+          </button>
+        ))}
+      </nav>
+
+      <div className={aba === 'resumo' ? '' : 'hidden'}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Link
           href={memoriaisHref}
@@ -257,8 +282,10 @@ function ParceiroDashboardInner() {
       >
         Ver todos os memoriais →
       </Link>
+      </div>
 
-      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 mb-8">
+      <div className={aba === 'memoriais' ? '' : 'hidden'}>
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">
         <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-4">Memoriais e QR Codes</h2>
         {erroFamilia && <p className="text-red-400 text-xs mb-2">{erroFamilia}</p>}
         {memoriaisQr.length === 0 ? (
@@ -324,8 +351,10 @@ function ParceiroDashboardInner() {
           </div>
         )}
       </div>
+      </div>
 
-      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">
+      <div className={aba === 'pagina' ? '' : 'hidden'}>
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-[var(--tema-zinc-400)]">Página pública (Editar)</h2>
           {parceiro.slug && (
@@ -390,6 +419,7 @@ function ParceiroDashboardInner() {
             {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
           </button>
         </form>
+      </div>
       </div>
     </div>
   )
