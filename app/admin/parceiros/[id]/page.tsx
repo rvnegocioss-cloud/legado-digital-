@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/auth'
-import SecaoRetratil from '@/components/admin/SecaoRetratil'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
@@ -112,6 +111,9 @@ export default function DetalheParceiro() {
   const [salvandoPagina, setSalvandoPagina] = useState(false)
   const [paginaErro, setPaginaErro] = useState('')
   const [paginaSalva, setPaginaSalva] = useState(false)
+  // Abas no topo, mesma estrutura aprovada no Portal da Família (2026-09-16):
+  // um tema por vez, ocupando a tela inteira, sem retrátil dentro da aba.
+  const [aba, setAba] = useState<'dados' | 'contatos' | 'pagina-publica' | 'memoriais' | 'plano'>('dados')
 
   useEffect(() => {
     if (params.id) load(params.id)
@@ -358,9 +360,37 @@ export default function DetalheParceiro() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
-          <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-3">Dados cadastrais</h2>
+      {/* Abas: Dados → Contatos e Acesso → Página Pública → Memoriais → Plano,
+          ordem de prioridade de preenchimento (2026-09-16, wireframe aprovado). */}
+      <nav className="flex items-center gap-1 flex-wrap border-b border-[var(--tema-zinc-800)] mb-6 -mx-1">
+        {([
+          ['dados', 'Dados'],
+          ['contatos', 'Contatos e Acesso'],
+          ['pagina-publica', 'Página Pública'],
+          ['memoriais', 'Memoriais'],
+          ['plano', 'Plano'],
+        ] as const).map(([id, rotulo]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setAba(id)}
+            className={`px-3 py-2.5 text-sm border-b-2 -mb-px transition-colors ${
+              aba === id
+                ? 'border-[#C9A46A] text-white font-medium'
+                : 'border-transparent text-[var(--tema-zinc-400)] hover:text-white'
+            }`}
+          >
+            {rotulo}
+          </button>
+        ))}
+      </nav>
+
+      <div className={aba === 'dados' ? '' : 'hidden'}>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 max-w-xl">
+          <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-1">Dados cadastrais</h2>
+          <p className="text-[var(--tema-zinc-500)] text-xs mb-3">
+            Só leitura por enquanto — editar razão social, CNPJ, e-mail ou telefone é feito direto no banco.
+          </p>
           <dl>
             <Campo label="Razão social">{parceiro.razao_social}</Campo>
             <Campo label="CNPJ">{parceiro.cnpj || '—'}</Campo>
@@ -368,9 +398,14 @@ export default function DetalheParceiro() {
             <Campo label="Telefone">{parceiro.telefone || '—'}</Campo>
           </dl>
         </div>
+      </div>
 
-        <div className="lg:col-span-2 xl:col-span-3 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 space-y-5">
-            <SecaoRetratil titulo={`Contatos da empresa ${contatos.length > 0 ? `(${contatos.length})` : ''}`} abertoPorPadrao>
+      <div className={aba === 'contatos' ? '' : 'hidden'}>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 space-y-5">
+            <div>
+              <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-1">
+                Contatos da empresa {contatos.length > 0 ? `(${contatos.length})` : ''}
+              </h2>
               <p className="text-[var(--tema-zinc-500)] text-xs mb-4">
                 Contato cadastrado com e-mail já recebe o acesso ao Portal do Parceiro automaticamente,
                 com senha temporária por e-mail. Deixe o e-mail em branco se for só um contato de referência,
@@ -482,11 +517,16 @@ export default function DetalheParceiro() {
                 </button>
               </form>
               </div>
-            </SecaoRetratil>
+            </div>
 
-            <SecaoRetratil titulo="Acesso ao Portal do Parceiro (convite avulso)">
-              <p className="text-[var(--tema-zinc-500)] text-sm mb-4">
-                Cria (ou atualiza) o login desse contato pro Portal do Parceiro, com senha temporária.
+            {/* Mesma aba, não mais um retrátil à parte -- é a mesma tarefa de
+                "dar acesso a alguém", só sem precisar existir na lista de
+                contatos acima. */}
+            <div className="pt-5 border-t border-[var(--tema-zinc-800)]">
+              <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-1">Conceder acesso avulso</h2>
+              <p className="text-[var(--tema-zinc-500)] text-xs mb-4">
+                Cria (ou atualiza) o login pro Portal do Parceiro sem vincular a um contato da lista acima —
+                senha temporária por e-mail.
               </p>
               <form onSubmit={convidarContato} className="flex flex-col sm:flex-row gap-3">
                 <input
@@ -521,9 +561,15 @@ export default function DetalheParceiro() {
                   <code className="bg-[var(--tema-zinc-800)] px-1.5 py-0.5 rounded">/parceiro/login</code>.
                 </p>
               )}
-            </SecaoRetratil>
+            </div>
+        </div>
+      </div>
 
-            <SecaoRetratil titulo={`Memoriais ${memoriais.length > 0 ? `(${memoriais.length})` : ''}`}>
+      <div className={aba === 'memoriais' ? '' : 'hidden'}>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
+            <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-3">
+              Memoriais {memoriais.length > 0 ? `(${memoriais.length})` : ''}
+            </h2>
               {memoriais.length === 0 ? (
                 <p className="text-[var(--tema-zinc-500)] text-sm">Nenhum memorial cadastrado por este parceiro ainda.</p>
               ) : (
@@ -550,10 +596,11 @@ export default function DetalheParceiro() {
                 </table>
               </div>
               )}
-            </SecaoRetratil>
         </div>
+      </div>
 
-        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
+      <div className={aba === 'pagina-publica' ? '' : 'hidden'}>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 max-w-xl">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-medium text-[var(--tema-zinc-400)]">Página pública do parceiro</h2>
             {parceiro.slug && (
@@ -622,8 +669,10 @@ export default function DetalheParceiro() {
             </button>
           </form>
         </div>
+      </div>
 
-        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5">
+      <div className={aba === 'plano' ? '' : 'hidden'}>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 max-w-xl">
           <h2 className="text-sm font-medium text-[var(--tema-zinc-400)] mb-3">Plano e pagamento</h2>
           <dl>
             <Campo label="Plano">{parceiro.plano_contratado || '—'}</Campo>
@@ -635,7 +684,6 @@ export default function DetalheParceiro() {
             <Campo label="Desde">{new Date(parceiro.created_at).toLocaleDateString('pt-BR')}</Campo>
           </dl>
         </div>
-
       </div>
     </div>
   )
