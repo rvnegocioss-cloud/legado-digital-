@@ -813,38 +813,6 @@ export default function FamiliaEdicaoPage() {
           <div className="lg:col-span-5 space-y-4">
             {memorialId && <JazigoDaFamilia slug={params.slug} memorialId={memorialId} />}
 
-            {memorialId && <ArvoreDaFamilia slug={params.slug} />}
-
-            {memorialId && (
-              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
-                <PrivacidadeFamilia
-                  memorialId={memorialId}
-                  modoGateInicial={modoGate}
-                  buscaHabilitadaInicial={buscaHabilitada}
-                  linkHabilitadoInicial={linkHabilitado}
-                  qrcodeHabilitadoInicial={qrcodeHabilitado}
-                  temSenhaAcessoInicial={temSenhaAcesso}
-                />
-              </div>
-            )}
-
-            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
-              <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-1">
-                Livro de assinaturas
-              </h2>
-              <p className="text-xs text-zinc-500 mb-4">
-                É o mesmo livro que aparece na página do memorial. Aqui você pode remover qualquer
-                assinatura — clique no nome de quem assinou.
-              </p>
-              <LivroAssinaturas
-                memorialId={memorialId}
-                assinaturasIniciais={assinaturas}
-                nomeHomenageado={(form.nome_completo || '').split(' ')[0] || 'ele'}
-                moderar
-              />
-            </div>
-
             <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-4">
               <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Fotos, vídeos e aparência</h2>
           <div className="pb-4 border-b border-zinc-800 mb-4">
@@ -1096,6 +1064,39 @@ export default function FamiliaEdicaoPage() {
             </div>
           </div>
         </div>
+
+            {memorialId && <ArvoreDaFamilia slug={params.slug} />}
+
+            {memorialId && (
+              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+                <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
+                <PrivacidadeFamilia
+                  memorialId={memorialId}
+                  modoGateInicial={modoGate}
+                  buscaHabilitadaInicial={buscaHabilitada}
+                  linkHabilitadoInicial={linkHabilitado}
+                  qrcodeHabilitadoInicial={qrcodeHabilitado}
+                  temSenhaAcessoInicial={temSenhaAcesso}
+                />
+              </div>
+            )}
+
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+              <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-1">
+                Livro de assinaturas
+              </h2>
+              <p className="text-xs text-zinc-500 mb-4">
+                É o mesmo livro que aparece na página do memorial. Aqui você pode remover qualquer
+                assinatura — clique no nome de quem assinou.
+              </p>
+              <LivroAssinaturas
+                memorialId={memorialId}
+                assinaturasIniciais={assinaturas}
+                nomeHomenageado={(form.nome_completo || '').split(' ')[0] || 'ele'}
+                moderar
+              />
+            </div>
+
 
         <footer className="mt-10 pt-6 border-t border-zinc-800 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-zinc-500">
           <span>© {new Date().getFullYear()} Legado Digital</span>
