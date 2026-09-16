@@ -70,6 +70,9 @@ export default function MapaPublicoCemiterio({
   const [hover, setHover] = useState<{ lng: number; lat: number; props: PinoProps } | null>(null)
   const [busca, setBusca] = useState('')
   const [expandido, setExpandido] = useState(false)
+  // A camada de pinos espera a imagem da cruz existir no mapa -- ver
+  // aoCarregarMapa. Sem isso, o mapa abria sem nenhuma cruz marcada.
+  const [iconePronto, setIconePronto] = useState(false)
 
   // Tela cheia de verdade no celular -- o mapa pequeno inline não dava pra
   // usar andando no cemitério. Fullscreen API some com a barra do navegador
@@ -107,12 +110,25 @@ export default function MapaPublicoCemiterio({
 
   const aoCarregarMapa = useCallback(() => {
     const map = mapRef.current?.getMap()
-    if (!map || map.hasImage('cruz-pino')) return
-    const img = new Image(28, 28)
-    img.onload = () => {
-      if (!map.hasImage('cruz-pino')) map.addImage('cruz-pino', img)
+    if (!map) return
+
+    // A camada de pinos só entra depois que a imagem da cruz existe no mapa.
+    // Antes, a camada era criada na mesma hora e a imagem chegava depois (o
+    // carregamento é assíncrono): o MapLibre não achava 'cruz-pino' e não
+    // desenhava pino nenhum. As cruzes só apareciam quando alguma outra coisa
+    // forçava o mapa a se redesenhar -- digitar na busca, por exemplo. Ou
+    // seja: quem abria o mapa não via onde tinha memorial (achado real,
+    // reportado pelo Rafael em 2026-09-16).
+    if (map.hasImage('cruz-pino')) {
+      setIconePronto(true)
+    } else {
+      const img = new Image(28, 28)
+      img.onload = () => {
+        if (!map.hasImage('cruz-pino')) map.addImage('cruz-pino', img)
+        setIconePronto(true)
+      }
+      img.src = `data:image/svg+xml;base64,${btoa(CRUZ_SVG)}`
     }
-    img.src = `data:image/svg+xml;base64,${btoa(CRUZ_SVG)}`
 
     if (ortomosaico?.bounds) {
       const [minLng, minLat, maxLng, maxLat] = ortomosaico.bounds
@@ -311,7 +327,7 @@ export default function MapaPublicoCemiterio({
         >
           <NavigationControl visualizePitch showZoom position="top-right" />
 
-        {temMemoriais && (
+        {temMemoriais && iconePronto && (
           <Source id="memoriais" type="geojson" data={memoriais}>
             <Layer
               id="pinos-memorial"
@@ -352,6 +368,14 @@ export default function MapaPublicoCemiterio({
                       }}
                     >
                       {hover.props.jazigo_nome || `${lista.length} memoriais neste túmulo`}
+                      {/* Com o nome do jazigo no título, a contagem ainda
+                          precisa aparecer -- senão a pessoa não sabe que tem
+                          mais de uma pessoa ali pra escolher. */}
+                      {hover.props.jazigo_nome && (
+                        <span style={{ display: 'block', fontSize: 10.5, fontWeight: 400, color: '#666', marginTop: 2 }}>
+                          {lista.length} memoriais — deslize para escolher
+                        </span>
+                      )}
                     </p>
                   )}
 
