@@ -102,6 +102,7 @@ function FichaMemorialParceiroInner() {
   const suffix = parceiroIdParam ? `?parceiro_id=${parceiroIdParam}` : ''
 
   const [memorial, setMemorial] = useState<Memorial | null>(null)
+  const [aba, setAba] = useState<'memorial' | 'fotos' | 'familia' | 'privacidade' | 'qr' | 'moderacao'>('memorial')
   const [form, setForm] = useState({
     nome_completo: '',
     data_nascimento: '',
@@ -761,10 +762,39 @@ function FichaMemorialParceiroInner() {
       </div>
       <StatusFicha chips={chipsStatus} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-6">
-        <div className="lg:col-span-8 @container">
+      {/* Abas no topo, mesmo padrão aprovado no Portal da Família e na ficha
+          do parceiro (2026-09-16): um tema por vez, nada empilhado. Tudo fica
+          montado (só escondido), então trocar de aba nunca perde o que foi
+          digitado e o formulário principal continua um só. */}
+      <nav className="flex items-center gap-1 flex-wrap border-b border-[var(--tema-zinc-800)] mt-6 mb-6 -mx-1">
+        {([
+          ['memorial', 'Memorial'],
+          ['fotos', 'Fotos e vídeos'],
+          ['familia', 'Família'],
+          ['privacidade', 'Privacidade'],
+          ['qr', 'QR Code e Placa'],
+          ['moderacao', 'Moderação'],
+        ] as const).map(([id, rotulo]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setAba(id)}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap border-b-2 -mb-px transition-colors ${
+              aba === id
+                ? 'border-[#C9A46A] text-white font-medium'
+                : 'border-transparent text-[var(--tema-zinc-400)] hover:text-white'
+            }`}
+          >
+            {rotulo}
+          </button>
+        ))}
+      </nav>
+
+      <div className={aba === 'memorial' || aba === 'fotos' ? '' : 'hidden'}>
+        <div className="@container">
           <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">
             <form onSubmit={salvar}>
+              <div className={aba === 'memorial' ? '' : 'hidden'}>
               <SecaoFicha titulo="Identificação" icon={User} primeira>
                 <div className="flex flex-wrap items-start gap-4">
                   <div className="shrink-0">
@@ -909,8 +939,11 @@ function FichaMemorialParceiroInner() {
                   </CampoFicha>
                 </div>
               </SecaoFicha>
+              </div>
 
+              <div className={aba === 'fotos' ? '' : 'hidden'}>
               <SecaoFicha
+                primeira
                 titulo="Galeria e vídeo"
                 icon={Images}
                 acao={
@@ -1018,10 +1051,13 @@ function FichaMemorialParceiroInner() {
                   </CampoFicha>
                 </div>
               </SecaoFicha>
+              </div>
 
+              <div className={aba === 'memorial' ? '' : 'hidden'}>
               <SecaoFicha titulo="Linha do tempo" icon={Milestone}>
                 <TimelineEditor value={timelineEventos} onChange={setTimelineEventos} />
               </SecaoFicha>
+              </div>
 
               <div className="flex items-center gap-4 mt-6 pt-4 border-t border-[var(--tema-zinc-800)]">
                 <Button type="submit" disabled={salvando}>
@@ -1033,9 +1069,10 @@ function FichaMemorialParceiroInner() {
             </form>
           </div>
         </div>
+      </div>
 
-        <div className="lg:col-span-4">
-          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6">
+      <div className={aba === 'familia' ? '' : 'hidden'}>
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-2xl">
             <SecaoFicha titulo="Quem preenche o conteúdo" icon={UserCog} primeira>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -1116,8 +1153,12 @@ function FichaMemorialParceiroInner() {
                 {familiaEmailMsg && <p className="text-[11px] text-[var(--tema-zinc-400)]">{familiaEmailMsg}</p>}
               </form>
             </SecaoFicha>
+          </div>
+      </div>
 
-            <SecaoFicha titulo="Senha da página pública" icon={Lock}>
+      <div className={aba === 'privacidade' ? '' : 'hidden'}>
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-2xl">
+            <SecaoFicha titulo="Senha da página pública" icon={Lock} primeira>
               <form onSubmit={salvarSenha} className="space-y-2">
                 <CampoFicha
                   label="Senha de acesso"
@@ -1143,8 +1184,12 @@ function FichaMemorialParceiroInner() {
             <SecaoFicha titulo="Privacidade — modos de acesso" icon={Lock}>
               {memorial && <PrivacidadeMemorial memorialId={memorial.id} />}
             </SecaoFicha>
+          </div>
+      </div>
 
-            <SecaoFicha titulo="QR Code" icon={QrCode}>
+      <div className={aba === 'qr' ? '' : 'hidden'}>
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-2xl">
+            <SecaoFicha titulo="QR Code" icon={QrCode} primeira>
               <div className="flex items-center gap-3">
                 {qrCodeUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -1207,8 +1252,12 @@ function FichaMemorialParceiroInner() {
                 {mensagemPlacaMsg && <p className="text-[11px] text-[var(--tema-zinc-400)] mt-2">{mensagemPlacaMsg}</p>}
               </form>
             </SecaoFicha>
+          </div>
+      </div>
 
-            <SecaoFicha titulo={`Mural de memórias ${mural.length > 0 ? `(${mural.length})` : ''}`} icon={MessageSquare}>
+      <div className={aba === 'moderacao' ? '' : 'hidden'}>
+          <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-2xl">
+            <SecaoFicha primeira titulo={`Mural de memórias ${mural.length > 0 ? `(${mural.length})` : ''}`} icon={MessageSquare}>
               {mural.length === 0 ? (
                 <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma memória deixada ainda.</p>
               ) : (
@@ -1260,7 +1309,6 @@ function FichaMemorialParceiroInner() {
               )}
             </SecaoFicha>
           </div>
-        </div>
       </div>
     </div>
   )
