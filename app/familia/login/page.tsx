@@ -27,6 +27,9 @@ export default function FamiliaLoginPage() {
   const [entrando, setEntrando] = useState(false)
   const [erro, setErro] = useState('')
 
+  // Entrar digitando nome + senha, sem escolher na lista -- é o caminho de
+  // quem escondeu o próprio memorial e por isso não o encontra na busca.
+  const [porNome, setPorNome] = useState(false)
   const [mostrarEsqueci, setMostrarEsqueci] = useState(false)
   const [emailRecuperacao, setEmailRecuperacao] = useState('')
   const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false)
@@ -63,14 +66,19 @@ export default function FamiliaLoginPage() {
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault()
-    if (!selecionado?.slug) return
+    if (!selecionado?.slug && !porNome) return
     setEntrando(true)
     setErro('')
 
+    // Memorial escondido não aparece na busca (é o objetivo), então a própria
+    // família ficava sem como clicar nele pra entrar. Aqui ela manda o nome
+    // junto com a senha, e o servidor confere os dois de uma vez (2026-09-16).
     const res = await fetch('/api/familia-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slug: selecionado.slug, senha }),
+      body: JSON.stringify(
+        selecionado?.slug ? { slug: selecionado.slug, senha } : { nome: nomeBusca, senha }
+      ),
     })
     const json = await res.json()
 
@@ -134,8 +142,40 @@ export default function FamiliaLoginPage() {
 
               {buscando && <p className="text-[#7a8a96] text-sm">Buscando...</p>}
 
+              {/* Memorial escondido não aparece na busca — de propósito. Mas a
+                  própria família precisa conseguir entrar, então aqui ela
+                  digita a senha direto, sem escolher da lista (2026-09-16). */}
               {!buscando && resultados !== null && resultados.length === 0 && (
-                <p className="text-[#7a8a96] text-sm">Nenhum memorial encontrado com esse nome.</p>
+                <div className="rounded-lg bg-white/5 border border-[rgba(201,164,106,0.2)] p-3 mt-1">
+                  <p className="text-[#7a8a96] text-sm mb-2">
+                    Nenhum memorial encontrado com esse nome.
+                  </p>
+                  <p className="text-[#7a8a96] text-xs mb-3">
+                    Se vocês deixaram o memorial escondido, ele não aparece nesta busca. Confira o nome
+                    e digite a senha aqui embaixo pra entrar.
+                  </p>
+                  <form onSubmit={entrar}>
+                    <label className={rotuloLabel}>Senha da família</label>
+                    <input
+                      type="password"
+                      value={senha}
+                      onChange={(e) => {
+                        setSenha(e.target.value)
+                        setPorNome(true)
+                      }}
+                      autoComplete="current-password"
+                      className={campoEscuro}
+                    />
+                    {erro && <p className="text-red-400 text-sm mb-2">{erro}</p>}
+                    <button
+                      type="submit"
+                      disabled={entrando || !senha}
+                      className="w-full py-3 rounded-lg bg-[#C9A46A] hover:bg-[#dfc08a] disabled:opacity-60 text-[#0B1D2A] text-[15px] font-bold transition-colors"
+                    >
+                      {entrando ? 'Entrando...' : 'Entrar'}
+                    </button>
+                  </form>
+                </div>
               )}
 
               {resultados && resultados.length > 0 && (
