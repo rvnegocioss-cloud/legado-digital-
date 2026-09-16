@@ -25,6 +25,7 @@ interface Memorial {
   slug: string | null
   created_at: string
   parceiro_id: string | null
+  lapide_id: string | null
   criado_por: { nome: string } | null
 }
 
@@ -61,7 +62,7 @@ export default function AdminMemoriais() {
     setLoading(true)
     const { data } = await supabase
       .from('homenagens')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at, parceiro_id, criado_por:criado_por_usuario_id(nome)')
+      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at, parceiro_id, lapide_id, criado_por:criado_por_usuario_id(nome)')
       .order('created_at', { ascending: false })
     if (data) setMemoriais(data as unknown as Memorial[])
 
@@ -193,15 +194,34 @@ export default function AdminMemoriais() {
         </Dialog>
       </div>
 
+      {/* Duas seções (pedido do Rafael, 2026-09-16, levantado pelo Ricardo na
+          reunião de 11/09): todo memorial nasce ONLINE e passa sozinho pra
+          JAZIGO quando é vinculado a um jazigo no cemitério. Mesmo cadastro,
+          mesma ficha -- o que decide é só ter ou não jazigo (lapide_id). */}
       {memoriais.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-[var(--tema-zinc-400)]">Nenhum memorial cadastrado ainda.</p>
         </div>
       ) : (
+        <div className="space-y-10">
+          {([
+            ['jazigo', 'Memoriais Jazigo', 'Vinculados a um jazigo no cemitério.', memoriais.filter((m) => m.lapide_id)],
+            ['online', 'Memoriais Online', 'Ainda sem jazigo — só digitais. Passam pra Jazigo sozinhos quando forem vinculados a um jazigo no cemitério.', memoriais.filter((m) => !m.lapide_id)],
+          ] as const).map(([secao, titulo, explicacao, lista]) => (
+          <section key={secao}>
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold text-white">
+                {titulo} <span className="text-sm font-normal text-[var(--tema-zinc-500)]">({lista.length})</span>
+              </h2>
+              <p className="text-xs text-[var(--tema-zinc-500)]">{explicacao}</p>
+            </div>
+            {lista.length === 0 ? (
+              <p className="text-sm text-[var(--tema-zinc-500)] rounded-xl border border-[var(--tema-zinc-800)] p-4">Nenhum memorial aqui.</p>
+            ) : (
         (() => {
           const parceiroPorId = new Map(parceiros.map((p) => [p.id, p]))
           const grupos = new Map<string, { parceiro: Parceiro | null; memoriais: Memorial[] }>()
-          for (const m of memoriais) {
+          for (const m of lista) {
             const chave = m.parceiro_id || 'sem-parceiro'
             if (!grupos.has(chave)) {
               grupos.set(chave, { parceiro: m.parceiro_id ? parceiroPorId.get(m.parceiro_id) || null : null, memoriais: [] })
@@ -219,14 +239,14 @@ export default function AdminMemoriais() {
           return (
             <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] divide-y divide-[var(--tema-zinc-800)]">
               {listaGrupos.map(([chave, grupo]) => {
-                const aberto = abertoId === chave
+                const aberto = abertoId === `${secao}-${chave}`
                 const nome = grupo.parceiro
                   ? grupo.parceiro.nome_fantasia || grupo.parceiro.razao_social
                   : 'Memoriais Legado Digital (nosso, sem parceiro)'
                 return (
                   <div key={chave}>
                     <button
-                      onClick={() => setAbertoId(aberto ? null : chave)}
+                      onClick={() => setAbertoId(aberto ? null : `${secao}-${chave}`)}
                       className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--tema-zinc-800)]/40 transition-colors"
                     >
                       <span className="text-white font-medium text-sm">{nome}</span>
@@ -276,6 +296,10 @@ export default function AdminMemoriais() {
             </div>
           )
         })()
+            )}
+          </section>
+          ))}
+        </div>
       )}
     </div>
   )
