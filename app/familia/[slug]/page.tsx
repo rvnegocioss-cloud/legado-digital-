@@ -163,6 +163,10 @@ export default function FamiliaEdicaoPage() {
   const [linkHabilitado, setLinkHabilitado] = useState(true)
   const [qrcodeHabilitado, setQrcodeHabilitado] = useState(true)
   const [temSenhaAcesso, setTemSenhaAcesso] = useState(false)
+  // Nome do jazigo ("Jazigo Família Saraiva") -- é a identidade que aparece
+  // no topo da página, no lugar de "Editar memorial de X". Vem do mesmo
+  // card que a família já usa pra nomear o jazigo (2026-09-16).
+  const [nomeJazigo, setNomeJazigo] = useState<string | null>(null)
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -652,8 +656,18 @@ export default function FamiliaEdicaoPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-4 mb-6">
-          <h1 className="text-xl font-bold text-white">Editar memorial de {form.nome_completo}</h1>
+        <div className="flex items-center justify-between mt-4 mb-1 flex-wrap gap-2">
+          <div>
+            <p className="text-[11px] uppercase tracking-wide" style={{ color: '#C9A46A' }}>
+              Portal da Família
+            </p>
+            <h1 className="text-xl font-bold text-white">
+              {/* Identidade da família: nome do jazigo quando já foi dado (ex:
+                  "Jazigo Família Saraiva"), senão cai no nome do homenageado --
+                  nunca fica sem título nenhum enquanto ninguém nomeou o jazigo. */}
+              {nomeJazigo || `Família de ${form.nome_completo || 'memorial'}`}
+            </h1>
+          </div>
           <a
             href={`/homenagem/${params.slug}`}
             className="text-blue-400 hover:underline text-xs whitespace-nowrap"
@@ -661,6 +675,17 @@ export default function FamiliaEdicaoPage() {
             Ver página →
           </a>
         </div>
+
+        {/* Menu de atalhos pros tópicos da página, mesmo padrão do menu no
+            topo da página pública do memorial (2026-09-16). */}
+        <nav className="flex items-center gap-4 flex-wrap text-xs text-zinc-400 border-y border-zinc-800 py-2.5 mb-6">
+          <a href="#memoriais" className="hover:text-white">Memoriais</a>
+          <a href="#fotos" className="hover:text-white">Fotos e vídeos</a>
+          <a href="#jazigo" className="hover:text-white">Jazigo</a>
+          <a href="#arvore" className="hover:text-white">Árvore</a>
+          <a href="#privacidade" className="hover:text-white">Privacidade</a>
+          <a href="#assinaturas" className="hover:text-white">Assinaturas</a>
+        </nav>
 
         {preenchidoPor === 'funeraria' && (
           <p className="text-xs text-blue-300 bg-blue-900/20 border border-blue-900/40 rounded-lg px-3 py-2 mb-4">
@@ -698,8 +723,29 @@ export default function FamiliaEdicaoPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div id="memoriais" className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start scroll-mt-4">
           <form onSubmit={salvar} className="lg:col-span-7 rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-3">
+            <div className="flex items-center gap-3 pb-3 mb-1 border-b border-zinc-800">
+              <span
+                className="w-11 h-11 rounded-full shrink-0 p-[2px]"
+                style={{ background: 'conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A)' }}
+              >
+                <span className="w-full h-full rounded-full overflow-hidden bg-zinc-950 flex items-center justify-center">
+                  {fotoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={urlMidiaProtegida(fotoUrl) || fotoUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-semibold" style={{ color: '#C9A46A' }}>
+                      {(form.nome_completo || '?').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </span>
+              </span>
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-zinc-500">Memoriais</p>
+                <p className="text-sm font-semibold text-white">{form.nome_completo || 'Novo memorial'}</p>
+              </div>
+            </div>
             <div>
               <label className="block text-xs text-zinc-500 mb-1">Nome completo<Dica texto="O nome completo de quem está sendo homenageado. Aparece em destaque no topo da página do memorial." /></label>
               <input
@@ -814,9 +860,13 @@ export default function FamiliaEdicaoPage() {
           </form>
 
           <div className="lg:col-span-5 space-y-4">
-            {memorialId && <JazigoDaFamilia slug={params.slug} memorialId={memorialId} />}
+            <div id="jazigo" className="scroll-mt-4">
+              {memorialId && (
+                <JazigoDaFamilia slug={params.slug} memorialId={memorialId} onJazigo={(j) => setNomeJazigo(j?.nome || null)} />
+              )}
+            </div>
 
-            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-4">
+            <div id="fotos" className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 space-y-4 scroll-mt-4">
               <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">Fotos, vídeos e aparência</h2>
           <div className="pb-4 border-b border-zinc-800 mb-4">
             <p className="text-xs text-zinc-500">Armazenamento: {usoStorageMB}MB / 500MB</p>
@@ -1068,10 +1118,12 @@ export default function FamiliaEdicaoPage() {
           </div>
         </div>
 
-            {memorialId && <ArvoreDaFamilia slug={params.slug} />}
+            <div id="arvore" className="scroll-mt-4">
+              {memorialId && <ArvoreDaFamilia slug={params.slug} />}
+            </div>
 
             {memorialId && (
-              <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+              <div id="privacidade" className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 scroll-mt-4">
                 <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-3">Privacidade</h2>
                 <PrivacidadeFamilia
                   memorialId={memorialId}
@@ -1084,7 +1136,7 @@ export default function FamiliaEdicaoPage() {
               </div>
             )}
 
-            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
+            <div id="assinaturas" className="rounded-xl bg-zinc-900 border border-zinc-800 p-6 scroll-mt-4">
               <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-1">
                 Livro de assinaturas
               </h2>

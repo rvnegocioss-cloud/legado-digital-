@@ -39,7 +39,18 @@ function lerCodigo(codigo: string | null) {
   return `Quadra ${Number(m[1])} · Fileira ${Number(m[2])} · Túmulo ${Number(m[3])}`
 }
 
-export default function JazigoDaFamilia({ slug, memorialId }: { slug: string; memorialId: string }) {
+export default function JazigoDaFamilia({
+  slug,
+  memorialId,
+  onJazigo,
+}: {
+  slug: string
+  memorialId: string
+  // A página inteira mostra o nome do jazigo como identidade da família no
+  // topo -- em vez de duplicar a mesma busca, este componente avisa o pai
+  // assim que carrega (2026-09-16).
+  onJazigo?: (jazigo: { nome: string | null } | null) => void
+}) {
   const [jazigo, setJazigo] = useState<Jazigo | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [editando, setEditando] = useState(false)
@@ -51,7 +62,10 @@ export default function JazigoDaFamilia({ slug, memorialId }: { slug: string; me
   function carregar() {
     return fetch(`/api/familia-jazigo?slug=${encodeURIComponent(slug)}`)
       .then((r) => r.json())
-      .then((j) => setJazigo(j.jazigo || null))
+      .then((j) => {
+        setJazigo(j.jazigo || null)
+        onJazigo?.(j.jazigo ? { nome: j.jazigo.nome } : null)
+      })
       .catch(() => setJazigo(null))
   }
 
