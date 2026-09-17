@@ -68,21 +68,39 @@ export default function JazigoGavetas3D({
   const [girando, setGirando] = useState(false)
   const controlsRef = useRef<OrbitControlsImpl | null>(null)
 
-  const andares = Math.max(1, ...gavetas.map((g) => g.linha || 1))
+  // Distribuição automática (pedido do Rafael, 2026-09-17): o desenho divide
+  // as gavetas meio a meio entre os dois lados do corredor, na ordem do
+  // cadastro (andar, depois código) -- 4 gavetas = 2 à esquerda + 2 à direita,
+  // de cima pra baixo. Não depende da coluna preenchida no cadastro.
+  const lugares = useMemo(() => {
+    const ordenadas = [...gavetas].sort(
+      (a, b) => a.linha - b.linha || a.coluna - b.coluna || a.codigo.localeCompare(b.codigo, 'pt-BR', { numeric: true })
+    )
+    const porLado = Math.max(1, Math.ceil(ordenadas.length / 2))
+    const mapa = new Map<string, { lado: 1 | 2; andar: number }>()
+    ordenadas.forEach((g, i) => {
+      mapa.set(g.id, i < porLado ? { lado: 1, andar: i + 1 } : { lado: 2, andar: i - porLado + 1 })
+    })
+    return { mapa, porLado }
+  }, [gavetas])
+
+  const andares = lugares.porLado
   const altCamara = andares * ANDAR + 0.3
   const meiaLarg = CORREDOR / 2 + LARG_GAVETA
   const centroY = -TOPO - altCamara / 2
   const selecionada = gavetas.find((g) => g.id === selecionadaId) || null
   const ocupadas = gavetas.filter((g) => tipoDa(g) !== 'vaga').length
 
-  const posicao = useMemo(
-    () => (g: GavetaInfo) => {
-      const x = (g.coluna === 2 ? 1 : -1) * (CORREDOR / 2 + LARG_GAVETA / 2)
-      const y = -TOPO - 0.25 - (g.linha - 1) * ANDAR - ANDAR * 0.55
-      return [x, y, 0] as [number, number, number]
-    },
-    []
-  )
+  function lugarDa(g: GavetaInfo) {
+    return lugares.mapa.get(g.id) || { lado: 1 as const, andar: 1 }
+  }
+
+  function posicao(g: GavetaInfo): [number, number, number] {
+    const { lado, andar } = lugarDa(g)
+    const x = (lado === 2 ? 1 : -1) * (CORREDOR / 2 + LARG_GAVETA / 2)
+    const y = -TOPO - 0.25 - (andar - 1) * ANDAR - ANDAR * 0.55
+    return [x, y, 0]
+  }
 
   function camera(pos: [number, number, number]) {
     const c = controlsRef.current
@@ -171,7 +189,7 @@ export default function JazigoGavetas3D({
               const tipo = tipoDa(g)
               const [x, y, z] = posicao(g)
               const sel = g.id === selecionadaId
-              const ladoDireito = g.coluna === 2
+              const ladoDireito = lugarDa(g).lado === 2
               return (
                 <group key={g.id}>
                   <mesh
@@ -268,8 +286,8 @@ export default function JazigoGavetas3D({
             )}
             <dl className="text-sm divide-y divide-[var(--tema-zinc-800)]">
               <div className="flex justify-between py-1.5"><dt className="text-[var(--tema-zinc-400)]">Quem está</dt><dd className="text-white text-right">{nomeDa(selecionada)}</dd></div>
-              <div className="flex justify-between py-1.5"><dt className="text-[var(--tema-zinc-400)]">Andar</dt><dd className="text-white">{selecionada.linha}º (de cima pra baixo)</dd></div>
-              <div className="flex justify-between py-1.5"><dt className="text-[var(--tema-zinc-400)]">Lado</dt><dd className="text-white">{selecionada.coluna === 2 ? 'direito (coluna 2)' : 'esquerdo (coluna 1)'}</dd></div>
+              <div className="flex justify-between py-1.5"><dt className="text-[var(--tema-zinc-400)]">Andar</dt><dd className="text-white">{lugarDa(selecionada).andar}º (de cima pra baixo)</dd></div>
+              <div className="flex justify-between py-1.5"><dt className="text-[var(--tema-zinc-400)]">Lado</dt><dd className="text-white">{lugarDa(selecionada).lado === 2 ? 'direito' : 'esquerdo'}</dd></div>
             </dl>
             {selecionada.observacoes && <p className="text-xs text-[var(--tema-zinc-400)] mt-2">{selecionada.observacoes}</p>}
             <div className="flex flex-wrap gap-2 mt-4">
