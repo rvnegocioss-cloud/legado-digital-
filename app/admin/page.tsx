@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/auth'
 
 interface RankItem {
+  id: string
   nome: string
   visualizacoes: number
 }
@@ -33,7 +34,8 @@ export default function AdminDashboard() {
       const [{ data: metricas }, parceiros, memoriais, usuarios, condolencias] = await Promise.all([
         supabase.rpc('admin_dashboard_metricas'),
         supabase.from('parceiros_b2b').select('*', { count: 'exact', head: true }),
-        supabase.from('homenagens').select('*', { count: 'exact', head: true }),
+        // rascunho ("Novo memorial") não é memorial de verdade
+        supabase.from('homenagens').select('*', { count: 'exact', head: true }).not('slug', 'like', 'rascunho-%').neq('nome_completo', 'Novo memorial'),
         supabase.from('usuarios').select('*', { count: 'exact', head: true }),
         supabase.from('condolencias').select('*', { count: 'exact', head: true }).gte('created_at', seteDiasAtras),
       ])
@@ -57,7 +59,7 @@ export default function AdminDashboard() {
   }
 
   const numeros: { titulo: string; valor: number; nota: string; href?: string }[] = [
-    { titulo: 'Visitas nos memoriais', valor: totalVisualizacoes, nota: 'total acumulado' },
+    { titulo: 'Visitas nos memoriais', valor: totalVisualizacoes, nota: 'visitantes únicos por dia, desde 17/09' },
     { titulo: 'Novos memoriais', valor: novosMemoriais, nota: 'últimos 7 dias' },
     { titulo: 'Homenagens', valor: homenagensRecentes, nota: 'últimos 7 dias' },
     { titulo: 'Parceiros', valor: totalParceiros, nota: 'abrir →', href: '/admin/parceiros' },
@@ -94,8 +96,8 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[
-          { titulo: 'Cemitérios com mais visita', itens: topCemiterios, vazio: 'Sem memorial vinculado a lápide/cemitério ainda.' },
-          { titulo: 'Parceiros com mais visita', itens: topParceiros, vazio: 'Sem memorial vinculado a parceiro ainda.' },
+          { titulo: 'Visitas por cemitério', itens: topCemiterios, vazio: 'Nenhum cemitério cadastrado ainda.', href: (id: string) => `/admin/cemiterios/${id}/mapa` },
+          { titulo: 'Visitas por parceiro', itens: topParceiros, vazio: 'Nenhum parceiro cadastrado ainda.', href: (id: string) => `/admin/parceiros/${id}` },
         ].map((r) => (
           <div key={r.titulo} className="rounded-xl bg-[var(--dash-bg)] border border-[var(--dash-border)] p-5">
             <h2 className="text-sm font-medium text-[var(--dash-fg-muted)] mb-3">{r.titulo}</h2>
@@ -104,8 +106,10 @@ export default function AdminDashboard() {
             ) : (
               <ul className="space-y-2">
                 {r.itens.map((i) => (
-                  <li key={i.nome} className="flex justify-between text-sm">
-                    <span className="text-[var(--dash-fg-muted)]">{i.nome}</span>
+                  <li key={i.id} className="flex justify-between text-sm">
+                    <Link href={r.href(i.id)} className="text-[var(--dash-fg-muted)] hover:text-[var(--dash-fg)] hover:underline">
+                      {i.nome}
+                    </Link>
                     <span className="text-[var(--dash-fg)] font-medium">{i.visualizacoes}</span>
                   </li>
                 ))}

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { MapPin, ShieldCheck, Lock } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
+import { registrarVisita } from "@/lib/registrarVisita";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
 import { resolverAcesso, type ModoGate } from "@/lib/modosPrivacidade";
@@ -186,7 +187,8 @@ export default async function HomenagemPage({
 
   // Só conta visita depois dos 2 bloqueios acima — antes contava até quem
   // nunca chegou a ver a página (link/QR desativado, ou senha não digitada).
-  supabase.rpc("incrementar_visualizacao", { p_slug: slug }).then(() => {});
+  // 1 visita por visitante/dia; robô, prévia de link e recarregar não contam.
+  await registrarVisita(slug);
 
   const anos = anosDestaque(m.data_nascimento, m.data_falecimento);
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];

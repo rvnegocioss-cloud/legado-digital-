@@ -2,6 +2,7 @@ import "./perfil.css";
 import { MapPin } from "lucide-react";
 import SiteFooter from "@/components/public/SiteFooter";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
+import { registrarVisita } from "@/lib/registrarVisita";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
 import { resolverAcesso, type ModoGate } from "@/lib/modosPrivacidade";
@@ -448,7 +449,8 @@ export default async function PerfilMemorialPage({
     return <GateEmailAutorizado memorialId={m.id} nomeCompleto={m.nome_completo} />;
   }
 
-  supabase.rpc("incrementar_visualizacao", { p_slug: slug }).then(() => {});
+  // 1 visita por visitante/dia; robô, prévia de link e recarregar não contam.
+  await registrarVisita(slug);
 
   const anos = anosDestaque(m.data_nascimento, m.data_falecimento);
   const timeline = Array.isArray(m.timeline) ? m.timeline : [];
