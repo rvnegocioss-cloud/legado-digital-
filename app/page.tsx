@@ -61,7 +61,7 @@ const MARCACAO = `<nav class="navbar">
     <div class="beam-linger"></div>
     <div class="glow"></div>
     <h1><span class="word" style="animation-delay:1.45s">Toda</span> <span class="word" style="animation-delay:1.55s">Família</span> <span class="word" style="animation-delay:1.62s">Tem</span> <span class="word" style="animation-delay:1.70s">Uma</span> <span class="word" style="animation-delay:1.78s">História</span><br><em><span class="word" style="animation-delay:1.92s">Que</span> <span class="word" style="animation-delay:2.00s">Deve</span> <span class="word" style="animation-delay:2.08s">Ser</span> <span class="word" style="animation-delay:2.16s">Eterna</span></em></h1>
-    <p class="sub">A funerária entrega à família uma página com as fotos, os vídeos e a história de quem se foi — aberta pelo QR Code na lápide, de qualquer celular, a qualquer hora.</p>
+    <p class="sub">Entregamos à família uma página dedicada a preservar fotos, vídeos e os melhores momentos de quem partiu, acessível por QR Code a qualquer hora e de qualquer celular.</p>
     <div class="dica-rolar" aria-hidden="true">
       <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
     </div>
