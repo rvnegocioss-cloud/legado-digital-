@@ -1,12 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/auth'
-import { corDaFila } from '@/lib/coresFila'
 import { useBuscaDebounce } from '@/lib/useBuscaDebounce'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 
 interface ArvoreFila {
   id: string
@@ -33,16 +32,25 @@ interface HomenagemLink {
   id: string
   nome_completo: string
   slug: string | null
+  foto_url?: string | null
 }
 
-interface LapideChip {
+// Jazigo da fileira aberta: quem está em cada gaveta vem das gavetas (fonte
+// de verdade do vínculo, 2026-09-15); homenagens.lapide_id só cobre memorial
+// que ainda não ganhou gaveta.
+interface JazigoCartao {
   id: string
-  codigo: string | null
+  nome: string | null
   numero: number | null
-  situacao: string
-  coordenada_precisao: string | null
-  foto_face_url: string | null
+  gavetas: { linha: number; nome_sem_memorial: string | null; homenagens: HomenagemLink | null }[]
   homenagens: HomenagemLink[]
+}
+
+interface ResultadoBusca {
+  chave: string
+  lapideId: string
+  titulo: string
+  detalhe: string
 }
 
 interface LapideOrfa {
@@ -59,19 +67,58 @@ interface LapideOrfa {
 
 const FORM_INICIAL = { identificacao: '', quadra: '', lote: '', observacoes: '' }
 
+// Pessoas do cartão, na ordem das gavetas. Mesmo memorial não repete.
+function pessoasDoJazigo(j: JazigoCartao) {
+  const lista: { chave: string; nome: string; memorial: HomenagemLink | null }[] = []
+  const vistos = new Set<string>()
+  for (const g of [...j.gavetas].sort((a, b) => a.linha - b.linha)) {
+    if (g.homenagens) {
+      if (vistos.has(g.homenagens.id)) continue
+      vistos.add(g.homenagens.id)
+      lista.push({ chave: g.homenagens.id, nome: g.homenagens.nome_completo, memorial: g.homenagens })
+    } else if (g.nome_sem_memorial?.trim()) {
+      lista.push({ chave: `g-${g.linha}`, nome: g.nome_sem_memorial.trim(), memorial: null })
+    }
+  }
+  for (const h of j.homenagens) {
+    if (vistos.has(h.id)) continue
+    vistos.add(h.id)
+    lista.push({ chave: h.id, nome: h.nome_completo, memorial: h })
+  }
+  return lista
+}
+
 export default function LapidesCemiterio() {
+  return (
+    <Suspense fallback={<p className="text-[var(--tema-zinc-400)]">Carregando...</p>}>
+      <LapidesCemiterioInner />
+    </Suspense>
+  )
+}
+
+function LapidesCemiterioInner() {
   const { id } = useParams<{ id: string }>()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  // Navegação em 3 níveis (2026-09-16, wireframe aprovado pelo Rafael):
+  // grade de quadras -> abas de fileira -> quadrados de jazigo. Quadra e
+  // fileira ficam no endereço, então voltar da página do jazigo cai no mesmo
+  // lugar. Com ~80 quadras e milhares de túmulos, nada abre tudo de uma vez.
+  const quadraParam = searchParams.get('quadra')
+  const filaParam = searchParams.get('fileira')
+
   const [cemiterioNome, setCemiterioNome] = useState('')
   const [carregando, setCarregando] = useState(true)
   const [arvore, setArvore] = useState<{ quadras: ArvoreQuadra[]; fora_de_fileira: ForaDeFileiraContagem } | null>(null)
   const [orfas, setOrfas] = useState<LapideOrfa[]>([])
   const [msg, setMsg] = useState('')
 
-  const [expandidas, setExpandidas] = useState<Record<string, boolean>>({})
-  const [tumulosPorFila, setTumulosPorFila] = useState<Record<string, LapideChip[]>>({})
+  const [jazigosPorFila, setJazigosPorFila] = useState<Record<string, JazigoCartao[]>>({})
   const [carregandoFila, setCarregandoFila] = useState<string | null>(null)
 
   const [busca, setBusca] = useState('')
+  const [irQuadra, setIrQuadra] = useState('')
 
   const [vinculando, setVinculando] = useState<LapideOrfa | null>(null)
   const [quadraVinculo, setQuadraVinculo] = useState('')
@@ -85,8 +132,18 @@ export default function LapidesCemiterio() {
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
 
+  // Passe de mídia: <img> não manda credencial, então a foto de memorial
+  // protegido apareceria quebrada no quadrado.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return
+      fetch('/api/midia-sessao', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {})
+    })
+  }, [])
+
   useEffect(() => {
     carregar()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   async function carregar() {
@@ -103,47 +160,81 @@ export default function LapidesCemiterio() {
         .order('created_at', { ascending: false })
         .limit(200),
     ])
-    // Antes essas 3 chamadas falhavam em silêncio -- a tela simplesmente
-    // ficava sem os quadradinhos, sem nenhuma pista do motivo. Agora, se
-    // qualquer uma falhar (RLS, RPC, rede), o erro real aparece na tela.
     const erroReal = erroCemiterio || erroArv || erroOrfas
     if (erroReal) setErro(erroReal.message || String(erroReal))
     setCemiterioNome(cemiterio?.nome || '')
     setArvore(arv as any)
     setOrfas((orfasData as any) || [])
-    setTumulosPorFila({})
+    setJazigosPorFila({})
     setCarregando(false)
   }
 
-  async function alternarFila(filaId: string) {
-    const abrindo = !expandidas[filaId]
-    setExpandidas((s) => ({ ...s, [filaId]: abrindo }))
-    if (abrindo && !tumulosPorFila[filaId]) {
-      setCarregandoFila(filaId)
-      const { data, error } = await supabase
-        .from('lapides')
-        .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo, slug)')
-        .eq('fila_id', filaId)
-        .order('numero', { ascending: true })
-      if (error) setErro(error.message)
-      setTumulosPorFila((s) => ({ ...s, [filaId]: (data as any) || [] }))
-      setCarregandoFila(null)
-    }
+  const quadrasOrdenadas = useMemo(
+    () => [...(arvore?.quadras || [])].sort((a, b) => a.numero - b.numero),
+    [arvore]
+  )
+  const quadraAtual = quadraParam && quadraParam !== 'fora' ? quadrasOrdenadas.find((q) => String(q.numero) === quadraParam) || null : null
+  const filasDaQuadra = useMemo(() => [...(quadraAtual?.filas || [])].sort((a, b) => a.numero - b.numero), [quadraAtual])
+  const filaAtual = filasDaQuadra.find((f) => String(f.numero) === filaParam) || filasDaQuadra[0] || null
+
+  function navegar(quadra: string | null, fileira: string | null) {
+    const p = new URLSearchParams()
+    if (quadra) p.set('quadra', quadra)
+    if (fileira) p.set('fileira', fileira)
+    const qs = p.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
-  // Antes saía uma consulta por tecla digitada. O hook espera a pessoa parar
-  // de digitar e descarta resposta de busca antiga (2026-09-15).
-  const { resultados: resultadoBusca, buscando } = useBuscaDebounce<LapideChip>(busca, async (termo) => {
-    const { data } = await supabase
+  useEffect(() => {
+    if (!filaAtual || jazigosPorFila[filaAtual.id]) return
+    const filaId = filaAtual.id
+    setCarregandoFila(filaId)
+    supabase
       .from('lapides')
-      .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo, slug)')
-      .eq('cemiterio_id', id)
-      .not('codigo', 'is', null)
-      .ilike('codigo', `%${termo}%`)
-      .order('codigo')
-      .limit(50)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ((data as any) || []) as LapideChip[]
+      .select(
+        'id, nome, numero, gavetas(linha, nome_sem_memorial, homenagens(id, nome_completo, slug, foto_url)), homenagens!homenagens_lapide_id_fkey(id, nome_completo, slug, foto_url)'
+      )
+      .eq('fila_id', filaId)
+      .order('numero', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) setErro(error.message)
+        setJazigosPorFila((s) => ({ ...s, [filaId]: (data as unknown as JazigoCartao[]) || [] }))
+        setCarregandoFila(null)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filaAtual?.id])
+
+  // Busca única: memorial, nome do jazigo ou código. Leva direto pra página
+  // do jazigo encontrado.
+  const { resultados: resultadoBusca, buscando } = useBuscaDebounce<ResultadoBusca>(busca, async (termoDigitado) => {
+    // vírgula e parêntese quebrariam o filtro .or() do PostgREST
+    const termo = termoDigitado.replace(/[,()%]/g, ' ').trim()
+    const [{ data: lapidesData }, { data: memoriaisData }] = await Promise.all([
+      supabase
+        .from('lapides')
+        .select('id, nome, codigo')
+        .eq('cemiterio_id', id)
+        .or(`codigo.ilike.%${termo}%,nome.ilike.%${termo}%`)
+        .order('codigo')
+        .limit(20),
+      supabase
+        .from('homenagens')
+        .select('id, nome_completo, lapides!homenagens_lapide_id_fkey!inner(id, nome, codigo, cemiterio_id)')
+        .eq('lapides.cemiterio_id', id)
+        .ilike('nome_completo', `%${termo}%`)
+        .limit(20),
+    ])
+    const saida: ResultadoBusca[] = []
+    type MemorialAchado = { id: string; nome_completo: string; lapides: { id: string; nome: string | null; codigo: string | null } | null }
+    for (const h of (memoriaisData as unknown as MemorialAchado[]) || []) {
+      const l = h.lapides
+      if (!l) continue
+      saida.push({ chave: `m-${h.id}`, lapideId: l.id, titulo: h.nome_completo, detalhe: `Memorial · ${l.nome || l.codigo || ''}` })
+    }
+    for (const l of (lapidesData as { id: string; nome: string | null; codigo: string | null }[]) || []) {
+      saida.push({ chave: `j-${l.id}`, lapideId: l.id, titulo: l.nome || l.codigo || 'Jazigo', detalhe: l.nome ? `Jazigo · ${l.codigo || ''}` : 'Jazigo' })
+    }
+    return saida
   })
 
   const quadraDoVinculo = arvore?.quadras.find((q) => q.id === quadraVinculo)
@@ -199,99 +290,64 @@ export default function LapidesCemiterio() {
 
   if (carregando) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
 
+  const termoQuadra = irQuadra.trim().toLowerCase()
+  const quadrasVisiveis = termoQuadra
+    ? quadrasOrdenadas.filter((q) => String(q.numero).startsWith(termoQuadra) || (q.nome || '').toLowerCase().includes(termoQuadra))
+    : quadrasOrdenadas
+  const totalJazigosCemiterio = quadrasOrdenadas.reduce((s, q) => s + q.filas.reduce((t, f) => t + f.total_tumulos, 0), 0)
+  const jazigos = filaAtual ? jazigosPorFila[filaAtual.id] : undefined
+  const verForaDeFileira = quadraParam === 'fora'
+
   return (
     <div>
       <Link href="/admin/cemiterios" className="text-[var(--tema-zinc-400)] hover:text-white text-sm mb-4 inline-block">
         ← Voltar pra Cemitérios
       </Link>
-      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h1 className="text-2xl font-bold text-white">Jazigos — {cemiterioNome}</h1>
         <Link
           href={`/admin/cemiterios/${id}/mapa`}
           className="text-sm font-medium px-3 py-1.5 rounded-lg"
           style={{ background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
         >
-          Mapa (marcar túmulos)
+          Mapa
         </Link>
       </div>
-      <p className="text-[var(--tema-zinc-400)] text-sm mb-3">
-        Organizado por Quadra → Fileira → Túmulo, do jeito que foi mapeado. Clica numa fileira pra ver os túmulos dela.
-      </p>
 
       {erro && (
         <div className="rounded-lg border border-red-800 bg-red-950/40 px-4 py-3 mb-4 text-sm text-red-300">
-          <strong>Erro ao carregar:</strong> {erro}
+          <strong>Erro:</strong> {erro}
         </div>
       )}
-
-      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-6">
-        <h2 className="text-sm font-semibold text-white mb-1">Como ler os quadradinhos</h2>
-        <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
-          O número dentro do quadradinho é o túmulo dentro da fileira. O contorno e a cor dizem em que pé está cada um.
-        </p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
-            <span className="text-[10px] px-1.5 py-1 rounded shrink-0" style={{ border: '1px dashed #52525b', color: '#a1a1aa' }}>7</span>
-            Só interpolado — ninguém conferiu no local ainda
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
-            <span className="relative text-[10px] px-1.5 py-1 rounded shrink-0" style={{ border: '1px solid #3f3f46', color: '#a1a1aa' }}>
-              7
-              <span className="absolute rounded-full" style={{ top: -2, right: -2, width: 6, height: 6, background: '#22c55e' }} />
-            </span>
-            Conferido em campo — tem foto do túmulo
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
-            <span
-              className="text-[10px] px-1.5 py-1 rounded shrink-0"
-              style={{ border: '1px dashed #52525b', background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
-            >
-              7
-            </span>
-            Tem memorial vinculado (fundo dourado)
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[var(--tema-zinc-400)]">
-            <span
-              className="text-[10px] px-1.5 py-1 rounded shrink-0"
-              style={{ border: '1px solid #3f3f46', background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
-            >
-              7⚠
-            </span>
-            ⚠ = mais de um memorial no mesmo túmulo (conferir)
-          </div>
-        </div>
-        <p className="text-xs mt-3 pt-3 border-t border-[var(--tema-zinc-800)]" style={{ color: '#fbbf24' }}>
-          <strong>Como um túmulo vira &quot;conferido&quot;:</strong> vá no <strong>Mapa</strong>, clique no pino do túmulo e suba a{' '}
-          <strong>foto dele</strong>. Só quem esteve lá fisicamente tem essa foto — por isso ela é o que marca o túmulo como conferido. A foto
-          também passa a aparecer ao passar o mouse no pino do mapa.
-        </p>
-      </div>
-
       {msg && <p className="text-xs text-[var(--tema-zinc-300)] mb-4 bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] rounded-lg px-3 py-2">{msg}</p>}
 
-      <div className="mb-6 max-w-md">
-        <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Buscar por código (ex: Q01-R02)</label>
+      <div className="relative mb-5">
+        <label htmlFor="busca-jazigos" className="block text-xs text-[var(--tema-zinc-400)] mb-1">
+          Buscar memorial, jazigo ou código
+        </label>
         <input
+          id="busca-jazigos"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          placeholder="Comece a digitar o código do túmulo"
+          placeholder="Ex: Carlos Saraiva, Família Saraiva, Q36-R01-T011"
           autoComplete="off"
-          className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-3 py-2 text-sm text-white"
+          className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded-lg px-3 py-2.5 text-sm text-white"
         />
         {(resultadoBusca || buscando) && (
-          <div className="mt-2 rounded-lg bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] max-h-56 overflow-y-auto">
+          <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-lg bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-700)] shadow-xl max-h-72 overflow-y-auto">
             {buscando ? (
               <p className="text-xs text-[var(--tema-zinc-500)] p-3">Buscando...</p>
             ) : resultadoBusca!.length === 0 ? (
-              <p className="text-xs text-[var(--tema-zinc-500)] p-3">Nenhum túmulo com esse código.</p>
+              <p className="text-xs text-[var(--tema-zinc-500)] p-3">Nada encontrado neste cemitério.</p>
             ) : (
-              resultadoBusca!.map((l) => (
+              resultadoBusca!.map((r) => (
                 <Link
-                  key={l.id}
-                  href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas`}
-                  className="block w-full text-left text-xs px-3 py-2 hover:bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-200)] border-b border-[var(--tema-zinc-800)] last:border-0"
+                  key={r.chave}
+                  href={`/admin/cemiterios/${id}/lapides/${r.lapideId}/gavetas`}
+                  className="block px-3 py-2 hover:bg-[var(--tema-zinc-800)] border-b border-[var(--tema-zinc-800)] last:border-0"
                 >
-                  {l.codigo} {l.homenagens.length > 0 && <span className="text-[var(--tema-zinc-500)]">— {l.homenagens.length} memorial(is)</span>}
+                  <span className="block text-sm text-white">{r.titulo}</span>
+                  <span className="block text-xs text-[var(--tema-zinc-400)]">{r.detalhe}</span>
                 </Link>
               ))
             )}
@@ -299,122 +355,172 @@ export default function LapidesCemiterio() {
         )}
       </div>
 
-      {!arvore || arvore.quadras.length === 0 ? (
-        <p className="text-[var(--tema-zinc-500)] text-sm mb-6">
-          Nenhuma quadra mapeada ainda. Use o <Link href={`/admin/cemiterios/${id}/mapa`} className="underline">mapa</Link> pra desenhar
-          quadra/fileira e gerar túmulos.
-        </p>
-      ) : (
-        <div className="overflow-x-auto pb-2 mb-6">
-          <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
-            {arvore.quadras.map((q) => (
-              <div key={q.id} className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-3" style={{ minWidth: 300, width: 300 }}>
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-sm font-semibold text-white">
-                    Quadra {q.numero} {q.geometria_revisada && <span className="text-emerald-400">🔒</span>}
-                  </h2>
-                  <span className="text-xs text-[var(--tema-zinc-500)]">{q.filas.length} fileira(s)</span>
-                </div>
-
-                {q.filas.length === 0 ? (
-                  <p className="text-xs text-[var(--tema-zinc-500)]">Nenhuma fileira desenhada.</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {q.filas.map((f) => {
-                      const filaKey = f.id
-                      const aberta = !!expandidas[filaKey]
-                      return (
-                        <div key={f.id} className="rounded border border-[var(--tema-zinc-800)]">
-                          <button
-                            type="button"
-                            onClick={() => alternarFila(f.id)}
-                            className="w-full flex items-center gap-1.5 text-left text-xs px-2 py-1.5 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
-                          >
-                            {aberta ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                            <span className="w-2 h-2 rounded-full inline-block shrink-0" style={{ background: corDaFila(f.numero) }} />
-                            Fileira {f.numero} {f.geometria_revisada && <span className="text-emerald-400">🔒</span>}
-                            <span className="text-[var(--tema-zinc-500)] ml-auto">{f.total_tumulos}</span>
-                          </button>
-                          {aberta && (
-                            <div className="p-2 border-t border-[var(--tema-zinc-800)]">
-                              {carregandoFila === f.id ? (
-                                <p className="text-xs text-[var(--tema-zinc-500)]">Carregando...</p>
-                              ) : (tumulosPorFila[f.id]?.length ?? 0) === 0 ? (
-                                <p className="text-xs text-[var(--tema-zinc-500)]">Sem túmulos ainda.</p>
-                              ) : (
-                                <>
-                                <div className="flex flex-wrap gap-1">
-                                  {tumulosPorFila[f.id]!.map((l) => {
-                                    const conferido = !!l.foto_face_url || l.situacao === 'confirmada'
-                                    return (
-                                      <Link
-                                        key={l.id}
-                                        href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas`}
-                                        title={
-                                          `${l.codigo || `#${l.numero}`}` +
-                                          (conferido ? ' · conferido em campo' : ' · não conferido') +
-                                          (l.homenagens.length > 0 ? ` · ${l.homenagens.map((h) => h.nome_completo).join(', ')}` : ' · sem memorial')
-                                        }
-                                        className="relative text-[10px] px-1.5 py-1 rounded"
-                                        style={{
-                                          border: conferido ? '1px solid #3f3f46' : '1px dashed #52525b',
-                                          background: l.homenagens.length > 0 ? 'rgba(201,164,106,0.15)' : 'transparent',
-                                          color: l.homenagens.length > 0 ? '#C9A46A' : '#a1a1aa',
-                                        }}
-                                      >
-                                        {l.numero ?? '?'}
-                                        {l.homenagens.length > 1 && '⚠'}
-                                        {l.foto_face_url && (
-                                          <span
-                                            aria-hidden
-                                            className="absolute rounded-full"
-                                            style={{ top: -2, right: -2, width: 6, height: 6, background: '#22c55e' }}
-                                          />
-                                        )}
-                                      </Link>
-                                    )
-                                  })}
-                                </div>
-                                <p className="text-[10px] text-[var(--tema-zinc-600)] mt-1.5">
-                                  {tumulosPorFila[f.id]!.filter((l) => l.foto_face_url || l.situacao === 'confirmada').length} de{' '}
-                                  {tumulosPorFila[f.id]!.length} conferido(s) em campo
-                                </p>
-                                {tumulosPorFila[f.id]!.some((l) => l.homenagens.length > 0) && (
-                                  <ul className="mt-1.5 pt-1.5 border-t border-[var(--tema-zinc-800)] space-y-0.5">
-                                    {tumulosPorFila[f.id]!
-                                      .filter((l) => l.homenagens.length > 0)
-                                      .map((l) => (
-                                        <li key={`mem-${l.id}`} className="flex items-center gap-1.5 text-[11px]">
-                                          <Link href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas`} className="text-[var(--tema-zinc-500)] hover:text-white shrink-0">Túmulo {l.numero ?? '?'}</Link>
-                                          {l.homenagens.map((h) => (
-                                            <Link
-                                              key={h.id}
-                                              href={h.slug ? `/homenagem/${h.slug}` : `/admin/memoriais/${h.id}`}
-                                              className="text-[#C9A46A] hover:underline truncate"
-                                              title={`Abrir a página do memorial de ${h.nome_completo}`}
-                                            >
-                                              {h.nome_completo}
-                                            </Link>
-                                          ))}
-                                        </li>
-                                      ))}
-                                  </ul>
-                                )}
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            ))}
+      {!quadraAtual && !verForaDeFileira && (
+        <>
+          <div className="flex items-end gap-3 mb-3 flex-wrap">
+            <div className="w-full sm:w-60">
+              <label htmlFor="ir-quadra" className="block text-xs text-[var(--tema-zinc-400)] mb-1">
+                Ir pra quadra
+              </label>
+              <input
+                id="ir-quadra"
+                value={irQuadra}
+                onChange={(e) => setIrQuadra(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && quadrasVisiveis[0]) navegar(String(quadrasVisiveis[0].numero), null)
+                }}
+                placeholder="Ex: 36"
+                autoComplete="off"
+                className="w-full bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded-lg px-3 py-2 text-sm text-white"
+              />
+            </div>
+            <span className="text-xs text-[var(--tema-zinc-400)] pb-2.5">
+              {quadrasOrdenadas.length} quadra(s) · {totalJazigosCemiterio} jazigo(s)
+            </span>
           </div>
+
+          {quadrasOrdenadas.length === 0 ? (
+            <p className="text-[var(--tema-zinc-500)] text-sm mb-6">
+              Nenhuma quadra mapeada ainda. Use o <Link href={`/admin/cemiterios/${id}/mapa`} className="underline">mapa</Link> pra desenhar
+              quadra/fileira e gerar túmulos.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-6">
+              {quadrasVisiveis.map((q) => (
+                <button
+                  key={q.id}
+                  type="button"
+                  onClick={() => navegar(String(q.numero), null)}
+                  className="text-left rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] hover:border-[#C9A46A] p-3 transition-colors"
+                >
+                  <span className="block text-sm font-semibold text-white">Quadra {q.numero}</span>
+                  <span className="block text-xs text-[var(--tema-zinc-400)]">
+                    {q.filas.reduce((t, f) => t + f.total_tumulos, 0)} jazigo(s)
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => navegar('fora', null)}
+                className="text-left rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] hover:border-[#C9A46A] p-3 transition-colors"
+              >
+                <span className="block text-sm font-semibold text-white">Fora de fileira</span>
+                <span className="block text-xs text-[var(--tema-zinc-400)]">{totalForaDeFileira} túmulo(s)</span>
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {(quadraAtual || verForaDeFileira) && (
+        <div className="flex items-baseline gap-4 mb-3">
+          <button type="button" onClick={() => navegar(null, null)} className="text-sm text-[var(--tema-zinc-400)] hover:text-white">
+            ← Todas as quadras
+          </button>
+          <span className="text-lg font-semibold text-white">{quadraAtual ? `Quadra ${quadraAtual.numero}` : 'Fora de fileira'}</span>
         </div>
       )}
 
+      {quadraParam && quadraParam !== 'fora' && !quadraAtual && (
+        <p className="text-sm text-[var(--tema-zinc-400)] mb-6">Quadra {quadraParam} não existe neste cemitério.</p>
+      )}
+
+      {quadraAtual && (
+        <div className="mb-8">
+          {filasDaQuadra.length === 0 ? (
+            <p className="text-sm text-[var(--tema-zinc-500)]">Nenhuma fileira desenhada nesta quadra.</p>
+          ) : (
+            <>
+              <nav className="flex items-center gap-1 overflow-x-auto border-b border-[var(--tema-zinc-800)] mb-4">
+                {filasDaQuadra.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => navegar(String(quadraAtual.numero), String(f.numero))}
+                    className={`px-3 py-2.5 text-sm whitespace-nowrap border-b-2 -mb-px transition-colors ${
+                      filaAtual?.id === f.id
+                        ? 'border-[#C9A46A] text-white font-medium'
+                        : 'border-transparent text-[var(--tema-zinc-400)] hover:text-white'
+                    }`}
+                  >
+                    Fileira {f.numero}
+                  </button>
+                ))}
+              </nav>
+
+              {carregandoFila === filaAtual?.id || !jazigos ? (
+                <p className="text-sm text-[var(--tema-zinc-500)]">Carregando...</p>
+              ) : jazigos.length === 0 ? (
+                <p className="text-sm text-[var(--tema-zinc-500)]">Sem túmulos nesta fileira ainda.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {jazigos.map((j) => {
+                    const pessoas = pessoasDoJazigo(j)
+                    const urlJazigo = `/admin/cemiterios/${id}/lapides/${j.id}/gavetas`
+                    return (
+                      // Quadrado inteiro abre a página do jazigo; o nome do
+                      // memorial (link próprio) abre a página pública.
+                      <div
+                        key={j.id}
+                        role="link"
+                        tabIndex={0}
+                        onClick={() => router.push(urlJazigo)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') router.push(urlJazigo)
+                        }}
+                        className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] hover:border-[#C9A46A] p-3 cursor-pointer transition-colors min-h-[96px]"
+                      >
+                        <p className="text-sm font-semibold text-white pb-2 mb-2 border-b border-[var(--tema-zinc-800)] truncate">
+                          {j.nome || `Túmulo ${j.numero ?? '?'}`}
+                        </p>
+                        {pessoas.length === 0 ? (
+                          <p className="text-xs text-[var(--tema-zinc-500)]">Ninguém registrado</p>
+                        ) : (
+                          <ul className="space-y-1.5">
+                            {pessoas.map((p) =>
+                              p.memorial ? (
+                                <li key={p.chave} className="flex items-center gap-2 min-w-0">
+                                  <span
+                                    className="w-7 h-7 rounded-full overflow-hidden shrink-0 bg-[var(--tema-zinc-800)]"
+                                    style={{ border: '2px solid #C9A46A' }}
+                                  >
+                                    {p.memorial.foto_url && (
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      <img src={urlMidiaProtegida(p.memorial.foto_url) || p.memorial.foto_url} alt="" className="w-full h-full object-cover" />
+                                    )}
+                                  </span>
+                                  {p.memorial.slug ? (
+                                    <Link
+                                      href={`/homenagem/${p.memorial.slug}`}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="text-sm font-medium hover:underline truncate"
+                                      style={{ color: '#C9A46A' }}
+                                    >
+                                      {p.nome}
+                                    </Link>
+                                  ) : (
+                                    <span className="text-sm font-medium truncate" style={{ color: '#C9A46A' }}>{p.nome}</span>
+                                  )}
+                                </li>
+                              ) : (
+                                <li key={p.chave} className="text-sm text-[var(--tema-zinc-300)] truncate pl-9">
+                                  {p.nome}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {verForaDeFileira && (
       <div
         className="rounded-xl p-4 mb-6"
         style={{
@@ -495,6 +601,7 @@ export default function LapidesCemiterio() {
           </div>
         )}
       </div>
+      )}
 
       {vinculando && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setVinculando(null)}>
