@@ -211,10 +211,6 @@ const MARCACAO = `<nav class="navbar">
         <p class="ans">Basta criar uma conta, escolher um plano e começar a cadastrar os memoriais. Em menos de 5 minutos você já pode gerar o primeiro QR Code.</p>
       </details>
       <details class="item">
-        <summary>A família precisa pagar algo?<span class="chev">▼</span></summary>
-        <p class="ans">Não. O memorial digital é um serviço oferecido pela funerária. A família só precisa personalizar o conteúdo.</p>
-      </details>
-      <details class="item">
         <summary>O QR Code é único para cada falecido?<span class="chev">▼</span></summary>
         <p class="ans">Sim. Cada memorial gera um QR Code exclusivo que leva diretamente à página de homenagem daquele ente querido.</p>
       </details>
