@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/auth'
@@ -24,6 +25,8 @@ interface Gaveta {
   observacoes: string | null
   homenagens: Homenagem | null
 }
+
+const JazigoGavetas3D = dynamic(() => import('@/components/admin/JazigoGavetas3D'), { ssr: false })
 
 const FORM_INICIAL = { codigo: '', linha: '1', coluna: '1', homenagem_id: '', nome_sem_memorial: '', observacoes: '' }
 
@@ -49,6 +52,9 @@ export default function GavetasLapide() {
   const [editandoId, setEditandoId] = useState<string | null>(null)
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
+  // Abas no topo, mesmo padrão da ficha do memorial (2026-09-16): um tema por
+  // vez, na ordem de uso.
+  const [aba, setAba] = useState<'cadastro' | 'foto' | 'gavetas' | '3d'>('cadastro')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -216,65 +222,74 @@ export default function GavetasLapide() {
       <Link href={`/admin/cemiterios/${id}/lapides`} className="text-[var(--tema-zinc-400)] hover:text-white text-sm mb-4 inline-block">
         ← Voltar pra Jazigos
       </Link>
-      <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-        <h1 className="text-2xl font-bold text-white">{lapideNome || `Jazigo ${lapideCodigo}`}</h1>
-        <Link
-          href={`/admin/cemiterios/${id}/lapides/${lapideId}/gavetas-3d`}
-          className="text-sm font-medium px-3 py-1.5 rounded-lg"
-          style={{ background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
-        >
-          Ver Gavetas 3D →
-        </Link>
-      </div>
+      <h1 className="text-2xl font-bold text-white mb-1">{lapideNome || `Jazigo ${lapideCodigo}`}</h1>
+      <p className="text-[var(--tema-zinc-400)] text-sm mb-4">Código do jazigo: {lapideCodigo}</p>
+
+      <nav className="flex items-center gap-1 flex-wrap border-b border-[var(--tema-zinc-800)] mb-6 -mx-1">
+        {([
+          ['cadastro', 'Cadastro do Jazigo'],
+          ['foto', 'Foto da Lápide'],
+          ['gavetas', `Gavetas (${gavetas.length})`],
+          ['3d', 'Gavetas 3D'],
+        ] as const).map(([idAba, rotulo]) => (
+          <button
+            key={idAba}
+            type="button"
+            onClick={() => setAba(idAba)}
+            className={`px-3 py-2.5 text-sm whitespace-nowrap border-b-2 -mb-px transition-colors ${
+              aba === idAba
+                ? 'border-[#C9A46A] text-white font-medium'
+                : 'border-transparent text-[var(--tema-zinc-400)] hover:text-white'
+            }`}
+          >
+            {rotulo}
+          </button>
+        ))}
+      </nav>
 
       {/* Nome do jazigo: é o título que aparece no card do mapa. Sem nome, o
           card cai no código técnico (Q36-R01-T011), que não diz nada pra quem
           olha (2026-09-15). */}
-      {editandoNome ? (
-        <div className="flex items-center gap-2 mb-2 max-w-lg">
-          <Input
-            autoFocus
-            placeholder="Ex: Jazigo Família Saraiva"
-            value={nomeInput}
-            onChange={(e) => setNomeInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') salvarNomeJazigo()
-              if (e.key === 'Escape') setEditandoNome(false)
-            }}
-            className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
-          />
-          <Button type="button" onClick={salvarNomeJazigo} disabled={salvando}>
-            Salvar
-          </Button>
-          <button type="button" onClick={() => setEditandoNome(false)} className="text-sm text-[var(--tema-zinc-400)] hover:text-white">
-            Cancelar
-          </button>
+      <div className={aba === 'cadastro' ? '' : 'hidden'}>
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-2xl space-y-4">
+          <div>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome do jazigo</label>
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Ex: Jazigo Família Saraiva"
+                value={editandoNome ? nomeInput : lapideNome}
+                onFocus={() => {
+                  if (!editandoNome) {
+                    setNomeInput(lapideNome)
+                    setEditandoNome(true)
+                  }
+                }}
+                onChange={(e) => setNomeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') salvarNomeJazigo()
+                }}
+                className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
+              />
+              <Button type="button" onClick={salvarNomeJazigo} disabled={salvando || !editandoNome || nomeInput === lapideNome}>
+                Salvar
+              </Button>
+            </div>
+            <p className="text-[11px] text-[var(--tema-zinc-500)] mt-1">
+              Aparece como título do card deste jazigo no mapa. Vazio, o card mostra só o código.
+            </p>
+            {erro && <p className="text-red-400 text-sm mt-1">{erro}</p>}
+          </div>
+          <div>
+            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Código do jazigo</label>
+            <p className="text-sm text-white">{lapideCodigo}</p>
+          </div>
         </div>
-      ) : (
-        <p className="text-[var(--tema-zinc-400)] text-sm mb-2">
-          Código do jazigo: {lapideCodigo} ·{' '}
-          <button
-            type="button"
-            onClick={() => {
-              setNomeInput(lapideNome)
-              setEditandoNome(true)
-            }}
-            className="underline"
-            style={{ color: '#C9A46A' }}
-          >
-            {lapideNome ? 'Renomear jazigo' : 'Dar nome ao jazigo'}
-          </button>
-        </p>
-      )}
-
-      <p className="text-[var(--tema-zinc-400)] text-sm mb-6">
-        Cada gaveta é uma posição física dentro do jazigo. Vincule um memorial já cadastrado pra marcar quem está ali — ou,
-        se a pessoa ainda não tem memorial, escreva só o nome dela.
-      </p>
+      </div>
 
       {/* Foto da lápide: é ela que aparece no topo do card do jazigo no mapa,
           e é o que marca o túmulo como conferido em campo (2026-09-15). */}
-      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-5 mb-8 max-w-lg">
+      <div className={aba === 'foto' ? '' : 'hidden'}>
+      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-2xl">
         <h2 className="text-sm font-semibold text-white mb-1">Foto da lápide</h2>
         <p className="text-[11px] text-[var(--tema-zinc-500)] mb-3">
           Tirada de perto, no cemitério. Aparece no topo do card deste jazigo no mapa e marca o túmulo como conferido em campo —
@@ -285,7 +300,7 @@ export default function GavetasLapide() {
           <img
             src={urlMidiaProtegida(fotoLapide) || fotoLapide}
             alt="Foto da lápide"
-            className="w-full max-w-xs rounded-lg mb-3"
+            className="w-full max-w-md rounded-lg mb-3"
           />
         )}
         <div className="flex items-center gap-3 flex-wrap">
@@ -315,8 +330,14 @@ export default function GavetasLapide() {
           )}
         </div>
       </div>
+      </div>
 
-      <form onSubmit={salvar} className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 mb-8 space-y-3 max-w-lg">
+      <p className={aba === 'gavetas' ? 'text-[var(--tema-zinc-400)] text-sm mb-4' : 'hidden'}>
+        Cada gaveta é uma posição física dentro do jazigo. Vincule um memorial já cadastrado pra marcar quem está ali — ou,
+        se a pessoa ainda não tem memorial, escreva só o nome dela.
+      </p>
+      <div className={aba === 'gavetas' ? 'grid grid-cols-1 lg:grid-cols-12 gap-5 items-start' : 'hidden'}>
+      <form onSubmit={salvar} className="lg:col-span-5 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 space-y-3">
         {editandoId && (
           <p className="text-xs" style={{ color: '#C9A46A' }}>
             Editando a gaveta {gavetas.find((g) => g.id === editandoId)?.codigo} —{' '}
@@ -414,8 +435,9 @@ export default function GavetasLapide() {
         </div>
       </form>
 
+      <div className="lg:col-span-7 rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)]">
       {gavetas.length === 0 ? (
-        <p className="text-[var(--tema-zinc-400)]">Nenhuma gaveta cadastrada nesse jazigo ainda.</p>
+        <p className="text-[var(--tema-zinc-400)] p-6">Nenhuma gaveta cadastrada nesse jazigo ainda.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -465,6 +487,25 @@ export default function GavetasLapide() {
           </table>
         </div>
       )}
+      </div>
+      </div>
+
+      <div className={aba === '3d' ? '' : 'hidden'}>
+        {gavetas.length === 0 ? (
+          <p className="text-[var(--tema-zinc-400)]">Nenhuma gaveta cadastrada nesse jazigo ainda.</p>
+        ) : aba === '3d' ? (
+          <JazigoGavetas3D
+            gavetas={gavetas.map((g) => ({
+              id: g.id,
+              codigo: g.codigo,
+              linha: g.linha,
+              coluna: g.coluna,
+              observacoes: g.observacoes,
+              homenagem: g.homenagens ? { nome_completo: g.homenagens.nome_completo, slug: g.homenagens.slug } : null,
+            }))}
+          />
+        ) : null}
+      </div>
     </div>
   )
 }
