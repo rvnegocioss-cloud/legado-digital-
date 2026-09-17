@@ -118,7 +118,7 @@ usuarios, perfis, permissoes · parceiros_b2b, contratos, pagina_publica_parceir
 | **Fase 5** | Geolocalização avançada, mapeamento cemiterial |
 
 ## Mapa Visual das Páginas
-Organograma dos 6 ambientes + fluxo de dados dos memoriais (`parceiro_id`): mantido como Artifact em `/admin/mapa`, atualizar a cada mudança estrutural relevante.
+Organograma dos 6 ambientes + fluxo de dados dos memoriais (`parceiro_id`): mantido como Artifact em `/admin/mapa`, atualizar a cada mudança estrutural relevante. **Em abas desde 2026-09-17** (mesmo padrão da ficha do memorial/jazigo — página tinha 5 seções empilhadas, ~900 linhas de rolagem): `Ambientes · Módulos da Central · Fluxo do Memorial · Segurança · Sugestões`, abre em Ambientes. Aviso "Manual do sistema →" e o rodapé "Atualizado em..." ficam fixos, fora das abas.
 
 ## Fase Atual
 **FASE 1 concluída → FASE 2 em andamento (Portal parceiro)**

@@ -26,7 +26,7 @@ Responda em português, direto e claro. Se não souber algo, diga que não sabe 
 - **Comunicações** (`/admin/emails`): dois blocos retráteis de leads no topo — **Leads de parceiro** (formulário de "quero ser parceiro" em `/parceiro/login`) e **Leads de família** (formulário de "quero um memorial" em `/familia/login`), cada um com contato do interessado, cidade, data e status editável (novo / em contato / convertido / descartado); abrem sozinhos quando há lead não lido. Abaixo, lista de parceiros com e-mail/WhatsApp/última atividade, memoriais de cada um expandindo com contato da família, e o histórico de e-mails automáticos disparados.
 - **Usuários** (`/admin/usuarios`): lista de usuários staff.
 - **Busca em todo o sistema (2026-09-15):** todo campo de busca e de escolha completa **enquanto a pessoa digita** — a lista vai se formando sozinha a partir da 2ª letra, sem botão "Buscar". Vale pra busca pública de memorial (`/busca` e página do parceiro), busca de nome no Portal da Família, busca dentro do mapa público do cemitério, busca de túmulo por código na Central, e a escolha de jazigo na ficha do memorial (Central e Portal do Parceiro), que deixou de ser uma lista gigante e virou campo de busca.
-- **Mapa** (`/admin/mapa`): organograma dos 6 ambientes, campo de sugestões dos sócios.
+- **Mapa** (`/admin/mapa`, virou abas em 2026-09-17): `Ambientes` (organograma dos 6 ambientes) · `Módulos da Central` · `Fluxo do Memorial` · `Segurança` · `Sugestões` (campo pra Rafael/Pedro/Ricardo deixarem opinião).
 - **Manual** (`/admin/manual`): documentação de cada página, linkado do Mapa.
 <!-- SOMENTE-STAFF-FIM -->
 

@@ -54,6 +54,26 @@ const css = `
   color: var(--text);
 }
 .mapa-paginas .masthead p { color: var(--text-muted); max-width: 62ch; margin: 0; font-size: 0.98rem; }
+.mapa-paginas .abas-mapa {
+  display: flex;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+}
+.mapa-paginas .aba-mapa {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mapa-paginas .aba-mapa:hover { color: var(--text); }
+.mapa-paginas .aba-mapa.on { color: var(--text); font-weight: 600; border-bottom-color: var(--gold); }
 .mapa-paginas h2 {
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   font-weight: 500;
@@ -297,6 +317,7 @@ interface Sugestao {
 }
 
 export default function MapaPaginas() {
+  const [aba, setAba] = useState<'ambientes' | 'modulos' | 'fluxo' | 'seguranca' | 'sugestoes'>('ambientes')
   const [sugestoes, setSugestoes] = useState<Sugestao[]>([])
   const [mensagem, setMensagem] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -358,7 +379,29 @@ export default function MapaPaginas() {
         </a>
       </header>
 
-      <section className="section">
+      {/* Abas no topo (2026-09-17, mesmo padrão aprovado na ficha do memorial e
+          do jazigo): cada assunto abre sozinho na tela inteira, em vez de tudo
+          empilhado numa rolagem de 900 linhas. */}
+      <nav className="abas-mapa">
+        {([
+          ['ambientes', 'Ambientes'],
+          ['modulos', 'Módulos da Central'],
+          ['fluxo', 'Fluxo do Memorial'],
+          ['seguranca', 'Segurança'],
+          ['sugestoes', 'Sugestões'],
+        ] as const).map(([id, rotulo]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setAba(id)}
+            className={aba === id ? 'aba-mapa on' : 'aba-mapa'}
+          >
+            {rotulo}
+          </button>
+        ))}
+      </nav>
+
+      <section className="section" style={aba === 'ambientes' ? undefined : { display: 'none' }}>
         <div className="section-head">
           <div>
             <h2>Mapa geral dos ambientes</h2>
@@ -450,7 +493,7 @@ export default function MapaPaginas() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" style={aba === 'modulos' ? undefined : { display: 'none' }}>
         <div className="section-head">
           <div>
             <h2>Módulos dentro da Central</h2>
@@ -504,7 +547,7 @@ export default function MapaPaginas() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" style={aba === 'fluxo' ? undefined : { display: 'none' }}>
         <div className="section-head">
           <div>
             <h2>Como um memorial circula</h2>
@@ -710,7 +753,7 @@ export default function MapaPaginas() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" style={aba === 'seguranca' ? undefined : { display: 'none' }}>
         <div className="section-head">
           <div>
             <h2>Segurança</h2>
@@ -825,7 +868,7 @@ export default function MapaPaginas() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" style={aba === 'sugestoes' ? undefined : { display: 'none' }}>
         <div className="section-head">
           <div>
             <h2>Sugestões dos sócios</h2>
