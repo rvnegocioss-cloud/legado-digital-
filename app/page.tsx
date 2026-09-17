@@ -168,7 +168,7 @@ const MARCACAO = `<nav class="navbar">
       <div class="tit">Como <span class="grad">Funciona</span></div>
       <div class="linha"><b>01 Funerária Cadastra</b><span>Cadastre o falecido na plataforma em 2 minutos.</span></div>
       <div class="linha"><b>02 Família Personaliza</b><span>Parentes recebem acesso e montam o memorial.</span></div>
-      <div class="linha"><b>03 QR Code Gerado</b><span>QR Code único é gerado e instalado na placa.</span></div>
+      <div class="linha"><b>03 QR Code Gerado</b><span>QR Code único é gerado para ser instalado na placa.</span></div>
       <div class="linha"><b>04 Homenagens Chegam</b><span>Visitantes escaneiam e deixam condolências.</span></div>
     </div>
 
