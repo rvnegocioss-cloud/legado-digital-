@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase, obterUsuarioIdAtual } from '@/lib/auth'
+import { urlMidiaProtegida } from '@/lib/urlMidia'
 import { Button } from '@/components/ui/button'
 
 interface Memorial {
@@ -13,6 +14,7 @@ interface Memorial {
   data_falecimento: string | null
   cidade: string | null
   slug: string | null
+  qr_code_url: string | null
   created_at: string
   parceiro_id: string | null
   lapide_id: string | null
@@ -54,7 +56,7 @@ export default function AdminMemoriais() {
 
     const { data } = await supabase
       .from('homenagens')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at, parceiro_id, lapide_id, criado_por:criado_por_usuario_id(nome)')
+      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, qr_code_url, created_at, parceiro_id, lapide_id, criado_por:criado_por_usuario_id(nome)')
       .order('created_at', { ascending: false })
     if (data) setMemoriais(data as unknown as Memorial[])
 
@@ -180,6 +182,7 @@ export default function AdminMemoriais() {
                               <th className="text-left py-2 px-2">Cidade</th>
                               <th className="text-left py-2 px-2">Criado em</th>
                               <th className="text-left py-2 px-2">Cadastrado por</th>
+                              <th className="text-left py-2 px-2">QR Code</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -198,6 +201,19 @@ export default function AdminMemoriais() {
                                 </td>
                                 <td className="py-2 px-2 text-[var(--tema-zinc-400)]">
                                   {m.criado_por?.nome || '—'}
+                                </td>
+                                <td className="py-2 px-2">
+                                  {m.qr_code_url ? (
+                                    <a
+                                      href={urlMidiaProtegida(m.qr_code_url) || m.qr_code_url}
+                                      download={`qrcode-${m.slug}.png`}
+                                      className="text-blue-400 hover:underline text-xs"
+                                    >
+                                      Baixar
+                                    </a>
+                                  ) : (
+                                    <span className="text-[var(--tema-zinc-500)] text-xs">Sem QR ainda</span>
+                                  )}
                                 </td>
                               </tr>
                             ))}

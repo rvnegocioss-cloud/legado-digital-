@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard da Central — 4 opções</title>
+<style>
+  body { margin:0; background:#f4f4f4; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#000; }
+  .pagina { max-width:1150px; margin:24px auto; padding:0 16px; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  .cinza { color:#666; font-size:13px; }
+  .aviso { background:#fff; border:2px solid #000; border-radius:8px; padding:12px 16px; font-size:13px; margin:14px 0; }
+  .opcao { background:#fff; border:1px solid #ccc; border-radius:8px; padding:22px; margin:26px 0; }
+  .opcao h2 { font-size:18px; margin:0 0 4px; }
+  .desc { font-size:13px; color:#444; margin:0 0 18px; }
+  .tela { border:1px solid #ccc; border-radius:8px; padding:18px; }
+  .t-h { font-size:20px; font-weight:700; margin-bottom:12px; }
+  .abas { display:flex; gap:4px; border-bottom:1px solid #ccc; margin-bottom:16px; font-size:14px; flex-wrap:wrap; }
+  .abas span { padding:9px 14px; color:#666; }
+  .abas .on { color:#000; font-weight:700; border-bottom:2px solid #000; }
+  .g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .g6 { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .num { border:1px solid #ccc; border-radius:8px; padding:12px; }
+  .num small { display:block; font-size:12px; color:#666; }
+  .num b { display:block; font-size:24px; margin:2px 0; }
+  .num i { font-style:normal; font-size:11px; color:#999; }
+  .caixa { border:1px solid #ccc; border-radius:8px; padding:14px; }
+  .caixa h3 { font-size:14px; margin:0 0 8px; }
+  .linha { display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid #eee; }
+  .atalho { border:1px solid #ccc; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; font-size:14px; }
+  .atalho b { font-size:20px; }
+  .tab { width:100%; border-collapse:collapse; font-size:13px; }
+  .tab th { text-align:left; color:#666; border-bottom:1px solid #000; padding:6px; }
+  .tab td { border-bottom:1px solid #eee; padding:6px; }
+  .qr { width:34px; height:34px; border:1px solid #999; background:repeating-linear-gradient(45deg,#ccc 0 3px,#fff 3px 6px); }
+  .campo { border:1px solid #ccc; border-radius:6px; padding:8px 10px; font-size:13px; color:#999; width:320px; display:inline-block; }
+  .btn { border:1px solid #000; border-radius:6px; padding:7px 12px; font-size:13px; display:inline-block; background:#fff; }
+  .mt { margin-top:12px; }
+  .sub { font-size:12px; color:#666; margin:8px 0; }
+  .bloco { border:1px solid #ccc; border-radius:10px; padding:16px; min-height:88px; }
+  .bloco b { display:block; font-size:16px; }
+  .bloco span { font-size:12px; color:#666; }
+  .badge { display:inline-block; border:1px solid #000; border-radius:10px; padding:0 7px; font-size:11px; font-weight:700; margin-left:6px; }
+  .lado { display:grid; grid-template-columns:1fr 300px; gap:12px; align-items:start; }
+  .nota { font-size:12px; color:#666; margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <h1>Dashboard da Central — 4 opções</h1>
+  <p class="cinza">Tudo o que existe hoje no Dashboard: visitas nos memoriais, novos memoriais, homenagens recentes, cemitérios e parceiros com mais visita, contadores (Parceiros, Memoriais, Usuários), e-mail do fornecedor de placas e a tabela de Memoriais e QR Codes.</p>
+  <div class="aviso"><b>Em todas as opções:</b> o bloco "11 memoriais com dados faltando" <b>sai do Dashboard</b> e vai pra <b>Comunicações</b>.</div>
+
+  <!-- ============ 1 ============ -->
+  <div class="opcao">
+    <h2>Opção 1 — Abas no topo (mesmo padrão das fichas)</h2>
+    <p class="desc">Igual à ficha do memorial e do jazigo: um assunto por aba, na tela inteira.</p>
+    <div class="tela">
+      <div class="t-h">Dashboard</div>
+      <div class="abas"><span class="on">Visão geral</span><span>Visitas</span><span>Memoriais e QR Codes</span><span>Configurações</span></div>
+      <div class="g6">
+        <div class="num"><small>Visitas nos memoriais</small><b>27769</b><i>total acumulado</i></div>
+        <div class="num"><small>Novos memoriais</small><b>5</b><i>últimos 7 dias</i></div>
+        <div class="num"><small>Homenagens recentes</small><b>0</b><i>últimos 7 dias</i></div>
+        <div class="num"><small>Parceiros B2B</small><b>1</b><i>abrir →</i></div>
+        <div class="num"><small>Memoriais</small><b>12</b><i>abrir →</i></div>
+        <div class="num"><small>Usuários</small><b>3</b><i>abrir →</i></div>
+      </div>
+      <p class="nota">Aba <b>Visitas</b>: cemitérios e parceiros com mais visita, lado a lado. Aba <b>Memoriais e QR Codes</b>: a tabela aberta, sem retrátil. Aba <b>Configurações</b>: e-mail do fornecedor de placas.</p>
+    </div>
+  </div>
+
+  <!-- ============ 2 ============ -->
+  <div class="opcao">
+    <h2>Opção 2 — Tela única enxuta, sem abas</h2>
+    <p class="desc">Só números e rankings, tudo visível sem clicar. A tabela de QR e o e-mail do fornecedor saem do Dashboard: a tabela já existe na lista de Memoriais, e o e-mail do fornecedor vira item de Configurações.</p>
+    <div class="tela">
+      <div class="t-h">Dashboard</div>
+      <div class="g6">
+        <div class="num"><small>Visitas</small><b>27769</b><i>total</i></div>
+        <div class="num"><small>Novos memoriais</small><b>5</b><i>7 dias</i></div>
+        <div class="num"><small>Homenagens</small><b>0</b><i>7 dias</i></div>
+        <div class="num"><small>Parceiros</small><b>1</b></div>
+        <div class="num"><small>Memoriais</small><b>12</b></div>
+        <div class="num"><small>Usuários</small><b>3</b></div>
+      </div>
+      <div class="g2 mt">
+        <div class="caixa"><h3>Cemitérios com mais visita</h3><div class="linha"><span>Cemitério São Pedro</span><span>27648</span></div></div>
+        <div class="caixa"><h3>Parceiros com mais visita</h3><div class="linha"><span>Planos Legado Digital</span><span>1</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 3 ============ -->
+  <div class="opcao">
+    <h2>Opção 3 — Abas + painel fixo de números ao lado</h2>
+    <p class="desc">Os números ficam sempre visíveis numa coluna à direita; as abas trocam só o conteúdo principal.</p>
+    <div class="tela">
+      <div class="t-h">Dashboard</div>
+      <div class="lado">
+        <div>
+          <div class="abas"><span class="on">Memoriais e QR Codes</span><span>Visitas</span><span>Configurações</span></div>
+          <table class="tab">
+            <thead><tr><th>QR Code</th><th>Nome</th><th></th><th></th></tr></thead>
+            <tbody>
+              <tr><td><div class="qr"></div></td><td>Carlos Saraiva</td><td>Baixar QR Code</td><td>Ver página</td></tr>
+              <tr><td><div class="qr"></div></td><td>Maria Aparecida Souza</td><td>Baixar QR Code</td><td>Ver página</td></tr>
+              <tr><td><span class="cinza">Sem QR ainda</span></td><td>jon doe da silva</td><td></td><td>Ver página</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="num"><small>Visitas nos memoriais</small><b>27769</b></div>
+          <div class="num"><small>Novos memoriais (7 dias)</small><b>5</b></div>
+          <div class="num"><small>Homenagens (7 dias)</small><b>0</b></div>
+          <div class="atalho"><span>Parceiros</span><b>1</b></div>
+          <div class="atalho"><span>Memoriais</span><b>12</b></div>
+          <div class="atalho"><span>Usuários</span><b>3</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 4 ============ -->
+  <div class="opcao">
+    <h2>Opção 4 — Central de atalhos</h2>
+    <p class="desc">Uma faixa curta de números em cima e, embaixo, blocos grandes que levam pra cada área, com o que precisa de atenção escrito no próprio bloco.</p>
+    <div class="tela">
+      <div class="t-h">Dashboard</div>
+      <div class="g3">
+        <div class="num"><small>Visitas nos memoriais</small><b>27769</b></div>
+        <div class="num"><small>Novos memoriais (7 dias)</small><b>5</b></div>
+        <div class="num"><small>Homenagens (7 dias)</small><b>0</b></div>
+      </div>
+      <div class="g3 mt">
+        <div class="bloco"><b>Memoriais <span class="badge">12</span></b><span>Cadastrar, editar e baixar QR Code</span></div>
+        <div class="bloco"><b>Comunicações <span class="badge">11 pendências</span></b><span>E-mails e memoriais com dados faltando</span></div>
+        <div class="bloco"><b>Cemitérios</b><span>Mais visitado: São Pedro (27648)</span></div>
+        <div class="bloco"><b>Parceiros <span class="badge">1</span></b><span>Mais visitado: Planos Legado Digital</span></div>
+        <div class="bloco"><b>Usuários <span class="badge">3</span></b><span>Equipe e acessos</span></div>
+        <div class="bloco"><b>Configurações</b><span>E-mail do fornecedor de placas</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

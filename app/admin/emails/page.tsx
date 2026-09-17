@@ -6,6 +6,8 @@ import { supabase } from '@/lib/auth'
 import { linkWhatsApp } from '@/lib/linkWhatsApp'
 import { rotuloTipoEmail } from '@/lib/emailLog'
 import PainelLeads from '@/components/admin/PainelLeads'
+import PendenciasMemoriais from '@/components/admin/PendenciasMemoriais'
+import EmailFornecedorPlacas from '@/components/admin/EmailFornecedorPlacas'
 
 interface EmailEnviado {
   id: string
@@ -132,6 +134,8 @@ export default function AdminComunicacoes() {
         memorial dele, tudo num lugar só — sem precisar abrir e-mail nenhum.
       </p>
 
+      <PendenciasMemoriais />
+
       <PainelLeads tipo="parceiro" />
       <PainelLeads tipo="familia" />
 
@@ -223,6 +227,8 @@ export default function AdminComunicacoes() {
           })
         )}
       </div>
+
+      <EmailFornecedorPlacas />
 
       <h2 className="text-lg font-medium text-white mb-4">Histórico de e-mails automáticos</h2>
 
