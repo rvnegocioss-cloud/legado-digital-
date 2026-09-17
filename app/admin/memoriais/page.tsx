@@ -2,19 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabase, obterUsuarioIdAtual } from '@/lib/auth'
-import { gerarQrCodeCliente } from '@/lib/gerarQrCode'
-import { gerarSlugUnico } from '@/lib/gerarSlug'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 
 interface Memorial {
   id: string
@@ -35,23 +25,13 @@ interface Parceiro {
   razao_social: string
 }
 
-const FORM_INICIAL = {
-  nome_completo: '',
-  data_nascimento: '',
-  data_falecimento: '',
-  cidade: '',
-  frase_preferida: '',
-  biografia: '',
-}
-
 export default function AdminMemoriais() {
   const [memoriais, setMemoriais] = useState<Memorial[]>([])
   const [parceiros, setParceiros] = useState<Parceiro[]>([])
   const [loading, setLoading] = useState(true)
   const [abertoId, setAbertoId] = useState<string | null>(null)
-  const [dialogAberto, setDialogAberto] = useState(false)
-  const [form, setForm] = useState(FORM_INICIAL)
-  const [salvando, setSalvando] = useState(false)
+  const router = useRouter()
+  const [criando, setCriando] = useState(false)
   const [erro, setErro] = useState('')
 
   useEffect(() => {
@@ -60,6 +40,18 @@ export default function AdminMemoriais() {
 
   async function loadMemoriais() {
     setLoading(true)
+
+    // Rascunho da Central que nunca recebeu nome real (aba fechada sem
+    // salvar) some depois de 2h -- mesma regra do Portal do Parceiro.
+    const duasHorasAtras = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    await supabase
+      .from('homenagens')
+      .delete()
+      .is('parceiro_id', null)
+      .like('slug', 'rascunho-%')
+      .eq('nome_completo', 'Novo memorial')
+      .lt('created_at', duasHorasAtras)
+
     const { data } = await supabase
       .from('homenagens')
       .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, created_at, parceiro_id, lapide_id, criado_por:criado_por_usuario_id(nome)')
@@ -75,36 +67,30 @@ export default function AdminMemoriais() {
     setLoading(false)
   }
 
-  function abrirNovo() {
-    setForm(FORM_INICIAL)
+  // "+ Novo Memorial" cria o rascunho na hora e abre direto a ficha completa
+  // em abas -- a mesma do Portal do Parceiro (2026-09-16). A janela curta de
+  // cadastro que existia aqui saiu. Slug definitivo nasce no primeiro save
+  // com nome real (FichaMemorial).
+  async function novoMemorial() {
+    setCriando(true)
     setErro('')
-    setDialogAberto(true)
-  }
-
-  async function salvar(e: React.FormEvent) {
-    e.preventDefault()
-    setSalvando(true)
-    setErro('')
-
-    const slug = await gerarSlugUnico(supabase, form.nome_completo)
+    const id = crypto.randomUUID()
+    const slug = `rascunho-${id.slice(0, 8)}`
     const criadoPorUsuarioId = await obterUsuarioIdAtual()
-    const { data, error } = await supabase
-      .from('homenagens')
-      .insert({ ...form, slug, memorial_slug: slug, criado_por_usuario_id: criadoPorUsuarioId })
-      .select()
-      .single()
-
+    const { error } = await supabase.from('homenagens').insert({
+      id,
+      nome_completo: 'Novo memorial',
+      slug,
+      memorial_slug: slug,
+      origem_cadastro: 'central',
+      criado_por_usuario_id: criadoPorUsuarioId,
+    })
     if (error) {
       setErro(error.message)
-      setSalvando(false)
+      setCriando(false)
       return
     }
-
-    if (data) gerarQrCodeCliente(data.id)
-
-    setSalvando(false)
-    setDialogAberto(false)
-    loadMemoriais()
+    router.push(`/admin/memoriais/${id}`)
   }
 
   if (loading) {
@@ -115,83 +101,12 @@ export default function AdminMemoriais() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-white">Memoriais</h1>
-        <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-          <DialogTrigger render={<Button onClick={abrirNovo}>+ Novo Memorial</Button>} />
-          <DialogContent className="bg-[var(--tema-zinc-900)] text-white ring-[var(--tema-zinc-800)] sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-white">Novo Memorial</DialogTitle>
-            </DialogHeader>
-            <p className="text-xs text-[var(--tema-zinc-500)] -mt-2 mb-1">
-              Criado direto pela Central, sem vínculo com parceiro — entra no balde "Memoriais Legado Digital".
-            </p>
-            <form onSubmit={salvar} className="space-y-3">
-              <div>
-                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Nome completo</label>
-                <Input
-                  placeholder="Nome completo do falecido"
-                  required
-                  value={form.nome_completo}
-                  onChange={(e) => setForm({ ...form, nome_completo: e.target.value })}
-                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
-                />
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Data de nascimento</label>
-                  <Input
-                    placeholder="DD/MM/AAAA"
-                    value={form.data_nascimento}
-                    onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
-                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Data de falecimento</label>
-                  <Input
-                    placeholder="DD/MM/AAAA"
-                    value={form.data_falecimento}
-                    onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
-                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Cidade</label>
-                <Input
-                  placeholder="Cidade onde viveu ou faleceu"
-                  value={form.cidade}
-                  onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Frase preferida</label>
-                <Input
-                  placeholder="Uma frase marcante da pessoa"
-                  value={form.frase_preferida}
-                  onChange={(e) => setForm({ ...form, frase_preferida: e.target.value })}
-                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Biografia</label>
-                <textarea
-                  placeholder="Conte a história de vida da pessoa"
-                  rows={3}
-                  value={form.biografia}
-                  onChange={(e) => setForm({ ...form, biografia: e.target.value })}
-                  className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
-                />
-              </div>
-              {erro && <p className="text-red-400 text-sm">{erro}</p>}
-              <DialogFooter className="bg-transparent border-[var(--tema-zinc-800)] mt-4">
-                <Button type="submit" disabled={salvando}>
-                  {salvando ? 'Salvando...' : 'Salvar'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-3">
+          {erro && <p className="text-red-400 text-sm">{erro}</p>}
+          <Button onClick={novoMemorial} disabled={criando}>
+            {criando ? 'Criando...' : '+ Novo Memorial'}
+          </Button>
+        </div>
       </div>
 
       {/* Duas seções (pedido do Rafael, 2026-09-16, levantado pelo Ricardo na
