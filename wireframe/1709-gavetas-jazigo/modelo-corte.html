@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gavetas 3D — modelo em corte</title>
+<style>
+  body { margin:0; background:#f4f4f4; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#000; }
+  .pagina { max-width:1100px; margin:24px auto; padding:0 16px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .cinza { color:#666; font-size:13px; }
+  .bloco { background:#fff; border:1px solid #ccc; border-radius:8px; padding:20px; margin:20px 0; }
+  h2 { font-size:16px; margin:0 0 12px; }
+  .abas { display:flex; gap:4px; border-bottom:1px solid #ccc; margin-bottom:16px; font-size:13px; }
+  .abas span { padding:8px 12px; color:#666; }
+  .abas .on { color:#000; font-weight:700; border-bottom:2px solid #000; }
+  .lado { display:grid; grid-template-columns:1fr 280px; gap:20px; align-items:start; }
+  .palco { border:1px solid #ccc; border-radius:8px; padding:10px; position:relative; }
+  .ctrl { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .btn { border:1px solid #000; border-radius:6px; padding:5px 10px; font-size:12px; background:#fff; display:inline-block; }
+  .painel { border:1px solid #ccc; border-radius:8px; padding:14px; font-size:13px; }
+  .painel b { font-size:15px; display:block; margin-bottom:8px; }
+  .linha { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee; }
+  .foto { width:44px; height:44px; border-radius:50%; background:#ddd; border:2px solid #C9A46A; margin-bottom:8px; }
+  .legenda { display:flex; gap:14px; font-size:12px; color:#444; margin-top:10px; flex-wrap:wrap; }
+  .q { width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle; margin-right:4px; }
+  .nota { font-size:12px; color:#666; margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <h1>Gavetas 3D — jazigo em corte</h1>
+  <p class="cinza">Segue a imagem de referência: chão de grama, tampa solta em cima, câmara aberta na frente, corredor no meio e gavetas nos lados. Gaveta 1 em cima. O desenho 3D de verdade gira e dá zoom — aqui está parado pra mostrar a ideia.</p>
+
+  <div class="bloco">
+    <h2>1 · Com os dados reais do Jazigo Família Saraiva (4 gavetas cadastradas na coluna 1)</h2>
+    <div class="abas"><span>Cadastro do Jazigo</span><span>Foto da Lápide</span><span>Gavetas (4)</span><span class="on">Gavetas 3D</span></div>
+    <div class="lado">
+      <div class="palco">
+        <svg viewBox="-150 20 820 550" width="100%" style="max-height:520px"><polygon points="255,60 305,30 375,30 325,60" fill="#7fbf6a" stroke="#000" stroke-width="1.5"/><polygon points="255,60 325,60 325,84 255,84" fill="#5a4632" stroke="#000" stroke-width="1.5"/><polygon points="255,90 325,90 375,60 305,60" fill="#e5e5e5" stroke="#000" stroke-width="1.5"/><text x="383" y="68" font-size="12" fill="#333">tampa removível (grama + terra + laje)</text><line x1="315.0" y1="100" x2="315.0" y2="170" stroke="#999" stroke-dasharray="4 4"/><polygon points="110,190 160,160 520,160 470,190" fill="#7fbf6a" stroke="#000" stroke-width="1.5"/><polygon points="255,190 305,160 375,160 325,190" fill="#3a3a3a" stroke="#000" stroke-width="1.5"/><polygon points="470,190 520,160 520,480 470,510" fill="#4a3a2a" stroke="#000" stroke-width="1.5"/><polygon points="110,190 470,190 470,510 110,510" fill="#5a4632" stroke="#000" stroke-width="1.5"/><polygon points="110,190 470,190 470,200 110,200" fill="#7fbf6a" stroke="#000" stroke-width="1.5"/><polygon points="126,216 454,216 454,494 126,494" fill="#f1f1f1" stroke="#999" stroke-width="1.5"/><polygon points="126,216 156.0,198.0 484.0,198.0 454,216" fill="#e3e3e3" stroke="#bbb" stroke-width="1"/><polygon points="255,216 325,216 325,494 255,494" fill="#fafafa" stroke="#ccc" stroke-width="1"/><text x="290.0" y="486" font-size="11" fill="#888" text-anchor="middle">corredor</text><polygon points="132,246 162.0,228.0 277.0,228.0 247,246" fill="#d9d9d9" stroke="#aaa" stroke-width="1"/><polygon points="132,246 247,246 247,258 132,258" fill="#aaa" stroke="#aaa" stroke-width="1"/><polygon points="132,316 162.0,298.0 277.0,298.0 247,316" fill="#C9A46A" stroke="#000" stroke-width="3"/><polygon points="132,316 247,316 247,328 132,328" fill="#8a6a2f" stroke="#000" stroke-width="3"/><polygon points="132,386 162.0,368.0 277.0,368.0 247,386" fill="#d9d9d9" stroke="#aaa" stroke-width="1"/><polygon points="132,386 247,386 247,398 132,398" fill="#aaa" stroke="#aaa" stroke-width="1"/><polygon points="132,456 162.0,438.0 277.0,438.0 247,456" fill="#d9d9d9" stroke="#aaa" stroke-width="1"/><polygon points="132,456 247,456 247,468 132,468" fill="#aaa" stroke="#aaa" stroke-width="1"/><text x="110" y="532" font-size="11" fill="#888">nível do chão = topo verde · lado esquerdo = coluna 1 · lado direito = coluna 2</text><line x1="132" y1="252" x2="104" y2="252" stroke="#bbb"/><text x="98" y="256" font-size="13" text-anchor="end" fill="#999" font-weight="400">G1 · Vaga</text><line x1="132" y1="322" x2="104" y2="322" stroke="#bbb"/><text x="98" y="326" font-size="13" text-anchor="end" fill="#6b4f1f" font-weight="700">G2 · Carlos Saraiva</text><line x1="132" y1="392" x2="104" y2="392" stroke="#bbb"/><text x="98" y="396" font-size="13" text-anchor="end" fill="#999" font-weight="400">G3 · Vaga</text><line x1="132" y1="462" x2="104" y2="462" stroke="#bbb"/><text x="98" y="466" font-size="13" text-anchor="end" fill="#999" font-weight="400">G4 · Vaga</text></svg>
+        <div class="ctrl"><span class="btn">↻ Girar</span><span class="btn">+ / − Zoom</span><span class="btn">Tampa: mostrar / esconder</span><span class="btn">Vista de frente</span></div>
+        <div class="legenda">
+          <span><span class="q" style="background:#C9A46A"></span>Tem memorial</span>
+          <span><span class="q" style="background:#8f8f8f"></span>Pessoa sem memorial</span>
+          <span><span class="q" style="background:#d9d9d9"></span>Vaga</span>
+          <span><span class="q" style="background:#fff;border:3px solid #000"></span>Selecionada</span>
+        </div>
+      </div>
+      <div class="painel">
+        <b>Gaveta 2 (clicada)</b>
+        <div class="foto"></div>
+        <div class="linha"><span>Quem está</span><span>Carlos Saraiva</span></div>
+        <div class="linha"><span>Andar</span><span>2º (de cima pra baixo)</span></div>
+        <div class="linha"><span>Lado</span><span>esquerdo (coluna 1)</span></div>
+        <div class="ctrl"><span class="btn">Abrir página do memorial</span><span class="btn">Editar gaveta</span></div>
+        <p class="nota"><b style="display:inline;font-size:13px">Ocupação:</b> 1 de 4 ocupada · 3 vagas</p>
+      </div>
+    </div>
+    <p class="nota">Hoje as 4 gavetas estão cadastradas todas na coluna 1, então aparecem todas do lado esquerdo e o lado direito fica vazio. Quando souberem como é o túmulo real, é só ajustar andar/coluna/número na aba Gavetas (botão Editar) — o desenho se refaz sozinho.</p>
+  </div>
+
+  <div class="bloco">
+    <h2>2 · Exemplo de jazigo duplo (2 gavetas de cada lado, igual à imagem)</h2>
+    <div class="palco"><svg viewBox="-150 20 820 410" width="100%" style="max-height:520px"><polygon points="255,60 305,30 375,30 325,60" fill="#7fbf6a" stroke="#000" stroke-width="1.5"/><polygon points="255,60 325,60 325,84 255,84" fill="#5a4632" stroke="#000" stroke-width="1.5"/><polygon points="255,90 325,90 375,60 305,60" fill="#e5e5e5" stroke="#000" stroke-width="1.5"/><text x="383" y="68" font-size="12" fill="#333">tampa removível (grama + terra + laje)</text><line x1="315.0" y1="100" x2="315.0" y2="170" stroke="#999" stroke-dasharray="4 4"/><polygon points="110,190 160,160 520,160 470,190" fill="#7fbf6a" stroke="#000" stroke-width="1.5"/><polygon points="255,190 305,160 375,160 325,190" fill="#3a3a3a" stroke="#000" stroke-width="1.5"/><polygon points="470,190 520,160 520,340 470,370" fill="#4a3a2a" stroke="#000" stroke-width="1.5"/><polygon points="110,190 470,190 470,370 110,370" fill="#5a4632" stroke="#000" stroke-width="1.5"/><polygon points="110,190 470,190 470,200 110,200" fill="#7fbf6a" stroke="#000" stroke-width="1.5"/><polygon points="126,216 454,216 454,354 126,354" fill="#f1f1f1" stroke="#999" stroke-width="1.5"/><polygon points="126,216 156.0,198.0 484.0,198.0 454,216" fill="#e3e3e3" stroke="#bbb" stroke-width="1"/><polygon points="255,216 325,216 325,354 255,354" fill="#fafafa" stroke="#ccc" stroke-width="1"/><text x="290.0" y="346" font-size="11" fill="#888" text-anchor="middle">corredor</text><polygon points="132,246 162.0,228.0 277.0,228.0 247,246" fill="#d9d9d9" stroke="#aaa" stroke-width="1"/><polygon points="132,246 247,246 247,258 132,258" fill="#aaa" stroke="#aaa" stroke-width="1"/><polygon points="132,316 162.0,298.0 277.0,298.0 247,316" fill="#C9A46A" stroke="#8a6a2f" stroke-width="1"/><polygon points="132,316 247,316 247,328 132,328" fill="#8a6a2f" stroke="#8a6a2f" stroke-width="1"/><polygon points="333,246 363.0,228.0 478.0,228.0 448,246" fill="#8f8f8f" stroke="#555" stroke-width="1"/><polygon points="333,246 448,246 448,258 333,258" fill="#555" stroke="#555" stroke-width="1"/><polygon points="333,316 363.0,298.0 478.0,298.0 448,316" fill="#d9d9d9" stroke="#aaa" stroke-width="1"/><polygon points="333,316 448,316 448,328 333,328" fill="#aaa" stroke="#aaa" stroke-width="1"/><text x="110" y="392" font-size="11" fill="#888">nível do chão = topo verde · lado esquerdo = coluna 1 · lado direito = coluna 2</text><line x1="132" y1="252" x2="104" y2="252" stroke="#bbb"/><text x="98" y="256" font-size="13" text-anchor="end" fill="#999" font-weight="400">G1 · Vaga</text><line x1="132" y1="322" x2="104" y2="322" stroke="#bbb"/><text x="98" y="326" font-size="13" text-anchor="end" fill="#6b4f1f" font-weight="700">G2 · Carlos Saraiva</text><line x1="448" y1="252" x2="528" y2="252" stroke="#bbb"/><text x="534" y="256" font-size="13" text-anchor="start" fill="#333" font-weight="700">G3 · Maria Saraiva</text><line x1="448" y1="322" x2="528" y2="322" stroke="#bbb"/><text x="534" y="326" font-size="13" text-anchor="start" fill="#999" font-weight="400">G4 · Vaga</text></svg></div>
+    <p class="nota">"Maria Saraiva" é só exemplo de pessoa escrita na gaveta sem memorial.</p>
+  </div>
+</div>
+</body>
+</html>

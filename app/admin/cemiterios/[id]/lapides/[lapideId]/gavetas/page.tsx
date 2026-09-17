@@ -13,6 +13,7 @@ interface Homenagem {
   id: string
   nome_completo: string
   slug: string
+  foto_url?: string | null
 }
 
 interface Gaveta {
@@ -56,6 +57,15 @@ export default function GavetasLapide() {
   // vez, na ordem de uso.
   const [aba, setAba] = useState<'cadastro' | 'foto' | 'gavetas' | '3d'>('cadastro')
 
+  // Passe de mídia: <img> não manda credencial, então foto de memorial
+  // protegido (painel das Gavetas 3D) apareceria quebrada.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return
+      fetch('/api/midia-sessao', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } }).catch(() => {})
+    })
+  }, [])
+
   const load = useCallback(async () => {
     setLoading(true)
     const { data: lapide } = await supabase.from('lapides').select('identificacao, nome, foto_face_url').eq('id', lapideId).single()
@@ -65,7 +75,7 @@ export default function GavetasLapide() {
 
     const { data } = await supabase
       .from('gavetas')
-      .select('id, codigo, linha, coluna, homenagem_id, nome_sem_memorial, observacoes, homenagens(id, nome_completo, slug)')
+      .select('id, codigo, linha, coluna, homenagem_id, nome_sem_memorial, observacoes, homenagens(id, nome_completo, slug, foto_url)')
       .eq('lapide_id', lapideId)
       .order('linha', { ascending: true })
       .order('coluna', { ascending: true })
@@ -501,8 +511,17 @@ export default function GavetasLapide() {
               linha: g.linha,
               coluna: g.coluna,
               observacoes: g.observacoes,
-              homenagem: g.homenagens ? { nome_completo: g.homenagens.nome_completo, slug: g.homenagens.slug } : null,
+              nome_sem_memorial: g.nome_sem_memorial,
+              homenagem: g.homenagens
+                ? { nome_completo: g.homenagens.nome_completo, slug: g.homenagens.slug, foto_url: g.homenagens.foto_url }
+                : null,
             }))}
+            onEditar={(gavetaId) => {
+              const g = gavetas.find((x) => x.id === gavetaId)
+              if (!g) return
+              setAba('gavetas')
+              editar(g)
+            }}
           />
         ) : null}
       </div>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gavetas do Jazigo — wireframe</title>
+<style>
+  body { margin: 0; background: #f4f4f4; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #000; }
+  .pagina { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .cinza { color: #666; font-size: 13px; }
+  .opcao { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .opcao h2 { font-size: 17px; margin: 0 0 4px; }
+  .opcao .desc { font-size: 13px; color: #444; margin: 0 0 16px; }
+  .abas { display: flex; gap: 4px; border-bottom: 1px solid #ccc; margin-bottom: 16px; font-size: 13px; }
+  .abas span { padding: 8px 12px; color: #666; }
+  .abas .on { color: #000; font-weight: 700; border-bottom: 2px solid #000; }
+  .lado { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
+  .resumo { border: 1px solid #ccc; border-radius: 8px; padding: 14px; font-size: 13px; }
+  .resumo b { display: block; font-size: 15px; margin-bottom: 6px; }
+  .resumo .linha { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee; }
+  .btn { display: inline-block; border: 1px solid #000; border-radius: 6px; padding: 5px 10px; font-size: 12px; margin: 6px 6px 0 0; background: #fff; }
+  .legenda { display: flex; gap: 14px; font-size: 12px; color: #444; margin: 12px 0 0; flex-wrap: wrap; }
+  .leg { display: inline-flex; align-items: center; gap: 6px; }
+  .quad { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+  .q-mem { background: #e9dcc2; border: 2px solid #8a6a2f; }
+  .q-nome { background: #eee; border: 2px solid #666; }
+  .q-vaga { background: #fff; border: 2px solid #ccc; }
+  .foto { width: 30px; height: 30px; border-radius: 50%; background: #ddd; border: 2px solid #8a6a2f; flex-shrink: 0; }
+  .nota { font-size: 12px; color: #666; margin-top: 12px; }
+
+  /* A: corte */
+  .corte { border: 1px solid #ccc; border-radius: 8px; padding: 16px; }
+  .chao-rot { font-size: 11px; color: #666; margin-bottom: 4px; }
+  .lapide { height: 46px; border: 2px solid #000; border-radius: 6px 6px 0 0; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13px; font-weight: 700; background: #f6f6f6; }
+  .lapide .mini { width: 38px; height: 30px; border: 1px solid #999; background: #ddd; }
+  .terra { height: 8px; background: repeating-linear-gradient(90deg, #999 0 6px, #ccc 6px 12px); }
+  .poco { border: 2px solid #000; border-top: 0; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+  .gav { border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; font-size: 14px; min-height: 40px; }
+  .gav .cod { font-size: 11px; font-weight: 700; border: 1px solid #999; border-radius: 4px; padding: 1px 5px; background: #fff; color: #333; }
+  .gav.mem { background: #e9dcc2; border: 2px solid #8a6a2f; color: #6b4f1f; font-weight: 600; }
+  .gav.nome { background: #eee; border: 2px solid #666; color: #333; }
+  .gav.vaga { background: #fff; border: 2px solid #ccc; color: #999; }
+  .gav .acao { margin-left: auto; font-size: 11px; color: #000; text-decoration: underline; font-weight: 400; }
+  .gav.sel { outline: 3px solid #000; outline-offset: 2px; }
+  .ossuario { border: 2px solid #000; border-top: 0; padding: 8px; font-size: 12px; color: #444; background: #fafafa; }
+
+  /* B: frente em grade (jazigo duplo) */
+  .frente { border: 2px solid #000; border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .frente .gav { min-height: 70px; flex-direction: column; align-items: flex-start; justify-content: center; }
+  .andar { font-size: 11px; color: #666; }
+
+  /* C: 3D revisto */
+  .palco { height: 330px; border: 1px solid #ccc; border-radius: 8px; background: linear-gradient(#fff, #eee); position: relative; overflow: hidden; }
+  .bloco { position: absolute; left: 50%; top: 40px; width: 260px; transform: translateX(-50%); }
+  .bloco .tampa { height: 36px; border: 2px solid #000; background: #ddd; transform: skewX(-20deg); margin-left: 20px; display:flex; align-items:center; justify-content:center; font-size: 12px; font-weight:700; }
+  .bloco .corpo { border: 2px solid #000; border-top: 0; background: #f2f2f2; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .bloco .g3d { height: 44px; border: 2px solid #999; background: #fff; transform: skewX(-8deg); }
+  .bloco .g3d.oc { background: #e9dcc2; border-color: #8a6a2f; }
+  .etq { position: absolute; font-size: 12px; background: #fff; border: 1px solid #000; border-radius: 4px; padding: 3px 7px; }
+  .ctrl { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <h1>Gavetas do Jazigo — 3 jeitos de mostrar</h1>
+  <p class="cinza">Aba "Gavetas 3D" da página do Jazigo Família Saraiva. Dados reais: 4 gavetas, Carlos Saraiva na Gaveta 2, as outras vagas. "Maria Saraiva" na Opção B é só exemplo de nome sem memorial.</p>
+
+  <!-- ================= A ================= -->
+  <div class="opcao">
+    <h2>Opção A — Corte do jazigo (recomendada)</h2>
+    <p class="desc">Desenho plano, visto de lado, como se o jazigo fosse cortado ao meio: a lápide no nível do chão e as gavetas empilhadas embaixo, do jeito que ficam no subsolo. Cada gaveta mostra quem está nela. Funciona igual no celular.</p>
+    <div class="abas"><span>Cadastro do Jazigo</span><span>Foto da Lápide</span><span>Gavetas (4)</span><span class="on">Gavetas no jazigo</span></div>
+    <div class="lado">
+      <div class="corte">
+        <div class="chao-rot">nível do chão</div>
+        <div class="lapide"><span class="mini"></span>Jazigo Família Saraiva</div>
+        <div class="terra"></div>
+        <div class="poco">
+          <div class="gav vaga"><span class="cod">G1</span>Vaga<span class="acao">+ ocupar</span></div>
+          <div class="gav mem sel"><span class="cod">G2</span><span class="foto"></span>Carlos Saraiva<span class="acao">abrir memorial</span></div>
+          <div class="gav vaga"><span class="cod">G3</span>Vaga<span class="acao">+ ocupar</span></div>
+          <div class="gav vaga"><span class="cod">G4</span>Vaga<span class="acao">+ ocupar</span></div>
+        </div>
+        <div class="ossuario">Ossuário (restos exumados): vazio</div>
+        <div class="legenda">
+          <span class="leg"><span class="quad q-mem"></span>Tem memorial</span>
+          <span class="leg"><span class="quad q-nome"></span>Pessoa sem memorial</span>
+          <span class="leg"><span class="quad q-vaga"></span>Vaga</span>
+        </div>
+      </div>
+      <div class="resumo">
+        <b>Gaveta 2 (selecionada)</b>
+        <div class="linha"><span>Quem está</span><span>Carlos Saraiva</span></div>
+        <div class="linha"><span>Memorial</span><span>sim</span></div>
+        <div class="linha"><span>Andar</span><span>2º</span></div>
+        <span class="btn">Abrir página do memorial</span><span class="btn">Trocar / liberar gaveta</span>
+        <p class="nota" style="margin-top:14px"><b style="display:inline;font-size:13px">Ocupação:</b> 1 de 4 gavetas ocupada · 3 livres</p>
+      </div>
+    </div>
+    <p class="nota">Clicar numa gaveta seleciona e mostra o resumo ao lado. "+ ocupar" abre vincular memorial ou escrever o nome.</p>
+  </div>
+
+  <!-- ================= B ================= -->
+  <div class="opcao">
+    <h2>Opção B — Frente do jazigo em grade (serve pra jazigo duplo)</h2>
+    <p class="desc">Visto de frente, andar por andar, com colunas lado a lado quando o jazigo tem 2 colunas de gavetas (o cadastro já tem "Coluna 1 ou 2"). Mais compacto, mas não mostra a profundidade.</p>
+    <div class="lado">
+      <div>
+        <div class="lapide" style="border-radius:6px 6px 0 0"><span class="mini"></span>Jazigo Família Saraiva</div>
+        <div class="frente">
+          <div class="gav vaga"><span class="andar">1º andar · coluna 1</span><span><span class="cod">G1</span> Vaga</span></div>
+          <div class="gav nome"><span class="andar">1º andar · coluna 2</span><span><span class="cod">G5</span> Maria Saraiva</span></div>
+          <div class="gav mem"><span class="andar">2º andar · coluna 1</span><span style="display:flex;align-items:center;gap:8px"><span class="cod">G2</span><span class="foto"></span>Carlos Saraiva</span></div>
+          <div class="gav vaga"><span class="andar">2º andar · coluna 2</span><span><span class="cod">G6</span> Vaga</span></div>
+          <div class="gav vaga"><span class="andar">3º andar · coluna 1</span><span><span class="cod">G3</span> Vaga</span></div>
+          <div class="gav vaga"><span class="andar">3º andar · coluna 2</span><span><span class="cod">G7</span> Vaga</span></div>
+        </div>
+      </div>
+      <div class="resumo"><b>Ocupação</b><div class="linha"><span>Ocupadas</span><span>2</span></div><div class="linha"><span>Livres</span><span>4</span></div><span class="btn">+ Adicionar gaveta</span></div>
+    </div>
+  </div>
+
+  <!-- ================= C ================= -->
+  <div class="opcao">
+    <h2>Opção C — 3D refeito</h2>
+    <p class="desc">Continua 3D e dá pra girar, mas passa a parecer jazigo: bloco fechado com a lápide em cima, gavetas como caixas dentro e o nome escrito flutuando ao lado de cada gaveta ocupada. Mais bonito de mostrar pra cliente, mais lento pra trabalhar e pior no celular.</p>
+    <div class="palco">
+      <div class="bloco">
+        <div class="tampa">Jazigo Família Saraiva</div>
+        <div class="corpo"><div class="g3d"></div><div class="g3d oc"></div><div class="g3d"></div><div class="g3d"></div></div>
+      </div>
+      <span class="etq" style="left: calc(50% + 150px); top: 132px;">G2 · Carlos Saraiva</span>
+      <div class="ctrl"><span class="btn">Girar</span><span class="btn">Cortar ao meio</span><span class="btn">Vista de frente</span></div>
+    </div>
+  </div>
+
+  <div class="opcao">
+    <h2>Pra ter utilidade de verdade — perguntas antes de construir</h2>
+    <p class="desc" style="margin:0">
+      1. No cemitério de vocês, a Gaveta 1 é a de cima ou a de baixo? (o desenho segue o que for)<br>
+      2. Quer guardar a <b>data do sepultamento</b> em cada gaveta? Com ela dá pra mostrar "pode exumar a partir de 03/2029" — o prazo comum é de 3 anos, mas varia por cemitério.<br>
+      3. O ossuário (caixa com restos exumados) entra no desenho? Hoje o banco não tem onde guardar isso — precisaria criar.
+    </p>
+  </div>
+</div>
+</body>
+</html>
