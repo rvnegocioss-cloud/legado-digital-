@@ -192,7 +192,7 @@ const MARCACAO = `<nav class="navbar">
 
   <div class="node photo" data-x="480" data-y="3559" data-t="0.769">
     <div class="ring"><img src="/fio-da-vida/nodes/portal-familia-1.png" class="node-img node-img-a node-3fotos" style="--reveza-atraso:2.4s" alt="Família editando o memorial no Portal da Família" /><img src="/fio-da-vida/nodes/portal-familia-2.png" class="node-img node-img-b" style="--reveza-atraso:2.4s" alt="Senhor vendo o memorial no tablet" /><img src="/fio-da-vida/nodes/portal-familia-3.png" class="node-img node-img-c" style="--reveza-atraso:2.4s" alt="Rapaz vendo o memorial no celular" /></div>
-    <div class="cap side-left"><b>Portal da Família</b>A família recebe um acesso próprio: sobe fotos e vídeos, escreve a história, monta a linha do tempo e decide quem pode ver o memorial.</div>
+    <div class="cap side-left"><b>Portal da Família</b><strong class="cap-sub">Um espaço para preservar memórias e manter histórias vivas.</strong>A família recebe um acesso exclusivo para reunir <strong>fotos, vídeos e momentos especiais</strong>, contar a história de quem partiu, construir uma linha do tempo e escolher com quem deseja compartilhar esse legado.</div>
   </div>
 
   <div class="node dot" data-x="400" data-y="3559" data-t="0.769"></div>
