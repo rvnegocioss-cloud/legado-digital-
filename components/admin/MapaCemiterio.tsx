@@ -3533,11 +3533,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                                     <ul className="mt-1 ml-4 space-y-0.5 border-l border-[var(--tema-zinc-800)] pl-2">
                                       {(memoriaisPorFila.get(f.id) || []).map((m) => (
                                         <li key={m.lapideId} className="flex items-center gap-1.5 text-[11px]">
-                                          <span className="text-[var(--tema-zinc-500)] shrink-0">Túmulo {m.numero ?? '?'}</span>
+                                          <Link href={`/admin/cemiterios/${cemiterioId}/lapides/${m.lapideId}/gavetas`} className="text-[var(--tema-zinc-500)] hover:text-white shrink-0">Túmulo {m.numero ?? '?'}</Link>
                                           <Link
-                                            href={`/admin/memoriais/${m.memorial.id}`}
+                                            href={m.memorial.slug ? `/homenagem/${m.memorial.slug}` : `/admin/memoriais/${m.memorial.id}`}
                                             className="text-[#C9A46A] hover:underline truncate"
-                                            title={`Abrir memorial de ${m.memorial.nome_completo}`}
+                                            title={`Abrir a página do memorial de ${m.memorial.nome_completo}`}
                                           >
                                             {m.memorial.nome_completo}
                                           </Link>

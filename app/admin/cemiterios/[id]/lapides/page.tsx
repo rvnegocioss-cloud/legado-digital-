@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ChevronDown, ChevronRight, X } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/auth'
 import { corDaFila } from '@/lib/coresFila'
 import { useBuscaDebounce } from '@/lib/useBuscaDebounce'
@@ -32,6 +32,7 @@ interface ForaDeFileiraContagem {
 interface HomenagemLink {
   id: string
   nome_completo: string
+  slug: string | null
 }
 
 interface LapideChip {
@@ -69,7 +70,6 @@ export default function LapidesCemiterio() {
   const [expandidas, setExpandidas] = useState<Record<string, boolean>>({})
   const [tumulosPorFila, setTumulosPorFila] = useState<Record<string, LapideChip[]>>({})
   const [carregandoFila, setCarregandoFila] = useState<string | null>(null)
-  const [tumuloSelecionado, setTumuloSelecionado] = useState<LapideChip | null>(null)
 
   const [busca, setBusca] = useState('')
 
@@ -97,7 +97,7 @@ export default function LapidesCemiterio() {
       supabase.rpc('obter_arvore_lapides_cemiterio', { p_cemiterio_id: id }),
       supabase
         .from('lapides')
-        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, created_at, homenagens!homenagens_lapide_id_fkey(id, nome_completo)')
+        .select('id, identificacao, quadra, lote, latitude, longitude, coordenada_origem, created_at, homenagens!homenagens_lapide_id_fkey(id, nome_completo, slug)')
         .eq('cemiterio_id', id)
         .is('fila_id', null)
         .order('created_at', { ascending: false })
@@ -122,7 +122,7 @@ export default function LapidesCemiterio() {
       setCarregandoFila(filaId)
       const { data, error } = await supabase
         .from('lapides')
-        .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo)')
+        .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo, slug)')
         .eq('fila_id', filaId)
         .order('numero', { ascending: true })
       if (error) setErro(error.message)
@@ -136,7 +136,7 @@ export default function LapidesCemiterio() {
   const { resultados: resultadoBusca, buscando } = useBuscaDebounce<LapideChip>(busca, async (termo) => {
     const { data } = await supabase
       .from('lapides')
-      .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo)')
+      .select('id, codigo, numero, situacao, coordenada_precisao, foto_face_url, homenagens!homenagens_lapide_id_fkey(id, nome_completo, slug)')
       .eq('cemiterio_id', id)
       .not('codigo', 'is', null)
       .ilike('codigo', `%${termo}%`)
@@ -286,13 +286,13 @@ export default function LapidesCemiterio() {
               <p className="text-xs text-[var(--tema-zinc-500)] p-3">Nenhum túmulo com esse código.</p>
             ) : (
               resultadoBusca!.map((l) => (
-                <button
+                <Link
                   key={l.id}
-                  onClick={() => setTumuloSelecionado(l)}
-                  className="w-full text-left text-xs px-3 py-2 hover:bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-200)] border-b border-[var(--tema-zinc-800)] last:border-0"
+                  href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas`}
+                  className="block w-full text-left text-xs px-3 py-2 hover:bg-[var(--tema-zinc-800)] text-[var(--tema-zinc-200)] border-b border-[var(--tema-zinc-800)] last:border-0"
                 >
                   {l.codigo} {l.homenagens.length > 0 && <span className="text-[var(--tema-zinc-500)]">— {l.homenagens.length} memorial(is)</span>}
-                </button>
+                </Link>
               ))
             )}
           </div>
@@ -347,9 +347,9 @@ export default function LapidesCemiterio() {
                                   {tumulosPorFila[f.id]!.map((l) => {
                                     const conferido = !!l.foto_face_url || l.situacao === 'confirmada'
                                     return (
-                                      <button
+                                      <Link
                                         key={l.id}
-                                        onClick={() => setTumuloSelecionado(l)}
+                                        href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas`}
                                         title={
                                           `${l.codigo || `#${l.numero}`}` +
                                           (conferido ? ' · conferido em campo' : ' · não conferido') +
@@ -371,7 +371,7 @@ export default function LapidesCemiterio() {
                                             style={{ top: -2, right: -2, width: 6, height: 6, background: '#22c55e' }}
                                           />
                                         )}
-                                      </button>
+                                      </Link>
                                     )
                                   })}
                                 </div>
@@ -385,13 +385,13 @@ export default function LapidesCemiterio() {
                                       .filter((l) => l.homenagens.length > 0)
                                       .map((l) => (
                                         <li key={`mem-${l.id}`} className="flex items-center gap-1.5 text-[11px]">
-                                          <span className="text-[var(--tema-zinc-500)] shrink-0">Túmulo {l.numero ?? '?'}</span>
+                                          <Link href={`/admin/cemiterios/${id}/lapides/${l.id}/gavetas`} className="text-[var(--tema-zinc-500)] hover:text-white shrink-0">Túmulo {l.numero ?? '?'}</Link>
                                           {l.homenagens.map((h) => (
                                             <Link
                                               key={h.id}
-                                              href={`/admin/memoriais/${h.id}`}
+                                              href={h.slug ? `/homenagem/${h.slug}` : `/admin/memoriais/${h.id}`}
                                               className="text-[#C9A46A] hover:underline truncate"
-                                              title={`Abrir memorial de ${h.nome_completo}`}
+                                              title={`Abrir a página do memorial de ${h.nome_completo}`}
                                             >
                                               {h.nome_completo}
                                             </Link>
@@ -551,61 +551,6 @@ export default function LapidesCemiterio() {
               <button type="button" onClick={() => setVinculando(null)} className="text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)]">
                 Cancelar
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {tumuloSelecionado && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setTumuloSelecionado(null)}>
-          <div className="bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] rounded-xl p-5 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-white">{tumuloSelecionado.codigo || `Túmulo #${tumuloSelecionado.numero}`}</h3>
-              <button onClick={() => setTumuloSelecionado(null)} className="text-[var(--tema-zinc-400)] hover:text-white">
-                <X size={16} />
-              </button>
-            </div>
-            {(() => {
-              // Q36-R05-T011 -> "Quadra 36 · Fileira 5 · Túmulo 11". O código
-              // sozinho é ilegível pra quem não decorou o padrão.
-              const m = tumuloSelecionado.codigo?.match(/^Q(\d+)-R(\d+)-T(\d+)$/)
-              return m ? (
-                <p className="text-xs text-[var(--tema-zinc-300)] mb-1">
-                  Quadra {Number(m[1])} · Fileira {Number(m[2])} · Túmulo {Number(m[3])}
-                </p>
-              ) : null
-            })()}
-            <p className="text-xs text-[var(--tema-zinc-500)] mb-2">
-              {tumuloSelecionado.foto_face_url || tumuloSelecionado.situacao === 'confirmada' ? (
-                <span className="text-emerald-400">✓ Conferido em campo</span>
-              ) : (
-                'Ainda não conferido em campo (sem foto do túmulo)'
-              )}{' '}
-              · Precisão: {tumuloSelecionado.coordenada_precisao || '—'}
-            </p>
-
-            {tumuloSelecionado.foto_face_url && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={tumuloSelecionado.foto_face_url}
-                alt=""
-                className="w-full rounded-lg mb-3"
-                style={{ maxHeight: 220, objectFit: 'cover' }}
-              />
-            )}
-
-            <p className="text-xs text-[var(--tema-zinc-400)] mb-3">
-              {tumuloSelecionado.homenagens.length === 0
-                ? 'Nenhum memorial vinculado.'
-                : `${tumuloSelecionado.homenagens.length} memorial(is): ${tumuloSelecionado.homenagens.map((h) => h.nome_completo).join(', ')}`}
-            </p>
-            <div className="flex flex-col gap-1 text-xs">
-              <Link href={`/admin/cemiterios/${id}/lapides/${tumuloSelecionado.id}/gavetas`} className="text-[var(--tema-zinc-300)] hover:text-white">
-                Ver gavetas
-              </Link>
-              <Link href={`/admin/cemiterios/${id}/lapides/${tumuloSelecionado.id}/gavetas-3d`} style={{ color: '#C9A46A' }}>
-                Ver gavetas 3D
-              </Link>
             </div>
           </div>
         </div>
