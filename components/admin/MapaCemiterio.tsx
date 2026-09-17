@@ -215,6 +215,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [salvando, setSalvando] = useState(false)
   const [msg, setMsg] = useState('')
   const mapRef = useRef<MapRef | null>(null)
+  // Busca do mapa (2026-09-16, pedido do Rafael): memorial, jazigo, quadra,
+  // fileira e rua num campo só, filtrando o que já veio carregado.
+  const [buscaMapa, setBuscaMapa] = useState('')
+  const [lapideDestacadaId, setLapideDestacadaId] = useState<string | null>(null)
 
   const desenho = useDesenhoNoMapa()
   const [quadraExpandida, setQuadraExpandida] = useState<Record<string, boolean>>({})
@@ -486,6 +490,92 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     for (const lista of mapa.values()) lista.sort((a, b) => (a.numero ?? 0) - (b.numero ?? 0))
     return mapa
   }, [lapides, homenagens])
+
+  type ResultadoBusca =
+    | { tipo: 'Memorial' | 'Jazigo'; chave: string; rotulo: string; detalhe: string; lapide: Lapide }
+    | { tipo: 'Quadra' | 'Fileira' | 'Rua'; chave: string; rotulo: string; detalhe: string; coords: number[][] }
+
+  const resultadosBusca = useMemo<ResultadoBusca[]>(() => {
+    const termo = buscaMapa.trim()
+    if (termo.length < 2) return []
+    // Sem acento e sem diferença de maiúscula: "jose" acha "José".
+    const limpar = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    const alvo = limpar(termo)
+    const bate = (...textos: (string | null | undefined)[]) => textos.some((t) => t && limpar(t).includes(alvo))
+    const quadraPorId = new Map(quadras.map((q) => [q.id, q]))
+    const rotuloQuadra = (q: Quadra) => `Quadra ${q.numero}${q.nome && limpar(q.nome) !== `quadra ${q.numero}` ? ` — ${q.nome}` : ''}`
+    const lapidePorId = new Map(lapidesComCoordenada.map((l) => [l.id, l]))
+    const rotuloJazigo = (l: Lapide) => l.nome || l.codigo || l.identificacao
+
+    const saida: ResultadoBusca[] = []
+
+    // Memorial: gaveta é a fonte do vínculo; lapide_id cobre o que ainda não
+    // tem gaveta. Mesmo memorial não aparece duas vezes.
+    const vistos = new Set<string>()
+    const addMemorial = (id: string, nome: string, lapideId: string | null) => {
+      if (vistos.has(id) || !lapideId || !bate(nome)) return
+      const l = lapidePorId.get(lapideId)
+      if (!l) return
+      vistos.add(id)
+      saida.push({ tipo: 'Memorial', chave: `m-${id}`, rotulo: nome, detalhe: rotuloJazigo(l), lapide: l })
+    }
+    for (const [lapideId, lista] of memoriaisPorJazigo) {
+      for (const { homenagem } of lista) addMemorial(homenagem.id, homenagem.nome_completo, lapideId)
+    }
+    for (const h of homenagens) addMemorial(h.id, h.nome_completo, h.lapide_id)
+
+    for (const l of lapidesComCoordenada) {
+      if (!bate(l.nome, l.codigo, l.identificacao)) continue
+      saida.push({ tipo: 'Jazigo', chave: `j-${l.id}`, rotulo: rotuloJazigo(l), detalhe: l.nome && l.codigo ? l.codigo : '', lapide: l })
+    }
+
+    for (const q of quadras) {
+      if (!q.poligono || !bate(rotuloQuadra(q), `quadra ${q.numero}`, `Q${String(q.numero).padStart(2, '0')}`)) continue
+      saida.push({ tipo: 'Quadra', chave: `q-${q.id}`, rotulo: rotuloQuadra(q), detalhe: '', coords: q.poligono.coordinates[0] })
+    }
+
+    for (const f of filas) {
+      const q = quadraPorId.get(f.quadra_id)
+      if (!f.eixo || !q) continue
+      const rotulo = `Quadra ${q.numero} · Fileira ${f.numero}`
+      if (!bate(rotulo, `fileira ${f.numero}`)) continue
+      saida.push({ tipo: 'Fileira', chave: `f-${f.id}`, rotulo, detalhe: '', coords: f.eixo.coordinates })
+    }
+
+    for (const r of ruas) {
+      const rotulo = r.nome || `Rua ${r.numero}`
+      if (!r.eixo || !bate(rotulo, `rua ${r.numero}`)) continue
+      saida.push({ tipo: 'Rua', chave: `r-${r.id}`, rotulo, detalhe: '', coords: r.eixo.coordinates })
+    }
+
+    return saida.slice(0, 12)
+  }, [buscaMapa, quadras, filas, ruas, lapidesComCoordenada, memoriaisPorJazigo, homenagens])
+
+  function irParaResultado(r: ResultadoBusca) {
+    setBuscaMapa('')
+    if ('lapide' in r) {
+      const l = r.lapide
+      mapRef.current?.flyTo({ center: [l.longitude!, l.latitude!], zoom: 21, duration: 900 })
+      const temMemorial = (memoriaisPorJazigo.get(l.id)?.length || 0) > 0
+      setFotoLapideQuebrada(false)
+      setLapideSelecionada(temMemorial ? l : null)
+      setLapideDestacadaId(l.id)
+      return
+    }
+    const lngs = r.coords.map((c) => c[0])
+    const lats = r.coords.map((c) => c[1])
+    mapRef.current?.fitBounds(
+      [
+        [Math.min(...lngs), Math.min(...lats)],
+        [Math.max(...lngs), Math.max(...lats)],
+      ],
+      { padding: 80, maxZoom: 21, duration: 900 }
+    )
+    setLapideSelecionada(null)
+    setLapideDestacadaId(null)
+  }
+
+  const lapideDestacada = lapideDestacadaId ? lapidesComCoordenada.find((l) => l.id === lapideDestacadaId) || null : null
 
   const idsEdicao = useMemo(() => new Set(lapidesEdicao.map((l) => l.id)), [lapidesEdicao])
 
@@ -1921,10 +2011,54 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
           Ver Jazigos deste cemitério →
         </Link>
       </div>
-      <h1 className="text-2xl font-bold text-white mb-1">Mapa — {cemiterio.nome}</h1>
-      <p className="text-[var(--tema-zinc-400)] text-sm mb-2">
-        {quadras.length} quadra(s) · {filas.length} fileira(s) · {ruas.length} rua(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
-      </p>
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">Mapa — {cemiterio.nome}</h1>
+          <p className="text-[var(--tema-zinc-400)] text-sm">
+            {quadras.length} quadra(s) · {filas.length} fileira(s) · {ruas.length} rua(s) · {lapidesComCoordenada.length} de {lapides.length} túmulos com coordenada
+          </p>
+        </div>
+        <div className="relative w-full lg:w-[420px]">
+          <label htmlFor="busca-mapa" className="block text-xs text-[var(--tema-zinc-400)] mb-1">
+            Encontrar no mapa
+          </label>
+          <input
+            id="busca-mapa"
+            type="search"
+            autoComplete="off"
+            value={buscaMapa}
+            onChange={(e) => setBuscaMapa(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setBuscaMapa('')
+              if (e.key === 'Enter' && resultadosBusca[0]) irParaResultado(resultadosBusca[0])
+            }}
+            placeholder="Memorial, jazigo, quadra, fileira ou rua"
+            className="w-full h-10 rounded-lg border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 text-sm text-white placeholder-[var(--tema-zinc-500)]"
+          />
+          {buscaMapa.trim().length >= 2 && (
+            <div className="absolute left-0 right-0 top-full mt-1 z-20 rounded-lg border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-900)] shadow-xl max-h-80 overflow-y-auto">
+              {resultadosBusca.length === 0 ? (
+                <p className="px-3 py-2 text-xs text-[var(--tema-zinc-400)]">Nada encontrado neste cemitério.</p>
+              ) : (
+                resultadosBusca.map((r) => (
+                  <button
+                    key={r.chave}
+                    type="button"
+                    onClick={() => irParaResultado(r)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-left border-t first:border-t-0 border-[var(--tema-zinc-800)] hover:bg-[var(--tema-zinc-800)]"
+                  >
+                    <span className="shrink-0 w-16 text-[10px] uppercase tracking-wide" style={{ color: '#C9A46A' }}>{r.tipo}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm text-white truncate">{r.rotulo}</span>
+                      {r.detalhe && <span className="block text-xs text-[var(--tema-zinc-400)] truncate">{r.detalhe}</span>}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
       {!ortomosaico && (
         <p className="text-amber-400 text-xs mb-4 bg-amber-950/30 border border-amber-900/40 rounded-lg px-3 py-2 inline-block">
           Este cemitério ainda não tem ortomosaico de drone — a marcação usa satélite genérico (precisão de metros, não de centímetros).
@@ -2103,6 +2237,22 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   <div title="Entrada do cemitério">
                     <Flag size={22} strokeWidth={2} fill="#22c55e" style={{ color: '#0B1D2A' }} />
                   </div>
+                </Marker>
+              )}
+
+              {lapideDestacada && (
+                <Marker longitude={lapideDestacada.longitude!} latitude={lapideDestacada.latitude!} anchor="center">
+                  <div
+                    title="Resultado da busca"
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: '50%',
+                      border: '3px solid #C9A46A',
+                      boxShadow: '0 0 12px rgba(201,164,106,.9)',
+                      pointerEvents: 'none',
+                    }}
+                  />
                 </Marker>
               )}
 
