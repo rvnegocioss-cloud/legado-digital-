@@ -1,0 +1,494 @@
+/* Landing oficial (app/page.tsx), 2026-09-22 — implementação do protótipo
+   aprovado pelo Rafael (wireframe/reestruturacao-site-publico/prototipo-home.html),
+   que substituiu a landing "O Fio da Vida" na home. A antiga continua inteira
+   em /fio-da-vida, intocada.
+
+   Tudo escopado em .landing pra não vazar pro resto do site. Cor e fonte saem
+   das variáveis oficiais do projeto (app/globals.css + app/layout.tsx):
+   navy #0B1D2A, dourado #C9A46A, Playfair Display nos títulos, Inter no corpo. */
+
+.landing {
+  --lp-bg: #0B1D2A;
+  --lp-bg2: #10222f;
+  --lp-panel: #132734;
+  --lp-fg: #F5F2EB;
+  --lp-fg-mut: #a8b2b8;
+  --lp-fg-faint: #7f8b93;
+  --lp-gold: #C9A46A;
+  --lp-gold-lite: #dfc08a;
+  --lp-border: rgba(201, 164, 106, 0.18);
+  --lp-border2: rgba(201, 164, 106, 0.32);
+
+  background: var(--lp-bg);
+  color: var(--lp-fg);
+  font-family: var(--font-sans), Inter, sans-serif;
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+.landing h1,
+.landing h2,
+.landing h3 {
+  font-family: var(--font-serif), "Playfair Display", serif;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.landing .wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 4vw, 40px);
+}
+
+/* ---------- botões ---------- */
+.landing .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--lp-gold);
+  color: #1a1408;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.landing .btn:hover { background: var(--lp-gold-lite); }
+.landing .btn.o {
+  background: transparent;
+  color: var(--lp-gold);
+  border: 1px solid var(--lp-border2);
+}
+.landing .btn.o:hover { background: rgba(201, 164, 106, 0.08); }
+.landing .btn.big { padding: 14px 26px; font-size: 15px; }
+
+.landing .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.landing .small { font-size: 12.5px; color: var(--lp-fg-faint); }
+.landing .card {
+  background: var(--lp-panel);
+  border: 1px solid var(--lp-border);
+  border-radius: 14px;
+}
+.landing .link-u {
+  color: var(--lp-gold-lite);
+  text-decoration: underline;
+  font-size: 13.5px;
+}
+
+/* ---------- hero ---------- */
+.landing .hero { padding: 56px 0 48px; }
+.landing .split {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 44px;
+  align-items: start;
+}
+.landing .h1 {
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.22;
+  margin-bottom: 16px;
+}
+.landing .h1 .gold { color: var(--lp-gold-lite); }
+.landing .lede {
+  color: var(--lp-fg-mut);
+  font-size: 15px;
+  margin-bottom: 26px;
+  max-width: 46ch;
+}
+.landing .searchbox {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--lp-border);
+  border-radius: 14px;
+  padding: 22px;
+}
+.landing .searchbox h3 {
+  font-family: var(--font-sans), Inter, sans-serif;
+  font-size: 15.5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--lp-fg);
+}
+.landing .searchbox p.small { margin: 0 0 14px; }
+
+/* ---------- card de identidade (mesmo layout da ficha do memorial) ---------- */
+.landing .preview {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.landing .preview:hover {
+  transform: translateY(-3px);
+  border-color: var(--lp-border2);
+  box-shadow: 0 0 44px 6px rgba(250, 240, 220, 0.14);
+}
+.landing .tag-exemplo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 10px;
+  background: rgba(11, 29, 42, 0.85);
+  border: 1px solid var(--lp-border2);
+  color: var(--lp-gold-lite);
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  z-index: 2;
+}
+.landing .ficha-card {
+  background: linear-gradient(180deg, rgba(201, 164, 106, 0.06), transparent 40%), rgba(255, 255, 255, 0.02);
+  border-radius: 14px 14px 0 0;
+  padding: 34px 26px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.landing .foto-ring { position: relative; width: 120px; height: 120px; margin-bottom: 16px; }
+.landing .foto-ring-in {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  padding: 2px;
+  background: var(--lp-gold);
+}
+.landing .foto-ring-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--lp-panel);
+  border: 4px solid var(--lp-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.landing .foto-ring-inner img { width: 100%; height: 100%; object-fit: cover; }
+.landing .monograma {
+  font-family: var(--font-serif), "Playfair Display", serif;
+  font-size: 38px;
+  color: var(--lp-gold);
+}
+.landing .eyebrow-ficha {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--lp-gold);
+  margin-bottom: 6px;
+}
+.landing .nome-ficha {
+  font-family: var(--font-serif), "Playfair Display", serif;
+  font-weight: 400;
+  font-size: 24px;
+  margin: 0 0 6px;
+  line-height: 1.15;
+}
+.landing .cidade-ficha {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--lp-fg-faint);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.landing .frase-ficha {
+  font-style: italic;
+  color: var(--lp-fg-mut);
+  font-size: 14px;
+  max-width: 32ch;
+  margin: 0;
+}
+.landing .preview .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 16px 20px 0;
+}
+.landing .preview .actions .btn { padding: 8px 13px; font-size: 12.5px; }
+.landing .preview .nota {
+  border-top: 1px dashed var(--lp-border);
+  margin: 14px 0 0;
+  padding: 12px 20px;
+  font-size: 11.5px;
+  color: var(--lp-fg-faint);
+  line-height: 1.6;
+}
+.landing .preview .nota b { color: var(--lp-fg-mut); }
+
+/* ---------- seções ---------- */
+.landing .sec { padding: 54px 0; }
+.landing .sec.alt {
+  background: var(--lp-bg2);
+  border-top: 1px solid var(--lp-border);
+  border-bottom: 1px solid var(--lp-border);
+}
+.landing .h2 { font-size: clamp(20px, 2.2vw, 26px); margin-bottom: 10px; }
+.landing .txt {
+  color: var(--lp-fg-mut);
+  font-size: 14.5px;
+  max-width: 50ch;
+  margin: 0 0 22px;
+}
+
+/* ---------- cemitério ---------- */
+.landing .mapcard { overflow: hidden; padding: 0; display: block; text-decoration: none; color: inherit; }
+.landing .mapcard .aerial {
+  height: 170px;
+  background: repeating-linear-gradient(45deg, #1c3140 0 18px, rgba(22, 40, 53, 0.27) 18px 36px), #142834;
+  position: relative;
+}
+.landing .mapcard .aerial::after {
+  content: "prévia do mapa aéreo";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lp-fg-faint);
+  font-size: 11.5px;
+}
+.landing .mapcard .pin {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--lp-gold);
+  border: 2px solid var(--lp-bg);
+  top: 70px;
+  left: 130px;
+}
+.landing .mapcard .corpo { padding: 16px 18px 18px; }
+.landing .mapcard .nome { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+
+/* ---------- o que a família recebe (nodes) ---------- */
+.landing .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.landing .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
+.landing .feat { padding: 26px 20px 22px; text-align: center; }
+.landing .feat .ring {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  margin: 0 auto 18px;
+  padding: 5px;
+  background: linear-gradient(135deg, #fffaf1, #ecdcbc);
+  box-shadow: 0 0 22px 2px rgba(250, 242, 226, 0.22);
+  cursor: zoom-in;
+  border: 0;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+}
+.landing .feat .ring img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 4px solid var(--lp-bg);
+}
+.landing .feat:hover .ring {
+  transform: scale(1.08);
+  box-shadow: 0 0 44px 7px rgba(250, 240, 220, 0.4), 0 0 100px 24px rgba(232, 214, 180, 0.18);
+}
+.landing .feat h4 {
+  font-family: var(--font-sans), Inter, sans-serif;
+  font-size: 15.5px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+.landing .feat p { color: var(--lp-fg-mut); font-size: 13px; margin: 0 auto; max-width: 30ch; }
+.landing .feat .zoom-hint {
+  font-size: 11px;
+  color: var(--lp-fg-faint);
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.landing .feat:hover .zoom-hint { opacity: 1; }
+.landing .diff { padding: 16px; }
+.landing .diff h4 {
+  font-family: var(--font-sans), Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 5px;
+  color: var(--lp-gold-lite);
+}
+.landing .diff p { color: var(--lp-fg-mut); font-size: 12.5px; margin: 0; }
+
+/* ---------- lightbox das fotos ---------- */
+.landing-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 17, 25, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+  cursor: zoom-out;
+  border: 0;
+}
+.landing-lightbox img {
+  max-width: min(88vw, 720px);
+  max-height: 86vh;
+  border-radius: 10px;
+  box-shadow: 0 0 60px 12px rgba(250, 242, 226, 0.15);
+  border: 2px solid rgba(201, 164, 106, 0.35);
+}
+.landing-lightbox .fechar {
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  color: #F5F2EB;
+  font-size: 26px;
+  opacity: 0.7;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.landing-lightbox .fechar:hover { opacity: 1; }
+
+/* ---------- como ter o memorial ---------- */
+.landing .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.landing .pathcard { padding: 22px; }
+.landing .pathcard h3 {
+  font-family: var(--font-sans), Inter, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.landing .pathcard p { color: var(--lp-fg-mut); font-size: 13.5px; margin: 0 0 14px; }
+.landing .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.landing .steps .n {
+  color: var(--lp-gold);
+  font-weight: 700;
+  font-size: 12px;
+  font-family: var(--font-serif), "Playfair Display", serif;
+}
+.landing .steps h5 {
+  font-family: var(--font-sans), Inter, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 3px 0;
+}
+.landing .steps p { font-size: 11.5px; color: var(--lp-fg-faint); margin: 0; }
+
+/* ---------- b2b ---------- */
+.landing .b2b { border-top: 2px solid var(--lp-border2); }
+.landing .dash-mock { border: 1px solid var(--lp-border); border-radius: 14px; padding: 20px; background: #0d1e2a; }
+.landing .dash-mock .tag-exemplo { position: static; display: inline-block; margin-bottom: 16px; }
+.landing .dash-mock .tabs-mock {
+  display: flex;
+  gap: 22px;
+  border-bottom: 1px solid var(--lp-border);
+  margin-bottom: 18px;
+  font-size: 13.5px;
+}
+.landing .dash-mock .tabs-mock span { padding-bottom: 10px; color: var(--lp-fg-faint); }
+.landing .dash-mock .tabs-mock span.on {
+  color: var(--lp-gold-lite);
+  border-bottom: 2px solid var(--lp-gold);
+  font-weight: 600;
+}
+.landing .dash-mock .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 22px; }
+.landing .dash-mock .kpi {
+  background: var(--lp-panel);
+  border: 1px solid var(--lp-border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.landing .dash-mock .kpi .lbl { font-size: 11px; color: var(--lp-fg-mut); margin-bottom: 6px; }
+.landing .dash-mock .kpi .val { font-size: 19px; font-weight: 700; color: var(--lp-fg); }
+.landing .dash-mock .kpi .val.pill {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 6px;
+  padding: 4px 11px;
+  display: inline-block;
+}
+.landing .dash-mock table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.landing .dash-mock th {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--lp-fg-faint);
+  font-weight: 500;
+  border-bottom: 1px solid var(--lp-border);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.landing .dash-mock td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--lp-fg);
+}
+.landing .dash-mock td.mut { color: var(--lp-fg-mut); }
+.landing .dash-mock .qrph { width: 32px; height: 32px; border-radius: 5px; background: #fff; opacity: 0.9; }
+.landing .dash-mock .panel-title {
+  font-size: 12.5px;
+  color: var(--lp-fg-mut);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ---------- faq ---------- */
+.landing .faq-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--lp-border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.landing .faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.landing .faq-item summary::-webkit-details-marker { display: none; }
+.landing .faq-item summary .chev { color: var(--lp-gold); font-size: 11px; transition: transform 0.2s; }
+.landing .faq-item[open] summary .chev { transform: rotate(180deg); }
+.landing .faq-item p {
+  margin: 10px 0 0;
+  color: var(--lp-fg-mut);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.landing .quote { text-align: center; padding: 40px 0; }
+.landing .quote p {
+  font-style: italic;
+  color: var(--lp-fg-mut);
+  font-size: 15px;
+  max-width: 52ch;
+  margin: 0 auto;
+}
+
+/* ---------- responsivo ---------- */
+@media (max-width: 900px) {
+  .landing .split,
+  .landing .grid2 { grid-template-columns: 1fr; }
+  .landing .grid3,
+  .landing .grid4 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 700px) {
+  .landing .dash-mock .cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .landing .grid3,
+  .landing .grid4,
+  .landing .steps { grid-template-columns: 1fr; }
+  .landing .row .btn { width: 100%; }
+}

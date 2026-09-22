@@ -103,7 +103,8 @@ Rotas conhecidas — Central (staff, `Admin Legado Digital`/`Operador Legado Dig
 - `/familia/login` — Portal da Família (atalho no menu lateral da Central)
 - `/admin/manual` — Manual do sistema
 - `/familia/login` — Portal da Família (busca por nome + senha da família; staff prefere o botão "Acessar Portal da Família" na ficha do memorial, que entra sem senha)
-- `/` — Site institucional (landing page)
+- `/` — Landing page (desde 2026-09-22 é a home nova, voltada pra família: busca de memorial no topo, cemitérios, o que a família recebe, dois caminhos pra ter o memorial, bloco curto pra funerária e FAQ)
+- `/fio-da-vida` — Landing anterior ("O Fio da Vida", fio dourado com fotos acendendo no scroll), preservada intacta nessa rota; deixou de ser a home em 2026-09-22 mas continua no ar e vai ser reaproveitada como peça de apresentação
 
 Rotas conhecidas — Portal do Parceiro (papel `Parceiro B2B`):
 - `/parceiro` — Dashboard do parceiro (inclui plano/pagamento)
@@ -130,7 +131,14 @@ As telas públicas de acesso são divididas ao meio: metade clara com um formul�
 
 Todo lead cai na tabela `leads`, aparece na Central de Comunicações, acende o sino do dashboard e dispara e-mail pros destinatários configurados em `configuracoes_sistema.emails_leads`. Se o SMTP falhar, o lead continua salvo e visível na Central.
 
-O dropdown "Área Restrita" da landing tem só **Portal do Parceiro** e **Portal da Família** — o acesso da equipe (`/admin/login`) saiu do menu público de propósito, mas continua funcionando normalmente pra quem digita o endereço.
+O menu "Entrar" do site aberto (chamava "Área Restrita" até 2026-09-22) tem só **Portal do Parceiro** e **Portal da Família** — o acesso da equipe (`/admin/login`) saiu do menu público de propósito, mas continua funcionando normalmente pra quem digita o endereço.
+
+## Menu e rodapé do site aberto (reescritos 2026-09-22)
+
+O mesmo cabeçalho e rodapé valem pra **toda página pública** (landing, busca, cemitérios, memorial, página do parceiro) — `components/public/SiteNav.tsx` e `SiteFooter.tsx`, compartilhados, nunca duplicados.
+
+- **Menu:** Buscar memorial (`/busca`) · Cemitérios (`/cemiterios`) · Como funciona (`/#como-funciona`), mais o botão **"Quero um memorial"** (leva ao formulário de lead de família) e o **"Entrar"** com os dois portais. Saíram: "Benefícios" e "FAQ" (viraram só seções da home, não destinos), o dropdown "Contato" e o item "Para parceiros" — a página pública `/parceiros` **não existe**, não prometa ela pra ninguém.
+- **Rodapé:** 4 colunas — marca, Memoriais (buscar, cemitérios, quero um memorial), Parceiros (seja nosso parceiro, como funciona, Portal do Parceiro) e Empresa (Sobre, contato, Privacidade, Termos). "Sobre" é texto sem link enquanto a página não existir.
 
 ## Imagem de capa do memorial (desde 2026-09-09, redesenhada no mesmo dia)
 
