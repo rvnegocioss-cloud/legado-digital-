@@ -346,8 +346,8 @@ export default async function Home() {
                 <div className="val">Essencial</div>
               </div>
               <div className="kpi">
-                <div className="lbl">Status de pagamento</div>
-                <div className="val pill">Em dia</div>
+                <div className="lbl">QR Codes gerados</div>
+                <div className="val pill">8</div>
               </div>
             </div>
 
