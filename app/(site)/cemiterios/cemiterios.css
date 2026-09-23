@@ -257,29 +257,8 @@
   .cem .painel-lista .rolagem { max-height: 300px; }
 }
 
-/* ---- Informações do cemitério, ao lado do botão de rota (2026-09-23) ---- */
-.cem .topo-cemiterio .acoes { align-items: flex-start; flex-wrap: wrap; justify-content: flex-end; }
-
-/* Sem moldura: texto solto ao lado do botão (o quadrado em volta ficou feio,
-   pedido do Rafael, 2026-09-23). */
-.cem .ficha-cemiterio {
-  margin-top: 40px;
-  padding-top: 32px;
-  border-top: 1px solid var(--ld-border);
-}
-.cem .ficha-cemiterio h2 {
-  font-family: var(--ld-font-corpo);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ld-gold);
-  margin: 0 0 10px;
-}
-.cem .ficha-cemiterio dl { margin: 0; display: grid; grid-template-columns: 1.4fr 1fr 1.4fr; gap: 24px; align-items: start; }
-.cem .ficha-cemiterio dt { font-size: 11px; color: var(--ld-fg-faint); margin: 0 0 1px; }
-.cem .ficha-cemiterio dd { margin: 0; font-size: var(--ld-t-apoio); color: var(--ld-fg); line-height: 1.5; }
-.cem .contatos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+/* ---- Contatos (dentro de "Sobre o cemitério") ---- */
+.cem .contatos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .cem .contatos li { display: flex; flex-direction: column; gap: 1px; }
 .cem .contatos .rotulo { font-size: 11px; color: var(--ld-fg-faint); }
 .cem .contatos a { color: var(--ld-gold-lite); text-decoration: none; font-weight: 600; }
@@ -298,6 +277,7 @@
   margin: 0 0 18px;
 }
 .cem .sobre-grade { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 24px; align-items: start; }
+.cem .sobre-grade + .sobre-grade { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--ld-border); }
 .cem .sobre-texto { color: var(--ld-fg-mut); margin: 0; line-height: 1.75; max-width: 60ch; }
 .cem .sobre-bloco { padding: 0; }
 .cem .sobre-bloco h3 {
@@ -314,5 +294,4 @@
 @media (max-width: 1000px) {
   .cem .sobre-grade { grid-template-columns: 1fr; }
   .cem .topo-cemiterio .acoes { justify-content: flex-start; width: 100%; }
-  .cem .ficha-cemiterio dl { grid-template-columns: 1fr; gap: 16px; }
 }

@@ -225,34 +225,43 @@ export default async function CemiterioMapaPage({
           </aside>
         </div>
 
-        {/* Informações do cemitério ao lado do "Caminho até o cemitério"
-            (pedido do Rafael, 2026-09-23). Campo sem dado não aparece:
-            nunca um "—" nem uma linha vazia. */}
-        {(c.endereco || c.horario_visitacao || (c.contatos && c.contatos.length > 0)) && (
-          <div className="ficha-cemiterio">
-            <h2>Informações</h2>
-            <dl>
-              {c.endereco && (
-                <div>
-                  <dt>Endereço</dt>
-                  <dd>
-                    {c.endereco}
-                    {c.bairro ? ` — Bairro ${c.bairro}` : ""}
-                    <br />
-                    {c.cidade} — {c.estado}
-                  </dd>
-                </div>
-              )}
-              {c.horario_visitacao && (
-                <div>
-                  <dt>Visitação</dt>
-                  <dd>{c.horario_visitacao}</dd>
-                </div>
-              )}
-              {c.contatos && c.contatos.length > 0 && (
-                <div>
-                  <dt>Contato</dt>
-                  <dd>
+        {/* Informações + institucional numa SEÇÃO SÓ, na mesma grade e com os
+            mesmos títulos das outras colunas — antes "Informações" era um bloco
+            à parte, com tipografia própria (dl/dt/dd) e um vão enorme ao lado do
+            endereço. Campo sem dado não aparece: nunca um "—". */}
+        {(c.endereco ||
+          c.horario_visitacao ||
+          (c.contatos && c.contatos.length > 0) ||
+          c.descricao_publica ||
+          (c.servicos && c.servicos.length > 0) ||
+          c.site_url) && (
+          <section className="sobre-cemiterio">
+            <h2>Sobre o {c.nome.trim()}</h2>
+
+            {(c.endereco || c.horario_visitacao || (c.contatos && c.contatos.length > 0)) && (
+              <div className="sobre-grade">
+                {c.endereco && (
+                  <div className="sobre-bloco">
+                    <h3>Endereço</h3>
+                    <p>
+                      {c.endereco}
+                      {c.bairro ? ` — Bairro ${c.bairro}` : ""}
+                      <br />
+                      {c.cidade} — {c.estado}
+                    </p>
+                  </div>
+                )}
+
+                {c.horario_visitacao && (
+                  <div className="sobre-bloco">
+                    <h3>Visitação</h3>
+                    <p>{c.horario_visitacao}</p>
+                  </div>
+                )}
+
+                {c.contatos && c.contatos.length > 0 && (
+                  <div className="sobre-bloco">
+                    <h3>Contato</h3>
                     <ul className="contatos">
                       {c.contatos.map((ct, i) => (
                         <li key={i}>
@@ -271,40 +280,37 @@ export default async function CemiterioMapaPage({
                         </li>
                       ))}
                     </ul>
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </div>
-        )}
+                  </div>
+                )}
+              </div>
+            )}
 
-        {(c.descricao_publica || (c.servicos && c.servicos.length > 0) || c.site_url) && (
-          <section className="sobre-cemiterio">
-            <h2>Sobre o {c.nome.trim()}</h2>
-            <div className="sobre-grade">
-              {c.descricao_publica && <p className="sobre-texto">{c.descricao_publica}</p>}
+            {(c.descricao_publica || (c.servicos && c.servicos.length > 0) || c.site_url) && (
+              <div className="sobre-grade">
+                {c.descricao_publica && <p className="sobre-texto">{c.descricao_publica}</p>}
 
-              {c.servicos && c.servicos.length > 0 && (
-                <div className="sobre-bloco">
-                  <h3>Serviços</h3>
-                  <ul>
-                    {c.servicos.map((sv, i) => (
-                      <li key={i}>{sv}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {c.servicos && c.servicos.length > 0 && (
+                  <div className="sobre-bloco">
+                    <h3>Serviços</h3>
+                    <ul>
+                      {c.servicos.map((sv, i) => (
+                        <li key={i}>{sv}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-              {c.site_url && (
-                <div className="sobre-bloco">
-                  <h3>Site oficial</h3>
-                  <p>Página oficial com informações e serviços deste cemitério.</p>
-                  <a href={c.site_url} target="_blank" rel="noopener noreferrer" className="btn o">
-                    Abrir o site
-                  </a>
-                </div>
-              )}
-            </div>
+                {c.site_url && (
+                  <div className="sobre-bloco">
+                    <h3>Site oficial</h3>
+                    <p>Página oficial com informações e serviços deste cemitério.</p>
+                    <a href={c.site_url} target="_blank" rel="noopener noreferrer" className="btn o">
+                      Abrir o site
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
 
             {c.informacoes_fonte && (
               <p className="fonte-info">
@@ -316,6 +322,7 @@ export default async function CemiterioMapaPage({
             )}
           </section>
         )}
+
       </main>
 
 
