@@ -106,7 +106,13 @@ export default function ParceiroLogin() {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-10 py-14 bg-[#F7F5F0]">
+      {/* id="cadastro": destino do "Seja nosso parceiro" do site (seção B2B da
+          home e rodapé). Mesmo furo da tela da família, achado na auditoria de
+          caminhos em 2026-09-23. */}
+      <div
+        id="cadastro"
+        className="flex-1 flex items-center justify-center px-10 py-14 bg-[#F7F5F0] scroll-mt-4"
+      >
         <FormularioLead tipo="parceiro" />
       </div>
     </div>

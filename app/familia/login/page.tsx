@@ -284,7 +284,15 @@ export default function FamiliaLoginPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-10 py-14 bg-[#F7F5F0]">
+      {/* id="cadastro": destino do "Quero um memorial" do site (menu, seção
+          "Como ter o memorial da sua família" e rodapé). Sem essa âncora o
+          link caía no topo da tela de login -- a pessoa clicava pra pedir um
+          memorial e encontrava um campo de senha. Achado ao auditar os
+          caminhos em 2026-09-23. */}
+      <div
+        id="cadastro"
+        className="flex-1 flex items-center justify-center px-10 py-14 bg-[#F7F5F0] scroll-mt-4"
+      >
         <FormularioLead tipo="familia" />
       </div>
     </div>
