@@ -238,8 +238,7 @@ export default async function CemiterioMapaPage({
           <section className="sobre-cemiterio">
             <h2>Sobre o {c.nome.trim()}</h2>
 
-            {(c.endereco || c.horario_visitacao || (c.contatos && c.contatos.length > 0)) && (
-              <div className="sobre-grade">
+            <div className="sobre-grade">
                 {c.endereco && (
                   <div className="sobre-bloco">
                     <h3>Endereço</h3>
@@ -282,11 +281,6 @@ export default async function CemiterioMapaPage({
                     </ul>
                   </div>
                 )}
-              </div>
-            )}
-
-            {(c.descricao_publica || (c.servicos && c.servicos.length > 0) || c.site_url) && (
-              <div className="sobre-grade">
                 {c.descricao_publica && <p className="sobre-texto">{c.descricao_publica}</p>}
 
                 {c.servicos && c.servicos.length > 0 && (
@@ -309,8 +303,7 @@ export default async function CemiterioMapaPage({
                     </a>
                   </div>
                 )}
-              </div>
-            )}
+            </div>
 
             {c.informacoes_fonte && (
               <p className="fonte-info">

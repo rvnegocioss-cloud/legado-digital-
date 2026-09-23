@@ -276,8 +276,7 @@
   font-weight: 400;
   margin: 0 0 18px;
 }
-.cem .sobre-grade { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 24px; align-items: start; }
-.cem .sobre-grade + .sobre-grade { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--ld-border); }
+.cem .sobre-grade { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 28px 24px; align-items: start; }
 .cem .sobre-texto { color: var(--ld-fg-mut); margin: 0; line-height: 1.75; max-width: 60ch; }
 .cem .sobre-bloco { padding: 0; }
 .cem .sobre-bloco h3 {
