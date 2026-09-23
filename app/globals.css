@@ -532,28 +532,28 @@ html {
   background: rgba(15,36,54,0.7); border-radius: 0 0 0 8px;
 }
 
-.cp { width: 210px; line-height: 1.35; }
+.cp { width: 158px; line-height: 1.3; }
 .cp-lapide { background: #0B1D2A; display: flex; justify-content: center; }
 /* A foto da lápide CABE inteira no card: largura toda, altura proporcional, com
    teto de 100px (foto em pé encolhe e centraliza em vez de cortar). A faixa
    fixa de 84px copiada da Central cortava a foto ao meio. */
-.cp-lapide img { width: 100%; height: auto; max-height: 100px; object-fit: contain; display: block; }
-.cp-corpo { padding: 9px 11px 11px; }
-.cp-eyebrow { font-size: 8.5px; text-transform: uppercase; letter-spacing: 1.3px; font-weight: 600; margin: 0; color: var(--ld-gold, #C9A46A); }
-.cp-nome { font-size: 13px; font-weight: 700; margin: 1px 0 0; color: #F4F7FA; }
-.cp-div { height: 1px; background: rgba(201,164,106,0.22); margin: 8px 0; }
+.cp-lapide img { width: 100%; height: auto; max-height: 54px; object-fit: contain; display: block; }
+.cp-corpo { padding: 6px 8px 8px; }
+.cp-eyebrow { font-size: 7.5px; text-transform: uppercase; letter-spacing: 1.1px; font-weight: 600; margin: 0; color: var(--ld-gold, #C9A46A); }
+.cp-nome { font-size: 11px; font-weight: 700; margin: 1px 0 0; color: #F4F7FA; }
+.cp-div { height: 1px; background: rgba(201,164,106,0.22); margin: 5px 0; }
 
 /* Lista vertical: um homenageado embaixo do outro. */
 /* O card inteiro nunca passa de ~280px: assim cabe acima OU abaixo da cruz em
    qualquer posição de um mapa de 620px (o MapLibre escolhe o lado sozinho), sem
    precisar mexer na câmera. Lista longa rola por dentro. */
-.cp-lista { display: flex; flex-direction: column; gap: 7px; max-height: 120px; overflow-y: auto; }
+.cp-lista { display: flex; flex-direction: column; gap: 5px; max-height: 84px; overflow-y: auto; }
 .cp-linha { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
 .cp-linha:hover .cp-tnome { text-decoration-color: var(--ld-gold, #C9A46A); }
 
 /* Node: círculo com anel dourado, foto DENTRO do círculo (mesmo anel da Central). */
 .cp-node {
-  width: 32px; height: 32px; flex: 0 0 32px; border-radius: 50%; padding: 1.5px;
+  width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%; padding: 1.5px;
   background: conic-gradient(from 0deg, #C9A46A, #E4CFA0, #A9824B, #C9A46A);
 }
 .cp-node-in {
@@ -564,10 +564,10 @@ html {
 
 .cp-texto { display: flex; flex-direction: column; min-width: 0; }
 .cp-tnome {
-  font-size: 11.5px; font-weight: 600; color: #F4F7FA; text-decoration: underline;
+  font-size: 10px; font-weight: 600; color: #F4F7FA; text-decoration: underline;
   text-decoration-color: rgba(201,164,106,0.55); text-underline-offset: 2px; overflow-wrap: anywhere;
 }
-.cp-cta { font-size: 10px; color: var(--ld-gold-lite, #dfc08a); }
+.cp-cta { font-size: 9px; color: var(--ld-gold-lite, #dfc08a); }
 
 /* Botão de tela cheia do mapa público (fica no rodapé do mapa). */
 .btn-tela-cheia {
