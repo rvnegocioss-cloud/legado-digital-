@@ -3,6 +3,9 @@ import { MapPin } from "lucide-react";
 import { supabaseServidor } from "@/lib/supabaseServidor";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 import NodesFamilia from "@/components/public/NodesFamilia";
+import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
+import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
+import { urlMidiaProtegida } from "@/lib/urlMidia";
 import "./landing.css";
 
 // Landing oficial desde 2026-09-22 — implementação do protótipo aprovado pelo
@@ -49,6 +52,51 @@ function iniciais(nome: string): string {
     .join("");
 }
 
+// Cemitério em destaque na home: o mapa real, não uma ilustração. Pega o
+// primeiro cemitério público que já tem ortomosaico de drone -- hoje o São
+// Pedro (Uberlândia). Se nenhum tiver mapa aéreo ainda, o bloco inteiro some
+// em vez de mostrar um retângulo vazio.
+async function buscarCemiterioDestaque() {
+  const { data: cidades } = await supabaseServidor.rpc("listar_cidades_publicas");
+  for (const c of (cidades || []) as { cidade_slug: string }[]) {
+    const { data: cems } = await supabaseServidor.rpc("listar_cemiterios_publicos", {
+      p_cidade_slug: c.cidade_slug,
+    });
+    const comMapa = ((cems || []) as { slug: string; tem_ortomosaico: boolean }[]).find(
+      (x) => x.tem_ortomosaico
+    );
+    if (!comMapa) continue;
+
+    const { data } = await supabaseServidor.rpc("obter_mapa_publico_cemiterio", {
+      p_slug: comMapa.slug,
+    });
+    if (!data) continue;
+
+    const ortoUrl = await assinarOrtomosaico(data.cemiterio.ortomosaico_url);
+    const memoriais = {
+      ...data.memoriais,
+      features: (data.memoriais?.features || []).map(
+        (f: { properties?: Record<string, unknown> }) => ({
+          ...f,
+          properties: {
+            ...f.properties,
+            foto_url: urlMidiaProtegida(f.properties?.foto_url as string | null),
+          },
+        })
+      ),
+    };
+
+    return {
+      cemiterio: data.cemiterio,
+      memoriais,
+      ortoUrl,
+      total: memoriais.features.length,
+      href: `/cemiterios/${c.cidade_slug}/${comMapa.slug}`,
+    };
+  }
+  return null;
+}
+
 async function buscarExemplo(): Promise<MemorialExemplo | null> {
   const { data } = await supabaseServidor
     .from("homenagens")
@@ -59,7 +107,7 @@ async function buscarExemplo(): Promise<MemorialExemplo | null> {
 }
 
 export default async function Home() {
-  const exemplo = await buscarExemplo();
+  const [exemplo, destaque] = await Promise.all([buscarExemplo(), buscarCemiterioDestaque()]);
   const nascimento = apenasAno(exemplo?.data_nascimento ?? null);
   const falecimento = apenasAno(exemplo?.data_falecimento ?? null);
 
@@ -147,21 +195,43 @@ export default async function Home() {
             </div>
           </div>
 
-          <Link href="/cemiterios" className="card mapcard">
-            <div className="aerial">
-              <span className="pin" />
-            </div>
-            <div className="corpo">
-              <div className="nome">Mapa aéreo do cemitério</div>
-              <p className="small">
-                Feito com drone pelo Legado Digital. Cada túmulo mapeado vira um ponto no mapa, com
-                rota até ele.
-              </p>
-              <div className="row" style={{ marginTop: 12 }}>
-                <span className="btn">Ir para os cemitérios</span>
+          {/* Mapa de verdade, não ilustração: o mesmo componente da página do
+              cemitério, com o ortomosaico de drone e os pinos vindos do banco.
+              Passar o mouse numa cruz mostra quem está ali. */}
+          {destaque && (
+            <div className="card mapcard">
+              <div className="mapa-vivo">
+                <MapaPublicoCemiterio
+                  cemiterioNome={destaque.cemiterio.nome}
+                  cidade={destaque.cemiterio.cidade}
+                  estado={destaque.cemiterio.estado}
+                  latitude={destaque.cemiterio.latitude}
+                  longitude={destaque.cemiterio.longitude}
+                  ortoUrl={destaque.ortoUrl}
+                  ortoMinzoom={destaque.cemiterio.ortomosaico_minzoom}
+                  ortoMaxzoom={destaque.cemiterio.ortomosaico_maxzoom}
+                  ortoBounds={destaque.cemiterio.ortomosaico_bounds}
+                  memoriais={destaque.memoriais}
+                />
+              </div>
+              <div className="corpo">
+                <div className="nome">{destaque.cemiterio.nome.trim()}</div>
+                <p className="small">
+                  {destaque.cemiterio.cidade} — {destaque.cemiterio.estado} ·{" "}
+                  {destaque.total} {destaque.total === 1 ? "memorial" : "memoriais"} · mapeado com
+                  drone pelo Legado Digital
+                </p>
+                <div className="row" style={{ marginTop: 12 }}>
+                  <Link href={destaque.href} className="btn">
+                    Abrir o mapa deste cemitério
+                  </Link>
+                  <Link href="/cemiterios" className="btn o">
+                    Ver todos
+                  </Link>
+                </div>
               </div>
             </div>
-          </Link>
+          )}
         </div>
       </section>
 
