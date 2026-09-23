@@ -265,7 +265,7 @@ export default async function CemiterioMapaPage({
                     <ul className="contatos">
                       {c.contatos.map((ct, i) => (
                         <li key={i}>
-                          <span className="rotulo">{ct.rotulo}</span>
+                          {c.contatos!.length > 1 && <span className="rotulo">{ct.rotulo}</span>}
                           <a
                             href={
                               ct.tipo === "whatsapp"
