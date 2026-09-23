@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Migalhas from "@/components/public/Migalhas";
+import VoltarPagina from "@/components/public/VoltarPagina";
 import { notFound } from "next/navigation";
 import { MapPin, Satellite } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
@@ -49,9 +50,7 @@ export default async function CidadeCemiteriosPage({
       />
 
       <main>
-        <Link href="/cemiterios" className="voltar">
-          ← Voltar pros cemitérios
-        </Link>
+        <VoltarPagina fallback="/cemiterios" />
 
         <p className="eyebrow">Em memória</p>
         <h1>

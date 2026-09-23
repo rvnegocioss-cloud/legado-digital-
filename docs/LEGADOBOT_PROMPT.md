@@ -135,6 +135,8 @@ O menu "Entrar" do site aberto (chamava "Área Restrita" até 2026-09-22) tem s�
 
 ## Menu e rodapé do site aberto (reescritos 2026-09-22)
 
+**Botões de voltar (2026-09-23):** no topo de toda página pública (menos a home) há uma seta **← que volta pra página de onde a pessoa veio** (mapa, busca, outro memorial); se não houver página anterior no site (ex: chegou pelo QR Code) ela leva à home. Ao lado, a logo leva à home e o texto **"Voltar pro site"** também. Os "← Voltar" das páginas de cemitério seguem a mesma regra.
+
 O mesmo cabeçalho e rodapé valem pra **toda página pública** (landing, busca, cemitérios, memorial, página do parceiro) — `components/public/SiteNav.tsx` e `SiteFooter.tsx`, compartilhados, nunca duplicados.
 
 - **Menu:** Buscar memorial (`/busca`) · Cemitérios (`/cemiterios`) · Como funciona (`/#como-funciona`), mais o botão **"Quero um memorial"** (leva ao formulário de lead de família) e o **"Entrar"** com os dois portais. Saíram: "Benefícios" e "FAQ" (viraram só seções da home, não destinos), o dropdown "Contato" e o item "Para parceiros" — a página pública `/parceiros` **não existe**, não prometa ela pra ninguém.

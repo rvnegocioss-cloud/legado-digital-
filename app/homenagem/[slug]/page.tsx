@@ -642,6 +642,9 @@ export default async function PerfilMemorialPage({
           logoStyle={{ height: 64, width: "auto" }}
         />
         <div style={estiloTopo.navLinks}>
+          {/* Regra 11: "Voltar pro site" explícito. A seta ao lado volta pra
+              página de onde a pessoa veio; este leva pra home. */}
+          <a href="/" style={estiloTopo.navLink}>Voltar pro site</a>
           <a href="/busca" style={estiloTopo.navLink}>Buscar memorial</a>
           <a href="/cemiterios" style={estiloTopo.navLink}>Cemitérios</a>
           <a href="/#como-funciona" style={estiloTopo.navLink}>Como funciona</a>

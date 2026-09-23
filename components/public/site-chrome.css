@@ -20,6 +20,21 @@
   color: rgba(255,255,255,0.55); font-size: 13px;
 }
 .site-navbar .volta-link:hover { color: #C9A46A; }
+/* Grupo da esquerda: seta (página anterior) + logo (home) + "Voltar pro site". */
+.site-navbar .volta-grupo { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.site-navbar .volta-seta {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px; /* alvo de toque de 44px */
+  border: 1px solid var(--ld-border-strong, rgba(201,164,106,0.32)); border-radius: 50%;
+  background: transparent; color: #C9A46A; font-size: 18px; line-height: 1; cursor: pointer;
+  transition: background .15s;
+}
+.site-navbar .volta-seta:hover { background: rgba(201,164,106,0.1); }
+.site-navbar .volta-site {
+  color: rgba(255,255,255,0.6); font-size: 12.5px; text-decoration: none; white-space: nowrap;
+  padding: 12px 2px;
+}
+.site-navbar .volta-site:hover { color: #C9A46A; }
 .site-navbar .logo-sm { height: 86px; width: auto; }
 /* Menu + ações num bloco só (2026-09-22): o "Quero um memorial"/"Entrar"
    ficam colados nos links, não grudados na borda da tela -- com 3 itens de

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Migalhas from "@/components/public/Migalhas";
+import VoltarPagina from "@/components/public/VoltarPagina";
 import { notFound } from "next/navigation";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
@@ -111,9 +112,7 @@ export default async function CemiterioMapaPage({
       />
 
       <main>
-        <Link href={`/cemiterios/${cidade}`} className="voltar">
-          ← Voltar pros cemitérios de {c.cidade}
-        </Link>
+        <VoltarPagina fallback={`/cemiterios/${cidade}`} />
 
         <div className="topo-cemiterio">
           <div className="info">

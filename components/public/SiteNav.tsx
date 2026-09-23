@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useVoltar } from "@/lib/useVoltar";
 import "./site-chrome.css";
 
 // Menu único de todo o site aberto (landing, busca, cemitérios, jazigo,
@@ -32,24 +34,51 @@ function Seta() {
 
 export default function SiteNav() {
   const [areaAberta, setAreaAberta] = useState(false);
+  const pathname = usePathname();
+  const voltar = useVoltar("/");
+  // Na home não há pra onde voltar nem "pro site" pra ir: a pessoa já está lá.
+  const naHome = pathname === "/";
 
   return (
     <nav className="site-navbar">
       <div className="inner">
-        {/* A seta fica: sem ela ninguém adivinha que a logo leva pro site.
-            Ela é o "voltar pro site" explícito (regra 11). Quem volta um
-            nível na hierarquia é a migalha, logo abaixo -- são duas coisas
-            diferentes e as duas precisam existir. */}
-        <Link href="/" className="volta-link" aria-label="Voltar pro site">
-          ←{" "}
-          <Image
-            className="logo-sm"
-            src="/logo-legado-digital.svg"
-            alt="Legado Digital"
-            width={220}
-            height={86}
-          />
-        </Link>
+        {/* Três coisas diferentes, cada uma com um botão só dela (correção do
+            Rafael, 2026-09-23 -- a seta e a logo eram o MESMO link fixo pra
+            home, então quem clicava na cruz do mapa, abria o memorial e
+            apertava a seta caía na landing em vez de voltar pro mapa):
+
+            ← seta       volta pra página de ONDE A PESSOA VEIO (useVoltar);
+                         sem página anterior no site, cai na home.
+            logo         leva pra home, como em qualquer site.
+            Voltar pro   texto explícito pra home (regra 11) -- é ele que
+            site         responde "como eu chego no site?", a seta não. */}
+        <div className="volta-grupo">
+          {!naHome && (
+            <button
+              type="button"
+              className="volta-seta"
+              onClick={voltar}
+              aria-label="Voltar para a página anterior"
+              title=""
+            >
+              ←
+            </button>
+          )}
+          <Link href="/" className="volta-link" aria-label="Legado Digital — ir para o início">
+            <Image
+              className="logo-sm"
+              src="/logo-legado-digital.svg"
+              alt="Legado Digital"
+              width={220}
+              height={86}
+            />
+          </Link>
+          {!naHome && (
+            <Link href="/" className="volta-site">
+              Voltar pro site
+            </Link>
+          )}
+        </div>
 
         <div className="nav-direita">
           <div className="links">
