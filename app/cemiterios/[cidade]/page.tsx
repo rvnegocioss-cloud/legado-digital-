@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Satellite } from "lucide-react";
-import { tema, CORES } from "@/lib/publicTheme";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import SiteNav from "@/components/public/SiteNav";
 import SiteFooter from "@/components/public/SiteFooter";
+import "../cemiterios.css";
+
+// Padronizada em 2026-09-23 junto com as outras páginas de cemitério.
+// Backup do arquivo original em `Desktop\Paginas Originais - Cemiterios\`.
 
 export const dynamic = "force-dynamic";
 
@@ -35,42 +38,35 @@ export default async function CidadeCemiteriosPage({
   const { cidade: nomeCidade, estado } = cemiterios[0];
 
   return (
-    <div style={tema.page}>
+    <div className="cem">
       <SiteNav />
-      <header style={tema.hero}>
-        <div style={{ alignSelf: "flex-start", margin: "0 auto 12px" }}>
-          <Link href="/cemiterios" style={{ color: CORES.textoFraco, fontSize: 12.5, textDecoration: "none" }}>
-            ← Voltar pros cemitérios
-          </Link>
-        </div>
-        <div style={tema.eyebrow}>Em Memória</div>
-        <h1 style={tema.titulo}>{nomeCidade} — {estado}</h1>
-        <p style={tema.subtitulo}>Cemitérios mapeados nesta cidade.</p>
-      </header>
 
-      <main style={tema.main}>
-        <div style={tema.placaGrid}>
+      <main>
+        <Link href="/cemiterios" className="voltar">
+          ← Voltar pros cemitérios
+        </Link>
+
+        <p className="eyebrow">Em memória</p>
+        <h1>
+          {nomeCidade} — {estado}
+        </h1>
+        <p className="subtitulo">Cemitérios mapeados nesta cidade.</p>
+
+        <div className="grade">
           {cemiterios.map((c) => (
-            <Link key={c.slug} href={`/cemiterios/${cidade}/${c.slug}`} style={tema.placaLink}>
-              <div style={tema.placa}>
-                <div style={tema.placaAnel}>
-                  <div style={tema.placaAnelInner}>
-                    <MapPin size={20} strokeWidth={1.5} color={CORES.dourado} />
-                  </div>
-                </div>
-                <div style={tema.placaTextos}>
-                  <div style={tema.placaNome}>{c.nome.trim()}</div>
-                  <div style={tema.placaHairline} />
-                  <div style={tema.placaMeta}>
-                    {c.tem_ortomosaico ? (
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                        <Satellite size={11} strokeWidth={1.5} /> Mapa aéreo de drone
-                      </span>
-                    ) : (
-                      c.endereco || "Ver mapa"
-                    )}
-                  </div>
-                </div>
+            <Link key={c.slug} href={`/cemiterios/${cidade}/${c.slug}`} className="card">
+              <div className="anel">
+                <MapPin size={20} strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="nome">{c.nome.trim()}</p>
+                {c.endereco && <p className="meta">{c.endereco.trim()}</p>}
+                {c.tem_ortomosaico && (
+                  <span className="selo">
+                    <Satellite size={11} strokeWidth={1.5} style={{ verticalAlign: -1 }} /> Mapa aéreo
+                    de drone
+                  </span>
+                )}
               </div>
             </Link>
           ))}

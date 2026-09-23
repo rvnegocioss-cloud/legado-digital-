@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-import { tema, CORES } from "@/lib/publicTheme";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import SiteNav from "@/components/public/SiteNav";
 import SiteFooter from "@/components/public/SiteFooter";
+import "./cemiterios.css";
+
+// Padronizada em 2026-09-23: saiu do lib/publicTheme (Georgia, 960px, fundo
+// em gradiente) e passou a usar os tokens de app/tokens.css, alinhando na
+// mesma largura do menu e do rodapé. Backup do arquivo original em
+// `Desktop\Paginas Originais - Cemiterios\`.
 
 export const dynamic = "force-dynamic";
 
@@ -24,36 +29,32 @@ export default async function CemiteriosPage() {
   const cidades = (data || []) as CidadePublica[];
 
   return (
-    <div style={tema.page}>
+    <div className="cem">
       <SiteNav />
-      <header style={tema.hero}>
-        <div style={tema.eyebrow}>Em Memória</div>
-        <h1 style={tema.titulo}>Cemitérios</h1>
-        <p style={tema.subtitulo}>
-          Escolha uma cidade pra ver os cemitérios mapeados e os memoriais publicados neles.
-        </p>
-      </header>
 
-      <main style={tema.main}>
+      <main>
+        <p className="eyebrow">Em memória</p>
+        <h1>Cemitérios mapeados</h1>
+        <p className="subtitulo">
+          Escolha uma cidade para ver os cemitérios mapeados e os memoriais publicados neles.
+        </p>
+
         {cidades.length === 0 ? (
-          <p style={tema.vazio}>Nenhum cemitério público cadastrado ainda.</p>
+          <p className="vazio">Nenhum cemitério público cadastrado ainda.</p>
         ) : (
-          <div style={tema.placaGrid}>
+          <div className="grade">
             {cidades.map((c) => (
-              <Link key={c.cidade_slug} href={`/cemiterios/${c.cidade_slug}`} style={tema.placaLink}>
-                <div style={tema.placa}>
-                  <div style={tema.placaAnel}>
-                    <div style={tema.placaAnelInner}>
-                      <MapPin size={20} strokeWidth={1.5} color={CORES.dourado} />
-                    </div>
-                  </div>
-                  <div style={tema.placaTextos}>
-                    <div style={tema.placaNome}>{c.cidade} — {c.estado}</div>
-                    <div style={tema.placaHairline} />
-                    <div style={tema.placaMeta}>
-                      {c.total_cemiterios} cemitério{c.total_cemiterios === 1 ? "" : "s"}
-                    </div>
-                  </div>
+              <Link key={c.cidade_slug} href={`/cemiterios/${c.cidade_slug}`} className="card">
+                <div className="anel">
+                  <MapPin size={20} strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p className="nome">
+                    {c.cidade} — {c.estado}
+                  </p>
+                  <p className="meta">
+                    {c.total_cemiterios} {c.total_cemiterios === 1 ? "cemitério" : "cemitérios"}
+                  </p>
                 </div>
               </Link>
             ))}

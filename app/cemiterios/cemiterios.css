@@ -1,0 +1,258 @@
+/* Páginas de cemitério do site público (lista de cidades, cemitérios da
+   cidade e a página do cemitério com o mapa).
+
+   Reescritas em 2026-09-23 a partir do protótipo aprovado pelo Rafael
+   (wireframe/reestruturacao-site-publico/prototipo-cemiterio.html). Antes
+   usavam lib/publicTheme.ts: Georgia, 960px e fundo em gradiente -- não
+   alinhavam com o menu nem com o rodapé, que já estão na largura oficial.
+
+   Todo valor vem de app/tokens.css. A página só entrega conteúdo.
+
+   NÃO entrou aqui, de propósito: o bloco institucional do protótipo (logo do
+   cemitério, telefone, WhatsApp, horário de visitação, texto de apresentação,
+   fotos, serviços e planos). Nada disso existe na tabela `cemiterios` hoje --
+   exige coluna nova, e o Rafael determinou que mudança de banco só acontece
+   na etapa de integração. */
+
+.cem {
+  background: var(--ld-bg);
+  color: var(--ld-fg);
+  font-family: var(--ld-font-corpo);
+  font-size: var(--ld-t-corpo);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.cem main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--ld-largura);
+  margin: 0 auto;
+  padding: 36px var(--ld-gutter) 64px;
+}
+
+/* ---- topo da página ---- */
+.cem .voltar {
+  display: inline-block;
+  color: var(--ld-fg-faint);
+  font-size: var(--ld-t-nota);
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+.cem .voltar:hover { color: var(--ld-gold); }
+
+.cem .eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ld-gold);
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.cem h1 {
+  font-family: var(--ld-font-titulo);
+  font-size: var(--ld-t-h1);
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.cem .subtitulo {
+  color: var(--ld-fg-mut);
+  font-size: var(--ld-t-apoio);
+  margin: 0;
+  max-width: 60ch;
+}
+
+/* ---- cabeçalho da página do cemitério (formato do protótipo:
+       informação à esquerda, ação à direita -- não centralizado) ---- */
+.cem .topo-cemiterio {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.cem .topo-cemiterio .info { flex: 1; min-width: 260px; }
+.cem .topo-cemiterio .acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.cem .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--ld-gold);
+  color: #1a1408;
+  border: none;
+  border-radius: var(--ld-raio);
+  padding: 11px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.cem .btn:hover { background: var(--ld-gold-lite); }
+.cem .btn.o {
+  background: transparent;
+  color: var(--ld-gold);
+  border: 1px solid var(--ld-border-strong);
+}
+.cem .btn.o:hover { background: rgba(201, 164, 106, 0.08); }
+
+/* ---- grade de cards (cidade / cemitério) ---- */
+.cem .grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.cem .card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--ld-surface);
+  border: 1px solid var(--ld-border);
+  border-radius: var(--ld-raio-card);
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.cem .card:hover {
+  border-color: var(--ld-border-strong);
+  transform: translateY(-2px);
+}
+
+.cem .card .anel {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  border-radius: 50%;
+  border: 1px solid var(--ld-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ld-gold);
+}
+
+.cem .card .nome {
+  font-family: var(--ld-font-titulo);
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+.cem .card .meta {
+  font-size: var(--ld-t-nota);
+  color: var(--ld-fg-faint);
+  margin: 0;
+}
+.cem .card .selo {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ld-gold);
+  margin-top: 4px;
+  display: block;
+}
+
+.cem .vazio {
+  color: var(--ld-fg-faint);
+  margin-top: 20px;
+}
+
+/* ---- mapa + lista lado a lado (página do cemitério) ---- */
+.cem .mapa-e-lista {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.cem .painel-lista {
+  background: var(--ld-surface);
+  border: 1px solid var(--ld-border);
+  border-radius: var(--ld-raio-card);
+  padding: 16px;
+}
+.cem .painel-lista h2 {
+  font-family: var(--ld-font-corpo);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ld-fg-mut);
+  margin: 0 0 12px;
+}
+.cem .painel-lista .rolagem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 460px;
+  overflow-y: auto;
+}
+
+.cem .item-memorial {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--ld-border);
+  border-radius: var(--ld-raio);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cem .item-memorial:hover {
+  border-color: var(--ld-border-strong);
+  background: rgba(201, 164, 106, 0.05);
+}
+.cem .item-memorial .retrato {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--ld-border-strong);
+  background: var(--ld-panel);
+}
+.cem .item-memorial .nome {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+.cem .item-memorial .meta {
+  font-size: 11.5px;
+  color: var(--ld-fg-faint);
+  margin: 0;
+}
+.cem .item-memorial .cadeado {
+  font-size: 10.5px;
+  color: var(--ld-gold);
+  border: 1px solid var(--ld-border-strong);
+  background: rgba(201, 164, 106, 0.1);
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.cem .nota-lista {
+  font-size: 11.5px;
+  color: var(--ld-fg-faint);
+  margin: 10px 0 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .cem .mapa-e-lista { grid-template-columns: 1fr; }
+  .cem .painel-lista .rolagem { max-height: 300px; }
+}
