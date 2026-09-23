@@ -109,7 +109,12 @@ export default async function CemiterioMapaPage({
         gente = [];
       }
     }
-    return gente.length ? gente : [{ slug: p.slug, nome: p.nome, foto_url: p.foto_url, protegido: p.protegido }];
+    const todos = gente.length ? gente : [{ slug: p.slug, nome: p.nome, foto_url: p.foto_url, protegido: p.protegido }];
+    // A foto de quem vem aninhado em `properties.memoriais` chega crua do
+    // banco (URL pública do balde, hoje privado -> 400). Só a foto de nível
+    // superior era assinada, então o 2º homenageado do túmulo aparecia com
+    // imagem quebrada. urlMidiaProtegida é idempotente.
+    return todos.map((x) => ({ ...x, foto_url: urlMidiaProtegida(x.foto_url) }));
   });
   const rotaCemiterio = `https://www.google.com/maps/dir/?api=1&destination=${c.latitude},${c.longitude}`;
 
