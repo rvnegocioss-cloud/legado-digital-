@@ -268,16 +268,13 @@
   top: 70px;
   left: 130px;
 }
-/* Mapa de verdade dentro do card (ortomosaico + pinos do banco). A altura é
-   travada aqui: o componente do mapa é o mesmo da página do cemitério, onde
-   ele ocupa a tela toda -- na home ele entra como prévia. */
-.landing .mapa-vivo {
-  height: 260px;
-  overflow: hidden;
-  border-bottom: 1px solid var(--lp-border);
-}
-.landing .mapa-vivo > * { height: 100%; }
-.landing .mapa-vivo .maplibregl-map { height: 100% !important; }
+/* Mapa de verdade dentro do card (ortomosaico + pinos do banco). O componente
+   é o mesmo da página do cemitério e traz a própria altura (busca em cima,
+   mapa de 620px, legenda e "Tela cheia" embaixo). Não travo a altura aqui:
+   a 1ª versão forçava height:100% no .maplibregl-map dentro de um contêiner de
+   altura automática, o que resolve pra ZERO -- o mapa sumia e só a legenda
+   aparecia (achado do Rafael, 2026-09-23). */
+.landing .mapa-vivo { border-bottom: 1px solid var(--lp-border); }
 
 .landing .mapcard .corpo { padding: 16px 18px 18px; }
 .landing .mapcard .nome { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
