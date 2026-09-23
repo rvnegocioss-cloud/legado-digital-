@@ -297,13 +297,10 @@ export default async function CemiterioMapaPage({
 
               {c.site_url && (
                 <div className="sobre-bloco">
-                  <h3>Consultar sepultados</h3>
-                  <p>
-                    A Prefeitura mantém uma consulta online da localização de sepulturas nos cemitérios
-                    municipais.
-                  </p>
+                  <h3>Site oficial</h3>
+                  <p>Página oficial com informações e serviços deste cemitério.</p>
                   <a href={c.site_url} target="_blank" rel="noopener noreferrer" className="btn o">
-                    Abrir a consulta
+                    Abrir o site
                   </a>
                 </div>
               )}

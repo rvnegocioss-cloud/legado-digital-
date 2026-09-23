@@ -302,7 +302,7 @@ export default function AdminCemiterios() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Site ou consulta de sepultados (link)</label>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Site oficial (link)</label>
                 <Input
                   placeholder="https://"
                   value={form.site_url}
