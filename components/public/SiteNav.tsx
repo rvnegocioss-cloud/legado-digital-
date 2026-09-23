@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -34,10 +34,27 @@ function Seta() {
 
 export default function SiteNav() {
   const [areaAberta, setAreaAberta] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
   const pathname = usePathname();
   const voltar = useVoltar("/");
   // Na home não há pra onde voltar nem "pro site" pra ir: a pessoa já está lá.
   const naHome = pathname === "/";
+
+  // Trocar de página fecha o menu: sem isso ele fica aberto por cima do
+  // conteúdo novo (a navegação do App Router não desmonta a nav).
+  useEffect(() => {
+    setMenuAberto(false);
+    setAreaAberta(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuAberto) return;
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuAberto(false);
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [menuAberto]);
 
   return (
     <nav className="site-navbar">
@@ -80,6 +97,24 @@ export default function SiteNav() {
           )}
         </div>
 
+        {/* No celular os links e as ações saem da barra e vão pro painel deste
+            botão. Antes eles simplesmente sumiam (`.links { display: none }`
+            sem nada no lugar), e não havia como chegar em Buscar memorial nem
+            em Cemitérios pelo telefone -- achado do Rafael, 2026-09-23. */}
+        <button
+          type="button"
+          className={`hamburguer ${menuAberto ? "aberto" : ""}`}
+          aria-expanded={menuAberto}
+          aria-controls="menu-do-site"
+          aria-label={menuAberto ? "Fechar o menu" : "Abrir o menu"}
+          title=""
+          onClick={() => setMenuAberto((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
         <div className="nav-direita">
           <div className="links">
             {LINKS.map((l) => (
@@ -116,6 +151,31 @@ export default function SiteNav() {
           </div>
         </div>
       </div>
+
+      {menuAberto && (
+        <div className="menu-celular" id="menu-do-site">
+          {LINKS.map((l) => (
+            <Link key={l.href} href={l.href} onClick={() => setMenuAberto(false)}>
+              {l.label}
+            </Link>
+          ))}
+
+          <Link
+            href="/familia/login#cadastro"
+            className="destaque"
+            onClick={() => setMenuAberto(false)}
+          >
+            Quero um memorial
+          </Link>
+
+          <p className="titulo-grupo">Entrar</p>
+          {AREA_RESTRITA_LINKS.map((l) => (
+            <Link key={l.href} href={l.href} onClick={() => setMenuAberto(false)}>
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }

@@ -37,8 +37,11 @@ export default function Migalhas({ trilha }: { trilha: Nivel[] }) {
   // Regra 4: sem trilha (ou só com o nível atual) não renderiza nada.
   if (!trilha || trilha.length < 2) return null;
 
-  // Níveis entre a raiz e o penúltimo: só existem com 4 ou mais níveis.
-  const temMeio = trilha.length > 3;
+  // No celular fica só "Início › … › atual": tudo entre a raiz e o nível
+  // atual é escondido por CSS. Então o "…" existe sempre que houver ao menos
+  // um nível no meio -- com 3 níveis também, não só com 4 (antes o "…" não
+  // aparecia com 3 e a trilha ficava com um buraco sem explicação).
+  const temMeio = trilha.length > 2;
 
   const jsonLd = {
     "@context": "https://schema.org",
