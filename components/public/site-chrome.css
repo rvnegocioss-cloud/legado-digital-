@@ -5,7 +5,10 @@
    container, nunca maior. */
 
 .site-navbar {
-  position: sticky; top: 0; z-index: 60;
+  /* Não gruda ao rolar -- wireframe do Pedro, tela "Navegação e casca": "o
+     cabeçalho não gruda; a faixa de seções gruda. Numa página longa o que a
+     pessoa precisa ao rolar é mover-se DENTRO dela." */
+  position: relative; z-index: 60;
   background: linear-gradient(to bottom,
     rgba(8,23,34,0.96) 0%, rgba(8,23,34,0.94) 70%, rgba(8,23,34,0.9) 100%);
   border-bottom: 1px solid rgba(201,164,106,0.14);
@@ -126,23 +129,19 @@
 .site-migalhas a:hover { color: var(--ld-gold); }
 .site-migalhas .atual span { color: var(--ld-fg-mut); font-weight: 600; }
 
-/* No celular a trilha colapsa em "Início › … › atual": os níveis do meio
-   somem e viram reticências, pra trilha longa não quebrar em 3 linhas. */
+/* No celular (wireframe): "Início › … › penúltimo › atual". Os níveis do meio
+   somem e o "…" é um botão: tocar nele abre a trilha completa. */
+.site-migalhas .reticencias { display: none; }
+.site-migalhas .reticencias button {
+  background: none; border: 0; padding: 12px 6px; min-width: 44px; cursor: pointer;
+  color: var(--ld-fg-faint); font: inherit; font-size: 12.5px;
+}
+.site-migalhas .reticencias button:hover { color: var(--ld-gold); }
 @media (max-width: 620px) {
   .site-migalhas .meio { display: none; }
-  .site-migalhas .meio:first-of-type {
-    display: flex;
-    pointer-events: none;
-  }
-  .site-migalhas .meio:first-of-type a,
-  .site-migalhas .meio:first-of-type span {
-    font-size: 0;
-  }
-  .site-migalhas .meio:first-of-type a::after,
-  .site-migalhas .meio:first-of-type span::after {
-    content: "…";
-    font-size: 12.5px;
-  }
+  .site-migalhas .reticencias { display: flex; }
+  .site-migalhas ol.expandida .meio { display: flex; }
+  .site-migalhas ol.expandida .reticencias { display: none; }
 }
 
 footer.site-footer {

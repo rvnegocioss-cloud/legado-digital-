@@ -4,6 +4,7 @@ import { supabaseServidor } from "@/lib/supabaseServidor";
 import { tema, CORES } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
+import Migalhas from "@/components/public/Migalhas";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +123,7 @@ export default async function ParceiroPublicoPage({
 
   return (
     <div style={tema.page}>
+      <Migalhas trilha={[{ rotulo: "Início", href: "/" }, { rotulo: p.nome_fantasia || p.razao_social }]} />
 
       <header style={tema.hero}>
         {p.logo_url && (

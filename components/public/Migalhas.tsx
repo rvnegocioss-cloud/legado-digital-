@@ -1,3 +1,6 @@
+"use client";
+
+import { Fragment, useState } from "react";
 import Link from "next/link";
 import "./site-chrome.css";
 
@@ -29,8 +32,13 @@ export interface Nivel {
 }
 
 export default function Migalhas({ trilha }: { trilha: Nivel[] }) {
+  const [expandida, setExpandida] = useState(false);
+
   // Regra 4: sem trilha (ou só com o nível atual) não renderiza nada.
   if (!trilha || trilha.length < 2) return null;
+
+  // Níveis entre a raiz e o penúltimo: só existem com 4 ou mais níveis.
+  const temMeio = trilha.length > 3;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -46,19 +54,30 @@ export default function Migalhas({ trilha }: { trilha: Nivel[] }) {
   return (
     <nav className="site-migalhas" aria-label="Você está em">
       <div className="inner">
-        <ol>
+        <ol className={expandida ? "expandida" : undefined}>
           {trilha.map((n, i) => {
             const ultimo = i === trilha.length - 1;
-            // Regra 5: no celular, só o primeiro e o último ficam visíveis.
-            const classe = ultimo ? "atual" : i === 0 ? "raiz" : "meio";
+            // No celular ficam visíveis: raiz, penúltimo e atual. O que está no
+            // meio some e o "…" (botão) abre a trilha completa.
+            const penultimo = i === trilha.length - 2 && i !== 0;
+            const classe = ultimo ? "atual" : i === 0 ? "raiz" : penultimo ? "penultimo" : "meio";
             return (
-              <li key={`${n.rotulo}-${i}`} className={classe}>
-                {n.href && !ultimo ? (
-                  <Link href={n.href}>{n.rotulo}</Link>
-                ) : (
-                  <span aria-current={ultimo ? "page" : undefined}>{n.rotulo}</span>
+              <Fragment key={`${n.rotulo}-${i}`}>
+                <li className={classe}>
+                  {n.href && !ultimo ? (
+                    <Link href={n.href}>{n.rotulo}</Link>
+                  ) : (
+                    <span aria-current={ultimo ? "page" : undefined}>{n.rotulo}</span>
+                  )}
+                </li>
+                {i === 0 && temMeio && (
+                  <li className="reticencias">
+                    <button type="button" onClick={() => setExpandida(true)} aria-label="Mostrar o caminho completo">
+                      …
+                    </button>
+                  </li>
                 )}
-              </li>
+              </Fragment>
             );
           })}
         </ol>
