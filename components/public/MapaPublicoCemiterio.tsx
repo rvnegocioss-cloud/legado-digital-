@@ -23,7 +23,7 @@ const CRUZ_SVG =
   '<path d="M14 7v14M8 12h12" stroke="#C9A46A" stroke-width="2.2" stroke-linecap="round"/></svg>'
 
 // Altura aproximada (px) do card de jazigo familiar, usada pra abrir espaço em cima da cruz.
-const ALTURA_CARD_JAZIGO = 260
+const ALTURA_CARD_JAZIGO = 330
 
 interface MemorialDoTumulo {
   slug: string
@@ -301,7 +301,7 @@ export default function MapaPublicoCemiterio({
                 background: 'rgba(255,255,255,0.05)',
                 border: `1px solid ${CORES.douradoBorda}`,
                 color: CORES.textoForte,
-                fontFamily: 'Georgia, serif',
+                fontFamily: 'var(--ld-font-corpo)',
                 fontSize: 14,
               }}
             />
@@ -339,7 +339,7 @@ export default function MapaPublicoCemiterio({
                         border: 0,
                         borderTop: i === 0 ? 0 : `1px solid ${CORES.douradoBorda}`,
                         color: CORES.textoForte,
-                        fontFamily: 'Georgia, serif',
+                        fontFamily: 'var(--ld-font-corpo)',
                         fontSize: 13.5,
                         cursor: 'pointer',
                       }}
@@ -406,31 +406,22 @@ export default function MapaPublicoCemiterio({
         )}
         </Map>
 
-        <button
-          type="button"
-          onClick={() => setExpandido((v) => !v)}
-          aria-label={expandido ? 'Fechar mapa em tela cheia' : 'Abrir mapa em tela cheia'}
-          style={{
-            position: 'absolute',
-            top: 10,
-            left: 10,
-            zIndex: 10,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '7px 12px',
-            borderRadius: 8,
-            border: `1px solid ${CORES.douradoBorda}`,
-            background: 'rgba(11,29,42,0.8)',
-            color: CORES.textoForte,
-            fontFamily: 'Georgia, serif',
-            fontSize: 12.5,
-            cursor: 'pointer',
-          }}
-        >
-          {expandido ? <Minimize2 size={14} strokeWidth={1.5} /> : <Maximize2 size={14} strokeWidth={1.5} />}
-          {expandido ? 'Fechar' : 'Tela cheia'}
-        </button>
+        {/* Em tela cheia o rodapé do mapa some, então o botão de fechar fica no
+            canto de BAIXO. Antes ficava no canto de cima à esquerda e tapava a
+            lista de resultados da busca (achado do Rafael, 2026-09-23). Com o
+            mapa pequeno o botão mora no rodapé, logo abaixo. */}
+        {expandido && (
+          <button
+            type="button"
+            onClick={() => setExpandido(false)}
+            aria-label="Fechar mapa em tela cheia"
+            className="btn-tela-cheia"
+            style={{ position: 'absolute', bottom: 34, left: 10, zIndex: 10 }}
+          >
+            <Minimize2 size={14} strokeWidth={1.5} />
+            Fechar
+          </button>
+        )}
       </div>
 
       {!expandido && (
@@ -452,6 +443,16 @@ export default function MapaPublicoCemiterio({
               <span>Arraste para andar pelo cemitério</span>
               <span>Use + e − para aproximar</span>
             </div>
+            <button
+              type="button"
+              onClick={() => setExpandido(true)}
+              aria-label="Abrir mapa em tela cheia"
+              className="btn-tela-cheia"
+              style={{ margin: '4px auto 8px' }}
+            >
+              <Maximize2 size={14} strokeWidth={1.5} />
+              Tela cheia
+            </button>
             <p style={{ fontSize: 11, color: CORES.textoFraco }}>
               {memoriais.features.length} túmulo{memoriais.features.length === 1 ? '' : 's'} com memorial em {cemiterioNome}
             </p>

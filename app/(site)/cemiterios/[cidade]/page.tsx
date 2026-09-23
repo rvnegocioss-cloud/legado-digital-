@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Migalhas from "@/components/public/Migalhas";
 import { notFound } from "next/navigation";
-import { MapPin, Satellite } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import "../cemiterios.css";
 
@@ -64,12 +64,6 @@ export default async function CidadeCemiteriosPage({
               <div>
                 <p className="nome">{c.nome.trim()}</p>
                 {c.endereco && <p className="meta">{c.endereco.trim()}</p>}
-                {c.tem_ortomosaico && (
-                  <span className="selo">
-                    <Satellite size={11} strokeWidth={1.5} style={{ verticalAlign: -1 }} /> Mapa aéreo
-                    de drone
-                  </span>
-                )}
               </div>
             </Link>
           ))}

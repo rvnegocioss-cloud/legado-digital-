@@ -218,8 +218,7 @@ export default async function Home() {
                 <div className="nome">{destaque.cemiterio.nome.trim()}</div>
                 <p className="small">
                   {destaque.cemiterio.cidade} — {destaque.cemiterio.estado} ·{" "}
-                  {destaque.total} {destaque.total === 1 ? "memorial" : "memoriais"} · mapeado com
-                  drone pelo Legado Digital
+                  {destaque.total} {destaque.total === 1 ? "memorial" : "memoriais"}
                 </p>
                 <div className="row" style={{ marginTop: 12 }}>
                   <Link href={destaque.href} className="btn">

@@ -533,8 +533,11 @@ html {
 }
 
 .cp { width: 210px; line-height: 1.35; }
-.cp-lapide { height: 84px; overflow: hidden; }
-.cp-lapide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cp-lapide { background: #0B1D2A; display: flex; justify-content: center; }
+/* A foto da lápide CABE inteira no card: largura toda, altura proporcional, com
+   teto de 150px (foto em pé encolhe e centraliza em vez de cortar). A faixa
+   fixa de 84px copiada da Central cortava a foto ao meio. */
+.cp-lapide img { width: 100%; height: auto; max-height: 150px; object-fit: contain; display: block; }
 .cp-corpo { padding: 9px 11px 11px; }
 .cp-eyebrow { font-size: 8.5px; text-transform: uppercase; letter-spacing: 1.3px; font-weight: 600; margin: 0; color: var(--ld-gold, #C9A46A); }
 .cp-nome { font-size: 13px; font-weight: 700; margin: 1px 0 0; color: #F4F7FA; }
@@ -562,3 +565,11 @@ html {
   text-decoration-color: rgba(201,164,106,0.55); text-underline-offset: 2px; overflow-wrap: anywhere;
 }
 .cp-cta { font-size: 10px; color: var(--ld-gold-lite, #dfc08a); }
+
+/* Botão de tela cheia do mapa público (fica no rodapé do mapa). */
+.btn-tela-cheia {
+  display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px;
+  border: 1px solid var(--ld-border-strong, rgba(201,164,106,0.32)); background: rgba(11,29,42,0.85);
+  color: var(--ld-fg, #F5F2EB); font-family: var(--ld-font-corpo); font-size: 12.5px; cursor: pointer;
+}
+.btn-tela-cheia:hover { border-color: var(--ld-gold, #C9A46A); color: var(--ld-gold-lite, #dfc08a); }
