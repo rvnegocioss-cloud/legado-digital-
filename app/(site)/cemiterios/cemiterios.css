@@ -260,13 +260,12 @@
 /* ---- Informações do cemitério, ao lado do botão de rota (2026-09-23) ---- */
 .cem .topo-cemiterio .acoes { align-items: flex-start; flex-wrap: wrap; justify-content: flex-end; }
 
+/* Sem moldura: texto solto ao lado do botão (o quadrado em volta ficou feio,
+   pedido do Rafael, 2026-09-23). */
 .cem .ficha-cemiterio {
-  background: var(--ld-surface);
-  border: 1px solid var(--ld-border);
-  border-radius: var(--ld-raio-card);
-  padding: 16px 18px;
   width: 380px;
   max-width: 100%;
+  padding: 0;
 }
 .cem .ficha-cemiterio h2 {
   font-family: var(--ld-font-corpo);
@@ -300,12 +299,7 @@
 }
 .cem .sobre-grade { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 24px; align-items: start; }
 .cem .sobre-texto { color: var(--ld-fg-mut); margin: 0; line-height: 1.75; max-width: 60ch; }
-.cem .sobre-bloco {
-  background: var(--ld-surface);
-  border: 1px solid var(--ld-border);
-  border-radius: var(--ld-raio-card);
-  padding: 16px 18px;
-}
+.cem .sobre-bloco { padding: 0; }
 .cem .sobre-bloco h3 {
   font-family: var(--ld-font-corpo);
   font-size: 13px;
