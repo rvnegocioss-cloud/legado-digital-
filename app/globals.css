@@ -507,3 +507,65 @@ html {
   box-shadow: 0 0 0 100vmax var(--mem-fundo-topo, #0f2436);
   clip-path: inset(0 -100vmax);
 }
+
+/* ---- Card do pino no mapa PÚBLICO do cemitério (components/public/CardPino.tsx) ----
+   2026-09-23. Substitui o card branco padrão do MapLibre (Georgia, miniaturas
+   de 36px). Navy + borda dourada, fonte e cores do padrão do site (tokens.css).
+   O MapLibre impõe fundo, fonte e padding próprios dentro do popup, por isso a
+   sobrescrita precisa ser feita aqui, pela classe do popup. */
+.card-pino-publico { max-width: none !important; z-index: 30; }
+.card-pino-publico .maplibregl-popup-content {
+  font-family: var(--ld-font-corpo);
+  background: var(--ld-bg-alt, #0f2436);
+  color: var(--ld-fg, #F5F2EB);
+  border: 1px solid var(--ld-border-strong, rgba(201,164,106,0.32));
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(0,0,0,0.5);
+  padding: 12px;
+}
+.card-pino-publico .maplibregl-popup-tip { border-top-color: var(--ld-bg-alt, #0f2436) !important; border-bottom-color: var(--ld-bg-alt, #0f2436) !important; }
+.card-pino-publico .maplibregl-popup-close-button {
+  color: var(--ld-gold, #C9A46A); font-size: 20px; padding: 2px 9px; z-index: 2;
+}
+.card-pino-publico .maplibregl-popup-close-button:hover { background: rgba(201,164,106,0.12); }
+
+.cp { display: block; text-decoration: none; color: inherit; }
+.cp-unico { display: flex; align-items: center; gap: 12px; width: 250px; }
+.cp-jazigo { width: 296px; }
+
+/* Retrato: caixa 4:5 fixa, foco alto pra não cortar o rosto ao meio. */
+.cp-foto {
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  aspect-ratio: 4 / 5; border-radius: 9px; background: var(--ld-panel, #132734);
+  border: 1px solid var(--ld-border-strong, rgba(201,164,106,0.32));
+  color: var(--ld-gold, #C9A46A);
+}
+.cp-foto img { width: 100%; height: 100%; object-fit: cover; object-position: center 22%; display: block; }
+.cp-foto-unico { width: 64px; flex: 0 0 64px; }
+.cp-mono { font-family: var(--ld-font-titulo); font-size: 22px; }
+
+.cp-texto { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cp-tnome { font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--ld-fg, #F5F2EB); overflow-wrap: anywhere; }
+.cp-cta { font-size: 11.5px; color: var(--ld-gold-lite, #dfc08a); }
+
+/* Lápide 4:3 no topo do card de jazigo familiar. */
+.cp-lapide {
+  aspect-ratio: 4 / 3; overflow: hidden; border-radius: 10px; margin-bottom: 12px;
+  border: 1px solid var(--ld-border-strong, rgba(201,164,106,0.32)); background: var(--ld-panel, #132734);
+}
+.cp-lapide img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+
+.cp-cab { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; padding-right: 22px; }
+.cp-eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 1.6px; color: var(--ld-gold, #C9A46A); font-weight: 600; }
+.cp-nome { font-family: var(--ld-font-titulo); font-size: 18px; font-weight: 500; line-height: 1.2; margin: 0; color: var(--ld-fg, #F5F2EB); }
+.cp-meta { font-size: 11.5px; color: var(--ld-fg-faint, #7f8b93); }
+
+.cp-grade { display: grid; gap: 10px; max-height: 330px; overflow-y: auto; }
+.cp-tile { display: flex; flex-direction: column; gap: 6px; min-width: 0; text-decoration: none; color: inherit; }
+.cp-tile .cp-foto { width: 100%; transition: border-color .15s, transform .15s; }
+.cp-tile:hover .cp-foto { border-color: var(--ld-gold, #C9A46A); transform: translateY(-2px); }
+.cp-tile .cp-tnome { font-size: 12px; text-align: center; }
+.cp-selo {
+  align-self: center; font-size: 10px; color: var(--ld-gold, #C9A46A);
+  border: 1px solid var(--ld-border-strong, rgba(201,164,106,0.32)); border-radius: 20px; padding: 1px 8px;
+}

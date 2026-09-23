@@ -10,7 +10,7 @@ import { CORES } from '@/lib/publicTheme'
 import { normalizarOrtomosaico } from '@/lib/ortomosaico'
 import { estiloComOrtomosaico } from '@/lib/estiloSatelite'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
-import { urlMidiaProtegida } from '@/lib/urlMidia'
+import CardPino, { type MemorialDoCard } from '@/components/public/CardPino'
 
 registrarProtocoloPmtiles()
 
@@ -38,6 +38,7 @@ interface PinoProps extends MemorialDoTumulo {
   // Nome do jazigo ("Jazigo Família Saraiva"). Com mais de um memorial no
   // mesmo túmulo, é assim que o card se apresenta (2026-09-16).
   jazigo_nome?: string | null
+  foto_lapide?: string | null
   memoriais?: MemorialDoTumulo[] | string
 }
 
@@ -68,6 +69,9 @@ export default function MapaPublicoCemiterio({
   const mapRef = useRef<MapRef | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [hover, setHover] = useState<{ lng: number; lat: number; props: PinoProps } | null>(null)
+  // Card fixado por clique: sem isso o card fechava assim que o mouse saía da
+  // cruz, e no computador ninguém conseguia chegar nos nomes pra clicar.
+  const [fixo, setFixo] = useState(false)
   const [busca, setBusca] = useState('')
   const [expandido, setExpandido] = useState(false)
   // A camada de pinos espera a imagem da cruz existir no mapa -- ver
@@ -137,6 +141,7 @@ export default function MapaPublicoCemiterio({
   }, [ortomosaico])
 
   const aoMoverMouse = useCallback((e: MapLayerMouseEvent) => {
+    if (fixo) return
     const feature = e.features?.[0]
     if (!feature || feature.geometry.type !== 'Point') {
       setHover(null)
@@ -144,15 +149,26 @@ export default function MapaPublicoCemiterio({
     }
     const [lng, lat] = feature.geometry.coordinates as [number, number]
     setHover({ lng, lat, props: feature.properties as PinoProps })
-  }, [])
+  }, [fixo])
 
   const aoClicarPino = useCallback(
     (e: MapLayerMouseEvent) => {
-      const props = e.features?.[0]?.properties as PinoProps | undefined
-      if (!props) return
+      const feature = e.features?.[0]
+      const props = feature?.properties as PinoProps | undefined
+      // Clique em área vazia solta o card fixado.
+      if (!props || !feature || feature.geometry.type !== 'Point') {
+        setFixo(false)
+        setHover(null)
+        return
+      }
       // Com mais de um memorial no mesmo túmulo o clique não escolhe por conta
-      // própria: mantém o card aberto pra pessoa escolher qual quer abrir.
-      if ((props.total ?? 1) > 1) return
+      // própria: FIXA o card pra pessoa escolher qual quer abrir.
+      if ((props.total ?? 1) > 1) {
+        const [lng, lat] = feature.geometry.coordinates as [number, number]
+        setHover({ lng, lat, props })
+        setFixo(true)
+        return
+      }
       if (props.slug) router.push(`/homenagem/${props.slug}`)
     },
     [router]
@@ -192,6 +208,7 @@ export default function MapaPublicoCemiterio({
   const irPara = useCallback((s: { lng: number; lat: number; props: PinoProps }) => {
     mapRef.current?.flyTo({ center: [s.lng, s.lat], zoom: 20, duration: 1400 })
     setHover({ lng: s.lng, lat: s.lat, props: s.props })
+    setFixo((s.props.total ?? 1) > 1)
     setBusca('')
   }, [])
 
@@ -307,7 +324,7 @@ export default function MapaPublicoCemiterio({
           </div>
 
           <p style={{ margin: 0, fontSize: 11.5, color: CORES.textoFraco, flex: '1 1 220px' }}>
-            Cada cruz no mapa é um memorial. Toque numa cruz para ver quem está ali.
+            Cada cruz no mapa é um memorial. Passe o mouse ou toque numa cruz para ver quem está ali; clique para fixar o card.
           </p>
         </div>
       )}
@@ -321,7 +338,7 @@ export default function MapaPublicoCemiterio({
           style={{ height: expandido ? '100%' : 620, width: '100%' }}
           interactiveLayerIds={['pinos-memorial']}
           onMouseMove={aoMoverMouse}
-          onMouseLeave={() => setHover(null)}
+          onMouseLeave={() => { if (!fixo) setHover(null) }}
           onClick={aoClicarPino}
           cursor={hover ? 'pointer' : 'grab'}
         >
@@ -343,92 +360,18 @@ export default function MapaPublicoCemiterio({
             latitude={hover.lat}
             anchor="bottom"
             offset={20}
-            closeButton={false}
+            className="card-pino-publico"
+            closeButton={fixo}
             closeOnClick={false}
+            onClose={() => {
+              setFixo(false)
+              setHover(null)
+            }}
           >
-            {(() => {
-              const lista = lerMemoriais(hover.props)
-              const varios = lista.length > 1
-              return (
-                <div style={{ minWidth: 190, maxWidth: 260, fontFamily: 'Georgia, serif' }}>
-                  {/* Túmulo com mais de um memorial se apresenta pelo nome da
-                      família, não por uma contagem seca (2026-09-16). Sem nome
-                      de jazigo cadastrado, cai na contagem de sempre. */}
-                  {varios && (
-                    <p
-                      style={{
-                        fontSize: hover.props.jazigo_nome ? 12.5 : 10,
-                        letterSpacing: hover.props.jazigo_nome ? 0 : 1.2,
-                        textTransform: hover.props.jazigo_nome ? 'none' : 'uppercase',
-                        fontWeight: hover.props.jazigo_nome ? 700 : 400,
-                        color: hover.props.jazigo_nome ? '#1a1a1a' : '#8a6d3b',
-                        margin: '0 0 8px',
-                        paddingBottom: 6,
-                        borderBottom: '1px solid rgba(0,0,0,0.08)',
-                      }}
-                    >
-                      {hover.props.jazigo_nome || `${lista.length} memoriais neste túmulo`}
-                      {/* Com o nome do jazigo no título, a contagem ainda
-                          precisa aparecer -- senão a pessoa não sabe que tem
-                          mais de uma pessoa ali pra escolher. */}
-                      {hover.props.jazigo_nome && (
-                        <span style={{ display: 'block', fontSize: 10.5, fontWeight: 400, color: '#666', marginTop: 2 }}>
-                          {lista.length} memoriais — deslize para escolher
-                        </span>
-                      )}
-                    </p>
-                  )}
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 210, overflowY: 'auto' }}>
-                    {lista.map((mem, i) => (
-                      <a
-                        key={mem.slug || i}
-                        href={mem.slug ? `/homenagem/${mem.slug}` : undefined}
-                        style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
-                      >
-                        <div
-                          style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: '50%',
-                            overflow: 'hidden',
-                            flexShrink: 0,
-                            background: CORES.fundoTopo,
-                            border: `1.5px solid ${CORES.dourado}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {mem.foto_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={urlMidiaProtegida(mem.foto_url) || mem.foto_url}
-                              alt=""
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                          ) : (
-                            <span style={{ color: CORES.dourado, fontSize: 16 }}>+</span>
-                          )}
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          {/* O nome aparece sempre, inclusive em memorial com
-                              senha: a trava protege o CONTEÚDO da página, não
-                              de quem é o túmulo -- o nome já está gravado na
-                              pedra, à vista de quem passa (2026-09-16). */}
-                          <p style={{ fontSize: 13, margin: 0, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {mem.nome}
-                          </p>
-                          <p style={{ fontSize: 10.5, margin: 0, color: '#666' }}>
-                            {mem.protegido ? 'Toque para entrar com a senha' : 'Toque para ver o memorial'}
-                          </p>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
+            <CardPino
+              dados={{ jazigo_nome: hover.props.jazigo_nome, foto_lapide: hover.props.foto_lapide }}
+              lista={lerMemoriais(hover.props) as MemorialDoCard[]}
+            />
           </Popup>
         )}
         </Map>
