@@ -359,6 +359,11 @@ export default function MapaPublicoCemiterio({
           onMouseLeave={() => { if (!fixo) agendarFechar() }}
           onClick={aoClicarPino}
           cursor={hover ? 'pointer' : 'grab'}
+          /* O crédito do mapa é obrigatório (termos do Esri World Imagery), mas
+             a caixa branca padrão do MapLibre brigava com o tema escuro e comia
+             a largura do mapa no celular. `compact` encolhe pra um "i" que abre
+             ao toque; a cor vem do CSS (.maplibregl-ctrl-attrib em globals). */
+          attributionControl={{ compact: true }}
         >
           <NavigationControl visualizePitch showZoom position="top-right" />
 

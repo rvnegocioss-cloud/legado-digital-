@@ -570,6 +570,26 @@ html {
 }
 .cp-cta { font-size: 9px; color: var(--ld-gold-lite, #dfc08a); }
 
+/* Crédito do mapa (MapLibre). É obrigatório pelos termos do Esri World
+   Imagery, então NÃO é removido -- só deixa de ser uma caixa branca em cima do
+   mapa escuro. Fechado é um "i" discreto; toca e abre o texto. */
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: rgba(11, 29, 42, 0.78) !important;
+  border-radius: 6px;
+  backdrop-filter: blur(2px);
+}
+.maplibregl-ctrl-attrib-inner,
+.maplibregl-ctrl-attrib-inner a {
+  color: rgba(232, 237, 242, 0.62) !important;
+  font-size: 10.5px;
+}
+.maplibregl-ctrl-attrib-inner a:hover { color: var(--ld-gold, #C9A46A) !important; }
+.maplibregl-ctrl-attrib-button {
+  background-color: rgba(11, 29, 42, 0.78) !important;
+  border-radius: 50%;
+}
+
 /* Botão de tela cheia do mapa público (fica no rodapé do mapa). */
 .btn-tela-cheia {
   display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px;
