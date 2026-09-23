@@ -94,7 +94,23 @@ export default async function CemiterioMapaPage({
     ),
   } as typeof memoriais;
 
-  const lista = memoriaisAssinados?.features || [];
+  // Um item por PESSOA. Cada feature do mapa é um TÚMULO e pode ter vários
+  // homenageados (`properties.memoriais`); listar só a feature escondia todo
+  // mundo depois do primeiro e contava túmulos como se fossem memoriais.
+  type Pessoa = { slug: string; nome: string | null; foto_url: string | null; protegido: boolean };
+  const lista: Pessoa[] = (memoriaisAssinados?.features || []).flatMap((f) => {
+    const p = f.properties as unknown as { memoriais?: Pessoa[] | string } & Pessoa;
+    let gente: Pessoa[] = [];
+    if (Array.isArray(p.memoriais)) gente = p.memoriais;
+    else if (typeof p.memoriais === "string") {
+      try {
+        gente = JSON.parse(p.memoriais);
+      } catch {
+        gente = [];
+      }
+    }
+    return gente.length ? gente : [{ slug: p.slug, nome: p.nome, foto_url: p.foto_url, protegido: p.protegido }];
+  });
   const rotaCemiterio = `https://www.google.com/maps/dir/?api=1&destination=${c.latitude},${c.longitude}`;
 
   return (
@@ -155,8 +171,7 @@ export default async function CemiterioMapaPage({
               <p className="nota-lista">Nenhum memorial publicado neste cemitério ainda.</p>
             ) : (
               <div className="rolagem">
-                {lista.map((f) => {
-                  const p = f.properties;
+                {lista.map((p) => {
                   const protegido = p?.protegido;
                   const nome = protegido ? "Memorial protegido" : p?.nome || "Sem nome";
                   return (
