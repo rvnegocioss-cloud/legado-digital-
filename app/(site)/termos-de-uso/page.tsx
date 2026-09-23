@@ -1,6 +1,4 @@
 import Link from "next/link";
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 import "../documento.css";
 
 // Reescrita 2026-09-23 (padronização do site público), junto com a Política
@@ -26,7 +24,7 @@ function Secao({ titulo, children }: { titulo: string; children: React.ReactNode
 export default function TermosDeUsoPage() {
   return (
     <div className="doc">
-      <SiteNav />
+
 
       <main>
         <div className="coluna">
@@ -143,7 +141,7 @@ export default function TermosDeUsoPage() {
         </div>
       </main>
 
-      <SiteFooter />
+
     </div>
   );
 }

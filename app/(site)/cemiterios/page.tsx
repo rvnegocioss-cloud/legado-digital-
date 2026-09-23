@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 import "./cemiterios.css";
 
 // Padronizada em 2026-09-23: saiu do lib/publicTheme (Georgia, 960px, fundo
@@ -30,7 +28,7 @@ export default async function CemiteriosPage() {
 
   return (
     <div className="cem">
-      <SiteNav />
+
 
       <main>
         <p className="eyebrow">Em memória</p>
@@ -62,7 +60,7 @@ export default async function CemiteriosPage() {
         )}
       </main>
 
-      <SiteFooter />
+
     </div>
   );
 }

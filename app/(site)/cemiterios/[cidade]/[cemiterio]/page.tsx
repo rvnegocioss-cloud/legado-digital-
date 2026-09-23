@@ -4,8 +4,6 @@ import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
 import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 import "../../cemiterios.css";
 
 // Reconstruída em 2026-09-23 a partir do protótipo aprovado pelo Rafael
@@ -100,7 +98,7 @@ export default async function CemiterioMapaPage({
 
   return (
     <div className="cem">
-      <SiteNav />
+
 
       <main>
         <Link href={`/cemiterios/${cidade}`} className="voltar">
@@ -183,7 +181,7 @@ export default async function CemiterioMapaPage({
         </div>
       </main>
 
-      <SiteFooter />
+
     </div>
   );
 }

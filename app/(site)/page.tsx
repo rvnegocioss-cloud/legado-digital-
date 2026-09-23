@@ -3,8 +3,6 @@ import { MapPin } from "lucide-react";
 import { supabaseServidor } from "@/lib/supabaseServidor";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 import NodesFamilia from "@/components/public/NodesFamilia";
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 import "./landing.css";
 
 // Landing oficial desde 2026-09-22 — implementação do protótipo aprovado pelo
@@ -67,7 +65,7 @@ export default async function Home() {
 
   return (
     <div className="landing">
-      <SiteNav inicio />
+
 
       {/* ---------- HERO: busca de memorial + prévia ---------- */}
       <section className="hero">
@@ -376,7 +374,7 @@ export default async function Home() {
         </div>
       </div>
 
-      <SiteFooter />
+
     </div>
   );
 }

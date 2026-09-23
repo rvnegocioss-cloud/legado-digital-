@@ -4,8 +4,6 @@ import { supabaseServidor } from "@/lib/supabaseServidor";
 import { tema, CORES } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -77,14 +75,14 @@ export default async function ParceiroPublicoPage({
   if (!parceiro) {
     return (
       <div style={tema.page}>
-        <SiteNav />
+
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 20px" }}>
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: 18, color: CORES.dourado, margin: 0 }}>Página não encontrada.</p>
             <p style={{ color: CORES.textoFraco, marginTop: 8 }}>Confira o endereço e tente novamente.</p>
           </div>
         </div>
-        <SiteFooter />
+
       </div>
     );
   }
@@ -124,7 +122,7 @@ export default async function ParceiroPublicoPage({
 
   return (
     <div style={tema.page}>
-      <SiteNav />
+
       <header style={tema.hero}>
         {p.logo_url && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -244,7 +242,7 @@ export default async function ParceiroPublicoPage({
         </section>
       </main>
 
-      <SiteFooter />
+
     </div>
   );
 }

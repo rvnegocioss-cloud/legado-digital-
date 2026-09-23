@@ -2,8 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Satellite } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 import "../cemiterios.css";
 
 // Padronizada em 2026-09-23 junto com as outras páginas de cemitério.
@@ -39,7 +37,7 @@ export default async function CidadeCemiteriosPage({
 
   return (
     <div className="cem">
-      <SiteNav />
+
 
       <main>
         <Link href="/cemiterios" className="voltar">
@@ -73,7 +71,7 @@ export default async function CidadeCemiteriosPage({
         </div>
       </main>
 
-      <SiteFooter />
+
     </div>
   );
 }

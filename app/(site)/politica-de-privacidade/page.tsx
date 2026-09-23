@@ -1,5 +1,3 @@
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 import "../documento.css";
 
 // Reescrita 2026-09-23 (padronização do site público). Antes esta página era
@@ -27,7 +25,7 @@ function Secao({ titulo, children }: { titulo: string; children: React.ReactNode
 export default function PoliticaPrivacidadePage() {
   return (
     <div className="doc">
-      <SiteNav />
+
 
       <main>
         <div className="coluna">
@@ -170,7 +168,7 @@ export default function PoliticaPrivacidadePage() {
         </div>
       </main>
 
-      <SiteFooter />
+
     </div>
   );
 }

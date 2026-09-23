@@ -69,6 +69,67 @@
 }
 .site-navbar .menu-area a:hover { color: #C9A46A; background: rgba(255,255,255,0.05); }
 
+/* ---- Caminho de migalhas (components/public/Migalhas.tsx) ----
+   Fica logo abaixo do menu, na mesma coluna do conteúdo. Não gruda ao rolar:
+   quem está descendo a página precisa se mover DENTRO dela; o caminho pra
+   fora está no topo e no rodapé, a um toque nos dois sentidos. */
+.site-migalhas {
+  border-bottom: 1px solid var(--ld-border);
+  background: rgba(8, 23, 34, 0.35);
+}
+.site-migalhas .inner {
+  max-width: var(--ld-largura);
+  margin: 0 auto;
+  padding: 10px var(--ld-gutter);
+}
+.site-migalhas ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-size: 12.5px;
+  font-family: var(--ld-font-corpo);
+}
+.site-migalhas li { display: flex; align-items: center; }
+.site-migalhas li + li::before {
+  content: "›";
+  color: var(--ld-fg-faint);
+  margin: 0 8px;
+  opacity: 0.7;
+}
+.site-migalhas a,
+.site-migalhas span {
+  color: var(--ld-fg-faint);
+  text-decoration: none;
+  /* alvo de toque de 44px mesmo com fonte de 12.5px */
+  padding: 12px 2px;
+  display: inline-block;
+}
+.site-migalhas a:hover { color: var(--ld-gold); }
+.site-migalhas .atual span { color: var(--ld-fg-mut); font-weight: 600; }
+
+/* No celular a trilha colapsa em "Início › … › atual": os níveis do meio
+   somem e viram reticências, pra trilha longa não quebrar em 3 linhas. */
+@media (max-width: 620px) {
+  .site-migalhas .meio { display: none; }
+  .site-migalhas .meio:first-of-type {
+    display: flex;
+    pointer-events: none;
+  }
+  .site-migalhas .meio:first-of-type a,
+  .site-migalhas .meio:first-of-type span {
+    font-size: 0;
+  }
+  .site-migalhas .meio:first-of-type a::after,
+  .site-migalhas .meio:first-of-type span::after {
+    content: "…";
+    font-size: 12.5px;
+  }
+}
+
 footer.site-footer {
   border-top: 1px solid rgba(201,164,106,0.1);
   padding: 40px var(--ld-gutter) 22px;

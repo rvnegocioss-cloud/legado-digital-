@@ -1,12 +1,10 @@
 import { tema } from "@/lib/publicTheme";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
-import SiteNav from "@/components/public/SiteNav";
-import SiteFooter from "@/components/public/SiteFooter";
 
 export default function BuscaPage() {
   return (
     <div style={tema.page}>
-      <SiteNav />
+
       <header style={tema.hero}>
         <div style={tema.eyebrow}>Em Memória</div>
         <h1 style={tema.titulo}>Buscar um memorial</h1>
@@ -20,7 +18,7 @@ export default function BuscaPage() {
         <BuscaMemorial />
       </main>
 
-      <SiteFooter />
+
     </div>
   );
 }
