@@ -507,6 +507,8 @@ export default async function PerfilMemorialPage({
   // Só vira link se o cemitério for público -- a página de cemitério filtra por
   // `publico`, então linkar um cemitério privado levaria a um 404.
   let cemiterioHref: string | null = null;
+  let cidadeHref: string | null = null;
+  let cidadeRotulo: string | null = null;
   if (localizacao?.cemiterio_nome) {
     const { data: cem } = await supabase
       .from("homenagens")
@@ -535,6 +537,8 @@ export default async function PerfilMemorialPage({
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "")}-${c.estado.trim().toLowerCase()}`;
       cemiterioHref = `/cemiterios/${cidadeSlug}/${c.slug}`;
+      cidadeHref = `/cemiterios/${cidadeSlug}`;
+      cidadeRotulo = `${c.cidade.trim()} — ${c.estado.trim().toUpperCase()}`;
     }
   }
 
@@ -663,6 +667,15 @@ export default async function PerfilMemorialPage({
             <span style={estiloTopo.migalhaSep}>›</span>
             <a href="/cemiterios" style={estiloTopo.migalhaLink}>Cemitérios</a>
             <span style={estiloTopo.migalhaSep}>›</span>
+            {/* Mesmo nível de cidade que a página do cemitério tem -- a trilha
+                do memorial tem que ser a mesma hierarquia, não uma versão
+                encurtada dela. */}
+            {cidadeHref && cidadeRotulo && (
+              <>
+                <a href={cidadeHref} style={estiloTopo.migalhaLink}>{cidadeRotulo}</a>
+                <span style={estiloTopo.migalhaSep}>›</span>
+              </>
+            )}
             {/* Vira link quando o cemitério é público: é a volta que faltava
                 pro ciclo do wireframe. Sem página pública, segue texto. */}
             {cemiterioHref ? (
