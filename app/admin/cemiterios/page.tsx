@@ -22,11 +22,27 @@ const CemiterioMapPicker = dynamic(() => import('@/components/CemiterioMapPicker
   loading: () => <div className="h-[280px] rounded-md bg-[var(--tema-zinc-800)] animate-pulse" />,
 })
 
+// Contato publico do cemiterio. O rotulo diz DE QUEM e o numero: o WhatsApp que
+// existe pode ser o da Prefeitura, e a pagina publica precisa dizer isso em vez
+// de fingir que e o do proprio cemiterio.
+interface ContatoCemiterio {
+  rotulo: string
+  tipo: 'telefone' | 'whatsapp'
+  valor: string
+}
+
 interface Cemiterio {
   id: string
   nome: string
   tipo: string
   endereco: string | null
+  bairro: string | null
+  horario_visitacao: string | null
+  descricao_publica: string | null
+  site_url: string | null
+  servicos: string[] | null
+  contatos: ContatoCemiterio[] | null
+  informacoes_fonte: string | null
   cidade: string | null
   estado: string | null
   latitude: number | null
@@ -40,6 +56,13 @@ const FORM_INICIAL = {
   nome: '',
   tipo: 'cemiterio',
   endereco: '',
+  bairro: '',
+  horario_visitacao: '',
+  descricao_publica: '',
+  site_url: '',
+  servicosTexto: '',
+  contatos: [] as ContatoCemiterio[],
+  informacoes_fonte: '',
   cidade: '',
   estado: '',
   latitude: null as number | null,
@@ -82,6 +105,13 @@ export default function AdminCemiterios() {
       nome: c.nome,
       tipo: c.tipo,
       endereco: c.endereco || '',
+      bairro: c.bairro || '',
+      horario_visitacao: c.horario_visitacao || '',
+      descricao_publica: c.descricao_publica || '',
+      site_url: c.site_url || '',
+      servicosTexto: (c.servicos || []).join('\n'),
+      contatos: c.contatos || [],
+      informacoes_fonte: c.informacoes_fonte || '',
       cidade: c.cidade || '',
       estado: c.estado || '',
       latitude: c.latitude,
@@ -102,7 +132,29 @@ export default function AdminCemiterios() {
     setSalvando(true)
     setErro('')
 
-    const payload = { ...form, updated_at: new Date().toISOString() }
+    const { servicosTexto, ...resto } = form
+    const vazio = (t: string) => (t.trim() === '' ? null : t.trim())
+    const contatos = form.contatos
+      .map((c) => ({ ...c, rotulo: c.rotulo.trim(), valor: c.valor.trim() }))
+      .filter((c) => c.valor !== '')
+    const servicos = servicosTexto
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+    const temInformacao =
+      contatos.length > 0 || servicos.length > 0 || !!vazio(form.horario_visitacao) || !!vazio(form.descricao_publica)
+    const payload = {
+      ...resto,
+      bairro: vazio(form.bairro),
+      horario_visitacao: vazio(form.horario_visitacao),
+      descricao_publica: vazio(form.descricao_publica),
+      site_url: vazio(form.site_url),
+      informacoes_fonte: vazio(form.informacoes_fonte),
+      servicos: servicos.length ? servicos : null,
+      contatos,
+      informacoes_atualizadas_em: temInformacao ? new Date().toISOString().slice(0, 10) : null,
+      updated_at: new Date().toISOString(),
+    }
 
     const { error } = editando
       ? await supabase.from('cemiterios').update(payload).eq('id', editando.id)
@@ -206,6 +258,129 @@ export default function AdminCemiterios() {
                     className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white w-20"
                   />
                 </div>
+              </div>
+
+              {/* Informacoes que aparecem na pagina PUBLICA do cemiterio, ao lado do
+                  botao "Caminho ate o cemiterio". Campo em branco nao aparece. */}
+              <div className="pt-2 border-t border-[var(--tema-zinc-800)]">
+                <p className="text-sm font-medium text-[var(--tema-zinc-300)]">Informações na página pública</p>
+                <p className="text-xs text-[var(--tema-zinc-500)] mt-0.5">
+                  Aparecem em /cemiterios, ao lado do botão de rota. Deixe em branco o que não souber.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Bairro</label>
+                  <Input value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Horário de visitação</label>
+                  <Input
+                    placeholder="Ex: Todos os dias, das 7h às 17h30"
+                    value={form.horario_visitacao}
+                    onChange={(e) => setForm({ ...form, horario_visitacao: e.target.value })}
+                    className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Sobre o cemitério</label>
+                <textarea
+                  rows={3}
+                  value={form.descricao_publica}
+                  onChange={(e) => setForm({ ...form, descricao_publica: e.target.value })}
+                  className="w-full rounded-md bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Serviços (um por linha)</label>
+                <textarea
+                  rows={3}
+                  value={form.servicosTexto}
+                  onChange={(e) => setForm({ ...form, servicosTexto: e.target.value })}
+                  className="w-full rounded-md bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Site ou consulta de sepultados (link)</label>
+                <Input
+                  placeholder="https://"
+                  value={form.site_url}
+                  onChange={(e) => setForm({ ...form, site_url: e.target.value })}
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Contatos</label>
+                <p className="text-xs text-[var(--tema-zinc-500)] mb-2">
+                  O rótulo diz de quem é o número (ex: &quot;Cemitério&quot;, &quot;WhatsApp da Prefeitura&quot;) — é o que a
+                  página pública mostra acima dele.
+                </p>
+                <div className="space-y-2">
+                  {form.contatos.map((ct, i) => (
+                    <div key={i} className="flex gap-2 items-start">
+                      <select
+                        value={ct.tipo}
+                        onChange={(e) => {
+                          const c = [...form.contatos]
+                          c[i] = { ...ct, tipo: e.target.value as 'telefone' | 'whatsapp' }
+                          setForm({ ...form, contatos: c })
+                        }}
+                        className="rounded-md bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] text-white text-sm p-2"
+                      >
+                        <option value="telefone">Telefone</option>
+                        <option value="whatsapp">WhatsApp</option>
+                      </select>
+                      <Input
+                        placeholder="Rótulo"
+                        value={ct.rotulo}
+                        onChange={(e) => {
+                          const c = [...form.contatos]
+                          c[i] = { ...ct, rotulo: e.target.value }
+                          setForm({ ...form, contatos: c })
+                        }}
+                        className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white flex-1"
+                      />
+                      <Input
+                        placeholder="(34) 3000-0000"
+                        value={ct.valor}
+                        onChange={(e) => {
+                          const c = [...form.contatos]
+                          c[i] = { ...ct, valor: e.target.value }
+                          setForm({ ...form, contatos: c })
+                        }}
+                        className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white w-40"
+                      />
+                      <button
+                        type="button"
+                        aria-label="Remover contato"
+                        onClick={() => setForm({ ...form, contatos: form.contatos.filter((_, k) => k !== i) })}
+                        className="text-red-400 text-sm px-2 py-2"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm({ ...form, contatos: [...form.contatos, { rotulo: '', tipo: 'telefone', valor: '' }] })
+                  }
+                  className="mt-2 text-xs text-[var(--tema-blue-400)]"
+                >
+                  + Adicionar contato
+                </button>
+              </div>
+              <div>
+                <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">De onde vieram essas informações</label>
+                <Input
+                  placeholder="Ex: site da Prefeitura, ligação em 23/09"
+                  value={form.informacoes_fonte}
+                  onChange={(e) => setForm({ ...form, informacoes_fonte: e.target.value })}
+                  className="bg-[var(--tema-zinc-800)] border-[var(--tema-zinc-700)] text-white"
+                />
               </div>
 
               <div>

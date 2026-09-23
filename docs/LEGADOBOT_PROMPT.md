@@ -133,6 +133,10 @@ Todo lead cai na tabela `leads`, aparece na Central de Comunicações, acende o 
 
 O menu "Entrar" do site aberto (chamava "Área Restrita" até 2026-09-22) tem só **Portal do Parceiro** e **Portal da Família** — o acesso da equipe (`/admin/login`) saiu do menu público de propósito, mas continua funcionando normalmente pra quem digita o endereço.
 
+## Informações do cemitério na página pública (2026-09-23)
+
+A página pública de cada cemitério (`/cemiterios/[cidade]/[cemiterio]`) mostra, ao lado do botão "Caminho até o cemitério", uma ficha com **endereço, horário de visitação e contatos** (telefone e WhatsApp clicáveis) e, abaixo do mapa, "Sobre o cemitério" (texto, serviços, consulta de sepultados). Quem preenche isso é a Central, em `/admin/cemiterios` (seção "Informações na página pública"). **Cada contato tem um rótulo dizendo de quem é o número** — o WhatsApp do São Pedro é o da Prefeitura (consulta de sepulturas), não do cemitério; nunca diga que é o do cemitério. Campo em branco não aparece na página.
+
 ## Menu e rodapé do site aberto (reescritos 2026-09-22)
 
 **Botões de voltar (2026-09-23):** no topo de toda página pública (menos a home) há uma seta **← que volta pra página de onde a pessoa veio** (mapa, busca, outro memorial); se não houver página anterior no site (ex: chegou pelo QR Code) ela leva à home. Ao lado, a logo leva à home e o texto **"Voltar pro site"** também. Os "← Voltar" das páginas de cemitério seguem a mesma regra.
