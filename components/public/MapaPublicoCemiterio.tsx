@@ -23,7 +23,7 @@ const CRUZ_SVG =
   '<path d="M14 7v14M8 12h12" stroke="#C9A46A" stroke-width="2.2" stroke-linecap="round"/></svg>'
 
 // Altura aproximada (px) do card de jazigo familiar, usada pra abrir espaço em cima da cruz.
-const ALTURA_CARD_JAZIGO = 360
+const ALTURA_CARD_JAZIGO = 260
 
 interface MemorialDoTumulo {
   slug: string
@@ -75,6 +75,19 @@ export default function MapaPublicoCemiterio({
   // Card fixado por clique: sem isso o card fechava assim que o mouse saía da
   // cruz, e no computador ninguém conseguia chegar nos nomes pra clicar.
   const [fixo, setFixo] = useState(false)
+  // O card NÃO pode sumir no instante em que o mouse sai da cruz -- senão não
+  // dá pra levar o mouse até ele e clicar num nome (achado do Rafael,
+  // 2026-09-23). Sai só depois de uma pequena folga sem estar na cruz nem no
+  // card; entrar no card cancela o fechamento.
+  const timerFechar = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cancelarFechar = useCallback(() => {
+    if (timerFechar.current) clearTimeout(timerFechar.current)
+    timerFechar.current = null
+  }, [])
+  const agendarFechar = useCallback(() => {
+    cancelarFechar()
+    timerFechar.current = setTimeout(() => setHover(null), 400)
+  }, [cancelarFechar])
   const [busca, setBusca] = useState('')
   const [expandido, setExpandido] = useState(false)
   // A camada de pinos espera a imagem da cruz existir no mapa -- ver
@@ -143,16 +156,20 @@ export default function MapaPublicoCemiterio({
     }
   }, [ortomosaico])
 
-  const aoMoverMouse = useCallback((e: MapLayerMouseEvent) => {
-    if (fixo) return
-    const feature = e.features?.[0]
-    if (!feature || feature.geometry.type !== 'Point') {
-      setHover(null)
-      return
-    }
-    const [lng, lat] = feature.geometry.coordinates as [number, number]
-    setHover({ lng, lat, props: feature.properties as PinoProps })
-  }, [fixo])
+  const aoMoverMouse = useCallback(
+    (e: MapLayerMouseEvent) => {
+      if (fixo) return
+      const feature = e.features?.[0]
+      if (!feature || feature.geometry.type !== 'Point') {
+        agendarFechar()
+        return
+      }
+      cancelarFechar()
+      const [lng, lat] = feature.geometry.coordinates as [number, number]
+      setHover({ lng, lat, props: feature.properties as PinoProps })
+    },
+    [fixo, agendarFechar, cancelarFechar]
+  )
 
   const aoClicarPino = useCallback(
     (e: MapLayerMouseEvent) => {
@@ -160,6 +177,7 @@ export default function MapaPublicoCemiterio({
       const props = feature?.properties as PinoProps | undefined
       // Clique em área vazia solta o card fixado.
       if (!props || !feature || feature.geometry.type !== 'Point') {
+        cancelarFechar()
         setFixo(false)
         setHover(null)
         return
@@ -177,7 +195,7 @@ export default function MapaPublicoCemiterio({
       }
       if (props.slug) router.push(`/homenagem/${props.slug}`)
     },
-    [router]
+    [router, cancelarFechar]
   )
 
   // Busca dentro do próprio mapa: os nomes vão aparecendo enquanto a pessoa
@@ -335,7 +353,7 @@ export default function MapaPublicoCemiterio({
           </div>
 
           <p style={{ margin: 0, fontSize: 11.5, color: CORES.textoFraco, flex: '1 1 220px' }}>
-            Cada cruz no mapa é um memorial. Passe o mouse ou toque numa cruz para ver quem está ali; clique para fixar o card.
+            Cada cruz no mapa é um memorial. Passe o mouse ou toque numa cruz para ver quem está ali.
           </p>
         </div>
       )}
@@ -349,7 +367,7 @@ export default function MapaPublicoCemiterio({
           style={{ height: expandido ? '100%' : 620, width: '100%' }}
           interactiveLayerIds={['pinos-memorial']}
           onMouseMove={aoMoverMouse}
-          onMouseLeave={() => { if (!fixo) setHover(null) }}
+          onMouseLeave={() => { if (!fixo) agendarFechar() }}
           onClick={aoClicarPino}
           cursor={hover ? 'pointer' : 'grab'}
         >
@@ -369,7 +387,7 @@ export default function MapaPublicoCemiterio({
           <Popup
             longitude={hover.lng}
             latitude={hover.lat}
-            offset={20}
+            offset={14}
             className="card-pino-publico"
             closeButton={fixo}
             closeOnClick={false}
@@ -378,10 +396,12 @@ export default function MapaPublicoCemiterio({
               setHover(null)
             }}
           >
-            <CardPino
-              dados={{ jazigo_nome: hover.props.jazigo_nome, foto_lapide: hover.props.foto_lapide }}
-              lista={lerMemoriais(hover.props) as MemorialDoCard[]}
-            />
+            <div onMouseEnter={cancelarFechar} onMouseLeave={() => { if (!fixo) agendarFechar() }}>
+              <CardPino
+                dados={{ jazigo_nome: hover.props.jazigo_nome, foto_lapide: hover.props.foto_lapide }}
+                lista={lerMemoriais(hover.props) as MemorialDoCard[]}
+              />
+            </div>
           </Popup>
         )}
         </Map>
