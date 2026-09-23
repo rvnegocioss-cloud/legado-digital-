@@ -56,21 +56,12 @@ function Node({ mem }: { mem: MemorialDoCard }) {
 
 export default function CardPino({ dados, lista }: { dados: DadosDoCard; lista: MemorialDoCard[] }) {
   const varios = lista.length > 1
-  const foto = dados.foto_lapide ? urlMidiaProtegida(dados.foto_lapide) || dados.foto_lapide : null
 
   return (
     <div className="cp">
-      {varios && foto && (
-        <div className="cp-lapide">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={foto} alt="Foto da lápide" loading="lazy" />
-        </div>
-      )}
-
       <div className="cp-corpo">
         {varios && (
           <p className="cp-cab">
-            <span className="cp-eyebrow">Jazigo familiar</span>
             <span className="cp-nome">{dados.jazigo_nome || 'Jazigo da família'}</span>
           </p>
         )}

@@ -532,7 +532,7 @@ html {
   background: rgba(15,36,54,0.7); border-radius: 0 0 0 8px;
 }
 
-.cp { width: 158px; line-height: 1.3; }
+.cp { width: 176px; line-height: 1.3; }
 .cp-lapide { background: #0B1D2A; display: flex; justify-content: center; }
 /* A foto da lápide CABE inteira no card: largura toda, altura proporcional, com
    teto de 100px (foto em pé encolhe e centraliza em vez de cortar). A faixa
