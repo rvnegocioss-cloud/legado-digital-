@@ -135,7 +135,7 @@ O menu "Entrar" do site aberto (chamava "Área Restrita" até 2026-09-22) tem s�
 
 ## Informações do cemitério na página pública (2026-09-23)
 
-A página pública de cada cemitério (`/cemiterios/[cidade]/[cemiterio]`) mostra, ao lado do botão "Caminho até o cemitério", uma ficha com **endereço, horário de visitação e contatos** (telefone e WhatsApp clicáveis) e, abaixo do mapa, "Sobre o cemitério" (texto, serviços, consulta de sepultados). Quem preenche isso é a Central, em `/admin/cemiterios` (seção "Informações na página pública"). **Cada contato tem um rótulo dizendo de quem é o número** — o WhatsApp do São Pedro é o da Prefeitura (consulta de sepulturas), não do cemitério; nunca diga que é o do cemitério. Campo em branco não aparece na página.
+Na página pública de cada cemitério (`/cemiterios/[cidade]/[cemiterio]`), **endereço, horário de visitação e telefone ficam dentro da seção "Sobre o cemitério", abaixo do mapa** — não existe mais ficha separada ao lado do botão de rota. É uma grade só: `Endereço · Visitação · Contato` numa linha, `descrição · Serviços · Site oficial` na outra. Quem preenche é a Central, em `/admin/cemiterios` (seção "Informações na página pública"). **Desde 2026-09-23 fica só o telefone do próprio cemitério** (São Pedro (34) 3219-7017, Bom Pastor (34) 3238-2930); os números da Secretaria de Serviços Urbanos e o WhatsApp do SIM foram retirados da página a pedido do Rafael. O José Lázaro (Tupaciguara) não tem telefone próprio conhecido: aparece o da Prefeitura, com esse rótulo — **nunca diga que é o número do cemitério.** Campo em branco não aparece na página.
 
 ## Menu e rodapé do site aberto (reescritos 2026-09-22)
 
