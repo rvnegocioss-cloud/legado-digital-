@@ -263,9 +263,9 @@
 /* Sem moldura: texto solto ao lado do botão (o quadrado em volta ficou feio,
    pedido do Rafael, 2026-09-23). */
 .cem .ficha-cemiterio {
-  width: 380px;
-  max-width: 100%;
-  padding: 0;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ld-border);
 }
 .cem .ficha-cemiterio h2 {
   font-family: var(--ld-font-corpo);
@@ -276,7 +276,7 @@
   color: var(--ld-gold);
   margin: 0 0 10px;
 }
-.cem .ficha-cemiterio dl { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.cem .ficha-cemiterio dl { margin: 0; display: grid; grid-template-columns: 1.4fr 1fr 1.4fr; gap: 24px; align-items: start; }
 .cem .ficha-cemiterio dt { font-size: 11px; color: var(--ld-fg-faint); margin: 0 0 1px; }
 .cem .ficha-cemiterio dd { margin: 0; font-size: var(--ld-t-apoio); color: var(--ld-fg); line-height: 1.5; }
 .cem .contatos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
@@ -314,5 +314,5 @@
 @media (max-width: 1000px) {
   .cem .sobre-grade { grid-template-columns: 1fr; }
   .cem .topo-cemiterio .acoes { justify-content: flex-start; width: 100%; }
-  .cem .ficha-cemiterio { width: 100%; }
+  .cem .ficha-cemiterio dl { grid-template-columns: 1fr; gap: 16px; }
 }

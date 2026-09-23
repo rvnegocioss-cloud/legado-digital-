@@ -168,59 +168,6 @@ export default async function CemiterioMapaPage({
           </div>
 
           <div className="acoes">
-            {/* Informações do cemitério ao lado do "Caminho até o cemitério"
-                (pedido do Rafael, 2026-09-23). Campo sem dado não aparece:
-                nunca um "—" nem uma linha vazia. */}
-            {(c.endereco || c.horario_visitacao || (c.contatos && c.contatos.length > 0)) && (
-              <div className="ficha-cemiterio">
-                <h2>Informações</h2>
-                <dl>
-                  {c.endereco && (
-                    <div>
-                      <dt>Endereço</dt>
-                      <dd>
-                        {c.endereco}
-                        {c.bairro ? ` — Bairro ${c.bairro}` : ""}
-                        <br />
-                        {c.cidade} — {c.estado}
-                      </dd>
-                    </div>
-                  )}
-                  {c.horario_visitacao && (
-                    <div>
-                      <dt>Visitação</dt>
-                      <dd>{c.horario_visitacao}</dd>
-                    </div>
-                  )}
-                  {c.contatos && c.contatos.length > 0 && (
-                    <div>
-                      <dt>Contato</dt>
-                      <dd>
-                        <ul className="contatos">
-                          {c.contatos.map((ct, i) => (
-                            <li key={i}>
-                              <span className="rotulo">{ct.rotulo}</span>
-                              <a
-                                href={
-                                  ct.tipo === "whatsapp"
-                                    ? `https://wa.me/${soDigitos(ct.valor)}`
-                                    : `tel:+${soDigitos(ct.valor)}`
-                                }
-                                {...(ct.tipo === "whatsapp" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                              >
-                                {ct.tipo === "whatsapp" ? "WhatsApp " : ""}
-                                {ct.valor}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-              </div>
-            )}
-
             <a href={rotaCemiterio} target="_blank" rel="noopener noreferrer" className="btn">
               Caminho até o cemitério
             </a>
@@ -277,6 +224,59 @@ export default async function CemiterioMapaPage({
             </p>
           </aside>
         </div>
+
+        {/* Informações do cemitério ao lado do "Caminho até o cemitério"
+            (pedido do Rafael, 2026-09-23). Campo sem dado não aparece:
+            nunca um "—" nem uma linha vazia. */}
+        {(c.endereco || c.horario_visitacao || (c.contatos && c.contatos.length > 0)) && (
+          <div className="ficha-cemiterio">
+            <h2>Informações</h2>
+            <dl>
+              {c.endereco && (
+                <div>
+                  <dt>Endereço</dt>
+                  <dd>
+                    {c.endereco}
+                    {c.bairro ? ` — Bairro ${c.bairro}` : ""}
+                    <br />
+                    {c.cidade} — {c.estado}
+                  </dd>
+                </div>
+              )}
+              {c.horario_visitacao && (
+                <div>
+                  <dt>Visitação</dt>
+                  <dd>{c.horario_visitacao}</dd>
+                </div>
+              )}
+              {c.contatos && c.contatos.length > 0 && (
+                <div>
+                  <dt>Contato</dt>
+                  <dd>
+                    <ul className="contatos">
+                      {c.contatos.map((ct, i) => (
+                        <li key={i}>
+                          <span className="rotulo">{ct.rotulo}</span>
+                          <a
+                            href={
+                              ct.tipo === "whatsapp"
+                                ? `https://wa.me/${soDigitos(ct.valor)}`
+                                : `tel:+${soDigitos(ct.valor)}`
+                            }
+                            {...(ct.tipo === "whatsapp" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                          >
+                            {ct.tipo === "whatsapp" ? "WhatsApp " : ""}
+                            {ct.valor}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </div>
+        )}
 
         {(c.descricao_publica || (c.servicos && c.servicos.length > 0) || c.site_url) && (
           <section className="sobre-cemiterio">
