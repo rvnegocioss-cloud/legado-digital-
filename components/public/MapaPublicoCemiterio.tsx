@@ -132,9 +132,14 @@ export default function MapaPublicoCemiterio({
     // O crédito compacto do MapLibre nasce ABERTO (ele mesmo põe a classe
     // `maplibregl-compact-show`), ou seja, a faixa de texto continuava em cima
     // do mapa. Tirar a classe deixa só o "i"; quem quiser o crédito toca nele.
-    map.getContainer()
-      .querySelector('.maplibregl-ctrl-attrib.maplibregl-compact')
-      ?.classList.remove('maplibregl-compact-show')
+    // Roda no primeiro `idle`, não no `load`: o MapLibre põe a classe de volta
+    // quando termina de montar o controle, depois do `load`.
+    const recolherCredito = () =>
+      map.getContainer()
+        .querySelector('.maplibregl-ctrl-attrib.maplibregl-compact')
+        ?.classList.remove('maplibregl-compact-show')
+    recolherCredito()
+    map.once('idle', recolherCredito)
 
     // A camada de pinos só entra depois que a imagem da cruz existe no mapa.
     // Antes, a camada era criada na mesma hora e a imagem chegava depois (o
