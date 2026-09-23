@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Migalhas from "@/components/public/Migalhas";
 import { MapPin } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import "./cemiterios.css";
@@ -29,6 +30,8 @@ export default async function CemiteriosPage() {
   return (
     <div className="cem">
 
+
+      <Migalhas trilha={[{ rotulo: "Início", href: "/" }, { rotulo: "Cemitérios" }]} />
 
       <main>
         <p className="eyebrow">Em memória</p>

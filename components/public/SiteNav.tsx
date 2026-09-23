@@ -30,21 +30,26 @@ function Seta() {
   );
 }
 
-export default function SiteNav({ inicio = false }: { inicio?: boolean }) {
+export default function SiteNav() {
   const [areaAberta, setAreaAberta] = useState(false);
 
   return (
     <nav className="site-navbar">
       <div className="inner">
-        {inicio ? (
-          <Link href="/" className="volta-link" aria-label="Legado Digital - início">
-            <Image className="logo-sm" src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} />
-          </Link>
-        ) : (
-          <Link href="/" className="volta-link" aria-label="Voltar pro início">
-            ← <Image className="logo-sm" src="/logo-legado-digital.svg" alt="Legado Digital" width={220} height={86} />
-          </Link>
-        )}
+        {/* A seta fica: sem ela ninguém adivinha que a logo leva pro site.
+            Ela é o "voltar pro site" explícito (regra 11). Quem volta um
+            nível na hierarquia é a migalha, logo abaixo -- são duas coisas
+            diferentes e as duas precisam existir. */}
+        <Link href="/" className="volta-link" aria-label="Voltar pro site">
+          ←{" "}
+          <Image
+            className="logo-sm"
+            src="/logo-legado-digital.svg"
+            alt="Legado Digital"
+            width={220}
+            height={86}
+          />
+        </Link>
 
         <div className="nav-direita">
           <div className="links">

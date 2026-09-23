@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Migalhas from "@/components/public/Migalhas";
 import "../documento.css";
 
 // Reescrita 2026-09-23 (padronização do site público), junto com a Política
@@ -25,6 +26,8 @@ export default function TermosDeUsoPage() {
   return (
     <div className="doc">
 
+
+      <Migalhas trilha={[{ rotulo: "Início", href: "/" }, { rotulo: "Termos de Uso" }]} />
 
       <main>
         <div className="coluna">

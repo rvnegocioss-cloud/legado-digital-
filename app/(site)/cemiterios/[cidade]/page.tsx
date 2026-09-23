@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Migalhas from "@/components/public/Migalhas";
 import { notFound } from "next/navigation";
 import { MapPin, Satellite } from "lucide-react";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
@@ -38,6 +39,14 @@ export default async function CidadeCemiteriosPage({
   return (
     <div className="cem">
 
+
+      <Migalhas
+        trilha={[
+          { rotulo: "Início", href: "/" },
+          { rotulo: "Cemitérios", href: "/cemiterios" },
+          { rotulo: `${nomeCidade} — ${estado}` },
+        ]}
+      />
 
       <main>
         <Link href="/cemiterios" className="voltar">

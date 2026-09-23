@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Migalhas from "@/components/public/Migalhas";
 import { notFound } from "next/navigation";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
@@ -99,6 +100,15 @@ export default async function CemiterioMapaPage({
   return (
     <div className="cem">
 
+
+      <Migalhas
+        trilha={[
+          { rotulo: "Início", href: "/" },
+          { rotulo: "Cemitérios", href: "/cemiterios" },
+          { rotulo: `${c.cidade} — ${c.estado}`, href: `/cemiterios/${cidade}` },
+          { rotulo: c.nome.trim() },
+        ]}
+      />
 
       <main>
         <Link href={`/cemiterios/${cidade}`} className="voltar">

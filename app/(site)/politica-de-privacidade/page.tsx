@@ -1,3 +1,4 @@
+import Migalhas from "@/components/public/Migalhas";
 import "../documento.css";
 
 // Reescrita 2026-09-23 (padronização do site público). Antes esta página era
@@ -26,6 +27,8 @@ export default function PoliticaPrivacidadePage() {
   return (
     <div className="doc">
 
+
+      <Migalhas trilha={[{ rotulo: "Início", href: "/" }, { rotulo: "Política de Privacidade" }]} />
 
       <main>
         <div className="coluna">

@@ -495,6 +495,49 @@ export default async function PerfilMemorialPage({
     orto_bounds: number[] | null;
   } | null;
 
+  // Fecha o ciclo nos dois sentidos (wireframe do Pedro, tela "Mapa proposto",
+  // decisão 5): do mapa do cemitério já se chegava ao memorial, mas o memorial
+  // não tinha volta -- o nome do cemitério na migalha era texto morto. Aqui
+  // buscamos o endereço da página daquele cemitério.
+  //
+  // Consulta separada de propósito, em vez de mexer na RPC
+  // `obter_localizacao_memorial`: alterar função do banco é mudança estrutural,
+  // e o Rafael determinou que isso só acontece na etapa de integração.
+  //
+  // Só vira link se o cemitério for público -- a página de cemitério filtra por
+  // `publico`, então linkar um cemitério privado levaria a um 404.
+  let cemiterioHref: string | null = null;
+  if (localizacao?.cemiterio_nome) {
+    const { data: cem } = await supabase
+      .from("homenagens")
+      .select("lapides(cemiterios(slug, cidade, estado, publico, ativo))")
+      .eq("slug", slug)
+      .maybeSingle();
+    const c = (
+      cem as {
+        lapides?: {
+          cemiterios?: {
+            slug: string | null;
+            cidade: string | null;
+            estado: string | null;
+            publico: boolean | null;
+            ativo: boolean | null;
+          };
+        };
+      } | null
+    )?.lapides?.cemiterios;
+    if (c?.slug && c.cidade && c.estado && c.publico && c.ativo) {
+      const cidadeSlug = `${c.cidade
+        .trim()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")}-${c.estado.trim().toLowerCase()}`;
+      cemiterioHref = `/cemiterios/${cidadeSlug}/${c.slug}`;
+    }
+  }
+
   const rota =
     localizacao?.cemiterio_lat != null &&
     localizacao?.cemiterio_lng != null &&
@@ -617,7 +660,15 @@ export default async function PerfilMemorialPage({
             <span style={estiloTopo.migalhaSep}>›</span>
             <a href="/cemiterios" style={estiloTopo.migalhaLink}>Cemitérios</a>
             <span style={estiloTopo.migalhaSep}>›</span>
-            <span style={estiloTopo.migalhaAtual}>{localizacao.cemiterio_nome}</span>
+            {/* Vira link quando o cemitério é público: é a volta que faltava
+                pro ciclo do wireframe. Sem página pública, segue texto. */}
+            {cemiterioHref ? (
+              <a href={cemiterioHref} style={estiloTopo.migalhaLink}>
+                {localizacao.cemiterio_nome}
+              </a>
+            ) : (
+              <span style={estiloTopo.migalhaAtual}>{localizacao.cemiterio_nome}</span>
+            )}
           </>
         ) : (
           <>

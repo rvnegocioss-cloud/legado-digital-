@@ -1,9 +1,12 @@
 import { tema } from "@/lib/publicTheme";
+import Migalhas from "@/components/public/Migalhas";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 
 export default function BuscaPage() {
   return (
     <div style={tema.page}>
+
+      <Migalhas trilha={[{ rotulo: "Início", href: "/" }, { rotulo: "Buscar memorial" }]} />
 
       <header style={tema.hero}>
         <div style={tema.eyebrow}>Em Memória</div>
