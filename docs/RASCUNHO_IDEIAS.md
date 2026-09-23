@@ -142,3 +142,20 @@ Gerar a arvore como imagem no ComfyUI foi descartado por ele: imagem tem posicao
 Ultimo caminho proposto e recusado: ilustracao feita direito (uma vez) com slots de medalhao pre-marcados, o codigo so encaixa quem existe.
 
 **Nao retomar sem uma referencia visual que ele aprove antes.** O gerador escalavel da tentativa 4 (galho por poligono afinado, copa recursiva, posicoes calculadas a partir dos dados) ficou salvo no scratchpad como `gerar_arvore.py` -- a matematica de layout funciona, o problema e estetico.
+
+## Landing: card de cemitério com dado real do São Pedro (2026-09-22)
+
+Pedido do Rafael, ainda não implementado — a seção "O legado tem um lugar" da landing nova (`app/page.tsx`) hoje mostra um card decorativo (`.mapcard`, aerial cinza com 1 pino estático). Ele quer:
+
+- Trocar pelo **Cemitério São Pedro de verdade** (`cemiterios.slug = 'cemiterio-sao-pedro'`, Uberlândia — MG, `publico = true`, já tem 1 memorial real vinculado: Carlos Saraiva).
+- Pino em formato de **cruz** — mesmo padrão já usado no mapa público de cemitérios (`MapaPublicoCemiterio.tsx`: "Túmulo com memorial vinculado ganha pino discreto de cruz").
+- Ao passar o mouse no pino: card com nome do homenageado (mesmo comportamento que já existe no mapa público).
+- "Ligar tudo que for necessário" — ou seja, puxar do banco de verdade, não mock estático.
+
+**Ordem que ele pediu:** primeiro corrigir/reconstruir a página do cemitério (`/cemiterios/[cidade]/[cemiterio]`, ver protótipo abaixo), **depois** encaminhar o card da landing pra ela direitinho (link real, não `#`).
+
+## Página do cemitério nova — protótipo feito (2026-09-22)
+
+Protótipo estático em `wireframe/reestruturacao-site-publico/prototipo-cemiterio.html`, cobrindo as telas 3 e 4 do wireframe do Pedro (`buscar cemitério` + `página do cemitério`). Só protótipo — nada implementado no código real ainda. Aguardando o Rafael aprovar antes de construir de verdade (regra 24: refatoração visual sempre passa por wireframe/protótipo antes de mexer em código).
+
+**Correção #1, registrada pelo Rafael (2026-09-23): hierarquia de barramento errada.** A 1ª versão do protótipo empilhava as duas telas (busca + página do cemitério) na mesma rolagem, uma embaixo da outra — errado, elas são páginas diferentes, uma dentro da outra na navegação, não um scroll só. Corrigido pro mesmo sistema do wireframe original do Pedro (`wireframe-legado-digital.html`): barra lateral com a lista de telas, `.screen{display:none}`/`.screen.on{display:block}`, só uma tela visível por vez, e o clique real (card do cemitério → abre a página do cemitério) troca de tela via JS, não âncora de scroll.

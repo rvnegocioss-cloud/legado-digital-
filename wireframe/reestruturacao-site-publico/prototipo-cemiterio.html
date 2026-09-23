@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legado Digital — protótipo Cemitérios (busca + página)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1D2A; --bg2:#10222f; --panel:#132734;
+  --fg:#F5F2EB; --fg-mut:#a8b2b8; --fg-faint:#7f8b93;
+  --gold:#C9A46A; --gold-lite:#dfc08a; --gold-dk:#a8834a;
+  --border:rgba(201,164,106,0.18); --border2:rgba(201,164,106,0.32);
+  --card:rgba(255,255,255,0.02);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Inter',sans-serif; background:var(--bg); color:var(--fg); line-height:1.6; font-size:15.5px}
+h1,h2,h3{font-family:'Playfair Display',serif; margin:0; letter-spacing:-.01em}
+a{color:inherit}
+.wrap{max-width:1240px; margin:0 auto; padding-inline:clamp(16px,4vw,40px)}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; background:var(--gold); color:#1a1408; border:none; border-radius:8px; padding:11px 20px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; transition:background .15s}
+.btn:hover{background:var(--gold-lite)}
+.btn.o{background:transparent; color:var(--gold); border:1px solid var(--border2)}
+.btn.o:hover{background:rgba(201,164,106,.08)}
+.btn.sm{padding:8px 14px; font-size:12.5px}
+.field{flex:1; min-width:140px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-size:13.5px; color:var(--fg-mut)}
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.small{font-size:12.5px; color:var(--fg-faint)}
+.card{background:var(--panel); border:1px solid var(--border); border-radius:14px}
+.lock{font-size:11px; color:var(--gold); background:rgba(201,164,106,.1); border:1px solid var(--border2); border-radius:20px; padding:2px 9px; white-space:nowrap}
+.link-u{color:var(--gold-lite); text-decoration:underline; cursor:pointer; font-size:13.5px}
+
+/* ================= BARRAMENTO (mesmo sistema do wireframe-legado-digital.html do Pedro) =================
+   Barra lateral fixa com a lista de telas + as duas telas mockadas do site
+   (dentro de um "navegador" simulado, urlbar incluída) à direita. Só uma
+   tela fica visível por vez (.tela{display:none} / .tela.on{display:block}).
+   O clique nos elementos DENTRO do site simulado (ex: card de cemitério)
+   troca de tela de verdade via JS -- não é âncora de scroll. */
+.shell{display:flex; min-height:100vh; align-items:flex-start}
+.side{
+  width:250px; flex:0 0 250px; background:#0d1e2a; border-right:1px solid var(--border);
+  padding:22px 0 40px; position:sticky; top:0; max-height:100vh; overflow:auto;
+}
+.side h1{font-size:14px; font-weight:600; margin:0 20px 2px; color:var(--fg)}
+.side .sub{font-size:11.5px; color:var(--fg-faint); margin:0 20px 18px}
+.side .grp{font-size:10.5px; color:var(--fg-faint); text-transform:uppercase; letter-spacing:.04em; margin:16px 20px 6px}
+.side button{
+  display:block; width:100%; text-align:left; padding:8px 20px; color:var(--fg-mut);
+  font-size:13px; background:none; border:none; border-left:3px solid transparent; cursor:pointer; font-family:inherit;
+}
+.side button:hover{background:rgba(255,255,255,.03)}
+.side button.on{border-left-color:var(--gold); background:rgba(201,164,106,.08); color:var(--gold-lite); font-weight:600}
+
+.main{flex:1; min-width:0; padding:26px clamp(14px,2.5vw,40px) 60px}
+.crumb-fluxo{font-size:12px; color:var(--fg-faint); margin-bottom:6px}
+.main h2.titulo-tela{font-size:19px; margin:0 0 4px}
+.main .intent-tela{font-size:13px; color:var(--fg-mut); margin:0 0 16px; max-width:74ch}
+
+.urlbar{
+  display:flex; align-items:center; gap:10px; background:#0d1e2a; border:1px solid var(--border);
+  border-bottom:none; border-radius:8px 8px 0 0; padding:8px 14px; font-size:12px; color:var(--fg-faint);
+}
+.urlbar .dots{display:flex; gap:5px}
+.urlbar .dots i{width:8px; height:8px; border-radius:50%; background:var(--border2); display:block}
+.urlbar code{font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:var(--fg-mut)}
+.urlbar .terr{margin-left:auto; font-size:10.5px; padding:2px 8px; border-radius:20px; border:1px solid var(--border2); background:rgba(201,164,106,.08); color:var(--gold-lite)}
+
+.site-box{border:1px solid var(--border); border-radius:0 0 10px 10px; overflow:hidden; background:var(--bg)}
+.tela{display:none}
+.tela.on{display:block}
+
+/* header do SITE simulado — mesmo padrão do protótipo da landing */
+header.bar{border-bottom:1px solid var(--border); background:rgba(11,29,42,.85)}
+header.bar .in{display:flex; align-items:center; gap:28px; padding:14px 20px; flex-wrap:wrap}
+.logo img{height:58px; width:auto; display:block}
+nav.nav{display:flex; gap:26px; font-size:13.5px; color:var(--fg-mut); flex-wrap:wrap}
+nav.nav a{text-decoration:none; cursor:pointer}
+nav.nav a:hover{color:var(--gold-lite)}
+.right{margin-left:26px; display:flex; gap:14px; align-items:center}
+.entrar{font-size:13.5px; color:var(--fg-mut); cursor:pointer}
+
+.crumb{padding:10px 20px; font-size:12px; color:var(--fg-faint); border-bottom:1px solid var(--border)}
+.crumb u{text-decoration:underline; cursor:pointer}
+.crumb b{color:var(--fg-mut); font-weight:600}
+
+.sec{padding:30px 20px}
+.searchbox{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:18px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.cemcard{overflow:hidden; padding:0; cursor:pointer; transition:border-color .15s}
+.cemcard:hover{border-color:var(--border2)}
+.cemcard .aerial{height:140px; position:relative; background:repeating-linear-gradient(45deg,#1c3140 0 18px,rgba(22,40,53,.27) 18px 36px),#142834}
+.cemcard .aerial.sem-mapa{background:#16283a; display:flex; align-items:center; justify-content:center; color:var(--fg-faint); font-size:12px; text-align:center}
+.cemcard .aerial-legenda{position:absolute; bottom:8px; left:10px; font-size:10.5px; color:var(--fg-faint); background:rgba(11,29,42,.7); padding:2px 8px; border-radius:10px}
+.cemcard .corpo{padding:14px 16px 16px}
+.cemcard .nome{font-size:15px; font-weight:600; margin-bottom:3px}
+.aviso-box{border:1px dashed var(--border2); border-radius:10px; padding:12px 14px; margin-top:8px; font-size:12px; color:var(--fg-mut)}
+.aviso-box b{color:var(--fg)}
+
+.topo-cem{display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:18px}
+.logo-cem{width:70px; height:70px; flex:0 0 70px; border-radius:10px; background:var(--panel); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--fg-faint); font-size:9px; text-align:center}
+.topo-cem .info{flex:1; min-width:200px}
+.topo-cem .info h1{font-size:21px; margin-bottom:4px}
+.topo-cem .acoes{display:flex; gap:8px; flex-wrap:wrap}
+
+.mapa-lista{display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-bottom:14px}
+.mapa-real{position:relative; height:300px; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:repeating-linear-gradient(45deg,#1c3140 0 20px,rgba(22,40,53,.3) 20px 40px),#142834}
+.mapa-real .pin-cruz{position:absolute; width:24px; height:24px; transform:translate(-50%,-100%); cursor:pointer}
+.mapa-real .pin-cruz svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.hover-card{position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--border2); border-radius:8px; padding:8px 10px; white-space:nowrap; font-size:12px; display:none; box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:5}
+.pin-cruz:hover .hover-card{display:block}
+.hover-card b{color:var(--gold-lite); display:block; font-size:12.5px}
+
+.lista-mem{display:flex; flex-direction:column; gap:7px; max-height:300px; overflow-y:auto}
+.lm-item{display:flex; gap:9px; align-items:center; padding:8px 9px; border:1px solid var(--border); border-radius:8px; background:rgba(255,255,255,.02); cursor:pointer}
+.lm-item.tracejado{border-style:dashed}
+.lm-item.selecionado{border-color:var(--gold); background:rgba(201,164,106,.06)}
+.av{width:30px; height:30px; flex:0 0 30px; border-radius:6px; background:var(--panel); border:1px solid var(--border)}
+.lm-item .nome{font-size:12.5px; font-weight:600; margin:0}
+.lm-item .meta{font-size:11px; color:var(--fg-faint); margin:0}
+
+.pino-selecionado{margin-top:14px; padding:16px; border:1px solid var(--border2); border-radius:12px; background:var(--card)}
+.pino-selecionado h3{font-size:13.5px; margin-bottom:8px}
+
+.sobre-cem{padding-top:30px; margin-top:6px; border-top:1px solid var(--border)}
+.sobre-grid{display:grid; grid-template-columns:1.5fr 1fr; gap:24px}
+.grid3fotos{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:12px 0}
+.foto-ph{height:74px; border-radius:8px; background:linear-gradient(135deg,#16283a,#233d50)}
+.servicos{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px}
+.serv-item{border:1px solid var(--border); border-radius:8px; padding:11px}
+.serv-item h4{font-size:12.5px; font-weight:600; margin-bottom:4px; font-family:'Inter'}
+.lateral-box{border:1px solid var(--border); border-radius:10px; padding:13px 15px; margin-bottom:9px}
+.lateral-box h4{font-size:12.5px; font-weight:600; margin-bottom:6px; font-family:'Inter'; color:var(--gold-lite)}
+
+.site-foot{background:var(--bg2); border-top:1px solid var(--border); padding:20px; text-align:center}
+
+.notas-fluxo{margin-top:20px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 18px}
+.notas-fluxo h3{font-size:13px; margin:0 0 10px}
+.notas-fluxo ol{margin:0; padding-left:18px; font-size:12.5px; color:var(--fg-mut); line-height:1.8}
+.notas-fluxo code{background:rgba(255,255,255,.06); padding:1px 5px; border-radius:3px; font-size:11.5px}
+
+@media (max-width:860px){
+  .shell{flex-direction:column}
+  .side{width:100%; flex:none; position:static; max-height:none; border-right:none; border-bottom:1px solid var(--border)}
+  .grid2, .mapa-lista, .sobre-grid, .servicos{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="side">
+    <h1>Legado Digital</h1>
+    <p class="sub">Protótipo — Cemitérios (fluxo real)</p>
+
+    <div class="grp">Fluxo desta tarefa</div>
+    <button class="on" data-tela="busca" onclick="irPara('busca')">① Buscar cemitério</button>
+    <button data-tela="pagina" onclick="irPara('pagina')">② Página do cemitério</button>
+    <button data-tela="jazigo" onclick="irPara('jazigo')">③ Página do jazigo</button>
+
+    <div class="grp">Como o clique flui</div>
+    <p class="sub" style="line-height:1.7">
+      ① lista cemitérios → clique no card abre ②. Em ②, clicar no pino/cartão
+      "Família Saraiva" (2+ memoriais no jazigo) abre ③. Em ③, "Ver memorial"
+      levaria ao memorial de verdade (fora deste protótipo). É a mesma
+      navegação real, uma tela dentro da outra — nunca soltas na rolagem.
+    </p>
+  </nav>
+
+  <main class="main">
+
+    <!-- ============ TELA 1 — BUSCAR CEMITÉRIO ============ -->
+    <section class="tela on" id="tela-busca">
+      <div class="crumb-fluxo">Fluxo do site público · passo 1 de 2</div>
+      <h2 class="titulo-tela">Tela ① · Buscar cemitério</h2>
+      <p class="intent-tela">Jornada de quem prefere achar o lugar primeiro. Filtra por estado, cidade e nome; cada resultado mostra a prévia do mapa aéreo e leva à página do cemitério ou à rota até ele.</p>
+
+      <div class="urlbar"><span class="dots"><i></i><i></i><i></i></span><code>legadodigital.net/cemiterios?uf=MG&amp;cidade=uberlandia</code><span class="terr">público</span></div>
+      <div class="site-box">
+        <header class="bar">
+          <div class="in">
+            <div class="logo"><img src="img/logo-legado-digital.svg" alt="Legado Digital"></div>
+            <nav class="nav">
+              <a>Buscar memorial</a>
+              <a><b style="color:var(--fg)">Cemitérios</b></a>
+              <a>Como funciona</a>
+            </nav>
+            <div class="right">
+              <a class="btn o">Quero um memorial</a>
+              <span class="entrar">Entrar ▾</span>
+            </div>
+          </div>
+        </header>
+        <div class="crumb"><u>Início</u> › <u>Cemitérios</u> › <u>MG</u> › <b>Uberlândia</b></div>
+
+        <div class="sec">
+          <div class="searchbox">
+            <div class="row">
+              <div class="field">Minas Gerais ▾</div>
+              <div class="field">Uberlândia ▾</div>
+              <div class="field" style="flex:1.5">Nome do cemitério (opcional)</div>
+              <button class="btn">Buscar</button>
+            </div>
+          </div>
+          <p class="small" style="margin:-6px 0 16px">2 cemitérios em Uberlândia — MG · 149 memoriais</p>
+
+          <div class="grid2">
+            <div class="card cemcard" onclick="irPara('pagina')" title="Clique abre a Tela ②">
+              <div class="aerial"><span class="aerial-legenda">imagem estática, sem pinos</span></div>
+              <div class="corpo">
+                <div class="nome">Cemitério São Pedro</div>
+                <p class="small">Uberlândia — MG · Av. Paes Leme, 855</p>
+                <div class="row" style="margin-top:8px">
+                  <span class="btn sm" onclick="event.stopPropagation(); irPara('pagina')">Ir para a página do cemitério</span>
+                  <span class="btn o sm" onclick="event.stopPropagation()">Caminho até o cemitério</span>
+                </div>
+              </div>
+            </div>
+            <div class="card cemcard">
+              <div class="aerial sem-mapa">sem mapa aéreo ainda</div>
+              <div class="corpo">
+                <div class="nome">Cemitério Bom Pastor</div>
+                <p class="small">Uberlândia — MG</p>
+                <div class="row" style="margin-top:8px">
+                  <span class="btn sm">Ver os memoriais</span>
+                  <span class="btn o sm">Caminho até o cemitério</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="aviso-box"><b>Sem filtro:</b> a lista vem agrupada por estado e cidade, com contagem de cemitérios e memoriais em cada uma — serve de índice para o Google e pra quem só quer ver onde a rede chegou.</div>
+          <div class="aviso-box"><b>Estado vazio:</b> "Ainda não temos cemitérios mapeados em [cidade]." Ação: <span class="link-u">indicar um cemitério</span> — o consumidor vira lead B2B.</div>
+        </div>
+
+        <div class="site-foot"><p class="small" style="margin:0">rodapé unificado do site — mesmo <code>SiteFooter.tsx</code> já usado nas outras páginas públicas</p></div>
+      </div>
+    </section>
+
+    <!-- ============ TELA 2 — PÁGINA DO CEMITÉRIO ============ -->
+    <section class="tela" id="tela-pagina">
+      <div class="crumb-fluxo">Fluxo do site público · passo 2 de 2 — chegou clicando no card do São Pedro na Tela ①</div>
+      <h2 class="titulo-tela">Tela ② · Página do cemitério</h2>
+      <p class="intent-tela">A tela mais usada em campo, quase sempre no celular, de pé, no sol — e ao mesmo tempo a página institucional do cemitério na internet. O mapa vem primeiro; a apresentação do cemitério vem depois. Dado real: <code>cemiterios.slug = cemiterio-sao-pedro</code>, Av. Paes Leme, 855, Uberlândia — MG.</p>
+
+      <div class="urlbar"><span class="dots"><i></i><i></i><i></i></span><code>legadodigital.net/cemiterio/sao-pedro-uberlandia-mg</code><span class="terr">público</span></div>
+      <div class="site-box">
+        <header class="bar">
+          <div class="in">
+            <div class="logo"><img src="img/logo-legado-digital.svg" alt="Legado Digital"></div>
+            <nav class="nav">
+              <a>Buscar memorial</a>
+              <a><b style="color:var(--fg)">Cemitérios</b></a>
+              <a>Como funciona</a>
+            </nav>
+            <div class="right">
+              <a class="btn o">Quero um memorial</a>
+              <span class="entrar">Entrar ▾</span>
+            </div>
+          </div>
+        </header>
+        <div class="crumb"><u onclick="irPara('busca')" title="Volta pra Tela ①">Início</u> › <u onclick="irPara('busca')" title="Volta pra Tela ①">Cemitérios</u> › <b>Cemitério São Pedro</b></div>
+
+        <div class="sec">
+          <div class="topo-cem">
+            <div class="logo-cem">logo do<br>cemitério</div>
+            <div class="info">
+              <h1>Cemitério São Pedro</h1>
+              <p class="small">Av. Paes Leme, 855 · Uberlândia — MG · Visitação 7h–18h</p>
+              <p class="small">1 memorial · mapeado pelo Legado Digital</p>
+            </div>
+            <div class="acoes">
+              <span class="btn o sm">Ligar</span>
+              <span class="btn o sm">WhatsApp</span>
+              <span class="btn sm">Caminho até o cemitério</span>
+            </div>
+          </div>
+
+          <div class="mapa-lista">
+            <div class="mapa-real">
+              <div class="pin-cruz" style="top:46%; left:52%">
+                <div class="hover-card"><b>Carlos Saraiva</b>1922 – 1995 · Quadra 36</div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2v9M8 7h8M12 11v11" stroke="#C9A46A" stroke-width="2.4" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <div>
+              <div class="field" style="margin-bottom:9px">Buscar neste cemitério</div>
+              <div class="lista-mem">
+                <div class="lm-item selecionado">
+                  <div class="av"></div>
+                  <div style="flex:1"><p class="nome">Carlos Saraiva</p><p class="meta">1922 – 1995 · Quadra 36 · memorial real</p></div>
+                </div>
+                <div class="lm-item">
+                  <div class="av"></div>
+                  <div style="flex:1"><p class="nome">João Batista Alves</p><p class="meta">1936 – 2021 · quadra 2</p></div>
+                </div>
+                <div class="lm-item">
+                  <div class="av"></div>
+                  <div style="flex:1"><p class="nome">Antônia Ferreira</p><p class="meta">1949 – 2025 · quadra 7</p></div>
+                  <span class="lock">senha</span>
+                </div>
+                <div class="lm-item tracejado">
+                  <div class="av"></div>
+                  <div style="flex:1"><p class="nome">José Carlos Mendes</p><p class="meta">1951 – 2020 · localização não informada</p></div>
+                </div>
+              </div>
+              <p class="small" style="margin-top:9px">Lista e mapa sincronizados: tocar num item destaca o pino e vice-versa. Memorial sem ponto associado aparece na lista, não no mapa.</p>
+            </div>
+          </div>
+
+          <div class="pino-selecionado">
+            <h3>Pino selecionado — Jazigo Família Saraiva · 3 memoriais</h3>
+            <p class="small" style="margin-bottom:9px">Com mais de um memorial no jazigo, o cabeçalho do cartão vira o <b style="color:var(--fg)">nome do jazigo</b>, não o de uma pessoa só — Carlos, Ione e Rafael Saraiva estão todos aqui.</p>
+            <div class="row">
+              <span class="btn sm" onclick="irPara('jazigo')" style="cursor:pointer">Ver o jazigo →</span>
+              <span class="btn o sm">Rota até o túmulo</span>
+            </div>
+          </div>
+
+          <div class="sobre-cem">
+            <h2 style="font-size:18px; margin-bottom:14px">Sobre o Cemitério São Pedro</h2>
+            <div class="sobre-grid">
+              <div>
+                <p class="small" style="font-size:13px; margin-bottom:11px">Texto institucional escrito pelo cemitério: história, o que oferece, como funciona a visitação. Sem limite rígido, com parágrafos.</p>
+                <div class="grid3fotos"><div class="foto-ph"></div><div class="foto-ph"></div><div class="foto-ph"></div></div>
+                <h4 style="font-family:'Inter'; font-size:13.5px; font-weight:600; margin-bottom:4px">Serviços e planos</h4>
+                <div class="servicos">
+                  <div class="serv-item"><h4>Planos funerários</h4><p class="small">descrição curta · <span class="link-u">saiba mais</span></p></div>
+                  <div class="serv-item"><h4>Jazigos e concessões</h4><p class="small">descrição curta · <span class="link-u">saiba mais</span></p></div>
+                  <div class="serv-item"><h4>Cremação</h4><p class="small">descrição curta</p></div>
+                  <div class="serv-item"><h4>Floricultura / capela</h4><p class="small">descrição curta</p></div>
+                </div>
+              </div>
+              <div>
+                <div class="lateral-box"><h4>Contato</h4><p class="small">Telefone · WhatsApp · E-mail<br>Av. Paes Leme, 855 · <span class="link-u">Caminho até o cemitério</span><br>Horário de visitação · Horário da administração</p></div>
+                <div class="lateral-box"><h4>Na internet</h4><p class="small">Site · Instagram · Facebook</p></div>
+                <div class="lateral-box"><h4>Memoriais neste cemitério</h4><p class="small">Sua família tem alguém aqui? <span class="link-u">Quero um memorial</span></p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="site-foot"><p class="small" style="margin:0">rodapé unificado do site — mesmo <code>SiteFooter.tsx</code> já usado nas outras páginas públicas</p></div>
+      </div>
+    </section>
+
+    <!-- ============ TELA 3 — PÁGINA DO JAZIGO ============ -->
+    <section class="tela" id="tela-jazigo">
+      <div class="crumb-fluxo">Fluxo do site público · passo 3 de 3 — chegou clicando em "Ver o jazigo" no pino da Tela ②</div>
+      <h2 class="titulo-tela">Tela ③ · Página do jazigo</h2>
+      <p class="intent-tela">Existe só quando um jazigo mapeado tem <b>dois ou mais</b> memoriais. É de onde a pessoa escolhe quem ver e pra onde volta. Com 1 memorial só, a rota redireciona direto pro memorial. O QR Code nunca aponta pra cá — é sempre por memorial.</p>
+
+      <div class="urlbar"><span class="dots"><i></i><i></i><i></i></span><code>legadodigital.net/jazigo/familia-saraiva-sao-pedro-uberlandia-mg</code><span class="terr">público</span></div>
+      <div class="site-box">
+        <header class="bar">
+          <div class="in">
+            <div class="logo"><img src="img/logo-legado-digital.svg" alt="Legado Digital"></div>
+            <nav class="nav">
+              <a>Buscar memorial</a>
+              <a><b style="color:var(--fg)">Cemitérios</b></a>
+              <a>Como funciona</a>
+            </nav>
+            <div class="right">
+              <a class="btn o">Quero um memorial</a>
+              <span class="entrar">Entrar ▾</span>
+            </div>
+          </div>
+        </header>
+        <div class="crumb"><u onclick="irPara('busca')">Início</u> › <u onclick="irPara('busca')">Cemitérios</u> › <u onclick="irPara('pagina')">Cemitério São Pedro</u> › <b>Jazigo Família Saraiva</b></div>
+
+        <div class="sec">
+          <div class="mapa-lista" style="grid-template-columns:1fr 340px">
+            <div>
+              <p class="small">Jazigo</p>
+              <h1 style="font-size:23px; margin-bottom:3px">Família Saraiva</h1>
+              <p class="small" style="margin-bottom:18px">Cemitério São Pedro · Uberlândia — MG · Quadra 36, Sepultura 11 · 3 memoriais</p>
+
+              <h2 style="font-size:16px; margin-bottom:10px">Quem descansa aqui</h2>
+              <div class="lista-mem" style="max-height:none">
+                <div class="lm-item" style="padding:11px">
+                  <div class="av" style="width:52px;height:52px;flex:0 0 52px;border-radius:50%"></div>
+                  <div style="flex:1">
+                    <p class="nome" style="font-size:14px">Carlos Saraiva</p>
+                    <p class="meta">1922 — 1995 · Pai · Esposo · Avô</p>
+                    <p class="meta" style="font-style:italic">"Trabalho, visão e legado"</p>
+                  </div>
+                  <span class="btn sm">Ver memorial</span>
+                </div>
+                <div class="lm-item" style="padding:11px">
+                  <div class="av" style="width:52px;height:52px;flex:0 0 52px;border-radius:50%"></div>
+                  <div style="flex:1">
+                    <p class="nome" style="font-size:14px">Ione de Souza Saraiva</p>
+                    <p class="meta">1930 — 2012 · Mãe · Esposa · Avó</p>
+                  </div>
+                  <span class="btn sm">Ver memorial</span>
+                </div>
+                <div class="lm-item" style="padding:11px">
+                  <div class="av" style="width:52px;height:52px;flex:0 0 52px;border-radius:50%"></div>
+                  <div style="flex:1">
+                    <p class="nome" style="font-size:14px">Rafael de Souza Saraiva</p>
+                    <p class="meta">1962 — 2021 · Filho</p>
+                  </div>
+                  <span class="lock">com senha</span>
+                  <span class="btn sm">Ver memorial</span>
+                </div>
+              </div>
+
+              <div class="aviso-box" style="margin-top:14px">
+                <b>Família:</b> os três memoriais estão na mesma árvore genealógica · <span class="link-u">abrir a árvore</span>
+              </div>
+            </div>
+
+            <div class="card" style="padding:0; overflow:hidden; align-self:start">
+              <div style="height:170px; background:repeating-linear-gradient(45deg,#1c3140 0 20px,rgba(22,40,53,.3) 20px 40px),#142834; position:relative; border-bottom:1px solid var(--border)">
+                <div class="pin-cruz" style="position:absolute; top:52%; left:50%; transform:translate(-50%,-100%)">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2v9M8 7h8M12 11v11" stroke="#C9A46A" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <div style="padding:14px 16px 16px">
+                <h4 style="font-family:'Inter'; font-size:13px; font-weight:600; margin-bottom:4px">Localização</h4>
+                <p class="small">Cemitério São Pedro · Quadra 36, Sepultura 11</p>
+                <div style="display:flex; flex-direction:column; gap:7px; margin-top:12px">
+                  <span class="btn sm">Guia até o túmulo</span>
+                  <span class="btn o sm">Rota até o cemitério</span>
+                </div>
+                <p class="small" style="margin-top:10px"><span class="link-u" onclick="irPara('pagina')">Página do Cemitério São Pedro</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="aviso-box">
+            <b>Sem vela, sem homenagem aqui.</b> Vela e homenagem são do memorial, de cada pessoa. A página do jazigo é lugar, não homenagem.
+          </div>
+        </div>
+
+        <div class="site-foot"><p class="small" style="margin:0">rodapé unificado do site — mesmo <code>SiteFooter.tsx</code> já usado nas outras páginas públicas</p></div>
+      </div>
+    </section>
+
+    <div class="notas-fluxo">
+      <h3>Como a hierarquia de navegação funciona aqui</h3>
+      <ol>
+        <li>São 3 telas reais neste fluxo: <code>①</code> lista de cemitérios → <code>②</code> página de 1 cemitério → <code>③</code> página do jazigo. Nunca aparecem juntas — é sempre uma ou outra, igual no site de verdade.</li>
+        <li>Clicar no <b>card "Cemitério São Pedro"</b> na tela ① abre a ②. Simula o <code>&lt;Link href="/cemiterio/[slug]"&gt;</code> real do Next.js.</li>
+        <li>Na tela ②, clicar em <b>"Ver o jazigo"</b> no cartão do pino abre a ③ — só aparece porque o jazigo tem 3 memoriais. Com 1 memorial, esse botão não existe e o pino vai direto pro memorial.</li>
+        <li>A migalha de cada tela volta pro nível de cima (③ → ② → ①). Na ③ o link "Página do Cemitério São Pedro" na lateral também volta pra ②.</li>
+        <li>A barra lateral esquerda é só o controle deste protótipo (trocar de tela pra revisão) — não existe no site de verdade, é o mesmo recurso do wireframe original do Pedro.</li>
+      </ol>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function irPara(nome){
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('on'));
+  document.getElementById('tela-' + nome).classList.add('on');
+  document.querySelectorAll('.side button[data-tela]').forEach(b => b.classList.toggle('on', b.dataset.tela === nome));
+  window.scrollTo({top:0, behavior:'instant'});
+}
+</script>
+</body>
+</html>

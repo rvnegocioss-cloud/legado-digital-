@@ -1,0 +1,104 @@
+/* Páginas de texto corrido do site público (Política de Privacidade, Termos
+   de Uso). Mesma casca e mesma identidade da landing -- antes essas duas
+   eram órfãs: sem menu, sem rodapé, em Georgia, com 720px de largura e
+   estilo escrito à mão dentro do próprio arquivo.
+
+   Todo valor sai de app/tokens.css. A página só entrega o texto. */
+
+.doc {
+  background: var(--ld-bg);
+  color: var(--ld-fg);
+  font-family: var(--ld-font-corpo);
+  font-size: var(--ld-t-corpo);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--ld-largura);
+  margin: 0 auto;
+  padding: 48px var(--ld-gutter) 72px;
+}
+
+/* A coluna de leitura é mais estreita que o container: linha comprida demais
+   cansa e faz o olho perder a linha seguinte. O container segue 1240 (alinha
+   com o menu); o texto para em ~72 caracteres. */
+.doc .coluna {
+  max-width: var(--ld-largura-leitura);
+  margin: 0 auto;
+}
+
+.doc .eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ld-gold);
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.doc h1 {
+  font-family: var(--ld-font-titulo);
+  font-size: var(--ld-t-h1);
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 0 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.doc .resumo {
+  color: var(--ld-fg-mut);
+  font-size: var(--ld-t-apoio);
+  margin: 0 0 8px;
+}
+
+.doc section {
+  margin-top: 40px;
+}
+
+.doc h2 {
+  font-family: var(--ld-font-titulo);
+  font-size: var(--ld-t-h2);
+  font-weight: 400;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.doc .regua {
+  height: 1px;
+  width: 80px;
+  background: var(--ld-border-strong);
+  margin-bottom: 16px;
+}
+
+.doc p {
+  color: var(--ld-fg-mut);
+  margin: 0 0 12px;
+  line-height: 1.75;
+}
+
+.doc ul {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+  color: var(--ld-fg-mut);
+  line-height: 1.75;
+}
+
+.doc li { margin-bottom: 6px; }
+.doc strong { color: var(--ld-fg); font-weight: 600; }
+
+.doc a {
+  color: var(--ld-gold-lite);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.doc a:hover { color: var(--ld-gold); }
+
+.doc .nota {
+  color: var(--ld-fg-faint);
+  font-size: var(--ld-t-nota);
+}

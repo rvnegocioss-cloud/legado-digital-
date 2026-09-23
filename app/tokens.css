@@ -1,0 +1,51 @@
+/* Fonte única da verdade do site público (Etapa 1 da padronização,
+   docs/PADRONIZACAO_SITE_PUBLICO.md).
+
+   Todo valor visual do site aberto mora aqui: cor, fonte, escala de título,
+   largura do container, raio, borda. Nenhum componente público deve escrever
+   um hex, um px de largura ou um nome de fonte cru -- referencia o token.
+   Trocar o valor aqui muda o site inteiro de uma vez; era exatamente isso que
+   não existia antes (havia 3 conjuntos de valores concorrentes: publicTheme,
+   site-chrome e landing).
+
+   As famílias de fonte vêm de app/layout.tsx (next/font: Inter, Playfair
+   Display, Cinzel, Caveat) -- aqui só apontamos qual papel cada uma cumpre. */
+
+:root {
+  /* ---- cor ---- */
+  --ld-bg: #0B1D2A;           /* fundo base (navy oficial) */
+  --ld-bg-alt: #10222f;       /* faixa alternada, pra separar seção */
+  --ld-bg-deep: #081722;      /* rodapé */
+  --ld-panel: #132734;        /* card/painel sobre o fundo */
+  --ld-surface: rgba(255, 255, 255, 0.02);
+
+  --ld-fg: #F5F2EB;           /* texto principal */
+  --ld-fg-mut: #a8b2b8;       /* texto de apoio */
+  --ld-fg-faint: #7f8b93;     /* legenda, nota de rodapé */
+
+  --ld-gold: #C9A46A;         /* dourado oficial */
+  --ld-gold-lite: #dfc08a;
+  --ld-gold-dark: #a8834a;
+
+  --ld-border: rgba(201, 164, 106, 0.18);
+  --ld-border-strong: rgba(201, 164, 106, 0.32);
+
+  /* ---- tipografia ---- */
+  --ld-font-corpo: var(--font-sans), Inter, sans-serif;
+  --ld-font-titulo: var(--font-serif), "Playfair Display", serif;
+
+  --ld-t-h1: clamp(26px, 3vw, 38px);
+  --ld-t-h2: clamp(20px, 2.2vw, 26px);
+  --ld-t-h3: 16px;
+  --ld-t-corpo: 15.5px;
+  --ld-t-apoio: 13.5px;
+  --ld-t-nota: 12.5px;
+
+  /* ---- medida ---- */
+  --ld-largura: 1240px;        /* container do site inteiro -- menu, conteúdo e rodapé na MESMA coluna */
+  --ld-largura-leitura: 72ch;  /* texto corrido (política, termos): trava a linha, não a página */
+  --ld-gutter: clamp(16px, 4vw, 40px);
+
+  --ld-raio: 8px;
+  --ld-raio-card: 14px;
+}

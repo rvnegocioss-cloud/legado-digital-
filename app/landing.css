@@ -7,22 +7,26 @@
    das variáveis oficiais do projeto (app/globals.css + app/layout.tsx):
    navy #0B1D2A, dourado #C9A46A, Playfair Display nos títulos, Inter no corpo. */
 
+/* Os valores não moram mais aqui: vêm de app/tokens.css (fonte única da
+   verdade). Estes aliases existem só pra não reescrever as ~80 ocorrências
+   de --lp-* abaixo de uma vez -- qualquer mudança de cor/fonte é feita no
+   tokens.css e chega aqui sozinha. */
 .landing {
-  --lp-bg: #0B1D2A;
-  --lp-bg2: #10222f;
-  --lp-panel: #132734;
-  --lp-fg: #F5F2EB;
-  --lp-fg-mut: #a8b2b8;
-  --lp-fg-faint: #7f8b93;
-  --lp-gold: #C9A46A;
-  --lp-gold-lite: #dfc08a;
-  --lp-border: rgba(201, 164, 106, 0.18);
-  --lp-border2: rgba(201, 164, 106, 0.32);
+  --lp-bg: var(--ld-bg);
+  --lp-bg2: var(--ld-bg-alt);
+  --lp-panel: var(--ld-panel);
+  --lp-fg: var(--ld-fg);
+  --lp-fg-mut: var(--ld-fg-mut);
+  --lp-fg-faint: var(--ld-fg-faint);
+  --lp-gold: var(--ld-gold);
+  --lp-gold-lite: var(--ld-gold-lite);
+  --lp-border: var(--ld-border);
+  --lp-border2: var(--ld-border-strong);
 
   background: var(--lp-bg);
   color: var(--lp-fg);
-  font-family: var(--font-sans), Inter, sans-serif;
-  font-size: 15.5px;
+  font-family: var(--ld-font-corpo);
+  font-size: var(--ld-t-corpo);
   line-height: 1.6;
 }
 
