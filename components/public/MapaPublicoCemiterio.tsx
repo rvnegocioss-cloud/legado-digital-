@@ -22,9 +22,6 @@ const CRUZ_SVG =
   '<circle cx="14" cy="14" r="13" fill="#0B1D2A" stroke="#C9A46A" stroke-width="2"/>' +
   '<path d="M14 7v14M8 12h12" stroke="#C9A46A" stroke-width="2.2" stroke-linecap="round"/></svg>'
 
-// Altura aproximada (px) do card de jazigo familiar, usada pra abrir espaço em cima da cruz.
-const ALTURA_CARD_JAZIGO = 330
-
 interface MemorialDoTumulo {
   slug: string
   nome: string | null
@@ -188,9 +185,6 @@ export default function MapaPublicoCemiterio({
         const [lng, lat] = feature.geometry.coordinates as [number, number]
         setHover({ lng, lat, props })
         setFixo(true)
-        // O card de jazigo é alto: sem isso ele estoura pra fora do mapa e a
-        // foto da lápide, que fica no topo, some. Empurra a cruz pra baixo.
-        mapRef.current?.easeTo({ center: [lng, lat], offset: [0, ALTURA_CARD_JAZIGO / 2], duration: 500 })
         return
       }
       if (props.slug) router.push(`/homenagem/${props.slug}`)
@@ -230,12 +224,7 @@ export default function MapaPublicoCemiterio({
   }, [busca, memoriais])
 
   const irPara = useCallback((s: { lng: number; lat: number; props: PinoProps }) => {
-    mapRef.current?.flyTo({
-      center: [s.lng, s.lat],
-      zoom: 20,
-      duration: 1400,
-      offset: [0, (s.props.total ?? 1) > 1 ? ALTURA_CARD_JAZIGO / 2 : 0],
-    })
+    mapRef.current?.flyTo({ center: [s.lng, s.lat], zoom: 20, duration: 1400 })
     setHover({ lng: s.lng, lat: s.lat, props: s.props })
     setFixo((s.props.total ?? 1) > 1)
     setBusca('')

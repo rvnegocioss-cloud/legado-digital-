@@ -535,16 +535,19 @@ html {
 .cp { width: 210px; line-height: 1.35; }
 .cp-lapide { background: #0B1D2A; display: flex; justify-content: center; }
 /* A foto da lápide CABE inteira no card: largura toda, altura proporcional, com
-   teto de 150px (foto em pé encolhe e centraliza em vez de cortar). A faixa
+   teto de 100px (foto em pé encolhe e centraliza em vez de cortar). A faixa
    fixa de 84px copiada da Central cortava a foto ao meio. */
-.cp-lapide img { width: 100%; height: auto; max-height: 150px; object-fit: contain; display: block; }
+.cp-lapide img { width: 100%; height: auto; max-height: 100px; object-fit: contain; display: block; }
 .cp-corpo { padding: 9px 11px 11px; }
 .cp-eyebrow { font-size: 8.5px; text-transform: uppercase; letter-spacing: 1.3px; font-weight: 600; margin: 0; color: var(--ld-gold, #C9A46A); }
 .cp-nome { font-size: 13px; font-weight: 700; margin: 1px 0 0; color: #F4F7FA; }
 .cp-div { height: 1px; background: rgba(201,164,106,0.22); margin: 8px 0; }
 
 /* Lista vertical: um homenageado embaixo do outro. */
-.cp-lista { display: flex; flex-direction: column; gap: 7px; max-height: 220px; overflow-y: auto; }
+/* O card inteiro nunca passa de ~280px: assim cabe acima OU abaixo da cruz em
+   qualquer posição de um mapa de 620px (o MapLibre escolhe o lado sozinho), sem
+   precisar mexer na câmera. Lista longa rola por dentro. */
+.cp-lista { display: flex; flex-direction: column; gap: 7px; max-height: 120px; overflow-y: auto; }
 .cp-linha { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
 .cp-linha:hover .cp-tnome { text-decoration-color: var(--ld-gold, #C9A46A); }
 
