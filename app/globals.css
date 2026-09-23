@@ -537,10 +537,11 @@ html {
 /* A foto da lápide CABE inteira no card: largura toda, altura proporcional, com
    teto de 100px (foto em pé encolhe e centraliza em vez de cortar). A faixa
    fixa de 84px copiada da Central cortava a foto ao meio. */
-.cp-lapide img { width: 100%; height: auto; max-height: 54px; object-fit: contain; display: block; }
+.cp-lapide img { width: 100%; height: auto; max-height: 44px; object-fit: contain; display: block; }
 .cp-corpo { padding: 6px 8px 8px; }
 .cp-eyebrow { font-size: 7.5px; text-transform: uppercase; letter-spacing: 1.1px; font-weight: 600; margin: 0; color: var(--ld-gold, #C9A46A); }
-.cp-nome { font-size: 11px; font-weight: 700; margin: 1px 0 0; color: #F4F7FA; }
+.cp-cab { margin: 0 0 6px; padding-bottom: 5px; border-bottom: 1px solid rgba(201,164,106,0.22); display: flex; flex-direction: column; gap: 1px; }
+.cp-nome { font-size: 10px; font-weight: 600; color: #F4F7FA; }
 .cp-div { height: 1px; background: rgba(201,164,106,0.22); margin: 5px 0; }
 
 /* Lista vertical: um homenageado embaixo do outro. */

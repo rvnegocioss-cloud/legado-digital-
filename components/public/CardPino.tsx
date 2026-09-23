@@ -69,11 +69,10 @@ export default function CardPino({ dados, lista }: { dados: DadosDoCard; lista: 
 
       <div className="cp-corpo">
         {varios && (
-          <>
-            <p className="cp-eyebrow">Jazigo familiar</p>
-            <p className="cp-nome">{dados.jazigo_nome || 'Jazigo da família'}</p>
-            <div className="cp-div" />
-          </>
+          <p className="cp-cab">
+            <span className="cp-eyebrow">Jazigo familiar</span>
+            <span className="cp-nome">{dados.jazigo_nome || 'Jazigo da família'}</span>
+          </p>
         )}
 
         <div className="cp-lista">
