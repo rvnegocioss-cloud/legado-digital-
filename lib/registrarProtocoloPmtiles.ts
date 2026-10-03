@@ -1,6 +1,7 @@
 'use client'
 
-import maplibregl from 'maplibre-gl'
+// maplibre-gl 6 não tem mais export default: as funções vêm nomeadas.
+import { addProtocol } from 'maplibre-gl'
 import { Protocol } from 'pmtiles'
 
 // Registro idempotente do protocolo pmtiles:// no MapLibre -- sem isso, a
@@ -10,6 +11,6 @@ let registrado = false
 export function registrarProtocoloPmtiles() {
   if (registrado || typeof window === 'undefined') return
   const protocolo = new Protocol()
-  maplibregl.addProtocol('pmtiles', protocolo.tile)
+  addProtocol('pmtiles', protocolo.tile)
   registrado = true
 }
