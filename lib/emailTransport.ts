@@ -2,7 +2,9 @@ import nodemailer from 'nodemailer'
 
 export const REMETENTE = `Legado Digital <${process.env.SMTP_FROM || 'contato@legadodigital.net'}>`
 
-let transporter: nodemailer.Transporter | null = null
+// nodemailer 10 traz os próprios tipos e não expõe mais o namespace
+// `nodemailer.Transporter`; o tipo sai do retorno de createTransport.
+let transporter: ReturnType<typeof nodemailer.createTransport> | null = null
 
 /**
  * Envio via SMTP do Google Workspace. contato@legadodigital.net é um Grupo
