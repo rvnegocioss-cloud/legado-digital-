@@ -51,3 +51,16 @@ scripts/ortomosaico/bin/
 scripts/ortomosaico/*.mbtiles
 scripts/ortomosaico/*.pmtiles
 scripts/ortomosaico/__pycache__/
+
+# graphify: grafo local, regenerado a cada extract/update
+graphify-out/
+
+# Trava de segurança: chave de conta de serviço do Google nunca pode ser
+# rastreada, mesmo que alguém salve/arraste ela pra dentro da pasta do
+# projeto por engano. As chaves reais ficam fora do repo, em
+# Desktop\Cerebro Claude - Legado Digital\credenciais\ (não é git).
+*service-account*.json
+google-credentials*.json
+
+# worker do maplibre-gl, copiado de node_modules a cada build
+/public/maplibre/
