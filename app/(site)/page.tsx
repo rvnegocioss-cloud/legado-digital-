@@ -35,6 +35,8 @@ interface MemorialExemplo {
   cidade: string | null;
   frase_preferida: string | null;
   slug: string | null;
+  foto_url: string | null;
+  vinculos: string[] | null;
 }
 
 function apenasAno(data: string | null): string | null {
@@ -100,7 +102,7 @@ async function buscarCemiterioDestaque() {
 async function buscarExemplo(): Promise<MemorialExemplo | null> {
   const { data } = await supabaseServidor
     .from("homenagens")
-    .select("nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, slug")
+    .select("nome_completo, data_nascimento, data_falecimento, cidade, frase_preferida, slug, foto_url, vinculos")
     .eq("slug", SLUG_EXEMPLO)
     .maybeSingle();
   return (data as MemorialExemplo) || null;
@@ -110,6 +112,7 @@ export default async function Home() {
   const [exemplo, destaque] = await Promise.all([buscarExemplo(), buscarCemiterioDestaque()]);
   const nascimento = apenasAno(exemplo?.data_nascimento ?? null);
   const falecimento = apenasAno(exemplo?.data_falecimento ?? null);
+  const fotoExemplo = urlMidiaProtegida(exemplo?.foto_url ?? null);
 
   return (
     <div className="landing">
@@ -143,12 +146,25 @@ export default async function Home() {
                 <div className="foto-ring">
                   <div className="foto-ring-in">
                     <div className="foto-ring-inner">
-                      <span className="monograma">{iniciais(exemplo.nome_completo)}</span>
+                      {fotoExemplo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={fotoExemplo} alt={exemplo.nome_completo} />
+                      ) : (
+                        <span className="monograma">{iniciais(exemplo.nome_completo)}</span>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="eyebrow-ficha">Em memória de</div>
                 <div className="nome-ficha">{exemplo.nome_completo}</div>
+                {Array.isArray(exemplo.vinculos) && exemplo.vinculos.length > 0 && (
+                  <div className="papeis-ficha">{exemplo.vinculos.join(" · ")}</div>
+                )}
+                {nascimento && falecimento && (
+                  <div className="anos-ficha">
+                    {nascimento} — {falecimento}
+                  </div>
+                )}
                 {exemplo.cidade && (
                   <div className="cidade-ficha">
                     <MapPin size={13} strokeWidth={1.5} />
@@ -156,11 +172,6 @@ export default async function Home() {
                   </div>
                 )}
                 {exemplo.frase_preferida && <p className="frase-ficha">&ldquo;{exemplo.frase_preferida}&rdquo;</p>}
-                {nascimento && falecimento && (
-                  <p className="small" style={{ marginTop: 10 }}>
-                    {nascimento} – {falecimento}
-                  </p>
-                )}
               </div>
               <div className="actions">
                 <span className="btn">Ver memorial</span>
