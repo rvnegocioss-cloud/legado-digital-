@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import GuiaTumulo from './GuiaTumuloCarregador'
 
@@ -127,19 +126,13 @@ export default function GuiaTumuloModal(props: Props) {
         Guia até o túmulo dentro do cemitério
       </button>
 
-      {/* Portal no <body>: no iPhone (sem tela cheia de verdade) a janela de
-          reserva ficava presa na camada do topo com capa e a barra de menu
-          passava por cima do mapa. Só muda ONDE o modal é desenhado. */}
-      {aberto && createPortal(
+      {aberto && (
         <div
           ref={containerRef}
           role="dialog"
           aria-modal="true"
           aria-label={`Como chegar até ${nomeCompletoSeguro(props.nomeCompleto)}`}
           style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            lineHeight: 1.6,
-            color: '#f5f2eb',
             position: 'fixed',
             inset: 0,
             zIndex: 200,
@@ -252,8 +245,7 @@ export default function GuiaTumuloModal(props: Props) {
               />
             </div>
           </div>
-        </div>,
-        document.body,
+        </div>
       )}
     </>
   )

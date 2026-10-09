@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // Galeria compacta no topo do memorial, ao lado do rosto: um destaque grande
@@ -110,9 +109,7 @@ export default function GaleriaTopo({
         </div>
       )}
 
-      {/* Portal no body: o topo com capa cria camada própria (z-index 1) e
-          prendia esta janela embaixo da barra de menu fixa. */}
-      {visor !== null && itens[visor] && createPortal(
+      {visor !== null && itens[visor] && (
         <div
           onClick={() => setVisor(null)}
           style={{
@@ -188,6 +185,7 @@ export default function GaleriaTopo({
             <img
               src={itens[visor]}
               alt=""
+              onClick={(e) => e.stopPropagation()}
               style={{ width: '100vw', height: '100vh', objectFit: 'contain' }}
             />
           )}
@@ -195,8 +193,7 @@ export default function GaleriaTopo({
           <div style={{ position: 'absolute', bottom: 18, fontSize: 12, color: '#7a8a96', letterSpacing: 1 }}>
             {visor + 1} / {itens.length}
           </div>
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   )

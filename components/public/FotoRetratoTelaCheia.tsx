@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 interface Props {
@@ -64,10 +63,7 @@ export default function FotoRetratoTelaCheia({ src, alt, style }: Props) {
         <img src={src} alt={alt} style={style} />
       </button>
 
-      {/* Portal no <body>: no iPhone (sem tela cheia de verdade) a janela de
-          reserva ficava presa na camada do topo com capa e a barra de menu
-          passava por cima. */}
-      {aberto && createPortal(
+      {aberto && (
         <div
           ref={containerRef}
           role="dialog"
@@ -77,7 +73,6 @@ export default function FotoRetratoTelaCheia({ src, alt, style }: Props) {
             if (e.target === e.currentTarget) setAberto(false)
           }}
           style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
             position: 'fixed',
             inset: 0,
             zIndex: 300,
@@ -123,8 +118,7 @@ export default function FotoRetratoTelaCheia({ src, alt, style }: Props) {
               style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 6 }}
             />
           </div>
-        </div>,
-        document.body,
+        </div>
       )}
     </>
   )

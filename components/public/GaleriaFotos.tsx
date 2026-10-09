@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CORES } from '@/lib/publicTheme'
 
@@ -130,8 +129,7 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
         })}
       </div>
 
-      {/* Portal no body: nenhuma camada da página prende a janela embaixo da barra de menu fixa. */}
-      {aberta !== null && createPortal(
+      {aberta !== null && (
         <div
           onClick={() => setAberta(null)}
           style={{
@@ -152,7 +150,6 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
               position: 'absolute',
               top: 20,
               right: 20,
-              zIndex: 2,
               background: 'rgba(255,255,255,0.06)',
               border: `1px solid ${CORES.douradoBorda}`,
               borderRadius: '50%',
@@ -176,7 +173,6 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
                 style={{
                   position: 'absolute',
                   left: 16,
-                  zIndex: 2,
                   background: 'rgba(255,255,255,0.06)',
                   border: `1px solid ${CORES.douradoBorda}`,
                   borderRadius: '50%',
@@ -197,7 +193,6 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
                 style={{
                   position: 'absolute',
                   right: 16,
-                  zIndex: 2,
                   background: 'rgba(255,255,255,0.06)',
                   border: `1px solid ${CORES.douradoBorda}`,
                   borderRadius: '50%',
@@ -234,6 +229,7 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
             <img
               src={itens[aberta]}
               alt={`Item ${aberta + 1}`}
+              onClick={(e) => e.stopPropagation()}
               style={{
                 width: '100vw',
                 height: '100vh',
@@ -253,8 +249,7 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
           >
             {aberta + 1} / {itens.length}
           </div>
-        </div>,
-        document.body
+        </div>
       )}
     </>
   )
