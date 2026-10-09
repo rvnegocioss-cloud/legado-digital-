@@ -76,8 +76,7 @@ function CemiteriosParceiroInner() {
     <div>
       <h1 className="text-2xl font-bold text-white mb-1">Cemitérios</h1>
       <p className="text-[var(--tema-zinc-400)] text-sm mb-6">
-        Mapa e organização de quadra/fileira/túmulo dos cemitérios onde você atua -- geometria mapeada e mantida pela Central Legado
-        Digital, aqui você só visualiza.
+        Cemitérios onde você atua. Em cada um, o mapa mostra os seus memoriais, igual ao que a família vê no site.
       </p>
 
       {cemiterios.length === 0 ? (
