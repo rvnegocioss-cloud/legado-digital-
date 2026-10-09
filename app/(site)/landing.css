@@ -241,6 +241,9 @@
 }
 
 /* ---------- cemitério ---------- */
+.landing .mapa-bloco { display: grid; gap: 28px; }
+.landing .mapa-topo { align-items: center; }
+.landing .mapa-topo .txt { margin-bottom: 0; }
 .landing .mapcard { overflow: hidden; padding: 0; display: block; text-decoration: none; color: inherit; }
 .landing .mapcard .aerial {
   height: 170px;

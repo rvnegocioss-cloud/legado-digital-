@@ -175,14 +175,19 @@ export default async function Home() {
       </section>
 
       {/* ---------- CEMITÉRIOS MAPEADOS ---------- */}
+      {/* Texto em cima, mapa embaixo na largura toda (pedido do Rafael,
+          2026-10-09): lado a lado, o mapa alto deixava um vão vazio embaixo
+          do texto. */}
       <section className="sec alt">
-        <div className="wrap split">
-          <div>
-            <h2 className="h2">O legado tem um lugar. E um caminho até ele.</h2>
-            <p className="txt">
-              O mapa do cemitério localiza o memorial e traça a rota por GPS, direto do celular, até
-              o túmulo exato.
-            </p>
+        <div className="wrap mapa-bloco">
+          <div className="split mapa-topo">
+            <div>
+              <h2 className="h2">O legado tem um lugar. E um caminho até ele.</h2>
+              <p className="txt">
+                O mapa do cemitério localiza o memorial e traça a rota por GPS, direto do celular,
+                até o túmulo exato.
+              </p>
+            </div>
             <div className="searchbox">
               <h3>Encontre um cemitério mapeado</h3>
               <p className="small">
