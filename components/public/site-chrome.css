@@ -227,3 +227,26 @@ footer.site-footer .bottom {
   text-align: center; color: rgba(255,255,255,0.3); font-size: 10.5px; line-height: 1.5;
 }
 @media (max-width: 700px) { footer.site-footer .cols { grid-template-columns: 1fr; } }
+
+/* ---------- faixa de assinatura (página do parceiro) ---------- */
+.site-assina {
+  position: relative; z-index: 60;
+  background: var(--ld-bg-deep, #081722);
+  border-bottom: 1px solid rgba(201,164,106,0.14);
+  font-family: var(--ld-font-corpo, Inter, sans-serif);
+  font-size: 12.5px;
+  color: var(--ld-fg-mut, #a8b2b8);
+}
+.site-assina .inner {
+  max-width: var(--ld-largura, 1240px); margin: 0 auto; padding: 0 40px;
+  min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.site-assina .marca { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.site-assina .marca img { height: 30px; width: auto; }
+.site-assina .lado { display: flex; gap: 20px; }
+.site-assina .lado a { color: inherit; text-decoration: none; }
+.site-assina .lado a:hover, .site-assina .marca:hover span { color: var(--ld-gold-lite, #dfc08a); }
+@media (max-width: 700px) {
+  .site-assina .inner { padding: 0 16px; }
+  .site-assina .lado a:last-child { display: none; }
+}

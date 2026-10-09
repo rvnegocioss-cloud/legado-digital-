@@ -56,6 +56,28 @@ export default function SiteNav() {
     return () => window.removeEventListener("keydown", aoTeclar);
   }, [menuAberto]);
 
+  // Página de um parceiro (/parceiros/[slug]): quem conduz ali é a funerária,
+  // então o menu grande do Legado não entra -- a marca dela ocupa o topo, na
+  // capa. Fica só esta faixa fina dizendo de quem é a tecnologia (o endereço da
+  // página é legadodigital.net) e o caminho de volta pro site (regra 11).
+  // Padrão de marca conjunta: quem apresenta vem primeiro, a plataforma assina.
+  if (pathname?.startsWith("/parceiros/")) {
+    return (
+      <div className="site-assina">
+        <div className="inner">
+          <Link href="/" className="marca" aria-label="Legado Digital — ir para o site">
+            <span>Memorial digital por</span>
+            <Image src="/logo-legado-digital.svg" alt="Legado Digital" width={92} height={36} />
+          </Link>
+          <div className="lado">
+            <Link href="/">Voltar pro site</Link>
+            <Link href="/familia/login">Portal da Família</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <nav className="site-navbar">
       <div className="inner">

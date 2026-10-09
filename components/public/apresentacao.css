@@ -1,0 +1,135 @@
+/* Apresentação guiada do parceiro. Cores e fontes só por token (app/tokens.css). */
+
+.apres {
+  position: fixed;
+  inset: 0;
+  background: var(--ld-bg);
+  color: var(--ld-fg);
+  font-family: var(--ld-font-corpo);
+}
+.apres-palco { height: 100dvh; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; }
+.apres-palco::-webkit-scrollbar { display: none; }
+
+.apres .tela {
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 84px 0 96px;
+}
+.apres .tela.alt { background: var(--ld-bg-alt); }
+.apres .wrap { width: 100%; max-width: var(--ld-largura); margin: 0 auto; padding: 0 64px; }
+.apres .duo { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; align-items: center; }
+.apres .tela.inv .duo > :first-child { order: 2; }
+
+.apres .quadro {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--ld-border-strong);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.apres .quadro img { object-fit: cover; }
+
+.apres .rotulo { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--ld-gold-lite); }
+.apres h1,
+.apres h2 {
+  font-family: var(--font-serif), "Playfair Display", serif;
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 10px 0 14px;
+}
+.apres h1 { font-size: clamp(32px, 5vw, 62px); }
+.apres h2 { font-size: clamp(26px, 3.6vw, 46px); }
+.apres .tela p { color: var(--ld-fg-mut); font-size: clamp(16px, 1.4vw, 19px); max-width: 44ch; margin: 0; }
+
+.apres .tela.abre { background-position: center; background-size: cover; text-align: center; }
+.apres .tela.abre::before { content: ""; position: absolute; inset: 0; background: rgba(8, 23, 34, 0.7); }
+.apres .tela.abre .wrap { position: relative; }
+.apres .tela.abre p { margin: 0 auto; color: #dfe5e8; }
+.apres .logo-g {
+  width: 132px; height: 132px; border-radius: 50%; background: #fff; padding: 14px;
+  margin: 0 auto 22px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 3px var(--ld-gold), 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+.apres .logo-g img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.apres .botao {
+  display: inline-block; margin-top: 24px; background: var(--ld-gold); color: #1a1408; font-weight: 600;
+  font-size: 15px; padding: 13px 24px; border-radius: 8px; text-decoration: none; border: 1px solid var(--ld-gold);
+}
+.apres .botao.vazado { background: transparent; color: var(--ld-gold-lite); border-color: var(--ld-border-strong); }
+
+/* mesmo card de identidade do memorial (valores de estiloTopo) */
+.apres .ficha {
+  text-align: center; font-family: Georgia, "Times New Roman", serif; padding: 36px 28px;
+  border: 1px solid var(--ld-border); border-radius: 14px;
+  background: linear-gradient(180deg, rgba(201, 164, 106, 0.05), transparent 40%), rgba(255, 255, 255, 0.03);
+}
+.apres .ficha .ring { width: 190px; height: 190px; border-radius: 50%; padding: 2px; background: var(--ld-gold); margin: 0 auto 18px; }
+.apres .ficha .ring img,
+.apres .ficha .ring span {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--ld-bg);
+  display: flex; align-items: center; justify-content: center; background: var(--ld-panel); color: var(--ld-gold); font-size: 52px;
+}
+.apres .ficha .nome { font-family: var(--font-cinzel), Georgia, serif; font-weight: 600; font-size: 27px; line-height: 1.2; }
+.apres .ficha .anos { color: var(--ld-gold); font-size: 17px; margin-top: 8px; }
+.apres .ficha .frase { font-style: italic; color: var(--ld-fg-mut); margin: 14px auto 0; max-width: 34ch; font-size: 16px; }
+
+.apres .tela.fecha { text-align: center; }
+.apres .tela.fecha p { margin: 0 auto; }
+.apres .acoes { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.apres .rodape {
+  margin-top: 54px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 12.5px; color: var(--ld-fg-faint);
+}
+.apres .rodape a { color: inherit; }
+
+/* ---------- controles fixos ---------- */
+.apres-barra {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; justify-content: space-between; align-items: center; padding: 14px 24px;
+  font-size: 12.5px; color: var(--ld-fg-mut);
+  background: linear-gradient(180deg, rgba(8, 23, 34, 0.85), transparent);
+}
+.apres-barra .lado { display: flex; align-items: center; gap: 14px; }
+.apres-barra .mini-logo { width: 42px; height: 42px; border-radius: 50%; background: #fff; padding: 5px; display: flex; align-items: center; justify-content: center; }
+.apres-barra .mini-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.apres-barra .por { display: inline-flex; align-items: center; gap: 6px; }
+.apres-barra .por img { height: 30px; width: auto; }
+.apres-barra button,
+.apres-barra a {
+  display: inline-flex; align-items: center; gap: 6px; font: inherit; color: inherit; text-decoration: none;
+  background: rgba(11, 29, 42, 0.7); border: 1px solid var(--ld-border); border-radius: 8px; padding: 7px 12px; cursor: pointer;
+}
+.apres-barra button:hover,
+.apres-barra a:hover { color: var(--ld-gold-lite); border-color: var(--ld-border-strong); }
+
+.apres-pontos { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); z-index: 5; display: flex; flex-direction: column; gap: 10px; }
+.apres-pontos button { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--ld-gold); background: transparent; padding: 0; cursor: pointer; }
+.apres-pontos button.on { background: var(--ld-gold); }
+
+.apres-setas {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 5;
+  display: flex; gap: 14px; align-items: center; font-size: 12.5px; color: var(--ld-fg-faint);
+}
+.apres-setas button {
+  width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--ld-border-strong);
+  background: rgba(11, 29, 42, 0.85); color: var(--ld-gold-lite); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.apres-setas button:disabled { opacity: 0.3; cursor: default; }
+
+@media (max-width: 900px) {
+  .apres .wrap { padding: 0 20px; }
+  .apres .duo { grid-template-columns: 1fr; gap: 24px; }
+  .apres .tela.inv .duo > :first-child { order: 0; }
+  .apres .tela { padding: 76px 0 88px; }
+  .apres-pontos { right: 8px; }
+  .apres-barra { padding: 10px 12px; }
+  .apres-barra button span, .apres-barra a span { display: none; }
+  .apres .ficha .ring { width: 140px; height: 140px; }
+}

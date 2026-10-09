@@ -50,3 +50,7 @@ Importante ao orientar uma família: **ela não cria o próprio acesso**. O memo
 ## Aparência do memorial (desde 2026-09-08)
 
 A família pode escolher, no próprio portal, uma imagem de capa pro topo da página (6 opções de paisagem prontas, ou nenhuma), a cor do memorial e o ambiente das laterais da página (pontos de luz, pétalas caindo, os dois ou nenhum — vem desligado, e não aparece junto com a imagem de capa: a família escolhe uma das duas) — em telas grandes a decoração aparece nas bordas, sem atrapalhar a leitura. Quem visita não altera nada disso, só vê o resultado escolhido pela família.
+
+## Página de funerária parceira (desde 2026-10-09)
+
+Cada funerária ou cemitério parceiro pode ter uma página própria dentro do site (endereço `/parceiros/nome-da-funeraria`), com a logo e a foto de capa dela no topo. Nessa página a família busca os memoriais que estão sob os cuidados daquele parceiro, vê o que o memorial oferece, um memorial de exemplo (com dados fictícios), o mapa do cemitério e o contato da funerária. Quem passa o endereço é a própria funerária — a página não aparece no menu do site. Se alguém perguntar "como acho a página da minha funerária", orientar a pedir o link pra funerária, ou usar a busca de memorial do site (`/busca`). Você não tem a lista de parceiros nem os endereços das páginas.

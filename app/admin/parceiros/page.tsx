@@ -320,6 +320,7 @@ export default function AdminParceiros() {
                 <th className="text-left py-3 px-4">Email</th>
                 <th className="text-left py-3 px-4">Tipo</th>
                 <th className="text-left py-3 px-4">Status</th>
+                <th className="text-left py-3 px-4">Página pública</th>
                 <th className="text-left py-3 px-4">Criado em</th>
                 <th className="text-left py-3 px-4"></th>
               </tr>
@@ -345,6 +346,15 @@ export default function AdminParceiros() {
                     >
                       {p.ativo ? 'Ativo' : 'Inativo'}
                     </button>
+                  </td>
+                  <td className="py-3 px-4">
+                    {p.slug ? (
+                      <a href={`/parceiros/${p.slug}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                        Abrir
+                      </a>
+                    ) : (
+                      <span className="text-xs text-yellow-500">sem endereço</span>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-[var(--tema-zinc-400)]">
                     {new Date(p.created_at).toLocaleDateString('pt-BR')}

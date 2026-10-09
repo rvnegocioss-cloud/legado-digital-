@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframes — Dashboard do parceiro · Minha página</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root { --tinta:#222; --cinza:#8a8a8a; --claro:#ececec; --papel:#fbfaf6; --marca:#c98a1a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--papel); color:var(--tinta); font-family:'Patrick Hand',cursive; font-size:17px; }
+  header.topo { padding:18px 24px 6px; max-width:1500px; margin:0 auto; }
+  header.topo h1 { font-family:Kalam; font-size:27px; margin:0 0 4px; }
+  header.topo p { margin:0; color:#555; }
+  nav.abas-w { display:flex; gap:8px; padding:14px 24px 0; max-width:1500px; margin:0 auto; flex-wrap:wrap; }
+  nav.abas-w button { font:inherit; font-size:18px; padding:8px 16px; background:#fff; border:2px solid var(--tinta); border-bottom:0; border-radius:10px 10px 0 0; cursor:pointer; }
+  nav.abas-w button.ativa { background:var(--tinta); color:#fff; }
+  main { max-width:1500px; margin:0 auto; padding:0 24px 60px; }
+  .opcao { display:none; border:2px solid var(--tinta); background:#fff; padding:20px; border-radius:0 10px 10px 10px; }
+  .opcao.visivel { display:block; }
+  .opcao h2 { font-family:Kalam; margin:0 0 2px; font-size:24px; }
+  .ideia { margin:0 0 14px; color:#444; }
+  .app { display:grid; grid-template-columns:190px 1fr; border:2px solid var(--tinta); border-radius:8px; overflow:hidden; min-height:520px; }
+  .lado { border-right:2px solid var(--tinta); background:#f3f1ea; padding:12px 10px; display:flex; flex-direction:column; gap:6px; }
+  .lado .logo { border:2px dashed var(--cinza); border-radius:6px; padding:6px; text-align:center; font-size:14px; margin-bottom:8px; }
+  .lado .it { padding:5px 8px; border-radius:6px; }
+  .lado .it.on { background:var(--tinta); color:#fff; }
+  .lado .fim { margin-top:auto; font-size:14px; color:#666; }
+  .conteudo { padding:14px 16px; }
+  .cab { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .tit { font-family:Kalam; font-weight:700; font-size:20px; }
+  .btn { display:inline-block; border:2px solid var(--tinta); border-radius:20px; padding:2px 12px; background:#fff; font-size:15px; white-space:nowrap; }
+  .btn.cheio { background:var(--tinta); color:#fff; }
+  .btn.ouro { background:#f6e3bd; border-color:var(--marca); }
+  .tabs { display:flex; gap:4px; border-bottom:2px solid var(--tinta); margin:12px 0 12px; flex-wrap:wrap; }
+  .tabs span { padding:4px 12px; border:2px solid var(--tinta); border-bottom:0; border-radius:8px 8px 0 0; background:#fff; margin-bottom:-2px; color:#666; }
+  .tabs span.on { background:var(--tinta); color:#fff; }
+  .bx { border:2px solid var(--tinta); border-radius:6px; padding:8px 10px; background:#fff; position:relative; }
+  .bx.pont { border-style:dashed; }
+  .marca { background:#f6e3bd; border-color:var(--marca); }
+  .foto { background:repeating-linear-gradient(45deg,#ecd29c 0 10px,#f8ecd0 10px 20px); display:flex; align-items:center; justify-content:center; text-align:center; border-color:var(--marca); }
+  .campo { border:2px solid var(--cinza); border-radius:6px; padding:4px 8px; color:#888; background:#fff; font-size:15px; }
+  .rot { font-size:14px; color:#555; margin:8px 0 2px; }
+  .regra { font-size:13.5px; color:#777; }
+  .linha { height:9px; background:var(--claro); border-radius:5px; margin:6px 0; }
+  .g { display:grid; gap:12px; } .g2 { grid-template-columns:1fr 1fr; } .g21 { grid-template-columns:2fr 1fr; } .g3 { grid-template-columns:repeat(3,1fr); }
+  .nota { font-size:14.5px; color:#b3261e; margin:6px 0 0; } .nota::before { content:'↳ '; }
+  .circ { width:56px; height:56px; border-radius:50%; border:2px solid var(--marca); background:#f6e3bd; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+  .fx { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  ul.pc { margin:12px 0 0; padding-left:20px; columns:2; } ul.pc li { margin:3px 0; break-inside:avoid; }
+  .pro { color:#1c6b2a; } .con { color:#a0421b; }
+  .ok { color:#1c6b2a; } .falta { color:#b3261e; }
+  @media (max-width:900px){ .app{grid-template-columns:1fr} .lado{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:2px solid var(--tinta)} .g2,.g21,.g3{grid-template-columns:1fr} ul.pc{columns:1} }
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <h1>Dashboard do parceiro · “Minha página” — 3 jeitos de organizar</h1>
+  <p>Menu na lateral, igual ao que o Portal do Parceiro e a Central já têm hoje. Dentro da tela, os campos ficam divididos em abas, para tudo aparecer no alto sem rolar. Muda entre as opções: onde fica a prévia e onde fica o botão de apresentar.</p>
+</header>
+
+<nav class="abas-w">
+  <button data-a="1" class="ativa">A · Abas + prévia ao lado</button>
+  <button data-a="2">B · Abas na largura toda</button>
+  <button data-a="3">C · Prévia em cima, abas embaixo</button>
+</nav>
+
+<main>
+
+<!-- ============ A ============ -->
+<section class="opcao visivel" data-o="1">
+  <h2>A · Abas + prévia fixa ao lado</h2>
+  <p class="ideia">Campos em abas à esquerda (2/3 da tela). A prévia fica sempre visível à direita (1/3) e muda enquanto o parceiro edita, em qualquer aba.</p>
+  <div class="app">
+    <div class="lado">
+      <div class="logo">LOGO Legado</div>
+      <div class="it">Dashboard</div><div class="it">Memoriais</div><div class="it">Cemitérios</div>
+      <div class="it on">Minha página</div><div class="it">E-mails</div>
+      <div class="fim">Voltar pro site</div>
+    </div>
+    <div class="conteudo">
+      <div class="cab">
+        <div><div class="tit">Minha página</div><div class="regra">legadodigital.net/parceiros/vale-da-paz</div></div>
+        <div class="fx"><span class="btn ouro">▶ Apresentar para a família</span><span class="btn">Ver página pública</span><span class="btn">Copiar link</span></div>
+      </div>
+      <div class="g g21" style="margin-top:4px">
+        <div>
+          <div class="tabs"><span class="on">Logo e capa</span><span>Textos</span><span>Contato</span></div>
+          <div class="g g2">
+            <div><div class="rot">Logo</div><div class="bx pont marca fx"><div class="circ">LOGO</div><span class="btn">Trocar</span></div><div class="regra">PNG fundo transparente · mínimo 500 × 500 · até 2 MB</div></div>
+            <div><div class="rot">Foto de capa</div><div class="bx pont foto" style="height:72px">capa <span class="btn" style="margin-left:8px">Trocar</span></div><div class="regra">1920 × 640 · mínimo 1600 × 533 · até 5 MB</div></div>
+          </div>
+          <div class="bx" style="margin-top:12px"><b>Não tem uma capa pronta?</b> pedido pronto pro ChatGPT <span class="btn">Copiar pedido</span></div>
+          <div class="fx" style="margin-top:14px"><span class="btn cheio">Salvar</span><span class="regra">salvo às 14:02</span></div>
+          <p class="nota">aba “Textos”: frase de apresentação · aba “Contato”: WhatsApp, telefone, endereço</p>
+        </div>
+        <div class="bx"><div class="rot" style="margin-top:0">Prévia — como a família vê</div><div class="foto bx" style="height:110px;flex-direction:column"><div class="circ">LOGO</div>Funerária Vale da Paz</div><div class="linha"></div><div class="linha" style="width:60%"></div><p class="nota">sempre visível, não importa a aba</p></div>
+      </div>
+    </div>
+  </div>
+  <ul class="pc">
+    <li class="pro">+ o parceiro vê o resultado enquanto mexe</li>
+    <li class="pro">+ mesmo desenho das fichas da Central (grande + painel curto ao lado)</li>
+    <li class="pro">+ cabe tudo sem rolar</li>
+    <li class="con">− em tela estreita (tablet) a prévia desce pra baixo dos campos</li>
+  </ul>
+</section>
+
+<!-- ============ B ============ -->
+<section class="opcao" data-o="2">
+  <h2>B · Abas na largura toda</h2>
+  <p class="ideia">Igual à ficha do memorial e à ficha do parceiro na Central: uma aba por assunto, cada uma ocupando a tela inteira. A prévia e a apresentação viram abas próprias.</p>
+  <div class="app">
+    <div class="lado">
+      <div class="logo">LOGO Legado</div>
+      <div class="it">Dashboard</div><div class="it">Memoriais</div><div class="it">Cemitérios</div>
+      <div class="it on">Minha página</div><div class="it">E-mails</div>
+      <div class="fim">Voltar pro site</div>
+    </div>
+    <div class="conteudo">
+      <div class="cab"><div><div class="tit">Minha página</div><div class="regra">legadodigital.net/parceiros/vale-da-paz</div></div><span class="btn cheio">Salvar</span></div>
+      <div class="tabs"><span class="on">Logo e capa</span><span>Textos e contato</span><span>Prévia</span><span>Apresentar</span></div>
+      <div class="g g3">
+        <div><div class="rot">Logo</div><div class="bx pont marca fx"><div class="circ">LOGO</div><span class="btn">Trocar</span></div><div class="regra">PNG fundo transparente · mínimo 500 × 500</div></div>
+        <div><div class="rot">Foto de capa</div><div class="bx pont foto" style="height:72px">capa <span class="btn" style="margin-left:8px">Trocar</span></div><div class="regra">1920 × 640 · mínimo 1600 × 533</div></div>
+        <div><div class="rot">Sem capa pronta?</div><div class="bx">pedido pronto pro ChatGPT<br><span class="btn">Copiar pedido</span></div></div>
+      </div>
+      <p class="nota">aba “Prévia”: a página inteira em miniatura · aba “Apresentar”: botão grande + copiar link + instruções de uso no balcão</p>
+    </div>
+  </div>
+  <ul class="pc">
+    <li class="pro">+ idêntico ao padrão de abas que você já aprovou em outras fichas</li>
+    <li class="pro">+ cada aba fica curta e limpa</li>
+    <li class="con">− pra ver como ficou, o parceiro tem que trocar de aba</li>
+    <li class="con">− o botão de apresentar fica escondido numa aba (a ação mais usada no dia a dia)</li>
+  </ul>
+</section>
+
+<!-- ============ C ============ -->
+<section class="opcao" data-o="3">
+  <h2>C · Prévia em cima, abas embaixo</h2>
+  <p class="ideia">A faixa do topo já é a página dele em miniatura, com o botão de apresentar e a lista do que falta preencher. As abas de edição ficam logo abaixo.</p>
+  <div class="app">
+    <div class="lado">
+      <div class="logo">LOGO Legado</div>
+      <div class="it">Dashboard</div><div class="it">Memoriais</div><div class="it">Cemitérios</div>
+      <div class="it on">Minha página</div><div class="it">E-mails</div>
+      <div class="fim">Voltar pro site</div>
+    </div>
+    <div class="conteudo">
+      <div class="g g21">
+        <div class="foto bx" style="height:120px;justify-content:flex-start;gap:12px;padding-left:18px"><div class="circ">LOGO</div><div style="text-align:left"><div class="tit">Funerária Vale da Paz</div><div class="regra">é assim que aparece no topo da sua página</div></div></div>
+        <div class="bx"><span class="btn ouro">▶ Apresentar para a família</span><div class="fx" style="margin-top:6px"><span class="btn">Ver página</span><span class="btn">Copiar link</span></div>
+          <div class="regra" style="margin-top:6px"><span class="ok">✓ logo</span> · <span class="ok">✓ capa</span> · <span class="falta">✗ WhatsApp</span> · <span class="ok">✓ frase</span></div></div>
+      </div>
+      <div class="tabs"><span class="on">Logo e capa</span><span>Textos</span><span>Contato</span></div>
+      <div class="g g3">
+        <div><div class="rot">Logo</div><div class="bx pont marca fx"><div class="circ">LOGO</div><span class="btn">Trocar</span></div><div class="regra">PNG fundo transparente · mínimo 500 × 500</div></div>
+        <div><div class="rot">Foto de capa</div><div class="bx pont foto" style="height:64px">capa <span class="btn" style="margin-left:8px">Trocar</span></div><div class="regra">1920 × 640 · mínimo 1600 × 533</div></div>
+        <div><div class="rot">Sem capa pronta?</div><div class="bx">pedido pro ChatGPT <span class="btn">Copiar</span></div></div>
+      </div>
+      <div class="fx" style="margin-top:12px"><span class="btn cheio">Salvar</span></div>
+      <p class="nota">a lista “✓ / ✗” mostra o que ainda falta pra página ficar completa</p>
+    </div>
+  </div>
+  <ul class="pc">
+    <li class="pro">+ o botão de apresentar e o que falta ficam na cara</li>
+    <li class="pro">+ prévia larga, parecida com a capa de verdade</li>
+    <li class="con">− a faixa de cima empurra os campos pra baixo (mais rolagem em notebook)</li>
+    <li class="con">− é a mais diferente das outras telas do portal</li>
+  </ul>
+</section>
+
+</main>
+
+<script>
+  const abas = document.querySelectorAll('nav.abas-w button'), ops = document.querySelectorAll('.opcao')
+  abas.forEach(b => b.onclick = () => {
+    abas.forEach(x => x.classList.toggle('ativa', x === b))
+    ops.forEach(o => o.classList.toggle('visivel', o.dataset.o === b.dataset.a))
+  })
+</script>
+</body>
+</html>

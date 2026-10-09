@@ -4,7 +4,7 @@ import { supabaseServidor } from "@/lib/supabaseServidor";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
 import NodesFamilia from "@/components/public/NodesFamilia";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
-import { assinarOrtomosaico } from "@/lib/ortomosaicoAssinado";
+import { buscarCemiterioDestaque } from "@/lib/cemiterioDestaque";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
 import "./landing.css";
 
@@ -52,51 +52,6 @@ function iniciais(nome: string): string {
     .slice(0, 2)
     .map((p) => p[0])
     .join("");
-}
-
-// Cemitério em destaque na home: o mapa real, não uma ilustração. Pega o
-// primeiro cemitério público que já tem ortomosaico de drone -- hoje o São
-// Pedro (Uberlândia). Se nenhum tiver mapa aéreo ainda, o bloco inteiro some
-// em vez de mostrar um retângulo vazio.
-async function buscarCemiterioDestaque() {
-  const { data: cidades } = await supabaseServidor.rpc("listar_cidades_publicas");
-  for (const c of (cidades || []) as { cidade_slug: string }[]) {
-    const { data: cems } = await supabaseServidor.rpc("listar_cemiterios_publicos", {
-      p_cidade_slug: c.cidade_slug,
-    });
-    const comMapa = ((cems || []) as { slug: string; tem_ortomosaico: boolean }[]).find(
-      (x) => x.tem_ortomosaico
-    );
-    if (!comMapa) continue;
-
-    const { data } = await supabaseServidor.rpc("obter_mapa_publico_cemiterio", {
-      p_slug: comMapa.slug,
-    });
-    if (!data) continue;
-
-    const ortoUrl = await assinarOrtomosaico(data.cemiterio.ortomosaico_url);
-    const memoriais = {
-      ...data.memoriais,
-      features: (data.memoriais?.features || []).map(
-        (f: { properties?: Record<string, unknown> }) => ({
-          ...f,
-          properties: {
-            ...f.properties,
-            foto_url: urlMidiaProtegida(f.properties?.foto_url as string | null),
-          },
-        })
-      ),
-    };
-
-    return {
-      cemiterio: data.cemiterio,
-      memoriais,
-      ortoUrl,
-      total: memoriais.features.length,
-      href: `/cemiterios/${c.cidade_slug}/${comMapa.slug}`,
-    };
-  }
-  return null;
 }
 
 async function buscarExemplo(): Promise<MemorialExemplo | null> {

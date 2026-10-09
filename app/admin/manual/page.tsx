@@ -67,7 +67,7 @@ const SECOES: Secao[] = [
     titulo: 'Sub-landing do Parceiro',
     path: '/parceiros/[slug]',
     texto: [
-      'Página pública de cada parceiro — logo, descrição institucional, busca interna escopada só aos memoriais daquele parceiro.',
+      'Página pública de cada parceiro — capa e logo da funerária no topo, busca só dos memoriais daquele parceiro, o que a família recebe, memorial de exemplo (fictício), mapa e contato. Editada em Minha página (Portal do Parceiro); tem um segundo modo, a apresentação guiada em /apresentacao/[slug].',
       'Integração: campos editáveis no dashboard do Portal do Parceiro E na ficha do parceiro na Central — os dois lados sempre em sincronia (mesma tabela `parceiros_b2b`).',
     ],
   },

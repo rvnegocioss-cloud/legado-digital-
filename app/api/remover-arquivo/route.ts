@@ -39,6 +39,14 @@ const RECURSOS: Record<string, Recurso> = {
     // (regra 22 — parceiro nunca alcança dado de outro parceiro).
     autorizar: (quem, id) => quem.ehStaff || quem.parceiroIds.includes(id),
   },
+  // Mesma pasta e mesma permissão do logo: a capa é a outra metade da marca do
+  // parceiro na página pública.
+  capa_parceiro: {
+    tabela: 'parceiros_b2b',
+    coluna: 'capa_url',
+    pasta: (id) => `parceiro-logos/${id}/`,
+    autorizar: (quem, id) => quem.ehStaff || quem.parceiroIds.includes(id),
+  },
   foto_tumulo: {
     tabela: 'lapides',
     coluna: 'foto_face_url',

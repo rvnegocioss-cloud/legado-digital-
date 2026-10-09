@@ -618,6 +618,34 @@ export default function DetalheParceiro() {
               social) e salve os dados do parceiro; o endereço é gerado sozinho no save.
             </p>
           )}
+          {/* Atalhos da página do parceiro (2026-10-09). A edição completa -- capa,
+              frase, contato -- mora na tela "Minha página" do Portal do Parceiro;
+              a Central abre a mesma tela em nome do parceiro, sem duplicar o
+              formulário (regra 16: mesma função, um lugar só). */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Link
+              href={`/parceiro/minha-pagina?parceiro_id=${parceiro.id}`}
+              className="px-3 py-2 rounded-lg text-sm font-semibold bg-[#C9A46A] text-[#1a1408] hover:bg-[#dfc08a]"
+            >
+              Editar página completa (logo, capa, contato)
+            </Link>
+            {parceiro.slug && (
+              <>
+                <a href={`/parceiros/${parceiro.slug}`} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg text-sm border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:text-white">
+                  Ver página pública
+                </a>
+                <a href={`/apresentacao/${parceiro.slug}`} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg text-sm border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:text-white">
+                  Abrir apresentação guiada
+                </a>
+              </>
+            )}
+          </div>
+          <p className="text-xs text-[var(--tema-zinc-500)] mb-4 rounded-lg border border-[#C9A46A]/30 bg-[#C9A46A]/5 p-3">
+            <b className="text-[#dfc08a]">Lembrete — endereço com o nome do parceiro.</b> A página pode abrir num endereço dele
+            (ex.: memorial.nomedafuneraria.com.br) em vez de legadodigital.net. Ainda não é automático: exige cadastrar o
+            domínio na Vercel e um registro no DNS do parceiro. Hoje aparece pro parceiro como “sob consulta”, na aba
+            “No seu site” da Minha página.
+          </p>
           <form onSubmit={salvarPaginaPublica} className="space-y-3">
             <div>
               <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Logo</label>

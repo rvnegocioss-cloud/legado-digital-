@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframes — Página do parceiro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root { --tinta:#222; --cinza:#8a8a8a; --claro:#efefef; --papel:#fbfaf6; --marca:#c98a1a; --nos:#2f6fb3; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--papel); color:var(--tinta); font-family:'Patrick Hand','Kalam',cursive; font-size:17px; }
+  header.topo { padding:18px 24px 8px; max-width:1500px; margin:0 auto; }
+  header.topo h1 { font-family:Kalam; font-size:28px; margin:0 0 4px; }
+  header.topo p { margin:0; color:#555; }
+  .legenda { display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; font-size:15px; }
+  .legenda span::before { content:''; display:inline-block; width:14px; height:14px; margin-right:6px; vertical-align:-2px; border:2px solid var(--tinta); border-radius:3px; }
+  .legenda .l-marca::before { background:#f6e3bd; border-color:var(--marca); }
+  .legenda .l-nos::before { background:#dbe8f6; border-color:var(--nos); }
+  .legenda .l-foto::before { background:repeating-linear-gradient(45deg,#ddd 0 6px,#f3f3f3 6px 12px); }
+  nav.abas { display:flex; gap:8px; flex-wrap:wrap; padding:14px 24px 0; max-width:1500px; margin:0 auto; }
+  nav.abas button { font:inherit; font-size:18px; padding:8px 16px; background:#fff; border:2px solid var(--tinta); border-radius:10px 10px 0 0; border-bottom:0; cursor:pointer; }
+  nav.abas button.ativa { background:var(--tinta); color:#fff; }
+  nav.abas button.todas { margin-left:auto; border-radius:10px; border-bottom:2px solid var(--tinta); }
+  main { max-width:1500px; margin:0 auto; padding:0 24px 60px; }
+  .opcao { display:none; border:2px solid var(--tinta); background:#fff; padding:20px; border-radius:0 10px 10px 10px; }
+  .opcao.visivel { display:block; }
+  body.lado-a-lado main { max-width:none; display:grid; grid-template-columns:repeat(4,minmax(380px,1fr)); gap:14px; overflow-x:auto; }
+  body.lado-a-lado .opcao { display:block; border-radius:10px; padding:12px; }
+  body.lado-a-lado .duas { grid-template-columns:1fr; }
+  .opcao h2 { font-family:Kalam; margin:0 0 2px; font-size:24px; }
+  .opcao .ideia { margin:0 0 14px; color:#444; }
+  .duas { display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr); gap:22px; align-items:start; }
+  .rot { font-size:14px; color:#666; text-transform:uppercase; letter-spacing:1px; margin:0 0 6px; }
+  .tela { border:2px solid var(--tinta); border-radius:8px; overflow:hidden; background:#fff; }
+  .bx { border:2px solid var(--tinta); border-radius:6px; padding:8px 10px; background:#fff; position:relative; }
+  .bx.pont { border-style:dashed; }
+  .marca { background:#f6e3bd; border-color:var(--marca); }
+  .nos { background:#dbe8f6; border-color:var(--nos); }
+  .foto { background:repeating-linear-gradient(45deg,#ddd 0 8px,#f3f3f3 8px 16px); display:flex; align-items:center; justify-content:center; text-align:center; }
+  .foto.capa { background:repeating-linear-gradient(45deg,#ecd29c 0 10px,#f8ecd0 10px 20px); border-color:var(--marca); }
+  .mapa { background:repeating-linear-gradient(0deg,#e6efe3 0 12px,#f4f8f2 12px 24px); }
+  .linha { height:9px; background:var(--claro); border-radius:5px; margin:6px 0; }
+  .linha.c { width:60%; } .linha.m { width:80%; }
+  .tit { font-family:Kalam; font-weight:700; font-size:19px; }
+  .btn { display:inline-block; border:2px solid var(--tinta); border-radius:20px; padding:2px 12px; background:#fff; font-size:15px; }
+  .btn.cheio { background:var(--tinta); color:#fff; }
+  .g { display:grid; gap:10px; } .g2 { grid-template-columns:1fr 1fr; } .g3 { grid-template-columns:repeat(3,1fr); } .g4 { grid-template-columns:repeat(4,1fr); }
+  .sec { padding:12px; border-top:2px dashed #bbb; }
+  .sec:first-child { border-top:0; }
+  .nota { font-size:14.5px; color:#b3261e; margin:6px 0 0; }
+  .nota::before { content:'↳ '; }
+  .circ { width:64px; height:64px; border-radius:50%; border:2px solid var(--marca); background:#f6e3bd; display:flex; align-items:center; justify-content:center; font-size:13px; text-align:center; flex-shrink:0; }
+  .circ.gde { width:92px; height:92px; }
+  .circ.foto-c { background:repeating-linear-gradient(45deg,#ddd 0 6px,#f3f3f3 6px 12px); border-color:var(--tinta); }
+  .fx { display:flex; gap:10px; align-items:center; } .entre { justify-content:space-between; } .centro { justify-content:center; text-align:center; } .col { flex-direction:column; }
+  ul.pc { margin:8px 0 0; padding-left:20px; } ul.pc li { margin:3px 0; }
+  .pro { color:#1c6b2a; } .con { color:#a0421b; }
+  .mini { font-size:14px; color:#555; }
+  .campo { border:2px solid var(--cinza); border-radius:6px; padding:4px 8px; color:#888; background:#fff; font-size:15px; }
+  @media (max-width:1000px){ .duas { grid-template-columns:1fr; } .g4{grid-template-columns:1fr 1fr;} }
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <h1>Página do parceiro — 4 jeitos de organizar</h1>
+  <p>Rascunho de estrutura, sem cor nem acabamento. À esquerda a página que a família vê; à direita onde o parceiro envia a logo e a capa, no dashboard. Exemplo: “Funerária Vale da Paz” (fictícia).</p>
+  <div class="legenda">
+    <span class="l-marca">marca da funerária (logo, capa, nome)</span>
+    <span class="l-nos">assinatura do Legado Digital</span>
+    <span class="l-foto">foto / imagem</span>
+    <span>conteúdo que já existe na landing (reaproveitado)</span>
+  </div>
+</header>
+
+<nav class="abas">
+  <button data-a="1" class="ativa">1 · Capa cheia</button>
+  <button data-a="2">2 · Lado a lado</button>
+  <button data-a="3">3 · Cartão de visita</button>
+  <button data-a="4">4 · Apresentação guiada</button>
+  <button class="todas" id="todas">ver as 4 lado a lado</button>
+</nav>
+
+<main>
+
+<!-- ============ OPÇÃO 1 ============ -->
+<section class="opcao visivel" data-o="1">
+  <h2>1 · Capa cheia</h2>
+  <p class="ideia">A capa da funerária ocupa o topo inteiro, com a logo no meio. A família vê a marca antes de qualquer coisa. O Legado assina só no rodapé.</p>
+  <div class="duas">
+    <div>
+      <p class="rot">o que a família vê</p>
+      <div class="tela">
+        <div class="bx foto capa" style="border:0;border-radius:0;height:210px;flex-direction:column;gap:8px">
+          <div class="circ gde">LOGO<br>funerária</div>
+          <div class="tit">Funerária Vale da Paz</div>
+          <div class="mini">Uberlândia — MG · “frase curta da funerária”</div>
+        </div>
+        <div class="sec">
+          <div class="bx" style="max-width:70%;margin:-34px auto 0;background:#fff">
+            <div class="tit">Buscar memorial sob nossos cuidados</div>
+            <div class="campo">Comece a digitar o nome…</div>
+          </div>
+          <p class="nota" style="text-align:center">a busca “sobe” por cima da capa</p>
+        </div>
+        <div class="sec">
+          <div class="tit">O que a sua família recebe</div>
+          <div class="g g3" style="margin-top:8px">
+            <div class="fx col centro"><div class="circ gde foto-c">foto</div><div>A casa toda</div><div class="linha m"></div></div>
+            <div class="fx col centro"><div class="circ gde foto-c">foto</div><div>De onde estiver</div><div class="linha m"></div></div>
+            <div class="fx col centro"><div class="circ gde foto-c">foto</div><div>Encontro diário</div><div class="linha m"></div></div>
+          </div>
+          <p class="nota">os 3 nodes e as fotos da landing, iguais</p>
+        </div>
+        <div class="sec">
+          <div class="g g2">
+            <div><div class="tit">Assim fica o memorial</div><div class="linha"></div><div class="linha m"></div><div class="linha c"></div><span class="btn cheio">Ver memorial de exemplo</span></div>
+            <div class="bx fx col centro"><div class="circ foto-c">foto</div><div class="tit">HELENA M. COSTA</div><div class="mini">1962 — 2025</div></div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="tit">O legado tem um lugar</div>
+          <div class="bx mapa foto" style="height:150px;margin-top:8px">MAPA do cemitério onde a funerária atua<br>(largura toda, igual à landing)</div>
+        </div>
+        <div class="sec">
+          <div class="g g2">
+            <div><div class="tit">Como funciona</div><div class="linha"></div><div class="linha m"></div><div class="linha c"></div></div>
+            <div class="bx marca"><div class="tit">Fale com a Vale da Paz</div><span class="btn">WhatsApp</span> <span class="btn">Telefone</span><div class="mini">endereço</div></div>
+          </div>
+        </div>
+        <div class="sec nos fx entre" style="border-top:2px solid var(--nos)">
+          <div>LOGO Legado Digital · “Memorial digital por Legado Digital”</div><div class="mini">Privacidade · Termos</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="rot">no dashboard do parceiro</p>
+      <div class="bx">
+        <div class="tit">Minha página (bloco no topo do dashboard)</div>
+        <div class="g g2" style="margin-top:8px">
+          <div class="g">
+            <div class="bx pont marca">Enviar LOGO <span class="mini">(PNG, até 2 MB)</span></div>
+            <div class="bx pont marca">Enviar CAPA <span class="mini">(larga, até 5 MB)</span></div>
+            <div class="campo">Descrição / frase</div>
+            <span class="btn cheio">Salvar página</span>
+          </div>
+          <div class="bx"><div class="mini">prévia ao vivo</div><div class="foto capa" style="height:70px">capa + logo</div><div class="linha"></div><div class="linha c"></div><span class="btn">Abrir minha página</span></div>
+        </div>
+        <p class="nota">sai do fim do dashboard e vai pro topo</p>
+      </div>
+      <ul class="pc">
+        <li class="pro">+ maior impacto: a funerária domina a tela</li>
+        <li class="pro">+ mais parecida com a nossa landing</li>
+        <li class="con">− capa ruim (foto escura, torta) estraga a página inteira</li>
+        <li class="con">− no celular a capa empurra a busca pra baixo</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OPÇÃO 2 ============ -->
+<section class="opcao" data-o="2">
+  <h2>2 · Lado a lado</h2>
+  <p class="ideia">Mesmo desenho do topo da nossa landing: texto e busca à esquerda, a capa da funerária à direita como um quadro. Uma faixa fina no alto diz que o memorial é do Legado.</p>
+  <div class="duas">
+    <div>
+      <p class="rot">o que a família vê</p>
+      <div class="tela">
+        <div class="bx nos fx entre" style="border:0;border-bottom:2px solid var(--nos);border-radius:0;font-size:14.5px"><span>Memorial digital por <b>Legado Digital</b></span><span>Entrar</span></div>
+        <div class="sec">
+          <div class="g g2">
+            <div class="g">
+              <div class="fx"><div class="circ">LOGO</div><div><div class="mini">Sob os cuidados de</div><div class="tit">Funerária Vale da Paz</div></div></div>
+              <div><div class="linha"></div><div class="linha m"></div></div>
+              <div class="bx"><div class="tit">Buscar memorial</div><div class="campo">Comece a digitar o nome…</div></div>
+              <div><span class="btn">WhatsApp</span> <span class="btn">Telefone</span></div>
+            </div>
+            <div class="bx foto capa" style="min-height:230px">CAPA da funerária<br>(quadro com cantos arredondados)</div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="g g2">
+            <div class="bx fx col centro"><div class="circ foto-c">foto</div><div class="tit">HELENA M. COSTA</div><div class="mini">memorial de exemplo</div><span class="btn cheio">Ver memorial</span></div>
+            <div><div class="tit">O que a sua família recebe</div>
+              <div class="fx" style="margin-top:6px"><div class="circ foto-c">foto</div><div style="flex:1"><div class="linha"></div><div class="linha c"></div></div></div>
+              <div class="fx" style="margin-top:6px"><div class="circ foto-c">foto</div><div style="flex:1"><div class="linha"></div><div class="linha c"></div></div></div>
+              <div class="fx" style="margin-top:6px"><div class="circ foto-c">foto</div><div style="flex:1"><div class="linha"></div><div class="linha c"></div></div></div>
+            </div>
+          </div>
+          <p class="nota">exemplo e “o que recebe” dividem a mesma faixa</p>
+        </div>
+        <div class="sec">
+          <div class="g g2"><div><div class="tit">O legado tem um lugar</div><div class="linha"></div><div class="linha c"></div></div><div class="bx"><div class="mini">cemitérios atendidos</div><div class="linha"></div><div class="linha m"></div></div></div>
+          <div class="bx mapa foto" style="height:140px;margin-top:8px">MAPA (largura toda)</div>
+        </div>
+        <div class="sec"><div class="tit">Como funciona</div><div class="g g3" style="margin-top:6px"><div class="bx">1</div><div class="bx">2</div><div class="bx">3</div></div></div>
+        <div class="sec nos fx entre" style="border-top:2px solid var(--nos)"><div>LOGO Legado Digital</div><div class="mini">Privacidade · Termos</div></div>
+      </div>
+    </div>
+    <div>
+      <p class="rot">no dashboard do parceiro</p>
+      <div class="bx">
+        <div class="fx"><span class="btn">Memoriais</span><span class="btn">Cemitérios</span><span class="btn cheio">Minha página</span><span class="btn">E-mails</span></div>
+        <p class="nota">vira item próprio do menu do parceiro</p>
+        <div class="g" style="margin-top:8px">
+          <div class="g g2"><div class="bx pont marca">LOGO</div><div class="bx pont marca">CAPA</div></div>
+          <div class="campo">Descrição</div>
+          <div class="g g2"><div class="campo">WhatsApp</div><div class="campo">Telefone</div></div>
+          <div class="fx entre"><span class="btn cheio">Salvar</span><span class="btn">Ver como a família vê →</span></div>
+        </div>
+      </div>
+      <ul class="pc">
+        <li class="pro">+ padrão idêntico ao topo da landing (mesma grade)</li>
+        <li class="pro">+ busca aparece sem rolar, também no celular</li>
+        <li class="pro">+ capa fraca atrapalha menos (é um quadro, não o fundo)</li>
+        <li class="con">− marca da funerária aparece menos que na opção 1</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OPÇÃO 3 ============ -->
+<section class="opcao" data-o="3">
+  <h2>3 · Cartão de visita</h2>
+  <p class="ideia">Como perfil de rede social: faixa de capa baixa, logo redonda encostada nela, nome e contato ao lado. Embaixo, um menu de atalhos leva a cada parte da página.</p>
+  <div class="duas">
+    <div>
+      <p class="rot">o que a família vê</p>
+      <div class="tela">
+        <div class="bx foto capa" style="border:0;border-radius:0;height:110px">CAPA (faixa baixa)</div>
+        <div class="sec" style="border-top:0">
+          <div class="fx entre" style="align-items:flex-end;margin-top:-46px">
+            <div class="fx" style="align-items:flex-end"><div class="circ gde">LOGO</div><div><div class="tit">Funerária Vale da Paz</div><div class="mini">Uberlândia — MG · desde 1987</div></div></div>
+            <div><span class="btn cheio">WhatsApp</span> <span class="btn">Ligar</span></div>
+          </div>
+          <div class="linha m" style="margin-top:12px"></div>
+          <div class="fx" style="margin-top:8px;flex-wrap:wrap"><span class="btn cheio">Buscar memorial</span><span class="btn">O que a família recebe</span><span class="btn">Exemplo</span><span class="btn">Mapa</span><span class="btn">Como funciona</span></div>
+          <p class="nota">atalhos: cada botão desce até a parte dele</p>
+        </div>
+        <div class="sec"><div class="bx"><div class="tit">Buscar memorial sob nossos cuidados</div><div class="campo">Comece a digitar o nome…</div></div></div>
+        <div class="sec">
+          <div class="tit">O que a sua família recebe</div>
+          <div class="g g3" style="margin-top:8px">
+            <div class="bx foto" style="height:90px">foto 1</div><div class="bx foto" style="height:90px">foto 2</div><div class="bx foto" style="height:90px">foto 3</div>
+          </div>
+          <div class="g g4" style="margin-top:8px"><div class="bx mini">diferencial</div><div class="bx mini">diferencial</div><div class="bx mini">diferencial</div><div class="bx mini">diferencial</div></div>
+        </div>
+        <div class="sec"><div class="g g2"><div class="bx fx col centro"><div class="circ foto-c">foto</div><div class="tit">memorial de exemplo</div></div><div class="bx mapa foto" style="min-height:120px">MAPA</div></div>
+          <p class="nota">exemplo e mapa lado a lado — mapa menor que na landing</p></div>
+        <div class="sec nos fx entre" style="border-top:2px solid var(--nos)"><div>Memorial digital por LOGO Legado Digital</div><div class="mini">Privacidade · Termos</div></div>
+      </div>
+    </div>
+    <div>
+      <p class="rot">no dashboard do parceiro</p>
+      <div class="bx">
+        <div class="tit">Editar em cima da própria página</div>
+        <div class="foto capa bx" style="height:70px;margin-top:8px">capa <span class="btn" style="position:absolute;right:6px;top:6px">✎ trocar</span></div>
+        <div class="fx" style="margin-top:-20px;padding-left:10px"><div class="circ">LOGO ✎</div><div class="campo" style="margin-top:22px">nome e frase ✎</div></div>
+        <p class="nota">o parceiro clica no lápis de cada peça; não existe formulário separado</p>
+      </div>
+      <ul class="pc">
+        <li class="pro">+ formato que todo mundo já conhece (Facebook, Instagram)</li>
+        <li class="pro">+ contato da funerária sempre à mão</li>
+        <li class="pro">+ capa baixa: aceita qualquer foto</li>
+        <li class="con">− o mais distante do desenho da nossa landing</li>
+        <li class="con">− edição “no lápis” dá mais trabalho pra construir</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OPÇÃO 4 ============ -->
+<section class="opcao" data-o="4">
+  <h2>4 · Apresentação guiada</h2>
+  <p class="ideia">Feita pro atendente mostrar no balcão ou no tablet: cada parte ocupa a tela inteira, uma por vez, na ordem da conversa de venda. Pontinhos na lateral mostram em que parte está.</p>
+  <div class="duas">
+    <div>
+      <p class="rot">o que a família vê (cada caixa = uma tela cheia)</p>
+      <div class="tela" style="position:relative">
+        <div style="position:absolute;right:6px;top:120px;display:flex;flex-direction:column;gap:6px;z-index:2"><span class="btn cheio" style="padding:0 6px">●</span><span class="btn" style="padding:0 6px">○</span><span class="btn" style="padding:0 6px">○</span><span class="btn" style="padding:0 6px">○</span><span class="btn" style="padding:0 6px">○</span></div>
+        <div class="bx nos fx entre" style="border:0;border-bottom:2px solid var(--nos);border-radius:0;font-size:14.5px"><span>LOGO funerária (pequena)</span><span>por <b>Legado Digital</b></span></div>
+        <div class="sec"><div class="mini">tela 1</div><div class="bx foto capa" style="height:150px;flex-direction:column"><div class="circ gde">LOGO</div><div class="tit">A Vale da Paz apresenta: o memorial da sua família</div><span class="btn cheio">Começar ↓</span></div></div>
+        <div class="sec"><div class="mini">tela 2 — o que a família recebe (uma foto grande por vez)</div><div class="g g2"><div class="bx foto" style="height:120px">FOTO grande da landing</div><div><div class="tit">A casa toda reunida</div><div class="linha"></div><div class="linha m"></div><div class="linha c"></div><span class="btn">próxima →</span></div></div></div>
+        <div class="sec"><div class="mini">tela 3 — memorial de exemplo</div><div class="bx fx col centro" style="padding:14px"><div class="circ gde foto-c">foto</div><div class="tit">HELENA MARTINS COSTA</div><span class="btn cheio">Abrir o memorial de exemplo</span></div></div>
+        <div class="sec"><div class="mini">tela 4 — o mapa</div><div class="bx mapa foto" style="height:120px">MAPA em tela cheia</div></div>
+        <div class="sec"><div class="mini">tela 5 — fechamento</div><div class="g g2"><div class="bx"><div class="tit">Já tem um memorial?</div><div class="campo">buscar pelo nome…</div></div><div class="bx marca"><div class="tit">Quero o memorial</div><span class="btn cheio">Falar com a Vale da Paz</span></div></div></div>
+        <div class="sec nos fx entre" style="border-top:2px solid var(--nos)"><div>LOGO Legado Digital</div><div class="mini">Privacidade · Termos</div></div>
+      </div>
+    </div>
+    <div>
+      <p class="rot">no dashboard do parceiro</p>
+      <div class="bx">
+        <div class="tit">Montar minha apresentação — 3 passos</div>
+        <div class="g g3" style="margin-top:8px"><div class="bx marca">1 · Logo</div><div class="bx marca">2 · Capa</div><div class="bx">3 · Contato</div></div>
+        <div class="fx entre" style="margin-top:8px"><span class="btn cheio">Abrir modo apresentação</span><span class="btn">Copiar link</span></div>
+        <p class="nota">botão grande pra abrir em tela cheia na hora da venda</p>
+      </div>
+      <ul class="pc">
+        <li class="pro">+ a melhor pra vender ao vivo, no balcão</li>
+        <li class="pro">+ as nossas fotos aparecem grandes</li>
+        <li class="con">− página muito longa no celular (5 telas)</li>
+        <li class="con">− quem só quer buscar um memorial tem que rolar até o fim</li>
+        <li class="con">− a mais trabalhosa de construir</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+  const abas = document.querySelectorAll('nav.abas button[data-a]')
+  const ops = document.querySelectorAll('.opcao')
+  abas.forEach(b => b.onclick = () => {
+    document.body.classList.remove('lado-a-lado')
+    abas.forEach(x => x.classList.toggle('ativa', x === b))
+    ops.forEach(o => o.classList.toggle('visivel', o.dataset.o === b.dataset.a))
+  })
+  document.getElementById('todas').onclick = () => document.body.classList.toggle('lado-a-lado')
+</script>
+</body>
+</html>

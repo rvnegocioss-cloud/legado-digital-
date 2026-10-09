@@ -159,3 +159,12 @@ Pedido do Rafael, ainda não implementado — a seção "O legado tem um lugar" 
 Protótipo estático em `wireframe/reestruturacao-site-publico/prototipo-cemiterio.html`, cobrindo as telas 3 e 4 do wireframe do Pedro (`buscar cemitério` + `página do cemitério`). Só protótipo — nada implementado no código real ainda. Aguardando o Rafael aprovar antes de construir de verdade (regra 24: refatoração visual sempre passa por wireframe/protótipo antes de mexer em código).
 
 **Correção #1, registrada pelo Rafael (2026-09-23): hierarquia de barramento errada.** A 1ª versão do protótipo empilhava as duas telas (busca + página do cemitério) na mesma rolagem, uma embaixo da outra — errado, elas são páginas diferentes, uma dentro da outra na navegação, não um scroll só. Corrigido pro mesmo sistema do wireframe original do Pedro (`wireframe-legado-digital.html`): barra lateral com a lista de telas, `.screen{display:none}`/`.screen.on{display:block}`, só uma tela visível por vez, e o clique real (card do cemitério → abre a página do cemitério) troca de tela via JS, não âncora de scroll.
+
+## Endereço com o nome do parceiro — ideia registrada (2026-10-09)
+
+O Rafael achou interessante e pediu pra não esquecer: a página do parceiro (`/parceiros/[slug]`) abrir num endereço do próprio parceiro, ex.: `memorial.valedapaz.com.br`, em vez de `legadodigital.net/parceiros/vale-da-paz`.
+
+- **O que precisa:** (1) cadastrar o domínio no projeto da Vercel; (2) o parceiro criar um registro CNAME no DNS dele apontando pra Vercel; (3) o site reconhecer o domínio e servir a página daquele parceiro (reescrita por `host` no `proxy.ts`, com uma coluna tipo `parceiros_b2b.dominio_proprio`); (4) revisar os links internos da página, que hoje assumem `legadodigital.net`.
+- **Não decidido:** se é cobrado à parte, quem configura o DNS do parceiro, e se a apresentação guiada também responde nesse domínio.
+- **Hoje:** aparece como "sob consulta" na aba "No seu site" da Minha página do parceiro, e como lembrete na aba Página Pública da ficha do parceiro na Central. Nada construído.
+- **O que já funciona sem isso:** botão/link no site do parceiro. Embutir em moldura (iframe) não funciona por causa dos cabeçalhos de segurança, e não é recomendado.

@@ -37,14 +37,6 @@ async function acessarPortalFamilia(memorialId: string): Promise<string> {
   return json.slug as string
 }
 
-async function subirLogo(parceiroId: string, file: File) {
-  const caminho = `parceiro-logos/${parceiroId}/${Date.now()}-${file.name}`
-  const { error } = await supabase.storage.from('memoriais').upload(caminho, file, { upsert: true })
-  if (error) throw error
-  const { data } = supabase.storage.from('memoriais').getPublicUrl(caminho)
-  return data.publicUrl
-}
-
 const PAGAMENTO_LABEL: Record<string, { label: string; className: string }> = {
   em_dia: { label: 'Em dia', className: 'bg-green-900/50 text-green-400' },
   pendente: { label: 'Pendente', className: 'bg-yellow-900/50 text-yellow-400' },
@@ -79,14 +71,6 @@ function ParceiroDashboardInner() {
   const [loading, setLoading] = useState(true)
   const [acessandoFamiliaId, setAcessandoFamiliaId] = useState<string | null>(null)
   const [erroFamilia, setErroFamilia] = useState('')
-
-  const [logoUrl, setLogoUrl] = useState('')
-  const [descricaoPublica, setDescricaoPublica] = useState('')
-  const [enviandoLogo, setEnviandoLogo] = useState(false)
-  const [removendoLogo, setRemovendoLogo] = useState(false)
-  const [salvandoPagina, setSalvandoPagina] = useState(false)
-  const [paginaErro, setPaginaErro] = useState('')
-  const [paginaSalva, setPaginaSalva] = useState(false)
 
   useEffect(() => {
     load()
@@ -134,10 +118,6 @@ function ParceiroDashboardInner() {
     setParceiro(p)
     setTotalMemoriais(count || 0)
     setMemoriaisQr(memoriais || [])
-    if (p) {
-      setLogoUrl(p.logo_url || '')
-      setDescricaoPublica(p.descricao_publica || '')
-    }
     setLoading(false)
   }
 
@@ -151,66 +131,6 @@ function ParceiroDashboardInner() {
       setErroFamilia(err.message)
       setAcessandoFamiliaId(null)
     }
-  }
-
-  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !parceiro) return
-    setEnviandoLogo(true)
-    setPaginaErro('')
-    try {
-      const url = await subirLogo(parceiro.id, file)
-      setLogoUrl(url)
-    } catch (err: any) {
-      setPaginaErro(err.message || 'Erro ao enviar logo')
-    }
-    setEnviandoLogo(false)
-  }
-
-  // Mesma rota da Central: o parceiro so consegue remover o proprio logo (a
-  // rota confere parceiros_usuarios antes de apagar).
-  async function removerLogo() {
-    if (!parceiro) return
-    setRemovendoLogo(true)
-    setPaginaErro('')
-    try {
-      const res = await fetch('/api/remover-arquivo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ''}`,
-        },
-        body: JSON.stringify({ recurso: 'logo_parceiro', id: parceiro.id }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Nao foi possivel remover o logo')
-      setLogoUrl('')
-    } catch (err: any) {
-      setPaginaErro(err.message || 'Erro ao remover logo')
-    }
-    setRemovendoLogo(false)
-  }
-
-  async function salvarPaginaPublica(e: React.FormEvent) {
-    e.preventDefault()
-    if (!parceiro) return
-    setSalvandoPagina(true)
-    setPaginaErro('')
-    setPaginaSalva(false)
-
-    const { error } = await supabase.rpc('atualizar_pagina_publica_parceiro', {
-      p_logo_url: logoUrl || null,
-      p_descricao_publica: descricaoPublica || null,
-    })
-
-    if (error) {
-      setPaginaErro(error.message)
-      setSalvandoPagina(false)
-      return
-    }
-
-    setSalvandoPagina(false)
-    setPaginaSalva(true)
   }
 
   if (loading) return <p className="text-[var(--tema-zinc-400)]">Carregando...</p>
@@ -353,73 +273,22 @@ function ParceiroDashboardInner() {
       </div>
       </div>
 
+      {/* A edição da página saiu daqui em 2026-10-09: virou a tela "Minha página"
+          do menu (logo, capa, textos, contato e o botão de apresentar). A aba fica
+          só como atalho, pra quem estava acostumado a procurar aqui. */}
       <div className={aba === 'pagina' ? '' : 'hidden'}>
-      <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-[var(--tema-zinc-400)]">Página pública (Editar)</h2>
-          {parceiro.slug && (
-            <a
-              href={`/parceiros/${parceiro.slug}`}
-              className="text-blue-400 hover:underline text-xs"
-            >
-              Ver página pública
-            </a>
-          )}
-        </div>
-        <p className="text-[var(--tema-zinc-500)] text-sm mb-4">
-          Logo e descrição que aparecem na sua página pública, aonde as famílias encontram seus memoriais.
-        </p>
-        <form onSubmit={salvarPaginaPublica} className="space-y-3 max-w-md">
-          <div>
-            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Logo</label>
-            {logoUrl && (
-              <div className="flex items-center gap-3 mb-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={urlMidiaProtegida(logoUrl) || logoUrl}
-                  alt="Logo"
-                  className="h-14 object-contain bg-[var(--tema-zinc-800)] rounded p-2"
-                />
-                <button
-                  type="button"
-                  onClick={removerLogo}
-                  disabled={removendoLogo}
-                  className="text-xs text-[var(--tema-zinc-500)] hover:text-red-400 disabled:opacity-50"
-                >
-                  {removendoLogo ? 'Removendo...' : 'Remover logo'}
-                </button>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-              disabled={enviandoLogo}
-              className="block w-full text-sm text-[var(--tema-zinc-400)] file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-[var(--tema-zinc-700)] file:text-white file:text-xs hover:file:bg-[var(--tema-zinc-600)]"
-            />
-            {enviandoLogo && <p className="text-xs text-[var(--tema-zinc-500)] mt-1">Enviando logo...</p>}
-          </div>
-          <div>
-            <label className="block text-xs text-[var(--tema-zinc-500)] mb-1">Descrição institucional</label>
-            <textarea
-              placeholder="Uma breve apresentação da sua funerária/cemitério pras famílias"
-              rows={3}
-              value={descricaoPublica}
-              onChange={(e) => setDescricaoPublica(e.target.value)}
-              className="flex w-full rounded-md border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-800)] px-3 py-2 text-sm text-white placeholder-[var(--tema-zinc-500)]"
-            />
-          </div>
-          {paginaErro && <p className="text-red-400 text-sm">{paginaErro}</p>}
-          {paginaSalva && <p className="text-green-400 text-sm">Salvo.</p>}
-          <button
-            type="submit"
-            disabled={salvandoPagina}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-branco-fixo text-sm font-medium rounded-lg"
+        <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-xl">
+          <h2 className="text-sm font-medium text-white mb-1">A edição da página mudou de lugar</h2>
+          <p className="text-[var(--tema-zinc-500)] text-sm mb-4">
+            Logo, foto de capa, frase, contato e a apresentação pra família agora ficam em “Minha página”, no menu ao lado.
+          </p>
+          <Link
+            href={parceiroIdParam ? `/parceiro/minha-pagina?parceiro_id=${parceiroIdParam}` : '/parceiro/minha-pagina'}
+            className="inline-block px-4 py-2 bg-[#C9A46A] hover:bg-[#dfc08a] text-[#1a1408] text-sm font-semibold rounded-lg"
           >
-            {salvandoPagina ? 'Salvando...' : 'Salvar página pública'}
-          </button>
-        </form>
-      </div>
+            Abrir Minha página
+          </Link>
+        </div>
       </div>
     </div>
   )

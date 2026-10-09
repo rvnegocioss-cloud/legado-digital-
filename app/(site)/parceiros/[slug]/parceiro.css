@@ -1,0 +1,96 @@
+/* Página pública do parceiro -- só o que a landing não tem: a capa cheia, a
+   busca que sobe por cima dela e o bloco de contato. Todo o resto (cards,
+   grades, botões, tipografia, larguras) vem de landing.css, pra página seguir
+   o padrão do site por construção. Cores e fontes só por token. */
+
+.pg-parceiro .capa {
+  position: relative;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: var(--lp-bg2);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+/* Véu: garante leitura do nome e da logo em cima de QUALQUER foto que o
+   parceiro enviar, e termina na cor do fundo pra emendar com a página. */
+.pg-parceiro .capa::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 23, 34, 0.55) 0%, rgba(8, 23, 34, 0.64) 55%, var(--lp-bg) 100%);
+}
+.pg-parceiro .capa .dentro { position: relative; padding: 56px 24px 124px; max-width: 900px; }
+.pg-parceiro .logo-parc {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: #fff;
+  margin: 0 auto 20px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 3px var(--lp-gold), 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+.pg-parceiro .logo-parc img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.pg-parceiro .capa .eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--lp-gold-lite);
+}
+.pg-parceiro .capa h1 {
+  font-weight: 400;
+  font-size: clamp(30px, 4.4vw, 52px);
+  line-height: 1.12;
+  margin: 6px 0 10px;
+  color: var(--lp-fg);
+}
+.pg-parceiro .capa p { color: #dfe5e8; margin: 0 auto; max-width: 56ch; }
+
+.pg-parceiro .busca-sobe { position: relative; z-index: 2; margin-top: -84px; }
+.pg-parceiro .busca-sobe .searchbox {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--lp-panel);
+  border-color: var(--lp-border2);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+}
+
+.pg-parceiro .sec.sem-borda { border-top: 0; }
+.pg-parceiro .vitrine { align-items: center; }
+.pg-parceiro .vitrine .preview { max-width: 460px; justify-self: end; width: 100%; }
+
+.pg-parceiro .passos { margin-top: 22px; }
+.pg-parceiro .passos .num {
+  font-family: var(--font-serif), "Playfair Display", serif;
+  color: var(--lp-gold);
+  font-size: 26px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.pg-parceiro .contato {
+  margin-top: 30px;
+  padding: 28px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  border-color: var(--lp-border2);
+  background: rgba(201, 164, 106, 0.05);
+}
+.pg-parceiro .contato .small { margin: 6px 0 0; }
+.pg-parceiro .contato .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .pg-parceiro .capa { min-height: 430px; }
+  .pg-parceiro .capa .dentro { padding: 40px 16px 112px; }
+  .pg-parceiro .logo-parc { width: 104px; height: 104px; }
+  .pg-parceiro .vitrine .preview { justify-self: stretch; max-width: none; }
+}

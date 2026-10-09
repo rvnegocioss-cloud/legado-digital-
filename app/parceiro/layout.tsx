@@ -8,7 +8,7 @@ import { getParceiroUser, getAdminUser, signOut, supabase } from '@/lib/auth'
 import { useTema } from '@/lib/useTema'
 import LegadoBotWidget from '@/components/LegadoBotWidget'
 import TrocarSenhaObrigatoria from '@/components/TrocarSenhaObrigatoria'
-import { Home, MessageCircle, Sun, Moon, LayoutDashboard, ScrollText, MapPin, Mail, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Home, MessageCircle, Sun, Moon, LayoutDashboard, ScrollText, MapPin, Mail, Store, ChevronLeft, ChevronRight } from 'lucide-react'
 
 type ParceiroUser = {
   email: string
@@ -144,6 +144,7 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
     { href: `/parceiro${suffix}`, label: 'Dashboard', match: '/parceiro', Icon: LayoutDashboard },
     { href: `/parceiro/memoriais${suffix}`, label: 'Memoriais (Cadastrar/Editar)', match: '/parceiro/memoriais', Icon: ScrollText },
     { href: `/parceiro/cemiterios${suffix}`, label: 'Cemitérios', match: '/parceiro/cemiterios', Icon: MapPin },
+    { href: `/parceiro/minha-pagina${suffix}`, label: 'Minha página', match: '/parceiro/minha-pagina', Icon: Store },
     { href: `/parceiro/emails${suffix}`, label: 'E-mails', match: '/parceiro/emails', Icon: Mail },
   ]
   const itemAtivo = (match: string) => (match === '/parceiro' ? pathname === match : pathname.startsWith(match))
