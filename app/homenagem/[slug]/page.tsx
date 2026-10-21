@@ -817,7 +817,7 @@ export default async function PerfilMemorialPage({
       <div id="guia-tumulo-area" className="mem-container" style={{ margin: "0 auto" }} />
 
       {/* ---- Corpo: coluna de leitura + lateral fixa ---------------------- */}
-      <div className="perfil-corpo">
+      <div className={`perfil-corpo${marcos.length === 0 || !anoNasc || !anoFalec ? " perfil-corpo-sem-rail" : ""}`}>
         <RailVida marcos={marcos} anoInicio={anoNasc ? String(anoNasc) : null} anoFim={anoFalec ? String(anoFalec) : null} />
 
         <main className="perfil-coluna">

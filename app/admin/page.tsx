@@ -23,6 +23,7 @@ export default function AdminDashboard() {
   const [totalVisualizacoes, setTotalVisualizacoes] = useState(0)
   const [novosMemoriais, setNovosMemoriais] = useState(0)
   const [homenagensRecentes, setHomenagensRecentes] = useState(0)
+  const [totalFiguras, setTotalFiguras] = useState(0)
   const [topCemiterios, setTopCemiterios] = useState<RankItem[]>([])
   const [topParceiros, setTopParceiros] = useState<RankItem[]>([])
 
@@ -31,13 +32,14 @@ export default function AdminDashboard() {
       const seteDiasAtras = new Date(Date.now() - 7 * 86400000).toISOString()
       // Agregação de visitas inteira no Postgres (RPC) -- nunca baixar as
       // tabelas pro navegador só pra somar.
-      const [{ data: metricas }, parceiros, memoriais, usuarios, condolencias] = await Promise.all([
+      const [{ data: metricas }, parceiros, memoriais, usuarios, condolencias, figuras] = await Promise.all([
         supabase.rpc('admin_dashboard_metricas'),
         supabase.from('parceiros_b2b').select('*', { count: 'exact', head: true }),
         // rascunho ("Novo memorial") não é memorial de verdade
         supabase.from('homenagens').select('*', { count: 'exact', head: true }).not('slug', 'like', 'rascunho-%').neq('nome_completo', 'Novo memorial'),
         supabase.from('usuarios').select('*', { count: 'exact', head: true }),
         supabase.from('condolencias').select('*', { count: 'exact', head: true }).gte('created_at', seteDiasAtras),
+        supabase.from('homenagens').select('*', { count: 'exact', head: true }).eq('figura_publica', true).not('slug', 'like', 'rascunho-%').neq('nome_completo', 'Novo memorial'),
       ])
       if (metricas) {
         setTotalVisualizacoes(metricas.totalVisualizacoes || 0)
@@ -49,6 +51,7 @@ export default function AdminDashboard() {
       setTotalMemoriais(memoriais.count || 0)
       setTotalUsuarios(usuarios.count || 0)
       setHomenagensRecentes(condolencias.count || 0)
+      setTotalFiguras(figuras.count || 0)
       setLoading(false)
     }
     carregar()
@@ -93,6 +96,7 @@ export default function AdminDashboard() {
           )
         })}
       </div>
+      <p className="text-xs text-[var(--dash-fg-muted)] -mt-3 mb-6">Ilustres: {totalFiguras}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[

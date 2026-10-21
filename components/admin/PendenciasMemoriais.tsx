@@ -9,6 +9,7 @@ interface MemorialIncompleto {
   nome_completo: string
   preenchido_por: 'funeraria' | 'familia' | null
   origem_cadastro: string | null
+  figura_publica?: boolean | null
   falta: string[]
 }
 
@@ -21,17 +22,17 @@ export default function PendenciasMemoriais() {
   useEffect(() => {
     supabase
       .from('homenagens')
-      .select('id, nome_completo, data_falecimento, foto_url, biografia, familia_email, preenchido_por, origem_cadastro, created_at')
+      .select('id, nome_completo, data_falecimento, foto_url, biografia, familia_email, preenchido_por, origem_cadastro, figura_publica, created_at')
       .order('created_at', { ascending: false })
       .limit(200)
       .then(({ data }) => {
         const lista = (data || [])
           .map((m) => {
             const falta: string[] = []
-            if (!m.data_falecimento) falta.push('data de falecimento')
+            if (!m.data_falecimento && !m.figura_publica) falta.push('data de falecimento')
             if (!m.foto_url) falta.push('foto')
             if (!m.biografia) falta.push('história')
-            if (!m.familia_email) falta.push('contato da família')
+            if (!m.familia_email && !m.figura_publica) falta.push('contato da família')
             return { ...m, falta }
           })
           .filter((m) => m.falta.length > 0)
@@ -57,7 +58,8 @@ export default function PendenciasMemoriais() {
             </Link>
             <span className="text-[var(--tema-zinc-400)] flex-1 min-w-[180px]">
               falta {m.falta.join(', ')}
-              {m.preenchido_por === 'familia' && <span className="text-blue-400"> · aguardando a família</span>}
+              {m.figura_publica && <span style={{ color: '#0891b2' }}> · Ilustre</span>}
+              {m.preenchido_por === 'familia' && !m.figura_publica && <span className="text-blue-400"> · aguardando a família</span>}
               {m.origem_cadastro === 'mapa_cemiterio' && <span> · cadastrado no cemitério</span>}
             </span>
           </li>

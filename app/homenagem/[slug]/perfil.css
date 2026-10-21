@@ -600,6 +600,12 @@
     grid-template-columns: 56px minmax(0, 1fr);
   }
 
+  /* Sem linha do tempo a régua não existe (RailVida devolve null): sem isto o
+     texto cai na faixa de 56px e some a história. */
+  .perfil-corpo.perfil-corpo-sem-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .perfil-rail {
     display: flex;
     flex-direction: column;

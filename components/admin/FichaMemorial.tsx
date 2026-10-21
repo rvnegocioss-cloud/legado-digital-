@@ -58,6 +58,7 @@ interface Memorial {
   lapide_id: string | null
   vinculos: string[] | null
   parceiro_id: string | null
+  figura_publica?: boolean | null
   created_at: string
   updated_at: string
   criado_por: { nome: string } | null
@@ -127,6 +128,7 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
     lapide_id: '',
   })
   const [vinculos, setVinculos] = useState<string[]>([])
+  const [figuraPublica, setFiguraPublica] = useState(false)
   const [cemiterios, setCemiterios] = useState<Cemiterio[]>([])
   const [jazigoEscolhido, setJazigoEscolhido] = useState<JazigoEscolhido | null>(null)
   const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
@@ -262,6 +264,10 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
       lapide_id: m.lapide_id || '',
     })
     setVinculos(m.vinculos || [])
+    if (modo === 'central') {
+      const { data: fp } = await supabase.from('homenagens').select('figura_publica').eq('id', m.id).maybeSingle()
+      setFiguraPublica(!!fp?.figura_publica)
+    }
     setFotoUrl(m.foto_url || '')
     setVideoUrl(m.video_url || '')
     setVideosGaleria(m.videos_galeria || [])
@@ -701,6 +707,7 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
       tema,
       timeline: timelineEventos.filter((ev) => ev.year || ev.title || ev.description),
     }
+    if (modo === 'central') payload.figura_publica = figuraPublica
     if (slugDefinitivo) {
       payload.slug = slugDefinitivo
       payload.memorial_slug = slugDefinitivo
@@ -793,6 +800,7 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
     placaChip,
     { label: `Galeria ${galeria.length}/${LIMITE_FOTOS}`, tom: 'neutro' },
     { label: `${usoStorageMB}MB / 500MB`, tom: usoStorageMB >= 400 ? 'amarelo' : 'neutro' },
+    ...(modo === 'central' && figuraPublica ? [{ label: 'Ilustre · sem vínculo com família', tom: 'neutro' as const }] : []),
     ...(memorial.criado_por?.nome ? [{ label: `Cadastrado por ${memorial.criado_por.nome}`, tom: 'neutro' as const }] : []),
   ]
 
@@ -1028,6 +1036,13 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
                 <CampoFicha label="Vínculo/papel (aparece perto do nome na página)" className="mt-4">
                   <VinculosEditor value={vinculos} onChange={setVinculos} />
                 </CampoFicha>
+
+                {modo === 'central' && (
+                  <label className="mt-4 flex items-center gap-2 text-xs text-[var(--tema-zinc-300)]">
+                    <input type="checkbox" checked={figuraPublica} onChange={(e) => setFiguraPublica(e.target.checked)} />
+                    Ilustre (pessoa pública, memorial criado pela equipe, sem família vinculada)
+                  </label>
+                )}
               </SecaoFicha>
 
               <SecaoFicha titulo="História" icon={FileText}>

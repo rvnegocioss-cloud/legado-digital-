@@ -18,6 +18,7 @@ interface Memorial {
   created_at: string
   parceiro_id: string | null
   lapide_id: string | null
+  figura_publica?: boolean | null
   criado_por: { nome: string } | null
 }
 
@@ -56,7 +57,7 @@ export default function AdminMemoriais() {
 
     const { data } = await supabase
       .from('homenagens')
-      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, qr_code_url, created_at, parceiro_id, lapide_id, criado_por:criado_por_usuario_id(nome)')
+      .select('id, nome_completo, data_nascimento, data_falecimento, cidade, slug, qr_code_url, created_at, parceiro_id, lapide_id, figura_publica, criado_por:criado_por_usuario_id(nome)')
       .order('created_at', { ascending: false })
     if (data) setMemoriais(data as unknown as Memorial[])
 
@@ -187,11 +188,23 @@ export default function AdminMemoriais() {
                           </thead>
                           <tbody>
                             {grupo.memoriais.map((m) => (
-                              <tr key={m.id} className="border-t border-[var(--tema-zinc-800)]/50">
+                              <tr
+                                key={m.id}
+                                className="border-t border-[var(--tema-zinc-800)]/50"
+                                style={m.figura_publica ? { boxShadow: 'inset 3px 0 0 #22d3ee', backgroundColor: 'rgba(34,211,238,0.07)' } : undefined}
+                              >
                                 <td className="py-2 px-2 text-white">
                                   <Link href={`/admin/memoriais/${m.id}`} className="hover:text-blue-400 hover:underline">
                                     {m.nome_completo}
                                   </Link>
+                                  {m.figura_publica && (
+                                    <span
+                                      className="ml-2 inline-block rounded border px-1.5 py-0.5 text-[10px] font-medium align-middle"
+                                      style={{ borderColor: '#22d3ee', color: '#0891b2' }}
+                                    >
+                                      Ilustre
+                                    </span>
+                                  )}
                                 </td>
                                 <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{m.data_nascimento || '-'}</td>
                                 <td className="py-2 px-2 text-[var(--tema-zinc-300)]">{m.data_falecimento || '-'}</td>
