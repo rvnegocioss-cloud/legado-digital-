@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
+import { Maximize2, Minimize2, X } from 'lucide-react'
 import GuiaTumulo from './GuiaTumuloCarregador'
 
 // Botão do topo + modal em tela cheia -- pedido do Rafael (2026-09-11, pauta
@@ -38,6 +38,10 @@ export default function GuiaTumuloModal(props: Props) {
   const [aberto, setAberto] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const conteudoRef = useRef<HTMLDivElement | null>(null)
+  // Tela cheia so quando a pessoa pede (botao "Tela cheia"). Pedido do
+  // Rafael 2026-10-21: abrir direto em tela cheia era invasivo; abre numa
+  // janela grande e proporcional na pagina.
+  const [telaCheia, setTelaCheia] = useState(false)
 
   // Esc fecha, trava o scroll da página de fundo, e pede tela cheia de
   // verdade -- no celular (uso real: gente andando no cemitério) a barra do
@@ -49,12 +53,11 @@ export default function GuiaTumuloModal(props: Props) {
     if (!aberto) return
     const antes = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    containerRef.current?.requestFullscreen?.().catch(() => {})
     function tecla(e: KeyboardEvent) {
       if (e.key === 'Escape') setAberto(false)
     }
     function aoMudarFullscreen() {
-      if (!document.fullscreenElement) setAberto(false)
+      setTelaCheia(!!document.fullscreenElement)
     }
     window.addEventListener('keydown', tecla)
     document.addEventListener('fullscreenchange', aoMudarFullscreen)
@@ -63,8 +66,15 @@ export default function GuiaTumuloModal(props: Props) {
       window.removeEventListener('keydown', tecla)
       document.removeEventListener('fullscreenchange', aoMudarFullscreen)
       if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {})
+      setTelaCheia(false)
     }
   }, [aberto])
+
+  function alternarTelaCheia() {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {})
+    else if (containerRef.current?.requestFullscreen) containerRef.current.requestFullscreen().catch(() => setTelaCheia((v) => !v))
+    else setTelaCheia((v) => !v)
+  }
 
   // O GuiaTumulo (intocado, regra 17) nasce com o mapa recolhido atrás de um
   // botão próprio -- fazia sentido lá embaixo na página, mas aqui dentro do
@@ -145,7 +155,9 @@ export default function GuiaTumuloModal(props: Props) {
             zIndex: 200,
             width: '100vw',
             height: '100dvh',
-            background: 'rgba(6,14,20,0.92)',
+            background: 'rgba(6,14,20,0.82)',
+            padding: telaCheia ? 0 : 'clamp(8px, 3vw, 32px)',
+            boxSizing: 'border-box',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -153,8 +165,11 @@ export default function GuiaTumuloModal(props: Props) {
         >
           <div
             style={{
-              width: '100%',
-              height: '100%',
+              width: telaCheia ? '100%' : 'min(1200px, 100%)',
+              height: telaCheia ? '100%' : 'min(860px, 100%)',
+              borderRadius: telaCheia ? 0 : 12,
+              border: telaCheia ? 0 : '1px solid rgba(201,164,106,0.25)',
+              boxShadow: telaCheia ? 'none' : '0 24px 70px rgba(0,0,0,0.5)',
               background: 'var(--mem-fundo-topo, #10222f)',
               overflow: 'hidden',
               display: 'flex',
@@ -191,6 +206,15 @@ export default function GuiaTumuloModal(props: Props) {
               <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#fff' }}>
                 Como chegar até {props.nomeCompleto}
               </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button
+                type="button"
+                onClick={alternarTelaCheia}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, color: 'rgba(255,255,255,0.8)', cursor: 'pointer', font: 'inherit', fontSize: 13, padding: '5px 10px' }}
+              >
+                {telaCheia ? <Minimize2 size={15} strokeWidth={1.5} /> : <Maximize2 size={15} strokeWidth={1.5} />}
+                {telaCheia ? 'Sair da tela cheia' : 'Tela cheia'}
+              </button>
               <button
                 type="button"
                 onClick={() => setAberto(false)}
@@ -210,6 +234,7 @@ export default function GuiaTumuloModal(props: Props) {
               >
                 <X size={18} strokeWidth={1.5} />
               </button>
+              </div>
             </div>
 
             <div ref={conteudoRef} className="gtm-mapa-full" style={{ flex: 1, minHeight: 0, padding: 14, overflowY: 'auto' }}>
@@ -232,7 +257,7 @@ export default function GuiaTumuloModal(props: Props) {
               <style>{`
                 .gtm-mapa-full > div > a:first-child { display: none; }
                 .gtm-mapa-full > div > div > button:first-child { display: none; }
-                .gtm-mapa-full .maplibregl-map { height: calc(100dvh - 170px) !important; }
+                .gtm-mapa-full .maplibregl-map { height: ${telaCheia ? 'calc(100dvh - 170px)' : 'calc(min(860px, 100dvh - 64px) - 170px)'} !important; }
               `}</style>
               <GuiaTumulo
                 cemiterioNome={props.cemiterioNome}
