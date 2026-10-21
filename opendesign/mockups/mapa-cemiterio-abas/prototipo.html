@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protótipo — Mapa com abas</title>
+<style>
+:root{--bg:#0B1D2A;--bg2:#10283a;--bg3:#16354b;--ouro:#C9A46A;--txt:#e8eef3;--mut:#8aa0b0;--lin:#24455e;--ok:#4ade80}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 Inter,system-ui,sans-serif;height:100vh;display:flex;flex-direction:column}
+header{display:flex;gap:12px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--lin)}
+header h1{font-size:15px;margin:0;font-weight:600;white-space:nowrap}
+.busca{position:relative;flex:0 1 340px}.busca input{width:100%;background:var(--bg2);border:1px solid var(--lin);color:var(--txt);padding:7px 10px;border-radius:6px}
+.res{position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--lin);border-radius:6px;z-index:9;display:none}
+.res div{padding:7px 10px;cursor:pointer}.res div:hover{background:var(--bg2)}
+.tabs{display:flex;flex-wrap:wrap;gap:2px;padding:6px 12px 0;border-bottom:1px solid var(--lin);align-items:flex-end}
+.tabs button{background:var(--bg2);border:1px solid var(--lin);border-bottom:none;color:var(--txt);padding:7px 11px;font-size:13px;border-radius:8px 8px 0 0;cursor:pointer;font:inherit}
+.tabs button.on{background:var(--ouro);color:#0B1D2A;font-weight:600}
+.tabs button.g{border-color:var(--ouro);border-bottom:none}.tabs button:disabled{opacity:.35;cursor:not-allowed}.tabs .sep{flex:1}
+.cam{padding:6px 12px;color:var(--mut);font-size:13px;border-bottom:1px solid var(--lin);min-height:32px}
+.cam a{color:var(--ouro);cursor:pointer;text-decoration:underline}
+main{flex:1;display:flex;min-height:0}
+aside{display:flex;flex-direction:column;width:320px;border-right:1px solid var(--lin);padding:12px;overflow:auto;background:var(--bg2)}
+.mapa{flex:1;position:relative;background:#1a2a1f}
+svg{width:100%;height:100%;display:block}
+h2{font-size:14px;margin:0 0 8px;color:var(--ouro)}p{margin:6px 0;color:var(--mut)}
+.btn{display:inline-block;background:var(--bg3);border:1px solid var(--lin);color:var(--txt);padding:6px 10px;border-radius:6px;cursor:pointer;margin:3px 3px 3px 0;font:inherit}
+.btn.pri{background:var(--ouro);color:#0B1D2A;border-color:var(--ouro);font-weight:600}.btn.red{border-color:#b04a4a;color:#f3a0a0}
+.grade{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:6px}.grade.t{grid-template-columns:repeat(6,1fr)}
+.grade button{background:var(--bg3);border:1px solid var(--lin);color:var(--txt);padding:6px 0;border-radius:5px;cursor:pointer;font:inherit}
+.grade button.on{background:var(--ouro);color:#0B1D2A}.grade button.vaz{border-style:dashed}
+.lista button{display:block;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--lin);color:var(--txt);padding:9px 10px;border-radius:6px;margin-bottom:5px;cursor:pointer;font:inherit}
+.aviso{border:1px solid var(--ouro);border-radius:8px;padding:10px;margin:8px 0;background:#2a2417}
+.gav{border:1px solid var(--lin);border-radius:8px;padding:8px;margin:6px 0;background:var(--bg3)}
+details{border:1px solid var(--lin);border-radius:6px;margin-bottom:6px;background:var(--bg3)}summary{padding:8px 10px;cursor:pointer}details div{padding:0 10px 10px}
+.nota{position:absolute;right:10px;bottom:10px;background:#000a;padding:6px 10px;border-radius:6px;font-size:12px;color:var(--mut)}
+@media(max-width:800px){main{flex-direction:column}aside{width:auto;max-height:45vh}}
+</style></head><body>
+<header><h1>Mapa — Cemitério São Pedro</h1>
+<div class="busca"><input id="b" placeholder="Buscar quadra, jazigo ou memorial…" autocomplete="off"><div class="res" id="res"></div></div>
+<span style="color:var(--mut);font-size:12px">Protótipo: clique de verdade, nada é salvo.</span></header>
+<div class="tabs" id="tabs"></div><div class="cam" id="cam"></div>
+<main><aside id="lado"></aside><div class="mapa"><svg id="svg" viewBox="0 0 800 560"></svg><div class="nota" id="nota"></div></div></main>
+<script>
+const COLS=[[81,79,77,68],[69,76,78,80]],G=[[81,79,77,68,69,76,78,80],[75,73,71,64,67,70,72,74],[47,45,43,66,65,44,46,48],[41,39,37,63,62,38,40,42],[35,33,31,61,60,32,34,36],[29,27,25,59,58,26,28,30],[23,21,19,55,56,20,22,24],[17,15,13,53,54,14,16,18],[11,9,7,51,52,8,10,12],[5,3,1,49,50,2,4,6]];
+const TODAS=G.flat().sort((a,b)=>a-b);
+const filas={};TODAS.forEach(n=>filas[n]=(n==12||n==5)?[]:[1,2,3,4].map(i=>({n:i,t:20+i})));filas[36]=[1,2,3,4,5].map(i=>({n:i,t:i==5?24:20}));
+const mem={'36-5-11':'Carlos Saraiva'};
+let S={q:null,f:null,t:null,tab:'ruas'};
+const $=id=>document.getElementById(id);
+function nivel(){return S.tab}
+function htmlFileiras(){const a=filas[S.q];let h=`<h2>Quadra ${S.q} — ${a.length} fileira(s)</h2>
+  <div><button class="btn">✎ Renomear quadra</button><button class="btn"># Renumerar quadra</button></div>
+  <div><button class="btn pri">+ Nova fileira</button><button class="btn">Numerar fileiras</button><button class="btn">Editar túmulos no mapa</button></div>`;
+  if(!a.length)h+=`<div class="aviso">Nenhuma fileira desenhada.<br><b>Use "+ Nova fileira" e clique no centro do 1º e do último túmulo da fileira.</b></div><button class="btn" onclick="criarF()" style="opacity:.7">(protótipo: simular fileira criada)</button>`;
+  else h+=`<div class="lista">${a.map(f=>`<button onclick="pickF(${f.n})">Fileira ${f.n} ${f.t?'— '+f.t+' túmulos':'— sem túmulos'}</button>`).join('')}</div>`
+ return h}
+function go(o){Object.assign(S,o);render()}
+function pickQ(n){go({q:n,f:null,t:null,tab:'fileiras'})}
+function pickF(n){go({f:n,t:null,tab:'tumulos'})}
+function pickT(n){go({t:n,tab:'tumulo'})}
+function criarF(){const a=filas[S.q];const n=a.length+1;a.push({n,t:0});go({f:n,t:null,tab:'tumulos'})}
+function gerar(){const f=filas[S.q].find(x=>x.n==S.f);f.t=f.t||12;render()}
+function render(){
+ const T=[['ruas','Ruas',1],['quadras','Quadras',1],['fileiras','Fileiras',S.q],['tumulos','Túmulos',S.f],['tumulo','Jazigo',S.t]];
+ const X=[['avulso','Marcar túmulo avulso'],['gps','Conferir com GPS de campo'],['pontos','Pontos de referência'],['legenda','Legenda'],['como','Como mapear'],['entrada','Entrada do cemitério']];
+ $('tabs').innerHTML=T.map(([k,l,ok])=>`<button ${ok?'':'disabled'} class="${S.tab==k?'on':''}" onclick="go({tab:'${k}'})">${l}</button>`).join('')+X.map(([k,l])=>`<button class="${S.tab==k?'on':''}" onclick="go({tab:'${k}'})">${l}</button>`).join('');
+ let c=`<a onclick="go({q:null,f:null,t:null,tab:'quadras'})">Quadras</a>`;
+ if(S.q)c+=` › <a onclick="go({f:null,t:null,tab:'fileiras'})">Quadra ${S.q}</a>`;if(S.f)c+=` › <a onclick="go({t:null,tab:'tumulos'})">Fileira ${S.f}</a>`;if(S.t)c+=` › Túmulo ${S.t}`;
+ $('cam').innerHTML='Você está em: '+c;
+ const L=$('lado'),k=nivel();let h='';
+ if(k=='quadras'){h=`<h2>Quadras</h2><button class="btn pri">+ Nova quadra</button><button class="btn">Numerar quadras a partir da entrada</button><p>Clique no mapa ou no número da quadra (ou digite na busca).</p><div class="grade">${TODAS.map(n=>`<button class="${S.q==n?'on':''} ${filas[n].length?'':'vaz'}" onclick="pickQ(${n})">${n}</button>`).join('')}</div><p>Tracejado = quadra sem fileira.</p>`}
+ if(k=='fileiras'){h=htmlFileiras()}
+ if(k=='tumulos'){const f=filas[S.q].find(x=>x.n==S.f);const ms=Array.from({length:f.t},(_,i)=>i+1).filter(n=>mem[S.q+'-'+S.f+'-'+n]);h=`<h2>Quadra ${S.q} · Fileira ${S.f} ${f.t?'— '+f.t+' túmulos':'— sem túmulos'}</h2>
+  <div><button class="btn pri" onclick="gerar()">${f.t?'Gerar mais →':'Gerar túmulos →'}</button><button class="btn">🔒 Travar</button><button class="btn">Duplicar</button><button class="btn red">Apagar</button></div>
+  <p>Clique no pino do túmulo no mapa para abrir o túmulo.</p>${ms.length?'<h2 style="margin-top:10px">Memoriais nesta fileira</h2><div class="lista">'+ms.map(n=>`<button onclick="pickT(${n})">Túmulo ${n} — <span style="color:var(--ouro)">${mem[S.q+'-'+S.f+'-'+n]}</span></button>`).join('')+'</div>':''}`}
+ if(k=='tumulo'){const m=mem[S.q+'-'+S.f+'-'+S.t];h=`<h2>Jazigo — túmulo ${S.t} · Quadra ${S.q} · Fileira ${S.f}</h2><p>Código Q${S.q}-R${S.f}-T${S.t}</p>
+  <div class="gav"><b>Gaveta 1</b><br>${m?`<span style="color:var(--ouro)">${m}</span> <button class="btn red">Desvincular</button>`:`<button class="btn pri" onclick="mem[S.q+'-'+S.f+'-'+S.t]='Novo memorial';render()">+ Criar memorial aqui</button><button class="btn">Vincular memorial existente</button>`}</div>
+  <div><button class="btn">Abrir página do jazigo →</button><button class="btn">Mover pino</button><button class="btn red">Apagar túmulo</button></div>`}
+ if(k=='ruas')h=`<h2>Ruas (caminhos internos) · 3</h2><button class="btn pri" style="border-color:#a855f7;background:#a855f7;color:#fff">+ Nova rua</button>
+  <p>Desenha por onde a pessoa anda de verdade (asfalto/calçada) — a rota da página pública segue essas ruas em vez de cortar reto por cima das quadras.</p>
+  <p style="color:var(--ok)">✓ Rede conectada — 590 m de rua mapeada.</p>
+  <button class="btn" style="width:100%">Testar rota até um túmulo</button>
+  <details open><summary>Editar / renomear ruas (3)</summary><div>
+  ${[1,2,3].map(n=>`<div class="gav"><b>Rua ${n}</b> <span style="color:var(--mut)">(190 m)</span><br><button class="btn">✎ Renomear</button><button class="btn">Editar no mapa</button><button class="btn">🔒 Travar</button><button class="btn red">Apagar</button></div>`).join('')}</div></details>`;
+ if(k=='avulso')h=`<h2>Marcar túmulo avulso</h2><p>Pra lápide que já existe no cadastro mas ainda não tem coordenada (fora do fluxo de quadra/fileira).</p><p>Pendentes (0)</p><p>Nenhuma lápide avulsa pendente.</p>`;
+ if(k=='entrada')h=`<h2>Entrada do cemitério</h2><p>Marcada — é daqui que a rota até o túmulo começa na página pública, e as quadras/fileiras são numeradas a partir daqui.</p><button class="btn pri">Remarcar entrada</button>`;
+ if(k=='pontos')h=`<h2>Pontos de referência</h2><p>Capela, Administração, Sanitários, Velório — as mesmas âncoras do mapa impresso. Arraste o pino roxo para ajustar.</p>
+  ${['Capela','Administração','Sanitários'].map(n=>`<div class="gav">${n} <button class="btn">🔒 Travar</button><button class="btn red">Apagar</button></div>`).join('')}
+  <button class="btn">+ Velório</button><button class="btn">+ Outro</button>`;
+ if(k=='gps')h=`<h2>Conferir com GPS de campo</h2><p>Cole aqui a coordenada que alguém mandou de dentro do cemitério. O mapa mede a distância até o túmulo marcado no ortomosaico e mostra se bate. Nada é sobrescrito sozinho.</p>
+  <p>O que a pessoa faz no cemitério: 1 ficar em pé em cima do túmulo, céu aberto · 2 esperar uns 30 segundos parado · 3 abrir o Google Maps e segurar o dedo no ponto · 4 tocar no pino › Compartilhar › copiar o link · 5 mandar o link + foto da lápide de perto.</p>
+  <label style="color:var(--mut);font-size:12px">Link do Google Maps ou coordenada</label><textarea rows="2" style="width:100%;background:#0B1D2A;color:#fff;border:1px solid var(--lin);border-radius:6px" placeholder="https://maps.app.goo.gl/... ou -18.9136976, -48.2967242"></textarea>
+  <button class="btn pri">Ler coordenada</button><button class="btn">Limpar</button>`;
+ if(k=='legenda')h=`<h2>Legenda</h2><p><b style="color:var(--ok)">Verde = conferido em campo</b> (tem foto do túmulo)</p><p>Dourado: Marcado/gerado no ortomosaico (preciso)</p><p>Azul: GPS de celular / satélite genérico</p><p>Cinza: Origem desconhecida</p>`;
+ if(k=='como')h=`<h2>Como mapear, passo a passo</h2><p><b>Quadra:</b> clique em "Nova quadra" e marque os cantos no mapa (mínimo 3). Depois use "# Renumerar quadra" pra pôr o número oficial da Prefeitura.</p><p><b>Fileira:</b> dentro da quadra, "Nova fileira". Clique no início e no fim da fileira e depois em "Gerar túmulos".</p><p><b>Memorial:</b> botão direito na bolinha do túmulo. "Criar memorial aqui" ou "Vincular memorial existente".</p><p><b>Conferir:</b> suba a foto do túmulo no pino. O pino fica verde.</p>`;
+ if(k!='legenda')h=h.replace(/<p>([^<]{60,})<\/p>/g,'');
+ h=h.replace('<br><b>Use "+ Nova fileira" e clique no centro do 1º e do último túmulo da fileira.</b>','');
+ L.innerHTML=BOT+'<div style="flex:1">'+h+'</div>';desenha()}
+const BOT=`<div style="margin-bottom:12px;border-bottom:1px solid var(--lin);padding-bottom:10px"><div style="color:var(--ouro);font-weight:600;margin-bottom:4px">LegadoBot — ajuda</div><div style="display:flex;gap:4px"><input id="aj" placeholder="Pergunte aqui. Ex.: como crio uma rua?" style="flex:1;background:var(--bg);border:1px solid var(--lin);color:var(--txt);padding:7px;border-radius:6px"><button class="btn pri" onclick="document.getElementById('ajr').textContent='(protótipo) O LegadoBot responderia aqui, explicando passo a passo a pergunta feita nesta aba.'">Perguntar</button></div><div id="ajr" style="color:var(--mut);font-size:12px;margin-top:6px"></div></div>`;
+function desenha(){
+ const s=$('svg');let o='';const k=nivel();
+ const nota=$('nota');nota.textContent='';
+ if(!['fileiras','tumulos','tumulo'].includes(k)||!S.q){
+  const W=64,H=46;G.forEach((r,ri)=>r.forEach((n,ci)=>{const x=40+ci*86+(ci>=4?24:0),y=30+ri*52;o+=`<g onclick="pickQ(${n})" style="cursor:pointer"><rect x="${x}" y="${y}" width="${W}" height="${H}" rx="3" fill="${S.q==n?'#C9A46A':'#2e4a38'}" stroke="#8a9"/><text x="${x+W/2}" y="${y+28}" text-anchor="middle" fill="${S.q==n?'#0B1D2A':'#fff'}" font-size="15">Q${n}</text></g>`}));
+  if(k=='ruas')for(let i=0;i<9;i++)o+=`<line x1="20" x2="780" y1="${52+i*52}" y2="${52+i*52}" stroke="#a855f7" stroke-width="4"/>`;
+  nota.textContent='Mapa: clique numa quadra'}
+ else if(k=='fileiras'){o+=`<rect x="80" y="40" width="640" height="480" rx="6" fill="#2e4a38" stroke="#C9A46A" stroke-width="2"/><text x="400" y="30" text-anchor="middle" fill="#C9A46A" font-size="16">Quadra ${S.q}</text>`;
+  const a=filas[S.q];if(!a.length)o+=`<text x="400" y="290" text-anchor="middle" fill="#fff" font-size="18">Sem fileira — crie no painel à esquerda</text>`;
+  a.forEach((f,i)=>{const y=90+i*(380/Math.max(a.length,3));o+=`<g onclick="pickF(${f.n})" style="cursor:pointer"><line x1="110" x2="690" y1="${y}" y2="${y}" stroke="${S.f==f.n?'#C9A46A':'#4285F4'}" stroke-width="${S.f==f.n?7:4}" stroke-dasharray="${f.t?'':'8 6'}"/><text x="100" y="${y+5}" text-anchor="end" fill="#fff" font-size="13">F${f.n}</text></g>`});
+  nota.textContent='Mapa ampliado na quadra'}
+ else{const f=filas[S.q].find(x=>x.n==S.f);o+=`<text x="400" y="40" text-anchor="middle" fill="#C9A46A" font-size="16">Quadra ${S.q} · Fileira ${S.f}</text><line x1="60" x2="740" y1="280" y2="280" stroke="#4285F4" stroke-width="2" stroke-dasharray="6 5"/>`;
+  for(let i=1;i<=f.t;i++){const x=60+(i-0.5)*(680/f.t),m=mem[S.q+'-'+S.f+'-'+i],sel=S.t==i;o+=`<g onclick="pickT(${i})" style="cursor:pointer"><circle cx="${x}" cy="280" r="${sel?13:9}" fill="${m?'#C9A46A':sel?'#fff':'#889'}" stroke="${sel?'#C9A46A':'#000'}" stroke-width="3"/><text x="${x}" y="${i%2?252:318}" text-anchor="middle" fill="#fff" font-size="11">${i}</text></g>`}
+  nota.textContent='Fileira ampliada';}
+ s.innerHTML=o}
+const b=$('b'),rs=$('res');b.oninput=()=>{const v=b.value.trim().toLowerCase();if(!v){rs.style.display='none';return}
+ const r=[];TODAS.filter(n=>('quadra '+n).includes(v)||String(n)==v).slice(0,5).forEach(n=>r.push(`<div onclick="pickQ(${n});rs_()">Quadra ${n}</div>`));
+ if('carlos saraiva'.includes(v))r.push(`<div onclick="go({q:36,f:5,t:11,tab:'quadras'});rs_()">Carlos Saraiva — Q36 · F5 · T11</div>`);
+ rs.innerHTML=r.join('')||'<div>Nada achado</div>';rs.style.display='block'};
+function rs_(){rs.style.display='none';b.value=''}
+render();
+</script></body></html>

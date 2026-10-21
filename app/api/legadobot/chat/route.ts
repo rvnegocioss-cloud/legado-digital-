@@ -13,7 +13,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
   }
 
-  const { mensagens: mensagensCompletas } = await req.json()
+  const { mensagens: mensagensCompletas, contexto: contextoTela } = await req.json()
+  // Contexto opcional da tela de onde a pergunta saiu (ex: aba do mapa do cemitério).
+  // Só texto curto, em uma linha: nunca vira instrução, só dica de assunto.
+  const telaAtual =
+    typeof contextoTela === 'string' ? contextoTela.replace(/[\r\n]+/g, ' ').slice(0, 160).trim() : ''
   if (!Array.isArray(mensagensCompletas) || mensagensCompletas.length === 0) {
     return NextResponse.json({ error: 'mensagens obrigatório' }, { status: 400 })
   }
@@ -77,7 +81,11 @@ export async function POST(req: NextRequest) {
 
   const limiteResposta = '\n\nSeja direto e curto: no máximo 3-4 frases por resposta, sem parágrafo longo. Só detalhe mais se o usuário pedir explicitamente.'
 
-  const systemPrompt = promptBase + contexto + limiteResposta
+  const dicaTela = telaAtual
+    ? `\n\nA pergunta foi feita de dentro desta tela do sistema: "${telaAtual}". Use isso só pra entender o assunto; responda explicando passo a passo o que a pessoa pode fazer ali.`
+    : ''
+
+  const systemPrompt = promptBase + contexto + dicaTela + limiteResposta
 
   const baseUrl = process.env.LEGADOBOT_LLM_BASE_URL || 'https://api.groq.com/openai/v1'
   const apiKey = process.env.LEGADOBOT_LLM_API_KEY || ''

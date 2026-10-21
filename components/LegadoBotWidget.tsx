@@ -21,11 +21,29 @@ export default function LegadoBotWidget() {
     fimRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensagens, aberto])
 
+  // Pergunta vinda de fora (ex: campo "LegadoBot — ajuda" do mapa do cemitério).
+  // O evento pode trazer { pergunta, contexto }; sem detalhe só abre a janela.
+  const [pendente, setPendente] = useState<string | null>(null)
+  const contextoRef = useRef('')
+
   useEffect(() => {
-    const abrir = () => setAberto(true)
+    const abrir = (e: Event) => {
+      setAberto(true)
+      const det = (e as CustomEvent<{ pergunta?: string; contexto?: string }>).detail
+      contextoRef.current = det?.contexto || ''
+      if (det?.pergunta && det.pergunta.trim()) setPendente(det.pergunta.trim())
+    }
     window.addEventListener('legadobot:abrir', abrir)
     return () => window.removeEventListener('legadobot:abrir', abrir)
   }, [])
+
+  useEffect(() => {
+    if (pendente === null) return
+    const texto = pendente
+    setPendente(null)
+    enviar(texto)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendente])
 
   useEffect(() => {
     async function carregarNome() {
@@ -40,8 +58,8 @@ export default function LegadoBotWidget() {
     carregarNome()
   }, [])
 
-  async function enviar() {
-    const texto = input.trim()
+  async function enviar(textoForcado?: string) {
+    const texto = (textoForcado ?? input).trim()
     if (!texto || carregando) return
 
     const novasMensagens: Mensagem[] = [...mensagens, { role: 'user', content: texto }]
@@ -60,7 +78,7 @@ export default function LegadoBotWidget() {
       const resp = await fetch('/api/legadobot/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ mensagens: novasMensagens }),
+        body: JSON.stringify({ mensagens: novasMensagens, contexto: contextoRef.current }),
       })
       const json = await resp.json()
 
@@ -115,12 +133,11 @@ export default function LegadoBotWidget() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && enviar()}
-              placeholder="Pergunte algo..."
+              onKeyDown={(e) => e.key === 'Enter' && enviar()}              placeholder="Pergunte algo..."
               className="flex-1 bg-[var(--tema-zinc-800)] text-sm text-white rounded-lg px-3 py-2 outline-none placeholder:text-[var(--tema-zinc-500)]"
             />
             <button
-              onClick={enviar}
+              onClick={() => enviar()}
               disabled={carregando}
               aria-label="Enviar"
               className="text-[var(--tema-zinc-400)] hover:text-white disabled:opacity-40 shrink-0"
