@@ -57,7 +57,6 @@ export default function GuiaTumuloModal(props: Props) {
     if (!aberto) return
     const area = document.getElementById('guia-tumulo-area')
     setAlvo(area || document.body)
-    if (area) setTimeout(() => area.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
     const antes = document.body.style.overflow
     if (!area) document.body.style.overflow = 'hidden'
     function tecla(e: KeyboardEvent) {
@@ -171,10 +170,10 @@ export default function GuiaTumuloModal(props: Props) {
             style={{
               width: telaCheia || integrado ? '100%' : 'min(1200px, 100%)',
               height: telaCheia ? '100%' : integrado ? 'min(780px, 88dvh)' : 'min(860px, 100%)',
-              borderRadius: telaCheia ? 0 : 12,
-              border: telaCheia ? 0 : '1px solid rgba(201,164,106,0.25)',
+              borderRadius: telaCheia || integrado ? 0 : 12,
+              border: telaCheia || integrado ? 0 : '1px solid rgba(201,164,106,0.25)',
               boxShadow: telaCheia || integrado ? 'none' : '0 24px 70px rgba(0,0,0,0.5)',
-              background: 'var(--mem-fundo-topo, #10222f)',
+              background: integrado && !telaCheia ? 'transparent' : 'var(--mem-fundo-topo, #10222f)',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
@@ -241,7 +240,7 @@ export default function GuiaTumuloModal(props: Props) {
               </div>
             </div>
 
-            <div ref={conteudoRef} className="gtm-mapa-full" style={{ flex: 1, minHeight: 0, padding: 14, overflowY: 'auto' }}>
+            <div ref={conteudoRef} className="gtm-mapa-full" style={{ flex: 1, minHeight: 0, padding: integrado && !telaCheia ? 0 : 14, overflowY: 'auto' }}>
               {/* O GuiaTumulo (regra 17, intocado) nasce com "Rota de carro"
                   + o botão retrátil "Guia até o túmulo" + o mapa. Aqui dentro
                   do modal os dois primeiros viram ruído: a rota de carro já

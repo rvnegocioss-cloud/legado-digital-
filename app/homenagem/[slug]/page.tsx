@@ -814,7 +814,7 @@ export default async function PerfilMemorialPage({
       </header>
 
       {/* Lugar onde o "Guia até o túmulo" abre, dentro da página, na largura do conteúdo (pedido do Rafael 2026-10-21). */}
-      <div id="guia-tumulo-area" className="mem-container" />
+      <div id="guia-tumulo-area" className="mem-container" style={{ margin: "0 auto" }} />
 
       {/* ---- Corpo: coluna de leitura + lateral fixa ---------------------- */}
       <div className="perfil-corpo">
