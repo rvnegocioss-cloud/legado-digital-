@@ -813,6 +813,9 @@ export default async function PerfilMemorialPage({
         </div>
       </header>
 
+      {/* Lugar onde o "Guia até o túmulo" abre, dentro da página, na largura do conteúdo (pedido do Rafael 2026-10-21). */}
+      <div id="guia-tumulo-area" className="mem-container" />
+
       {/* ---- Corpo: coluna de leitura + lateral fixa ---------------------- */}
       <div className="perfil-corpo">
         <RailVida marcos={marcos} anoInicio={anoNasc ? String(anoNasc) : null} anoFim={anoFalec ? String(anoFalec) : null} />

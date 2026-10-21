@@ -42,6 +42,10 @@ export default function GuiaTumuloModal(props: Props) {
   // Rafael 2026-10-21: abrir direto em tela cheia era invasivo; abre numa
   // janela grande e proporcional na pagina.
   const [telaCheia, setTelaCheia] = useState(false)
+  // Abre DENTRO da página, num espaço grande logo abaixo do topo (#guia-tumulo-area).
+  // Página sem esse espaço (clássica) cai no comportamento de janela por cima.
+  const [alvo, setAlvo] = useState<HTMLElement | null>(null)
+  const integrado = !!alvo && alvo !== (typeof document !== 'undefined' ? document.body : null)
 
   // Esc fecha, trava o scroll da página de fundo, e pede tela cheia de
   // verdade -- no celular (uso real: gente andando no cemitério) a barra do
@@ -51,8 +55,11 @@ export default function GuiaTumuloModal(props: Props) {
   // deixa um <div> pedir tela cheia, mas a área ocupada já é a tela toda).
   useEffect(() => {
     if (!aberto) return
+    const area = document.getElementById('guia-tumulo-area')
+    setAlvo(area || document.body)
+    if (area) setTimeout(() => area.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60)
     const antes = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    if (!area) document.body.style.overflow = 'hidden'
     function tecla(e: KeyboardEvent) {
       if (e.key === 'Escape') setAberto(false)
     }
@@ -140,7 +147,7 @@ export default function GuiaTumuloModal(props: Props) {
       {/* Portal no <body>: no iPhone (sem tela cheia de verdade) a janela de
           reserva ficava presa na camada do topo com capa e a barra de menu
           passava por cima do mapa. Só muda ONDE o modal é desenhado. */}
-      {aberto && createPortal(
+      {aberto && alvo && createPortal(
         <div
           ref={containerRef}
           role="dialog"
@@ -150,13 +157,10 @@ export default function GuiaTumuloModal(props: Props) {
             fontFamily: "Georgia, 'Times New Roman', serif",
             lineHeight: 1.6,
             color: '#f5f2eb',
-            position: 'fixed',
-            inset: 0,
-            zIndex: 200,
-            width: '100vw',
-            height: '100dvh',
-            background: 'rgba(6,14,20,0.82)',
-            padding: telaCheia ? 0 : 'clamp(8px, 3vw, 32px)',
+            ...(integrado && !telaCheia
+              ? { position: 'relative' as const, width: '100%', margin: '24px 0', scrollMarginTop: 96 }
+              : { position: 'fixed' as const, inset: 0, zIndex: 200, width: '100vw', height: '100dvh', background: 'rgba(6,14,20,0.82)' }),
+            padding: telaCheia || integrado ? 0 : 'clamp(8px, 3vw, 32px)',
             boxSizing: 'border-box',
             display: 'flex',
             alignItems: 'center',
@@ -165,11 +169,11 @@ export default function GuiaTumuloModal(props: Props) {
         >
           <div
             style={{
-              width: telaCheia ? '100%' : 'min(1200px, 100%)',
-              height: telaCheia ? '100%' : 'min(860px, 100%)',
+              width: telaCheia || integrado ? '100%' : 'min(1200px, 100%)',
+              height: telaCheia ? '100%' : integrado ? 'min(780px, 88dvh)' : 'min(860px, 100%)',
               borderRadius: telaCheia ? 0 : 12,
               border: telaCheia ? 0 : '1px solid rgba(201,164,106,0.25)',
-              boxShadow: telaCheia ? 'none' : '0 24px 70px rgba(0,0,0,0.5)',
+              boxShadow: telaCheia || integrado ? 'none' : '0 24px 70px rgba(0,0,0,0.5)',
               background: 'var(--mem-fundo-topo, #10222f)',
               overflow: 'hidden',
               display: 'flex',
@@ -257,7 +261,7 @@ export default function GuiaTumuloModal(props: Props) {
               <style>{`
                 .gtm-mapa-full > div > a:first-child { display: none; }
                 .gtm-mapa-full > div > div > button:first-child { display: none; }
-                .gtm-mapa-full .maplibregl-map { height: ${telaCheia ? 'calc(100dvh - 170px)' : 'calc(min(860px, 100dvh - 64px) - 170px)'} !important; }
+                .gtm-mapa-full .maplibregl-map { height: ${telaCheia ? 'calc(100dvh - 170px)' : integrado ? 'calc(min(780px, 88dvh) - 170px)' : 'calc(min(860px, 100dvh - 64px) - 170px)'} !important; }
               `}</style>
               <GuiaTumulo
                 cemiterioNome={props.cemiterioNome}
@@ -278,7 +282,7 @@ export default function GuiaTumuloModal(props: Props) {
             </div>
           </div>
         </div>,
-        document.body,
+        alvo,
       )}
     </>
   )
