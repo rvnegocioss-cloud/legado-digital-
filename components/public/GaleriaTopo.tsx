@@ -30,7 +30,6 @@ export default function GaleriaTopo({
   const totalVideos = (videoCapa ? 1 : 0) + videosExtras.length
   const total = fotos.length + totalVideos
   const miniaturas = fotos.slice(0, 3)
-  const restantes = total - miniaturas.length - (videoCapa ? 1 : 0)
 
   // Tudo o que o visor percorre com as setas: os extras entram depois das fotos.
   const itens = [...fotos, ...videosExtras]
@@ -102,11 +101,6 @@ export default function GaleriaTopo({
               <img src={url} alt="" />
             </button>
           ))}
-          {restantes > 0 && (
-            <button type="button" onClick={() => setVisor(miniaturas.length)} className="retrato-mini mais">
-              +{restantes}
-            </button>
-          )}
         </div>
       )}
 
