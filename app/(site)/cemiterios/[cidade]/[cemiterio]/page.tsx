@@ -186,12 +186,11 @@ export default async function CemiterioMapaPage({
             ortoMaxzoom={c.ortomosaico_maxzoom}
             ortoBounds={c.ortomosaico_bounds}
             memoriais={memoriaisAssinados}
-          />
-
-          <aside className="painel-lista">
-            <h2>Memoriais neste cemitério</h2>
-
-            {lista.length === 0 ? (
+            acessorioBusca={
+              <details className="lista-retratil">
+                <summary>Memoriais neste cemitério ({lista.length})</summary>
+                <div className="lista-retratil-corpo painel-lista">
+                  {lista.length === 0 ? (
               <p className="nota-lista">Nenhum memorial publicado neste cemitério ainda.</p>
             ) : (
               <div className="rolagem">
@@ -217,12 +216,15 @@ export default async function CemiterioMapaPage({
                 })}
               </div>
             )}
-
-            <p className="nota-lista">
+                  <p className="nota-lista">
               Cada cruz no mapa é um memorial. Memorial sem localização marcada aparece só nesta
               lista.
             </p>
-          </aside>
+                </div>
+              </details>
+            }
+          />
+
         </div>
 
         {/* Informações + institucional numa SEÇÃO SÓ, na mesma grade e com os

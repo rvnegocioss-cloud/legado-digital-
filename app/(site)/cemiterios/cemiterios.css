@@ -172,7 +172,7 @@
 /* ---- mapa + lista lado a lado (página do cemitério) ---- */
 .cem .mapa-e-lista {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr;
   gap: 18px;
   align-items: start;
 }
@@ -294,3 +294,21 @@
   .cem .sobre-grade { grid-template-columns: 1fr; }
   .cem .topo-cemiterio .acoes { justify-content: flex-start; width: 100%; }
 }
+
+/* ---- Lista de memoriais retrátil, na linha da busca (o mapa ocupa a largura toda) ---- */
+.cem .lista-retratil { order: 2; flex: 0 0 auto; }
+.cem .lista-retratil[open] { flex: 1 0 100%; }
+.cem .lista-retratil summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 9px 14px;
+  border: 1px solid var(--ld-border-strong, var(--ld-border));
+  border-radius: 8px;
+  font-size: 14px;
+  color: inherit;
+  white-space: nowrap;
+}
+.cem .lista-retratil summary::-webkit-details-marker { display: none; }
+.cem .lista-retratil summary::after { content: " ▾"; }
+.cem .lista-retratil[open] summary::after { content: " ▴"; }
+.cem .lista-retratil-corpo { margin-top: 10px; }

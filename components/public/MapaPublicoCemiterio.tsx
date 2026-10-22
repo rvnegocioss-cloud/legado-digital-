@@ -53,6 +53,8 @@ interface Props {
   ortoMaxzoom: number | null
   ortoBounds: number[] | null
   memoriais: GeoJSON.FeatureCollection<GeoJSON.Point, PinoProps>
+  /** Algo que fica na linha da busca, ao lado do campo (ex.: lista retrátil de memoriais). */
+  acessorioBusca?: React.ReactNode
 }
 
 export default function MapaPublicoCemiterio({
@@ -64,6 +66,7 @@ export default function MapaPublicoCemiterio({
   ortoMaxzoom,
   ortoBounds,
   memoriais,
+  acessorioBusca,
 }: Props) {
   const router = useRouter()
   const mapRef = useRef<MapRef | null>(null)
@@ -288,6 +291,7 @@ export default function MapaPublicoCemiterio({
             borderBottom: `1px solid ${CORES.douradoBorda}`,
           }}
         >
+          {acessorioBusca}
           <div style={{ position: 'relative', flex: '1 1 260px' }}>
             <input
               value={busca}
