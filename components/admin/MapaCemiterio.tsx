@@ -1188,6 +1188,29 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
+  // Jazigo sem nenhuma gaveta cadastrada: o passo "Em qual gaveta?" ficava
+  // vazio e não dava pra vincular. Cria a gaveta (G<n>, próxima livre) e
+  // vincula na sequência, pela mesma função do fluxo normal.
+  async function criarGavetaEVincular(memorialId: string, nomeMemorial: string) {
+    if (!vincularEm) return
+    setSalvando(true)
+    setMsg('')
+    const existentes = gavetasPorJazigo.get(vincularEm.id) || []
+    const proxima = existentes.length + 1
+    const { data: nova, error } = await supabase
+      .from('gavetas')
+      .insert({ lapide_id: vincularEm.id, codigo: `G${proxima}`, linha: proxima, coluna: 1 })
+      .select('id')
+      .single()
+    if (error || !nova) {
+      setMsg(error?.message || 'Não consegui criar a gaveta.')
+      setSalvando(false)
+      return
+    }
+    setSalvando(false)
+    await vincularMemorial(memorialId, nomeMemorial, nova.id)
+  }
+
   // Desvincular: limpa a gaveta e o campo direto junto -- nunca um sem o
   // outro, mesma regra do vincular.
   async function desvincularMemorial(gavetaId: string, nomeMemorial: string) {
@@ -2783,6 +2806,17 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       </button>
                     ))}
                   </div>
+                  {(gavetasPorJazigo.get(vincularEm.id) || []).length === 0 && (
+                    <p className="text-xs text-[var(--tema-zinc-400)] mb-2">Este jazigo ainda não tem gaveta cadastrada.</p>
+                  )}
+                  <button
+                    type="button"
+                    disabled={salvando}
+                    onClick={() => criarGavetaEVincular(memorialEscolhido.id, memorialEscolhido.nome)}
+                    className="w-full text-xs px-3 py-1.5 rounded border border-[var(--tema-zinc-700)] text-amber-400 hover:bg-[var(--tema-zinc-800)] disabled:opacity-40 mb-2"
+                  >
+                    + Criar uma gaveta nova e vincular
+                  </button>
                   <button
                     type="button"
                     onClick={() => setMemorialEscolhido(null)}
