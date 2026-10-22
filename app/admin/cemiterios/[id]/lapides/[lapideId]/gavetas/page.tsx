@@ -126,6 +126,18 @@ export default function GavetasLapide() {
       return
     }
 
+    // Gaveta e campo direto andam juntos (causa raiz do bug de 15/09, voltou em 22/10 com o
+    // Virgílio): o endereço oficial, o mapa do memorial e o pino verde leem homenagens.lapide_id.
+    const anterior = editandoId ? gavetas.find((g) => g.id === editandoId)?.homenagem_id ?? null : null
+    if (payload.homenagem_id) {
+      const { error: erroSync } = await supabase.from('homenagens').update({ lapide_id: lapideId }).eq('id', payload.homenagem_id)
+      if (erroSync) setErro(`Gaveta salva, mas não consegui ligar o memorial ao jazigo: ${erroSync.message}`)
+    }
+    if (anterior && anterior !== payload.homenagem_id) {
+      const { count } = await supabase.from('gavetas').select('id', { count: 'exact', head: true }).eq('homenagem_id', anterior)
+      if (!count) await supabase.from('homenagens').update({ lapide_id: null }).eq('id', anterior)
+    }
+
     setForm(FORM_INICIAL)
     setEditandoId(null)
     setSalvando(false)
