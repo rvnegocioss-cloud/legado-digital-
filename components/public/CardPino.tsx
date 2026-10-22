@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Lock } from 'lucide-react'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
 
@@ -56,16 +57,27 @@ function Node({ mem }: { mem: MemorialDoCard }) {
 
 export default function CardPino({ dados, lista }: { dados: DadosDoCard; lista: MemorialDoCard[] }) {
   const varios = lista.length > 1
+  // Toque/clique na foto da lápide amplia dentro do próprio card (sem abrir janela).
+  const [ampliada, setAmpliada] = useState(false)
 
   return (
-    <div className="cp">
+    <div className={`cp${ampliada ? ' cp-ampliada' : ''}`}>
       {/* Foto da lápide: só chega aqui se a família liberou (a função do mapa
           público já devolve null quando não liberou). */}
       {dados.foto_lapide && (
-        <div className="cp-lapide">
+        <button
+          type="button"
+          className="cp-lapide"
+          onClick={(e) => {
+            e.stopPropagation()
+            setAmpliada((v) => !v)
+          }}
+          aria-label={ampliada ? 'Reduzir a foto da lápide' : 'Ampliar a foto da lápide'}
+          title={ampliada ? 'Toque para reduzir' : 'Toque para ampliar'}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={urlMidiaProtegida(dados.foto_lapide) || dados.foto_lapide} alt="Lápide" loading="lazy" />
-        </div>
+        </button>
       )}
       <div className="cp-corpo">
         {varios && (

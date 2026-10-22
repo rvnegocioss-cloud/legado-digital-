@@ -533,12 +533,16 @@ html {
 }
 
 .cp { width: 176px; line-height: 1.3; }
-.cp-lapide { background: #0B1D2A; display: flex; justify-content: center; }
+.cp-lapide { background: #0B1D2A; display: flex; justify-content: center; width: 100%; border: 0; padding: 0; cursor: zoom-in; }
 /* A foto da lápide CABE inteira no card: largura toda, altura proporcional, com
    teto de 100px (foto em pé encolhe e centraliza em vez de cortar). A faixa
    fixa de 84px copiada da Central cortava a foto ao meio. */
 .cp-lapide img { width: 100%; height: auto; max-height: 44px; object-fit: contain; display: block; }
 .cp-corpo { padding: 6px 8px 8px; }
+/* Foto da lápide ampliada (toque): card um pouco mais largo e a foto cresce, sem janela nova. */
+.cp.cp-ampliada { width: 260px; }
+.cp-ampliada .cp-lapide { cursor: zoom-out; }
+.cp-ampliada .cp-lapide img { max-height: 240px; }
 .cp-eyebrow { font-size: 7.5px; text-transform: uppercase; letter-spacing: 1.1px; font-weight: 600; margin: 0; color: var(--ld-gold, #C9A46A); }
 .cp-cab { margin: 0 0 6px; padding-bottom: 5px; border-bottom: 1px solid rgba(201,164,106,0.22); display: flex; flex-direction: column; gap: 1px; }
 .cp-nome { font-size: 10px; font-weight: 600; color: #F4F7FA; }
