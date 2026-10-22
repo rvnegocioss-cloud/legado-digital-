@@ -29,7 +29,8 @@ export default function GaleriaTopo({
 
   const totalVideos = (videoCapa ? 1 : 0) + videosExtras.length
   const total = fotos.length + totalVideos
-  const miniaturas = fotos.slice(0, 3)
+  // Até 4 miniaturas; a tira divide a largura entre as que existem, sem sobrar vão.
+  const miniaturas = fotos.slice(0, 4)
 
   // Tudo o que o visor percorre com as setas: os extras entram depois das fotos.
   const itens = [...fotos, ...videosExtras]
@@ -94,7 +95,7 @@ export default function GaleriaTopo({
       )}
 
       {miniaturas.length > 0 && (
-        <div className="retrato-tira">
+        <div className="retrato-tira" style={{ gridTemplateColumns: `repeat(${miniaturas.length}, 1fr)`, ["--mini-prop" as string]: miniaturas.length < 3 ? "16 / 10" : "1" }}>
           {miniaturas.map((url) => (
             <button key={url} type="button" onClick={() => setVisor(fotos.indexOf(url))} className="retrato-mini">
               {/* eslint-disable-next-line @next/next/no-img-element */}

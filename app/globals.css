@@ -449,7 +449,7 @@ html {
   padding-top: 14px; border-top: 1px solid rgba(201,164,106,.18);
 }
 .retrato-mini {
-  aspect-ratio: 1; padding: 3px; border: 0; cursor: pointer; display: block;
+  aspect-ratio: var(--mini-prop, 1); padding: 3px; border: 0; cursor: pointer; display: block;
   background: linear-gradient(150deg, #eddcae, #a58347);
   border-radius: 3px; box-shadow: 0 3px 10px rgba(0,0,0,.35);
   transition: transform .18s ease, box-shadow .18s ease;
