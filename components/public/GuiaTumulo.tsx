@@ -44,6 +44,8 @@ interface Props {
   ortoMaxzoom?: number | null
   ortoBounds?: number[] | null
   rotaCoordenadas?: [number, number][] | null
+  // Atalho opcional ao lado do botão "Mostrar caminho até o túmulo" (memorial novo). Sem a prop, nada muda.
+  hrefCemiterio?: string | null
 }
 
 function distanciaMetros(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -76,6 +78,7 @@ export default function GuiaTumulo({
   ortoMaxzoom,
   ortoBounds,
   rotaCoordenadas,
+  hrefCemiterio,
 }: Props) {
   const [aberto, setAberto] = useState(false)
   const [minhaPos, setMinhaPos] = useState<{ lat: number; lng: number } | null>(null)
@@ -336,15 +339,26 @@ export default function GuiaTumulo({
                 )}
 
                 {!navegando ? (
-                  <button
-                    type="button"
-                    onClick={iniciarNavegacao}
-                    className="flex items-center justify-center gap-2 mx-auto px-4 py-2 rounded-lg text-sm font-medium"
-                    style={{ background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
-                  >
-                    <MapPin size={16} strokeWidth={1.5} />
-                    Mostrar caminho até o túmulo
-                  </button>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={iniciarNavegacao}
+                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
+                      style={{ background: 'rgba(201,164,106,0.15)', color: '#C9A46A' }}
+                    >
+                      <MapPin size={16} strokeWidth={1.5} />
+                      Mostrar caminho até o túmulo
+                    </button>
+                    {hrefCemiterio && (
+                      <a
+                        href={hrefCemiterio}
+                        className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
+                        style={{ background: 'rgba(201,164,106,0.15)', color: '#C9A46A', textDecoration: 'none' }}
+                      >
+                        Ver outros memoriais neste cemitério
+                      </a>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-center">
                     {distancia != null ? (

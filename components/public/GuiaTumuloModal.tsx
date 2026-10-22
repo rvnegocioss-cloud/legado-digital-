@@ -303,18 +303,9 @@ export default function GuiaTumuloModal(props: Props) {
                 ortoMaxzoom={props.ortoMaxzoom}
                 ortoBounds={props.ortoBounds}
                 rotaCoordenadas={props.rotaCoordenadas}
+                hrefCemiterio={props.hrefCemiterio}
               />
             </div>
-            {props.hrefCemiterio && (
-              <div style={{ padding: '12px 18px', borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
-                <a
-                  href={props.hrefCemiterio}
-                  style={{ color: 'var(--mem-dourado-claro, #dfc08a)', fontSize: 14, textDecoration: 'none', borderBottom: '1px solid rgba(201,164,106,0.5)', paddingBottom: 2 }}
-                >
-                  Ver outros memoriais neste cemitério &rarr;
-                </a>
-              </div>
-            )}
           </div>
         </div>,
         alvo,
