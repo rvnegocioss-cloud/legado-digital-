@@ -186,43 +186,6 @@ export default async function CemiterioMapaPage({
             ortoMaxzoom={c.ortomosaico_maxzoom}
             ortoBounds={c.ortomosaico_bounds}
             memoriais={memoriaisAssinados}
-            acessorioBusca={
-              <details className="lista-retratil">
-                <summary>Memoriais neste cemitério ({lista.length})</summary>
-                <div className="lista-retratil-corpo painel-lista">
-                  {lista.length === 0 ? (
-              <p className="nota-lista">Nenhum memorial publicado neste cemitério ainda.</p>
-            ) : (
-              <div className="rolagem">
-                {lista.map((p) => {
-                  const protegido = p?.protegido;
-                  const nome = protegido ? "Memorial protegido" : p?.nome || "Sem nome";
-                  return (
-                    <Link key={p.slug} href={`/homenagem/${p.slug}`} className="item-memorial">
-                      {p?.foto_url && !protegido ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img className="retrato" src={p.foto_url} alt="" />
-                      ) : (
-                        <span className="retrato" />
-                      )}
-                      <span style={{ flex: 1 }}>
-                        <span className="nome" style={{ display: "block" }}>
-                          {nome}
-                        </span>
-                      </span>
-                      {protegido && <span className="cadeado">senha</span>}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-                  <p className="nota-lista">
-              Cada cruz no mapa é um memorial. Memorial sem localização marcada aparece só nesta
-              lista.
-            </p>
-                </div>
-              </details>
-            }
           />
 
         </div>
