@@ -511,12 +511,14 @@
 .landing .nodes-familia { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .landing .feat .ring-slot { height: 256px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
 .landing .feat .ring.ring-foto {
-  width: auto; height: auto; max-width: 100%; max-height: 100%;
-  margin: 0; border-radius: 20px; display: inline-flex;
+  /* Os 4 quadros têm EXATAMENTE o mesmo tamanho (3:2); as 4 imagens já são 3:2,
+     então nada é cortado. */
+  width: min(100%, 384px); aspect-ratio: 3 / 2; height: auto;
+  margin: 0; border-radius: 20px; display: block;
 }
 .landing .feat .ring.ring-foto img {
-  width: auto; height: auto; max-width: 100%; max-height: 246px;
-  border-radius: 16px; object-fit: contain;
+  width: 100%; height: 100%; max-width: none; max-height: none;
+  border-radius: 16px; object-fit: cover;
 }
 @media (max-width: 600px) { .landing .nodes-familia { grid-template-columns: 1fr; } }
 

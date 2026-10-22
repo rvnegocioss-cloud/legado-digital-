@@ -29,7 +29,7 @@ const NODES = [
       "A família recebe um acesso próprio: sobe fotos e vídeos, escreve a história, monta a linha do tempo e decide quem pode ver o memorial.",
   },
   {
-    src: "/fio-da-vida/nodes/caminho-tumulo.jpg",
+    src: "/fio-da-vida/nodes/caminho-tumulo-3x2.jpg",
     alt: "Família na porta do cemitério com o celular mostrando o caminho até o túmulo",
     titulo: "Do caminho até o túmulo",
     texto:
