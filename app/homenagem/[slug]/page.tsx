@@ -2,7 +2,7 @@ import "./perfil.css";
 import { MapPin } from "lucide-react";
 import SiteFooter from "@/components/public/SiteFooter";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
-import { redirecionarSeNaoCanonico } from "@/lib/urlMemorialServidor";
+import { hrefMapaPublicoDoMemorial, redirecionarSeNaoCanonico } from "@/lib/urlMemorialServidor";
 import { registrarVisita } from "@/lib/registrarVisita";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
@@ -485,6 +485,7 @@ export default async function PerfilMemorialPage({
     ]);
 
   const condolencias = (condolenciasData || []) as Condolencia[];
+  const hrefCemiterio = localizacaoData ? await hrefMapaPublicoDoMemorial(slug) : null;
   const localizacao = localizacaoData as {
     cemiterio_nome: string;
     cemiterio_lat: number | null;
@@ -803,6 +804,7 @@ export default async function PerfilMemorialPage({
                   rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
                   estiloBotao={estiloTopo.botaoFichaSecundario}
                   abrirAoCarregar={localizacao.lapide_lat != null && localizacao.lapide_lng != null}
+                  hrefCemiterio={hrefCemiterio}
                 />
               </div>
             )}

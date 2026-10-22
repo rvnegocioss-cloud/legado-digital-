@@ -36,6 +36,8 @@ interface Props {
   // pra chamar atenção. Só a página passa true quando o túmulo tem marcação (lat/lng).
   // Abre DEPOIS de a página carregar (não disputa banda com o resto) e sem rolar a tela.
   abrirAoCarregar?: boolean
+  // Mapa público do cemitério (só se o cemitério é público): atalho abaixo do mapa.
+  hrefCemiterio?: string | null
 }
 
 export default function GuiaTumuloModal(props: Props) {
@@ -300,6 +302,16 @@ export default function GuiaTumuloModal(props: Props) {
                 rotaCoordenadas={props.rotaCoordenadas}
               />
             </div>
+            {props.hrefCemiterio && (
+              <div style={{ padding: '12px 18px', borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
+                <a
+                  href={props.hrefCemiterio}
+                  style={{ color: 'var(--mem-dourado-claro, #dfc08a)', fontSize: 14, textDecoration: 'none', borderBottom: '1px solid rgba(201,164,106,0.5)', paddingBottom: 2 }}
+                >
+                  Ver outros memoriais neste cemitério &rarr;
+                </a>
+              </div>
+            )}
           </div>
         </div>,
         alvo,

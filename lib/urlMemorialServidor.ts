@@ -1,5 +1,5 @@
 import { supabaseServidor } from '@/lib/supabaseServidor'
-import { urlCanonicaMemorial, type DadosUrlMemorial } from '@/lib/urlMemorial'
+import { slugificar, urlCanonicaMemorial, type DadosUrlMemorial } from '@/lib/urlMemorial'
 import { headers } from 'next/headers'
 import { permanentRedirect } from 'next/navigation'
 
@@ -69,4 +69,23 @@ export async function redirecionarSeNaoCanonico(
     permanentRedirect(s ? `${canonica}?${s}` : canonica)
   }
   return dados
+}
+
+/**
+ * Link pro mapa PÚBLICO do cemitério do memorial (/cemiterios/{cidade-uf}/{slug}), pro atalho
+ * "ver outros memoriais neste cemitério". Só devolve se o cemitério está ativo e marcado como
+ * público (senão a página do cemitério dá 404). Sem túmulo/cemitério: null.
+ */
+export async function hrefMapaPublicoDoMemorial(slug: string): Promise<string | null> {
+  const { data, error } = await supabaseServidor
+    .from('homenagens')
+    .select('lapides!homenagens_lapide_id_fkey(cemiterios(slug, publico, ativo, cidade, estado))')
+    .eq('slug', slug)
+    .maybeSingle()
+  if (error || !data) return null
+  type C = { slug: string | null; publico: boolean | null; ativo: boolean | null; cidade: string | null; estado: string | null }
+  const lap = um((data as unknown as { lapides: { cemiterios: C | C[] | null } | { cemiterios: C | C[] | null }[] | null }).lapides)
+  const c = um(lap?.cemiterios)
+  if (!c || !c.slug || !c.publico || c.ativo === false || !c.cidade || !c.estado) return null
+  return `/cemiterios/${slugificar(c.cidade.trim())}-${c.estado.trim().toLowerCase()}/${c.slug}`
 }
