@@ -42,6 +42,9 @@ interface Props {
 
 export default function GuiaTumuloModal(props: Props) {
   const [aberto, setAberto] = useState(false)
+  // Altura que o mapa deixa livre pro cabeçalho, legenda e botão "Mostrar caminho até o túmulo".
+  // O atalho do cemitério (rodapé) ocupa ~54px: sem reservar, o botão do GPS sumia pra baixo da rolagem.
+  const reservado = 170 + (props.hrefCemiterio ? 54 : 0)
 
   useEffect(() => {
     if (!props.abrirAoCarregar) return
@@ -283,7 +286,7 @@ export default function GuiaTumuloModal(props: Props) {
               <style>{`
                 .gtm-mapa-full > div > a:first-child { display: none; }
                 .gtm-mapa-full > div > div > button:first-child { display: none; }
-                .gtm-mapa-full .maplibregl-map { height: ${telaCheia ? 'calc(100dvh - 170px)' : integrado ? 'calc(min(780px, 88dvh) - 170px)' : 'calc(min(860px, 100dvh - 64px) - 170px)'} !important; }
+                .gtm-mapa-full .maplibregl-map { height: ${telaCheia ? `calc(100dvh - ${reservado}px)` : integrado ? `calc(min(780px, 88dvh) - ${reservado}px)` : `calc(min(860px, 100dvh - 64px) - ${reservado}px)`} !important; }
               `}</style>
               <GuiaTumulo
                 cemiterioNome={props.cemiterioNome}
