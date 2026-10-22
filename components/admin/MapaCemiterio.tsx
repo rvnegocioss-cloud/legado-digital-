@@ -173,7 +173,8 @@ type NumeracaoProposta = { tipo: 'quadras' | 'filas'; contexto: string; itens: I
 type DuplicacaoFila = { filaOrigemId: string; quadraId: string; quadraNumero: number; numeroOrigem: number }
 
 const CORES_ORIGEM: Record<string, string> = {
-  conferido: '#22c55e', // tem foto do tumulo -- alguem esteve la fisicamente
+  com_memorial: '#22c55e', // VERDE = tem memorial vinculado (ou acabou de ser criado) -- regra do Rafael 2026-10-22
+  conferido: '#14b8a6', // tem foto do tumulo -- alguem esteve la fisicamente (verde-agua, nunca confundir com o verde do memorial)
   ortomosaico: '#C9A46A',
   gps_celular: '#4285F4',
   mapa_satelite: '#4285F4',
@@ -682,11 +683,17 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             // Foto = alguem esteve no tumulo fisicamente. Vence a cor de
             // origem: saber que foi conferido em campo importa mais do que
             // saber de onde veio a coordenada.
-            origem: l.foto_face_url ? 'conferido' : l.coordenada_origem || 'desconhecida',
+            // Memorial vinculado vence tudo (verde): é o que o Rafael confere no mapa.
+            origem:
+              temMemorialGeo[l.id] || homenagemPorLapide.has(l.id) || (gavetasPorJazigo.get(l.id) || []).some((g) => !!g.homenagem_id)
+                ? 'com_memorial'
+                : l.foto_face_url
+                  ? 'conferido'
+                  : l.coordenada_origem || 'desconhecida',
           },
         })),
     }),
-    [lapidesComCoordenada, idsEdicao]
+    [lapidesComCoordenada, idsEdicao, temMemorialGeo, homenagens, gavetasPorJazigo]
   )
 
   const quadrasGeojson = useMemo(
@@ -2346,6 +2353,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     'circle-color': [
                       'match',
                       ['get', 'origem'],
+                      'com_memorial',
+                      CORES_ORIGEM.com_memorial,
                       'conferido',
                       CORES_ORIGEM.conferido,
                       'ortomosaico',
@@ -3700,7 +3709,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 <li><strong>Ajustar:</strong> &quot;Editar túmulos no mapa&quot;. Arraste cada bolinha até o túmulo de verdade. Salva sozinho ao soltar.</li>
                 <li><strong>Nome do jazigo:</strong> clique no pino e abra &quot;Abrir página do jazigo&quot;. Na aba Cadastro do Jazigo, escreva o nome da família.</li>
                 <li><strong>Memorial:</strong> clique no pino (ou botão direito) e use &quot;Criar memorial aqui&quot; (só pede o nome) ou &quot;Vincular memorial existente&quot; (busca pelo nome). Já fica ligado ao túmulo. Se o jazigo tiver várias pessoas, depois escolha quem está em cada gaveta na página do jazigo, aba Gavetas.</li>
-                <li><strong>Conferir:</strong> suba a foto do túmulo no pino. O pino fica verde (conferido em campo).</li>
+                <li><strong>Conferir:</strong> suba a foto do túmulo no pino. O pino fica verde-água (conferido em campo). Pino verde = tem memorial vinculado.</li>
                 <li><strong>Travar:</strong> só no fim, &quot;Travar quadra&quot;. Travar protege contra arrastar sem querer. Pra ajustar de novo, destrave.</li>
               </ol>
 
@@ -3864,8 +3873,12 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             <h2 className="text-sm font-semibold text-white mb-2">Legenda</h2>
             <div className="space-y-1.5 text-xs text-[var(--tema-zinc-400)]">
               <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full inline-block" style={{ background: CORES_ORIGEM.com_memorial }} />
+                <strong className="text-emerald-400">Verde = tem memorial vinculado</strong> (vinculou ou criou o memorial)
+              </div>
+              <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ background: CORES_ORIGEM.conferido }} />
-                <strong className="text-emerald-400">Verde = conferido em campo</strong> (tem foto do túmulo)
+                <strong className="text-teal-400">Verde-água = conferido em campo</strong> (tem foto do túmulo, sem memorial)
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full inline-block" style={{ background: CORES_ORIGEM.ortomosaico }} />
