@@ -802,6 +802,7 @@ export default async function PerfilMemorialPage({
                   ortoBounds={localizacao.orto_bounds}
                   rotaCoordenadas={rota?.usouRede ? rota.coordenadas : null}
                   estiloBotao={estiloTopo.botaoFichaSecundario}
+                  abrirAoCarregar={localizacao.lapide_lat != null && localizacao.lapide_lng != null}
                 />
               </div>
             )}

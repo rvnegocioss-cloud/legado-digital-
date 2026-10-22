@@ -32,10 +32,31 @@ interface Props {
   // de identidade do memorial (2026-09-15) passa o próprio estilo pra ficar
   // igual ao botão "Rota de carro" ao lado, sem duplicar o modal inteiro.
   estiloBotao?: React.CSSProperties
+  // Pedido do Pedro/Rafael (2026-10-22): o mapa já aparece aberto ao entrar na página,
+  // pra chamar atenção. Só a página passa true quando o túmulo tem marcação (lat/lng).
+  // Abre DEPOIS de a página carregar (não disputa banda com o resto) e sem rolar a tela.
+  abrirAoCarregar?: boolean
 }
 
 export default function GuiaTumuloModal(props: Props) {
   const [aberto, setAberto] = useState(false)
+
+  useEffect(() => {
+    if (!props.abrirAoCarregar) return
+    let cancelado = false
+    const abrir = () => {
+      if (cancelado) return
+      const ocioso = (window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number }).requestIdleCallback
+      if (ocioso) ocioso(() => !cancelado && setAberto(true), { timeout: 2500 })
+      else setTimeout(() => !cancelado && setAberto(true), 600)
+    }
+    if (document.readyState === 'complete') abrir()
+    else window.addEventListener('load', abrir, { once: true })
+    return () => {
+      cancelado = true
+      window.removeEventListener('load', abrir)
+    }
+  }, [props.abrirAoCarregar])
   const containerRef = useRef<HTMLDivElement | null>(null)
   const conteudoRef = useRef<HTMLDivElement | null>(null)
   // Tela cheia so quando a pessoa pede (botao "Tela cheia"). Pedido do
