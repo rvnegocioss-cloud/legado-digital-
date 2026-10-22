@@ -59,6 +59,14 @@ export default function CardPino({ dados, lista }: { dados: DadosDoCard; lista: 
 
   return (
     <div className="cp">
+      {/* Foto da lápide: só chega aqui se a família liberou (a função do mapa
+          público já devolve null quando não liberou). */}
+      {dados.foto_lapide && (
+        <div className="cp-lapide">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={urlMidiaProtegida(dados.foto_lapide) || dados.foto_lapide} alt="Lápide" loading="lazy" />
+        </div>
+      )}
       <div className="cp-corpo">
         {varios && (
           <p className="cp-cab">

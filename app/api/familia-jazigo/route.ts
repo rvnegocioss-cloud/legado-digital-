@@ -44,8 +44,25 @@ export async function GET(req: NextRequest) {
     p_homenagem_id: homenagem.id,
   })
 
+  // Foto da lápide: cadastrada pela equipe, visibilidade no mapa público é da
+  // família. Lida sempre da lapide_id do memorial, nunca de id do cliente.
+  let fotoLapide: { url: string | null; publica: boolean } | null = null
+  const { data: hLapide } = await supabaseAdmin
+    .from('homenagens')
+    .select('lapide_id')
+    .eq('id', homenagem.id)
+    .maybeSingle()
+  if (hLapide?.lapide_id) {
+    const { data: lap } = await supabaseAdmin
+      .from('lapides')
+      .select('foto_face_url, foto_face_publica')
+      .eq('id', hLapide.lapide_id)
+      .maybeSingle()
+    fotoLapide = { url: lap?.foto_face_url || null, publica: !!lap?.foto_face_publica }
+  }
+
   // Memorial sem túmulo vinculado ainda: não é erro, o card só não aparece.
-  return NextResponse.json({ ok: true, jazigo: jazigo || null, homenagemId: homenagem.id })
+  return NextResponse.json({ ok: true, jazigo: jazigo || null, homenagemId: homenagem.id, fotoLapide })
 }
 
 // A família nomeia o próprio jazigo ("Jazigo Família Saraiva") e escreve quem
@@ -59,7 +76,7 @@ export async function GET(req: NextRequest) {
 //  - só gaveta SEM memorial. Gaveta com memorial tem dono — pode ser de outra
 //    família, e o nome de lá vem do memorial, não deste campo.
 export async function POST(req: NextRequest) {
-  const { slug, nome, gavetas } = await req.json()
+  const { slug, nome, gavetas, fotoPublica } = await req.json()
   if (!slug) return NextResponse.json({ error: 'slug obrigatório' }, { status: 400 })
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
@@ -88,6 +105,25 @@ export async function POST(req: NextRequest) {
       { error: 'Este memorial ainda não está ligado a um jazigo. Fale com a funerária.' },
       { status: 400 }
     )
+  }
+
+  if (typeof fotoPublica === 'boolean') {
+    const { data: lap } = await supabaseAdmin
+      .from('lapides')
+      .select('foto_face_url')
+      .eq('id', homenagem.lapide_id)
+      .maybeSingle()
+    if (!lap?.foto_face_url) {
+      return NextResponse.json(
+        { error: 'A funerária ainda não cadastrou a foto da lápide.' },
+        { status: 400 }
+      )
+    }
+    const { error } = await supabaseAdmin
+      .from('lapides')
+      .update({ foto_face_publica: fotoPublica })
+      .eq('id', homenagem.lapide_id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   if (typeof nome === 'string') {

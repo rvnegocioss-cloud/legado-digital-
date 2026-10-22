@@ -8,6 +8,7 @@ import { TimelineEditor, type TimelineEvento } from '@/components/admin/Timeline
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
 import JazigoDaFamilia from '@/components/familia/JazigoDaFamilia'
+import FotoLapideFamilia from '@/components/familia/FotoLapideFamilia'
 import ArvoreDaFamilia from '@/components/familia/ArvoreDaFamilia'
 import { type Assinatura } from '@/components/public/LivroAssinaturas'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
@@ -1007,6 +1008,7 @@ export default function FamiliaEdicaoPage() {
               }}
             />
           )}
+          {memorialId && <FotoLapideFamilia slug={params.slug} />}
         </div>
 
         <div className={aba === 'fotos' ? '' : 'hidden'}>
