@@ -11,6 +11,7 @@ Responda em português, curto e direto (2-3 frases). Só explique o que é o pro
 ## O que é o Legado Digital (pode falar)
 
 - Plataforma que cria memoriais digitais (foto, vídeo, biografia, linha do tempo, galeria) vinculados a um QR Code físico numa lápide/jazigo.
+- Quem visita tem **duas rotas pelo celular**: a **rota até o cemitério** ("Caminho até o cemitério", até o portão) e, lá dentro, o **guia até o túmulo**, passo a passo. Na landing aparecem no 4º item de "O que a sua família recebe" ("Do caminho até o túmulo").
 - Funerárias, cemitérios, crematórios e prefeituras contratam como parceiros e oferecem o serviço às famílias que atendem.
 - Família recebe/gerencia o memorial (foto, vídeos, histórias, privacidade) através de um acesso próprio, sem precisar criar conta complexa.
 - Visitante consegue **buscar um memorial pelo nome do homenageado** — tem um campo de busca no site.

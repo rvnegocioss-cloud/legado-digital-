@@ -1,0 +1,65 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protótipo — O que a sua família recebe (4 nodes)</title>
+<style>
+:root{--bg:#0B1D2A;--bg2:#10222f;--panel:#132734;--ouro:#C9A46A;--fg:#e8eef3;--mut:#9fb0bd;--faint:#6f8494;--bd:rgba(201,164,106,.18)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 Inter,system-ui,sans-serif;display:flex}
+#ctl{width:240px;flex:none;position:sticky;top:0;height:100vh;overflow:auto;background:#07131d;border-right:1px solid var(--bd);padding:14px;font-size:13px}
+#ctl h3{margin:0 0 6px;color:var(--ouro);font-size:14px}#ctl label{display:block;margin:12px 0 3px;color:var(--mut)}
+#ctl input[type=range],#ctl select{width:100%}#ctl select{background:var(--bg2);color:#fff;border:1px solid var(--bd);padding:5px;border-radius:5px}
+#ctl .n{color:#fff;font-weight:600}.dica{color:var(--faint);font-size:12px;margin-top:14px}
+main{flex:1;min-width:0;padding:48px 40px 80px}
+.sec{max-width:1240px;margin:0 auto}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ouro);margin:0 0 8px}
+h2{font-family:Georgia,serif;font-weight:400;font-size:34px;margin:0 0 8px}.sub{color:var(--mut);max-width:60ch;margin:0 0 34px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(var(--cols),1fr)}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:26px 20px 22px;text-align:center}
+.ring{width:min(var(--ring),100%);aspect-ratio:1;height:auto;border-radius:50%;margin:0 auto 18px;padding:5px;background:linear-gradient(135deg,#fffaf1,#ecdcbc);box-shadow:0 0 22px 2px rgba(250,242,226,.22);cursor:zoom-in;border:0;transition:transform .28s,box-shadow .28s;display:block}
+.ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:4px solid var(--bg)}
+.card:hover .ring{transform:scale(1.05);box-shadow:0 0 44px 7px rgba(250,240,220,.4)}
+.card h4{font-size:16px;margin:0 0 8px}.card p{color:var(--mut);font-size:13.5px;margin:0 auto;max-width:30ch}
+.novo{outline:2px dashed var(--ouro);outline-offset:4px}.tag{display:inline-block;margin-top:10px;font-size:11px;color:#0B1D2A;background:var(--ouro);border-radius:10px;padding:1px 9px}
+.lb{position:fixed;inset:0;background:rgba(6,16,24,.95);display:none;align-items:center;justify-content:center;z-index:9;cursor:zoom-out}
+.lb.on{display:flex}.lb img{max-width:92vw;max-height:92vh;border-radius:8px}
+@media(max-width:900px){body{flex-direction:column}#ctl{width:auto;height:auto;position:static}.grid{grid-template-columns:1fr 1fr!important}}
+@media(max-width:600px){.grid{grid-template-columns:1fr!important}}
+</style></head><body>
+<div id="ctl">
+ <h3>Ajustes (mexa e veja)</h3>
+ <label>Tamanho dos nodes: <span class="n" id="vr">190</span> px <span style="color:var(--faint)">(hoje: 132)</span></label>
+ <input id="r" type="range" min="132" max="280" value="190" step="2">
+ <label>Disposição</label>
+ <select id="c"><option value="4">4 na mesma linha</option><option value="2">2 + 2 (nodes maiores)</option></select>
+ <label>Rotas</label>
+ <select id="rt"><option value="1">1 item juntando as duas rotas</option><option value="2">2 itens: rota até o cemitério + guia até o túmulo</option></select>
+ <label>Moldura da imagem</label>
+ <select id="f"><option value="1">Círculo (como hoje, corta)</option><option value="2" selected>Moldura que acompanha a foto (não corta)</option></select>
+ <div class="dica">Cabe? Na landing real (1240px de largura) 4 na linha comportam nodes de até uns 250px; acima disso use 2 + 2. O círculo nunca deforma: se não couber, ele encolhe. A 4ª (borda tracejada) é a proposta nova: família na porta do cemitério e o caminho até o túmulo. O texto dela é sugestão, você aprova ou troca. Clique em qualquer imagem para ampliar.</div>
+</div>
+<main><div class="sec">
+ <p class="eyebrow">O que a sua família recebe</p>
+ <h2>Tudo para lembrar, num só lugar</h2>
+ <p class="sub">Protótipo só desta seção da landing, com 4 itens e imagens maiores.</p>
+ <div class="grid" id="g">
+  <div class="card"><button class="ring" data-i="img/memorial-node-1.png"><img src="img/memorial-node-1.png"></button><h4>Memorial Legado Digital</h4><p>Fotos, vídeos, biografia, linha do tempo e as mensagens de quem conviveu. Acessível pelo QR Code da placa, de qualquer celular.</p></div>
+  <div class="card"><button class="ring" data-i="img/qrcode-node-1.png"><img src="img/qrcode-node-1.png"></button><h4>QR Code na lápide</h4><p>Uma placa discreta com QR Code é instalada no túmulo. Quem visita aponta a câmera do celular e abre o memorial completo na hora.</p></div>
+  <div class="card"><button class="ring" data-i="img/portal-familia-1.png"><img src="img/portal-familia-1.png"></button><h4>Portal da Família</h4><p>A família recebe um acesso próprio: sobe fotos e vídeos, escreve a história, monta a linha do tempo e decide quem pode ver o memorial.</p></div>
+  <div class="card novo" id="rotaCemiterio" style="display:none"><button class="ring" data-i="img/mapa-rota-1.png"><img src="img/mapa-rota-1.png"></button><h4>Rota até o cemitério</h4><p>O celular leva a família até o portão do cemitério, como qualquer navegador, sem precisar procurar o endereço.</p><span class="tag">novo, proposta</span></div>
+  <div class="card novo"><button class="ring" data-i="img/caminho-tumulo.jpg"><img src="img/caminho-tumulo.jpg" style="object-position:50% 40%"></button><h4 id="tit4">Do caminho até o túmulo</h4><p id="txt4">Primeiro a rota até o cemitério; lá dentro, o guia até o túmulo, passo a passo, sem se perder.</p><span class="tag">novo, proposta</span></div>
+ </div>
+</div></main>
+<div class="lb" id="lb"><img id="lbi"></div>
+<script>
+const g=document.getElementById('g');document.querySelectorAll('.ring').forEach(b=>{const w=document.createElement('div');w.className='slot';b.parentNode.insertBefore(w,b);w.appendChild(b);const im=b.querySelector('img');if(im.style.objectPosition)im.dataset.pos=im.style.objectPosition});
+function ap(){const r=document.getElementById('r').value;document.getElementById('vr').textContent=r;
+ g.style.setProperty('--ring',r+'px');g.style.setProperty('--cols',(document.getElementById('rt').value==='2'&&document.getElementById('c').value==='4')?5:document.getElementById('c').value);
+ const f=document.getElementById('f').value;
+ document.querySelectorAll('.slot').forEach(sl=>{sl.style.height=f==='2'?(r+'px'):'auto';sl.style.display='flex';sl.style.alignItems='center';sl.style.justifyContent='center';sl.style.marginBottom='18px'});
+ document.querySelectorAll('.ring').forEach(b=>{const im=b.querySelector('img');
+  if(f==='2'){b.style.cssText='width:auto;height:auto;max-width:100%;max-height:100%;margin:0;border-radius:20px;aspect-ratio:auto;display:inline-flex';im.style.cssText='width:auto;height:auto;max-width:100%;max-height:'+(r-10)+'px;border-radius:16px;object-fit:contain;display:block;border:4px solid var(--bg)'}
+  else{b.style.cssText='';b.style.margin='0';im.style.cssText='object-position:'+(im.dataset.pos||'50% 50%')}});
+}
+document.getElementById('rt').oninput=()=>{const d=document.getElementById('rt').value==='2';document.getElementById('rotaCemiterio').style.display=d?'':'none';document.getElementById('tit4').textContent=d?'Guia até o túmulo':'Do caminho até o túmulo';document.getElementById('txt4').textContent=d?'Já dentro do cemitério, o celular guia a família até o túmulo, passo a passo, sem se perder.':'Primeiro a rota até o cemitério; lá dentro, o guia até o túmulo, passo a passo, sem se perder.';ap()};
+['r','c','f'].forEach(i=>document.getElementById(i).oninput=ap);ap();
+document.querySelectorAll('.ring').forEach(b=>b.onclick=()=>{document.getElementById('lbi').src=b.dataset.i;document.getElementById('lb').classList.add('on')});
+document.getElementById('lb').onclick=()=>document.getElementById('lb').classList.remove('on');
+</script></body></html>

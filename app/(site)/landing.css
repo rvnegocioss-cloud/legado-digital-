@@ -504,6 +504,22 @@
   margin: 0 auto;
 }
 
+/* ---------- nodes da família: moldura que acompanha a foto (2026-10-22) ----------
+   Protótipo aprovado: opendesign/mockups/landing-nodes/prototipo-nodes.html.
+   A moldura dourada tem o formato da própria imagem (nada é cortado); a faixa
+   tem altura fixa pros 4 cartões alinharem. */
+.landing .nodes-familia { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.landing .feat .ring-slot { height: 256px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+.landing .feat .ring.ring-foto {
+  width: auto; height: auto; max-width: 100%; max-height: 100%;
+  margin: 0; border-radius: 20px; display: inline-flex;
+}
+.landing .feat .ring.ring-foto img {
+  width: auto; height: auto; max-width: 100%; max-height: 246px;
+  border-radius: 16px; object-fit: contain;
+}
+@media (max-width: 600px) { .landing .nodes-familia { grid-template-columns: 1fr; } }
+
 /* ---------- responsivo ---------- */
 @media (max-width: 900px) {
   .landing .split,
