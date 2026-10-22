@@ -42,6 +42,7 @@ Grafo de código local em `graphify-out/graph.json` (1421 nodes, 2580 edges, 108
 - Sem emoji como ícone de UI — usar `lucide-react`, sempre `strokeWidth={1.5}`, cor neutra.
 - Limite de upload/quantidade sempre visível no label do campo (ex: `Galeria de fotos (2/4)`).
 - **Painel de edição sempre à ESQUERDA, conteúdo/mapa à direita** (o Rafael é canhoto, 2026-10-22). Vale pra toda tela nova da Central e dos portais.
+- **Nunca aparece espaço vazio, caixa vazia nem marcador de "vaga"** (regra do Rafael, 2026-10-22): se um campo/foto/bloco não existe, ele não aparece; o que existe se acomoda e preenche a largura, em qualquer tela (computador e celular). Vale pra toda tela pública e da Central (ex.: tira de miniaturas do topo do memorial divide a largura entre as fotos que há; a caixa tracejada "+N" foi removida).
 - **Reorganizar tela existente = só mover, nunca renomear nem inventar função** (regra do Rafael, 2026-10-22): usar os nomes exatos de hoje; cada ferramenta dentro da sua aba, nada solto.
 
 ## O que é
