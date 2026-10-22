@@ -22,14 +22,14 @@ const NODES = [
       "Uma placa discreta com QR Code é instalada no túmulo. Quem visita aponta a câmera do celular e abre o memorial completo na hora.",
   },
   {
-    src: "/fio-da-vida/nodes/portal-familia-1-larga.jpg",
+    src: "/fio-da-vida/nodes/portal-familia-1.png",
     alt: "Família editando o memorial no Portal da Família",
     titulo: "Portal da Família",
     texto:
       "A família recebe um acesso próprio: sobe fotos e vídeos, escreve a história, monta a linha do tempo e decide quem pode ver o memorial.",
   },
   {
-    src: "/fio-da-vida/nodes/caminho-tumulo-3x2.jpg",
+    src: "/fio-da-vida/nodes/caminho-tumulo.jpg",
     alt: "Família na porta do cemitério com o celular mostrando o caminho até o túmulo",
     titulo: "Do caminho até o túmulo",
     texto:

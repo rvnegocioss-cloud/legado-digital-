@@ -511,8 +511,8 @@
 .landing .nodes-familia { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .landing .feat .ring-slot { height: 256px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
 .landing .feat .ring.ring-foto {
-  /* Os 4 quadros têm EXATAMENTE o mesmo tamanho (3:2); as 4 imagens já são 3:2,
-     então nada é cortado. */
+  /* Os 4 quadros têm EXATAMENTE o mesmo tamanho (3:2); imagens originais, sem
+     nenhum tratamento. Imagem de outra proporção é enquadrada (corte leve). */
   width: min(100%, 384px); aspect-ratio: 3 / 2; height: auto;
   margin: 0; border-radius: 20px; display: block;
 }
