@@ -10,11 +10,14 @@ const um = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? 
 
 /** Busca os pedaços pelo slug do memorial. Sem túmulo/cemitério: só { slug }. */
 export async function buscarDadosUrlMemorial(slug: string): Promise<DadosUrlMemorial> {
-  const { data } = await supabaseServidor
+  const { data, error } = await supabaseServidor
     .from('homenagens')
-    .select('id, lapides(id_publico, numero_oficial, cemiterios(slug_curto, cidade))')
+    // homenagens e lapides têm 2 FKs (lapide_id e gestor_homenagem_id): sem o !hint o PostgREST
+    // devolve PGRST201 e o endereço cai sempre no curto.
+    .select('id, lapides!homenagens_lapide_id_fkey(id_publico, numero_oficial, cemiterios(slug_curto, cidade))')
     .eq('slug', slug)
     .maybeSingle()
+  if (error) console.error('urlMemorial: consulta falhou', error.message)
   if (!data) return { slug }
 
   const { data: seg } = await supabaseServidor
