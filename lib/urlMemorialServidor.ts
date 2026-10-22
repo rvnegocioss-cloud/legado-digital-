@@ -1,0 +1,69 @@
+import { supabaseServidor } from '@/lib/supabaseServidor'
+import { urlCanonicaMemorial, type DadosUrlMemorial } from '@/lib/urlMemorial'
+import { headers } from 'next/headers'
+import { permanentRedirect } from 'next/navigation'
+
+type Cem = { slug_curto: string | null; cidade: string | null }
+type Lap = { id_publico: number | string | null; numero_oficial: string | null; cemiterios: Cem | Cem[] | null }
+
+const um = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? v[0] ?? null : v ?? null)
+
+/** Busca os pedaços pelo slug do memorial. Sem túmulo/cemitério: só { slug }. */
+export async function buscarDadosUrlMemorial(slug: string): Promise<DadosUrlMemorial> {
+  const { data } = await supabaseServidor
+    .from('homenagens')
+    .select('id, lapides(id_publico, numero_oficial, cemiterios(slug_curto, cidade))')
+    .eq('slug', slug)
+    .maybeSingle()
+  if (!data) return { slug }
+
+  const { data: seg } = await supabaseServidor
+    .from('homenagens_seguranca')
+    .select('modo_gate')
+    .eq('homenagem_id', (data as { id: string }).id)
+    .maybeSingle()
+
+  const lap = um((data as unknown as { lapides: Lap | Lap[] | null }).lapides)
+  const cem = um(lap?.cemiterios)
+  return {
+    slug,
+    cidade: cem?.cidade ?? null,
+    cemiterioSlug: cem?.slug_curto ?? null,
+    idPublico: lap?.id_publico ?? null,
+    numeroOficial: lap?.numero_oficial ?? null,
+    aberto: (seg?.modo_gate ?? 'aberto') === 'aberto',
+  }
+}
+
+export async function urlCanonicaPorSlug(slug: string): Promise<string> {
+  return urlCanonicaMemorial(await buscarDadosUrlMemorial(slug))
+}
+
+/**
+ * Chamar no topo de app/homenagem/[slug]/page.tsx. Devolve os dados (reuso).
+ * - Curto (sem cabeçalho x-memorial-caminho) e existe canônico longo -> 308 pro longo.
+ * - Longo (o proxy reescreveu e mandou o caminho original) que não bate com o
+ *   canônico -> 308 pro canônico (ou pro curto).
+ * Sem loop: o rewrite do proxy é interno (não refaz requisição); o 308 só
+ * ocorre quando o caminho ATUAL difere do canônico. Preserva ?qr=.
+ */
+export async function redirecionarSeNaoCanonico(
+  slug: string,
+  searchParams: Record<string, string | string[] | undefined>
+): Promise<DadosUrlMemorial> {
+  const h = await headers()
+  const caminhoOriginal = h.get('x-memorial-caminho') // só o proxy escreve (e sobrescreve qualquer valor do cliente)
+  const dados = await buscarDadosUrlMemorial(slug)
+  const canonica = urlCanonicaMemorial(dados)
+  const atual = caminhoOriginal ?? `/homenagem/${slug}`
+  if (atual !== canonica) {
+    const qs = new URLSearchParams()
+    for (const [k, v] of Object.entries(searchParams)) {
+      if (Array.isArray(v)) v.forEach((x) => qs.append(k, x))
+      else if (v !== undefined) qs.set(k, v)
+    }
+    const s = qs.toString()
+    permanentRedirect(s ? `${canonica}?${s}` : canonica)
+  }
+  return dados
+}

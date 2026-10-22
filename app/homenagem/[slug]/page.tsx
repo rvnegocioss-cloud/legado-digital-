@@ -2,6 +2,7 @@ import "./perfil.css";
 import { MapPin } from "lucide-react";
 import SiteFooter from "@/components/public/SiteFooter";
 import { supabaseServidor as supabase } from "@/lib/supabaseServidor";
+import { redirecionarSeNaoCanonico } from "@/lib/urlMemorialServidor";
 import { registrarVisita } from "@/lib/registrarVisita";
 import { cookies } from "next/headers";
 import { verificarTokenAcessoMemorial, verificarTokenQr } from "@/lib/acessoMemorialSessao";
@@ -405,6 +406,10 @@ export default async function PerfilMemorialPage({
 }) {
   const { slug } = await params;
   const { qr } = await searchParams;
+
+  // Endereço oficial (docs/PLANO_URL_MEMORIAL_HIERARQUICA.md): curto -> 308 pro longo quando
+  // existe; longo desatualizado -> 308 pro oficial. Só redireciona, não muda a página.
+  await redirecionarSeNaoCanonico(slug, qr ? { qr } : {});
 
   const { data: homenagem } = await supabase
     .from("homenagens_publica")

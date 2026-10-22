@@ -289,6 +289,30 @@ async function isStaffUser(req: NextRequest): Promise<boolean> {
   }
 }
 
+/**
+ * Endereço oficial do memorial (docs/PLANO_URL_MEMORIAL_HIERARQUICA.md):
+ *   /homenagem/{cidade}/{cemiterio}/t{id}/{memorial}
+ * Reescrita INTERNA (sem nova requisição) pra /homenagem/{memorial}, que é a
+ * página de sempre; o caminho original viaja no cabeçalho x-memorial-caminho
+ * pra page.tsx decidir se precisa de 308 pro canônico. O proxy não consulta
+ * banco. Qualquer x-memorial-caminho vindo do cliente é descartado, então
+ * só o rewrite daqui consegue escrever esse cabeçalho (sem loop: o curto nunca
+ * carrega o cabeçalho e o longo só é reescrito, nunca redirecionado, aqui).
+ */
+function passarOuReescreverMemorial(request: NextRequest, pathname: string): NextResponse {
+  if (!pathname.startsWith('/homenagem/')) return NextResponse.next()
+  const headers = new Headers(request.headers)
+  headers.delete('x-memorial-caminho')
+  const segs = pathname.split('/').filter(Boolean)
+  if (segs.length === 5) {
+    headers.set('x-memorial-caminho', pathname)
+    const url = request.nextUrl.clone() // preserva a query (?qr=)
+    url.pathname = `/homenagem/${segs[4]}`
+    return NextResponse.rewrite(url, { request: { headers } })
+  }
+  return NextResponse.next({ request: { headers } })
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -359,7 +383,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Requisição permitida: incluir headers informativos
-    const res = NextResponse.next()
+    const res = passarOuReescreverMemorial(request, pathname)
 
     res.headers.set('X-RateLimit-Limit', String(limit))
     res.headers.set('X-RateLimit-Remaining', String(Math.max(0, limit - count)))
@@ -382,7 +406,7 @@ export async function proxy(request: NextRequest) {
       )
     }
 
-    const res = NextResponse.next()
+    const res = passarOuReescreverMemorial(request, pathname)
     setCacheHeaders(res, pathname)
     return res
   }
