@@ -6,6 +6,7 @@ import NodesFamilia from "@/components/public/NodesFamilia";
 import MapaPublicoCemiterio from "@/components/public/MapaPublicoCemiterioCarregador";
 import { buscarCemiterioDestaque } from "@/lib/cemiterioDestaque";
 import { urlMidiaProtegida } from "@/lib/urlMidia";
+import MovimentoLanding from "@/components/public/MovimentoLanding";
 import "./landing.css";
 
 // Landing oficial desde 2026-09-22 — implementação do protótipo aprovado pelo
@@ -71,7 +72,7 @@ export default async function Home() {
 
   return (
     <div className="landing">
-
+      <MovimentoLanding />
 
       {/* ---------- HERO: busca de memorial + prévia ---------- */}
       <section className="hero">
