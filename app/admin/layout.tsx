@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -109,7 +109,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Alerta = feed das comunicações que o sistema já registra (emails_enviados,
   // mesma tabela que alimenta /admin/emails) -- nada de tabela nova, só
   // superfície do que já existe direto no header, com link pro memorial.
-  useEffect(() => {
+  // Atualiza sozinho: ao entrar, a cada troca de tela, a cada 30 s, ao voltar pra aba e ao abrir o
+  // sino. Antes carregava UMA vez só -- e-mail enviado depois (ex.: senha da família ao cadastrar um
+  // memorial) nunca aparecia sem recarregar a página (achado 2026-10-23).
+  const carregarAlertas = useCallback(() => {
     supabase
       .from('emails_enviados')
       .select('id, homenagem_id, tipo, destinatario, status, erro_msg, created_at, homenagens(nome_completo)')
@@ -117,6 +120,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .limit(20)
       .then(({ data }) => setAlertas((data as any) || []))
   }, [])
+
+  useEffect(() => {
+    carregarAlertas()
+  }, [carregarAlertas, pathname])
+
+  useEffect(() => {
+    const intervalo = setInterval(carregarAlertas, 30000)
+    const aoVoltar = () => {
+      if (document.visibilityState === 'visible') carregarAlertas()
+    }
+    document.addEventListener('visibilitychange', aoVoltar)
+    window.addEventListener('focus', aoVoltar)
+    return () => {
+      clearInterval(intervalo)
+      document.removeEventListener('visibilitychange', aoVoltar)
+      window.removeEventListener('focus', aoVoltar)
+    }
+  }, [carregarAlertas])
+
+  // "Visto até": e-mail novo (enviado com sucesso) também acende o sino até a pessoa abrir.
+  const [vistoAte, setVistoAte] = useState<string | null>(null)
+  useEffect(() => {
+    try {
+      const guardado = localStorage.getItem('legado-sino-visto')
+      if (guardado) setVistoAte(guardado)
+      else {
+        const agora = new Date().toISOString()
+        localStorage.setItem('legado-sino-visto', agora)
+        setVistoAte(agora)
+      }
+    } catch {
+      setVistoAte(new Date().toISOString())
+    }
+  }, [])
+  function marcarVisto() {
+    const agora = new Date().toISOString()
+    setVistoAte(agora)
+    try {
+      localStorage.setItem('legado-sino-visto', agora)
+    } catch {}
+  }
 
   // Lead novo (formulários de /parceiro/login e /familia/login) também acende o
   // sino -- é contato comercial esperando resposta, não pode ficar só na Central.
@@ -131,7 +175,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [])
 
   const alertasComErro = alertas.filter((a) => a.status === 'erro').length
-  const totalBadge = alertasComErro + leadsNovos.length
+  const emailsNovos = vistoAte ? alertas.filter((x) => x.status !== 'erro' && new Date(x.created_at).getTime() > new Date(vistoAte).getTime()).length : 0
+  const totalBadge = alertasComErro + leadsNovos.length + emailsNovos
 
   // Página de login não precisa do layout admin
   if (pathname === '/admin/login') return <>{children}</>
@@ -294,7 +339,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               }}
             >
               <button
-                onClick={() => setAlertasAberto(!alertasAberto)}
+                onClick={() => {
+                  if (!alertasAberto) {
+                    carregarAlertas()
+                    marcarVisto()
+                  }
+                  setAlertasAberto(!alertasAberto)
+                }}
                 className="relative text-[var(--tema-zinc-400)] hover:text-white transition-colors"
                 aria-label="Alertas de comunicações"
                 title="Alertas de comunicações"
