@@ -70,13 +70,13 @@ export function Dica({ texto }: { texto: string }) {
   return (
     <span
       className="relative inline-flex items-center ml-1.5 align-middle"
-      onMouseEnter={() => setAberta(true)}
-      onMouseLeave={() => setAberta(false)}
+      onMouseEnter={() => window.matchMedia('(hover:hover)').matches && setAberta(true)}
+      onMouseLeave={() => window.matchMedia('(hover:hover)').matches && setAberta(false)}
     >
       <button
         type="button"
         onClick={() => setAberta((a) => !a)}
-        className="w-[15px] h-[15px] rounded-full border border-[#C9A46A] text-[#C9A46A] text-[9.5px] leading-none flex items-center justify-center font-semibold"
+        className="relative after:absolute after:-inset-[14px] after:content-[''] w-[15px] h-[15px] rounded-full border border-[#C9A46A] text-[#C9A46A] text-[9.5px] leading-none flex items-center justify-center font-semibold"
         aria-label="Ajuda sobre este campo"
         aria-expanded={aberta}
       >

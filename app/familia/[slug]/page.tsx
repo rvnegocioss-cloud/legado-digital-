@@ -98,6 +98,30 @@ async function subirArquivoFamilia(
   return conf as ResultadoUpload
 }
 
+// Datas: o form guarda ISO (vindo do servidor/rascunho antigo) ou o texto
+// DD/MM/AAAA digitado. Exibe sempre DD/MM/AAAA; converte para ISO so ao gravar.
+function isoParaBR(v: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '')
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : v || ''
+}
+function mascaraData(v: string): string {
+  const d = v.replace(/\D/g, '').slice(0, 8)
+  if (d.length <= 2) return d
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`
+}
+// '' = vazio; null = incompleta/invalida; senao ISO AAAA-MM-DD
+function brParaIso(v: string): string | null {
+  if (!v) return ''
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v)
+  if (!m) return null
+  const dia = Number(m[1]), mes = Number(m[2]), ano = Number(m[3])
+  const dt = new Date(Date.UTC(ano, mes - 1, dia))
+  if (dt.getUTCFullYear() !== ano || dt.getUTCMonth() !== mes - 1 || dt.getUTCDate() !== dia) return null
+  return `${m[3]}-${m[2]}-${m[1]}`
+}
+
 function chaveRascunho(slug: string) {
   return `legado-rascunho-familia-${slug}`
 }
@@ -441,6 +465,13 @@ export default function FamiliaEdicaoPage() {
   async function salvar(e?: React.FormEvent, silencioso = false, baseOverride?: Record<string, unknown>) {
     e?.preventDefault()
     if (salvandoRef.current) return
+    const nascIso = brParaIso(form.data_nascimento)
+    const falecIso = brParaIso(form.data_falecimento)
+    if (nascIso === null || falecIso === null) {
+      // data incompleta nao grava (nem no auto-save)
+      if (!silencioso) setErro('Data incompleta')
+      return
+    }
     salvandoRef.current = true
     if (!silencioso) setSalvando(true)
     setErro('')
@@ -454,6 +485,8 @@ export default function FamiliaEdicaoPage() {
         updatedAtEsperado: updatedAtCarregado,
         valoresBase: baseOverride ?? valoresBase,
         ...form,
+        data_nascimento: nascIso,
+        data_falecimento: falecIso,
         foto_url: fotoUrl || null,
         video_url: videoUrl || null,
         videos_galeria: videosGaleria,
@@ -501,8 +534,8 @@ export default function FamiliaEdicaoPage() {
     // segundo salvar seguido acusaria conflito com a propria alteracao.
     setValoresBase({
       nome_completo: form.nome_completo,
-      data_nascimento: form.data_nascimento,
-      data_falecimento: form.data_falecimento,
+      data_nascimento: nascIso,
+      data_falecimento: falecIso,
       cidade: form.cidade,
       frase_preferida: form.frase_preferida,
       biografia: form.biografia,
@@ -885,28 +918,34 @@ export default function FamiliaEdicaoPage() {
                 <label className="block text-xs text-zinc-500 mb-1">Data de nascimento<Dica texto="Dia, mês e ano de nascimento. Se não souber o dia exato, pode deixar em branco." /></label>
                 <input
                   type="text"
+                  inputMode="numeric"
+                  maxLength={10}
                   placeholder="DD/MM/AAAA"
-                  value={form.data_nascimento}
-                  onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
+                  value={isoParaBR(form.data_nascimento)}
+                  onChange={(e) => setForm({ ...form, data_nascimento: mascaraData(e.target.value) })}
                   className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
                 />
+                {brParaIso(form.data_nascimento) === null && <p className="text-[11px] text-amber-400 mt-1">Data incompleta</p>}
               </div>
               <div className="flex-1">
                 <label className="block text-xs text-zinc-500 mb-1">Data de falecimento<Dica texto="Data do falecimento. Aparece junto com a de nascimento na página do memorial." /></label>
                 <input
                   type="text"
+                  inputMode="numeric"
+                  maxLength={10}
                   placeholder="DD/MM/AAAA"
-                  value={form.data_falecimento}
-                  onChange={(e) => setForm({ ...form, data_falecimento: e.target.value })}
+                  value={isoParaBR(form.data_falecimento)}
+                  onChange={(e) => setForm({ ...form, data_falecimento: mascaraData(e.target.value) })}
                   className="w-full px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white text-sm"
                 />
+                {brParaIso(form.data_falecimento) === null && <p className="text-[11px] text-amber-400 mt-1">Data incompleta</p>}
               </div>
             </div>
             <div>
               <label className="block text-xs text-zinc-500 mb-1">Vínculo/papel (ex: Pai, Avó — aparece perto do nome na página)<Dica texto="Como essa pessoa era chamada pela família — Pai, Mãe, Avô, Esposa... Pode adicionar mais de um." /></label>
               <VinculosEditor value={vinculos} onChange={setVinculos} />
             </div>
-            <div className="flex gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex-1">
                 <label className="block text-xs text-zinc-500 mb-1">Cidade<Dica texto="Cidade onde a pessoa viveu ou faleceu. Aparece embaixo do nome na página do memorial." /></label>
                 <input
@@ -1072,7 +1111,8 @@ export default function FamiliaEdicaoPage() {
                     <button
                       type="button"
                       onClick={() => removerVideoGaleria(url)}
-                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                      aria-label="Remover vídeo"
+                      className="absolute -top-1 -right-1 bg-black/70 text-white text-xs rounded-full w-11 h-11 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                     >
                       ×
                     </button>
@@ -1242,7 +1282,8 @@ export default function FamiliaEdicaoPage() {
                     <button
                       type="button"
                       onClick={() => removerFoto(url)}
-                      className="absolute top-0.5 right-0.5 bg-black/70 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                      aria-label="Remover foto"
+                      className="absolute -top-1 -right-1 bg-black/70 text-white text-xs rounded-full w-11 h-11 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                     >
                       ×
                     </button>
