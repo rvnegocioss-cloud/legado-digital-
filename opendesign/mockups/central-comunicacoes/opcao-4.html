@@ -1,0 +1,29 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opção 4 — Abas por interlocutor</title><link rel="stylesheet" href="wire.css">
+<style>.kan{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.kan .box{min-height:120px}
+@media(max-width:900px){.kan{grid-template-columns:1fr 1fr}}@media(max-width:560px){.kan{grid-template-columns:1fr}}
+.cartao{border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;margin-bottom:6px;background:var(--card2)}</style></head><body>
+<div id="c"></div>
+<script src="wire.js"></script>
+<script>
+$('#c').innerHTML = cab(4,'Abas por interlocutor: Famílias · Parceiros · Fornecedor · Sistema',
+ 'Organiza por QUEM a gente fala. Aba Famílias: quadro com colunas pelo dado que falta (Sem contato · Sem data · Sem foto · Sem história), cada cartão é um memorial; ao lado, e-mails e WhatsApp daquela família.',
+ 'Responde "o que eu devo a cada pessoa"; o quadro mostra de relance o gargalo (qual dado mais falta).',
+ 'Modelo mental novo; e-mail com erro fica espalhado em cada aba; mais caro de construir (cruza várias tabelas).') + `
+<div class="tabs scroll" id="tb">
+ <button data-t="fa">Famílias <span class="bd g">6</span></button>
+ <button data-t="pa">Parceiros <span class="bd g">2</span></button>
+ <button data-t="fo">Fornecedor <span class="bd">1</span></button>
+ <button data-t="si">Sistema e caixa contato@ <span class="bd">1</span></button>
+</div>
+<div class="panel" id="fa"><div class="row" style="margin-bottom:8px"><div id="vw"></div><input placeholder="Buscar memorial ou família"></div><div id="fv"></div></div>
+<div class="panel" id="pa"><div class="grid g2 cols"><div class="box"><h3>Leads de parceiro</h3><div id="l1"></div></div><div class="box"><h3>Parceiros ativos</h3><div id="pp"></div></div></div></div>
+<div class="panel" id="fo"><div class="box" style="max-width:640px"><h3>Fornecedor de placas</h3><div id="fr"></div></div></div>
+<div class="panel" id="si"><div class="grid g2 cols"><div class="box"><h3>Histórico e erros de e-mail</h3><div id="eh"></div></div><div class="box"><h3>Caixa contato@</h3><div id="cx"></div></div></div></div>`;
+tabs($('#tb'));
+function quadro(){
+ const col=['contato da família','data de falecimento','foto','história'];
+ $('#fv').innerHTML='<div class="kan">'+col.map(c=>{const x=D.pend.filter(m=>m.falta.includes(c));return `<div class="box"><h3>Sem ${c} ${chip(x.length,'amb')}</h3>${x.map(m=>`<div class="cartao"><b>${m.n}</b><div class="small mut">${m.p} · ${m.dias} d</div><div class="row"><button class="btn pri">Abrir ficha</button><button class="btn">Lembrar</button></div></div>`).join('')||'<span class="mut small">nenhum</span>'}</div>`}).join('')+'</div><div class="nota">Um memorial com 3 faltas aparece em 3 colunas (é o mesmo cartão).</div>';}
+function lista(){const d=document.createElement('div');d.className='box';d.id='fp';$('#fv').innerHTML='';$('#fv').appendChild(d);pendList(d)}
+filtros($('#vw'),['quadro','lista'],v=>v==='quadro'?quadro():lista(),'quadro');quadro();
+leadsList($('#l1'),'parceiro');parceiros($('#pp'));fornecedor($('#fr'));emailsList($('#eh'));caixa($('#cx'));
+</script></body></html>

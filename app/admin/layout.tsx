@@ -36,6 +36,7 @@ type AlertaComunicacao = {
   destinatario: string
   status: string
   erro_msg: string | null
+  resolvido_em: string | null
   created_at: string
   homenagens: { nome_completo: string } | null
 }
@@ -115,7 +116,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const carregarAlertas = useCallback(() => {
     supabase
       .from('emails_enviados')
-      .select('id, homenagem_id, tipo, destinatario, status, erro_msg, created_at, homenagens(nome_completo)')
+      .select('id, homenagem_id, tipo, destinatario, status, erro_msg, resolvido_em, created_at, homenagens(nome_completo)')
       .order('created_at', { ascending: false })
       .limit(20)
       .then(({ data }) => setAlertas((data as any) || []))
@@ -174,7 +175,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .then(({ data }) => setLeadsNovos((data as any) || []))
   }, [])
 
-  const alertasComErro = alertas.filter((a) => a.status === 'erro').length
+  const alertasComErro = alertas.filter((a) => a.status === 'erro' && !a.resolvido_em).length
   const emailsNovos = vistoAte ? alertas.filter((x) => x.status !== 'erro' && new Date(x.created_at).getTime() > new Date(vistoAte).getTime()).length : 0
   const totalBadge = alertasComErro + leadsNovos.length + emailsNovos
 
@@ -389,7 +390,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         className="block px-4 py-2.5 hover:bg-[var(--tema-zinc-800)] border-b border-[var(--tema-zinc-800)]/50 last:border-0"
                       >
                         <p className="text-xs flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.status === 'erro' ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.status === 'erro' && !a.resolvido_em ? 'bg-red-500' : 'bg-emerald-500'}`} />
                           <span className="text-[var(--tema-zinc-300)]">{rotuloTipoEmail(a.tipo)}</span>
                           <span className="text-[var(--tema-zinc-600)]">·</span>
                           <span className="text-[var(--tema-zinc-500)] ml-auto shrink-0">{tempoRelativo(a.created_at)}</span>
@@ -397,7 +398,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <p className="text-xs text-[var(--tema-zinc-500)] mt-0.5 truncate">
                           {a.homenagens?.nome_completo ? `Sobre: ${a.homenagens.nome_completo}` : `Para: ${a.destinatario}`}
                         </p>
-                        {a.status === 'erro' && a.erro_msg && (
+                        {a.status === 'erro' && !a.resolvido_em && a.erro_msg && (
                           <p className="text-xs text-red-400 mt-0.5 truncate">{a.erro_msg}</p>
                         )}
                       </Link>

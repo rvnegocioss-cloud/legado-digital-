@@ -1,0 +1,47 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opção 1 — Abas por assunto</title><link rel="stylesheet" href="wire.css"></head><body>
+<div id="c"></div>
+<script src="wire.js"></script>
+<script>
+$('#c').innerHTML = cab(1,'Abas horizontais por assunto (padrão da Central)',
+ 'Mesma barra de abas da ficha do memorial. Abre na Visão geral (o que exige ação hoje); cada aba é um tipo de coisa.',
+ 'Igual ao resto da Central, zero aprendizado; badge vermelho mostra onde há trabalho.',
+ 'Quem procura "tudo da Maria Lígia" tem de andar por várias abas.') + `
+<div class="tabs scroll" id="tb">
+ <button data-t="vg">Visão geral <span class="bd">4</span></button>
+ <button data-t="pe">Pendências dos memoriais <span class="bd g">6</span></button>
+ <button data-t="em">E-mails enviados <span class="bd">2</span></button>
+ <button data-t="le">Contatos e leads <span class="bd g">2</span></button>
+ <button data-t="ca">Caixa contato@ <span class="tag-futuro">em breve</span></button>
+ <button data-t="fo">Fornecedor de placas</button>
+</div>
+<div class="panel" id="vg">
+ <div class="grid g4">
+  <div class="box"><div class="num" style="color:var(--red)">2</div>e-mails com erro<br><a href="#" onclick="go('em');return false">ver erros</a></div>
+  <div class="box"><div class="num">6</div>memoriais com dado faltando<br><a href="#" onclick="go('pe');return false">ver pendências</a></div>
+  <div class="box"><div class="num">2</div>leads novos<br><a href="#" onclick="go('le');return false">responder</a></div>
+  <div class="box"><div class="num">2</div>e-mails não lidos no contato@<br><span class="tag-futuro">em breve</span></div>
+ </div>
+ <div class="box" style="margin-top:12px"><h3>Fila de hoje (mais urgente primeiro)</h3>
+  <div class="item"><div class="main">${chip('erro','red')} <b>Envio ao fornecedor</b> · Carlos Saraiva · caixa cheia</div><div class="acts"><button class="btn pri">Reenviar</button></div></div>
+  <div class="item"><div class="main">${chip('novo','amb')} <b>Marcos Aurora</b> · Funerária Aurora quer oferecer o Legado</div><div class="acts"><button class="btn pri">Responder</button></div></div>
+  <div class="item"><div class="main">${chip('há 21 dias','amb')} <b>José Pereira Rocha</b> · falta contato, data e história</div><div class="acts"><button class="btn pri">Abrir ficha</button></div></div>
+ </div>
+</div>
+<div class="panel" id="pe"><div class="box">
+ <div class="row"><div><label>Mostrar por</label><div id="agr"></div></div><div><label>Dado que falta</label><div id="ft"></div></div><div><label>Quem preenche</label><div id="qm"></div></div></div>
+ <div class="nota">Ação em 1 clique em cada linha: abrir ficha, lembrar família, reenviar acesso.</div>
+ <div id="pl"></div></div></div>
+<div class="panel" id="em"><div class="box"><div class="row"><div id="ef"></div><input placeholder="Buscar por e-mail ou assunto"></div><div id="el" style="margin-top:8px"></div></div></div>
+<div class="panel" id="le"><div class="grid g2 cols"><div class="box"><h3>Leads de parceiro</h3><div id="l1"></div></div><div class="box"><h3>Leads de família</h3><div id="l2"></div></div></div><div class="box" style="margin-top:12px"><h3>Parceiros e contatos das famílias</h3><div id="pa"></div></div></div>
+<div class="panel" id="ca"><div class="box"><h3>Caixa de entrada contato@legadodigital.net</h3><div id="cx"></div></div></div>
+<div class="panel" id="fo"><div class="box" style="max-width:640px"><h3>Fornecedor de placas</h3><div id="fr"></div></div></div>`;
+const go=tabs($('#tb'));
+let S={agrupar:'memorial',filtro:'todos',quem:'todos'};
+const rp=()=>pendList($('#pl'),S);
+filtros($('#agr'),['memorial','tipo'],v=>{S.agrupar=v;rp()},'memorial');
+filtros($('#ft'),['todos','foto','história','data de falecimento','contato da família'],v=>{S.filtro=v;rp()},'todos');
+filtros($('#qm'),['todos','familia','equipe'],v=>{S.quem=v;rp()},'todos');
+rp();
+filtros($('#ef'),['todos','erro','enviado','confirmado'],v=>emailsList($('#el'),{so:v==='todos'?null:v}),'todos');
+emailsList($('#el'));leadsList($('#l1'),'parceiro');leadsList($('#l2'),'familia');parceiros($('#pa'));caixa($('#cx'));fornecedor($('#fr'));
+</script></body></html>

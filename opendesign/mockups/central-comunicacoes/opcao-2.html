@@ -1,0 +1,39 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opção 2 — Caixa de entrada</title><link rel="stylesheet" href="wire.css">
+<style>.cols{display:grid;grid-template-columns:200px minmax(0,1.2fr) minmax(0,1fr);gap:12px;align-items:start}
+.cat{display:flex;justify-content:space-between;width:100%;text-align:left;margin-bottom:4px}
+@media(max-width:900px){.cols{grid-template-columns:1fr}#det{display:none}#det.on{display:block}}</style></head><body>
+<div id="c"></div>
+<script src="wire.js"></script>
+<script>
+$('#c').innerHTML = cab(2,'Caixa de entrada unificada (3 colunas)',
+ 'Tudo vira um item numa fila só: pendência, e-mail com erro, lead, mensagem do contato@. Esquerda: categorias com contagem; meio: fila; direita: detalhe e ação.',
+ 'Uma pessoa zera a fila de manhã sem pular de tela; funciona igual ao e-mail que o time já conhece.',
+ 'Mistura coisas de natureza diferente; foge do padrão de abas da Central; tela cheia no celular vira só lista.') + `
+<div class="cols">
+ <div class="box"><label>Categorias</label><div id="cats"></div>
+  <hr style="border:0;border-top:1.5px dashed var(--line)"><label>Configurar</label><button class="btn cat" onclick="cfg()">Fornecedor de placas</button></div>
+ <div class="box"><div class="row"><input id="bq" placeholder="Buscar..." style="flex:1"></div><div id="fila" style="margin-top:6px"></div></div>
+ <div class="box" id="det"><div class="ph">Escolha um item na fila</div></div>
+</div>`;
+const ITENS=[
+ ...D.emails.filter(e=>e.s==='erro').map((e,i)=>({id:'e'+i,cat:'Erros',tit:e.t+' — '+e.m,sub:e.e,q:e.q,ac:['Reenviar','Abrir ficha'],cor:'red'})),
+ ...D.pend.map((m,i)=>({id:'p'+i,cat:'Pendências',tit:m.n,sub:'falta '+m.falta.join(', '),q:'há '+m.dias+' dias',ac:['Abrir ficha','Lembrar família','Reenviar acesso'],cor:'amb'})),
+ ...D.leads.map((l,i)=>({id:'l'+i,cat:'Leads',tit:l.n+(l.emp?' · '+l.emp:''),sub:l.msg,q:l.q,ac:['WhatsApp','E-mail','Marcar convertido'],cor:'blu'})),
+ ...D.caixa.map((m,i)=>({id:'c'+i,cat:'Caixa contato@',tit:m.as,sub:m.de,q:m.q,ac:['Responder'],cor:'blu',fut:1})),
+ ...D.emails.filter(e=>e.s!=='erro').map((e,i)=>({id:'h'+i,cat:'Histórico',tit:e.t+' — '+e.m,sub:e.d+' · '+e.s,q:e.q,ac:[],cor:'grn'}))
+];
+const CATS=['Tudo','Erros','Pendências','Leads','Caixa contato@','Histórico'];
+let cat='Tudo',sel=null;
+function draw(){
+ $('#cats').innerHTML=CATS.map(c=>{const n=c==='Tudo'?ITENS.length:ITENS.filter(i=>i.cat===c).length;return `<button class="f cat ${c===cat?'on':''}" data-c="${c}"><span>${c}</span><span>${n}</span></button>`}).join('');
+ $$('#cats button').forEach(b=>b.onclick=()=>{cat=b.dataset.c;draw()});
+ const q=$('#bq').value.toLowerCase();
+ const L=ITENS.filter(i=>(cat==='Tudo'||i.cat===cat)&&(i.tit+i.sub).toLowerCase().includes(q));
+ $('#fila').innerHTML=L.map(i=>`<div class="item ${i.id===sel?'sel':''}" data-i="${i.id}" style="cursor:pointer"><div class="main">${chip(i.cat,i.cor)} <b>${i.tit}</b><div class="small mut">${i.sub} · ${i.q}</div></div></div>`).join('')||'<p class="mut">Nada aqui.</p>';
+ $$('#fila .item').forEach(e=>e.onclick=()=>{sel=e.dataset.i;draw();det()});
+}
+function det(){const i=ITENS.find(x=>x.id===sel);if(!i)return;const d=$('#det');d.classList.add('on');
+ d.innerHTML=`<h3>${i.tit}</h3><div>${chip(i.cat,i.cor)} <span class="mut small">${i.q}</span></div><p>${i.sub}</p>${i.fut?'<div class="nota">Futuro: leitura da caixa via Google.</div>':''}<div class="acts row">${i.ac.map((a,k)=>`<button class="btn ${k?'':'pri'}">${a}</button>`).join('')}</div>`}
+function cfg(){const d=$('#det');d.classList.add('on');d.innerHTML='<h3>Fornecedor de placas</h3><div id="fr"></div>';fornecedor($('#fr'))}
+$('#bq').oninput=draw;draw();
+</script></body></html>

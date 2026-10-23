@@ -1,0 +1,30 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Opção 3 — Abas laterais por tarefa</title><link rel="stylesheet" href="wire.css">
+<style>.lay{display:grid;grid-template-columns:230px minmax(0,1fr);gap:12px;align-items:start}
+.gr{color:var(--gold);font-size:17px;margin:8px 0 3px}
+.nv{display:flex;justify-content:space-between;width:100%;text-align:left;margin-bottom:4px}
+@media(max-width:760px){.lay{display:block}#nv{display:flex;overflow-x:auto;gap:6px;margin-bottom:10px}.gr{display:none}.nv{white-space:nowrap;width:auto}}</style></head><body>
+<div id="c"></div>
+<script src="wire.js"></script>
+<script>
+$('#c').innerHTML = cab(3,'Abas laterais agrupadas: Agir · Acompanhar · Configurar',
+ 'Menu vertical à esquerda dividido por verbo. "Agir" concentra o que dá trabalho (pendências, erros, leads); "Acompanhar" é consulta; "Configurar" é set-and-forget.',
+ 'Separa urgência de consulta; cresce bem se entrarem WhatsApp e a caixa do Google; painel de trabalho fica à direita da navegação.',
+ 'Mais cliques para ver o histórico; diferente das abas horizontais do resto da Central.') + `
+<div class="lay"><div class="box" id="nv"></div><div id="main"></div></div>`;
+const NAV=[['Agir',[['pe','Pendências dos memoriais',6,'g'],['er','E-mails com erro',2,''],['le','Leads novos',2,'g']]],
+ ['Acompanhar',[['hi','Histórico de e-mails',0,'m'],['pa','Parceiros e famílias',0,'m'],['ca','Caixa contato@ (em breve)',2,'m']]],
+ ['Configurar',[['fo','Fornecedor de placas',0,'m']]]];
+let cur='pe',S={filtro:'todos'};
+function nav(){$('#nv').innerHTML=NAV.map(([g,it])=>`<div class="gr">${g}</div>`+it.map(([id,t,n,k])=>`<button class="f nv ${id===cur?'on':''}" data-i="${id}"><span>${t}</span>${n?`<span class="bd ${k}">${n}</span>`:''}</button>`).join('')).join('');
+ $$('#nv button').forEach(b=>b.onclick=()=>{cur=b.dataset.i;nav();pane()})}
+function pane(){const m=$('#main');
+ if(cur==='pe'){m.innerHTML=`<div class="box"><h2>Pendências dos memoriais</h2><div class="small mut">Agrupado por dado faltante; um clique abre a ficha na aba certa.</div><div id="ft" style="margin:8px 0"></div><div id="pl"></div></div>`;
+  filtros($('#ft'),['todos','foto','história','data de falecimento','contato da família'],v=>{pendList($('#pl'),{agrupar:'tipo',filtro:v})},'todos');pendList($('#pl'),{agrupar:'tipo'})}
+ else if(cur==='er'){m.innerHTML=`<div class="box"><h2>E-mails com erro</h2><div id="x"></div><div class="nota">Cada erro com motivo e botão Reenviar. Some da lista ao reenviar com sucesso.</div></div>`;emailsList($('#x'),{so:'erro'})}
+ else if(cur==='le'){m.innerHTML=`<div class="box"><h2>Leads</h2><div id="x"></div></div>`;leadsList($('#x'))}
+ else if(cur==='hi'){m.innerHTML=`<div class="box"><h2>Histórico de e-mails automáticos</h2><div id="x"></div></div>`;emailsList($('#x'))}
+ else if(cur==='pa'){m.innerHTML=`<div class="box"><h2>Parceiros e contatos das famílias</h2><div id="x"></div></div>`;parceiros($('#x'))}
+ else if(cur==='ca'){m.innerHTML=`<div class="box"><h2>Caixa contato@</h2><div id="x"></div></div>`;caixa($('#x'))}
+ else {m.innerHTML=`<div class="box" style="max-width:600px"><h2>Fornecedor de placas</h2><div id="x"></div></div>`;fornecedor($('#x'))}}
+nav();pane();
+</script></body></html>
