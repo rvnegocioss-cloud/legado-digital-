@@ -1111,9 +1111,26 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }
     // Se veio de um nome sem memorial, a gaveta é a dele mesmo (a pessoa
     // "vira" memorial, não é gente a mais) -- senão, pega a primeira livre.
-    const gavetaAlvo = cadastroMemorial.gavetaId
+    const daqui = gavetasPorJazigo.get(cadastroMemorial.lapide.id) || []
+    let gavetaAlvo = cadastroMemorial.gavetaId
       ? gavetas.find((g) => g.id === cadastroMemorial.gavetaId)
-      : (gavetasPorJazigo.get(cadastroMemorial.lapide.id) || []).find((g) => !g.homenagem_id && !g.nome_sem_memorial)
+      : daqui.find((g) => !g.homenagem_id && !g.nome_sem_memorial)
+    // Jazigo SEM nenhuma gaveta (o normal nos túmulos gerados pela fileira): cria a G1 sozinha
+    // em vez de travar com aviso e não abrir a ficha (bug de 2026-10-22).
+    if (!gavetaAlvo && daqui.length === 0) {
+      setSalvando(true)
+      const { data: nova, error: erroNova } = await supabase
+        .from('gavetas')
+        .insert({ lapide_id: cadastroMemorial.lapide.id, codigo: 'G1', linha: 1, coluna: 1 })
+        .select('id, codigo')
+        .single()
+      if (erroNova || !nova) {
+        setMsg(erroNova?.message || 'Não consegui criar a gaveta do jazigo.')
+        setSalvando(false)
+        return
+      }
+      gavetaAlvo = { ...nova } as unknown as Gaveta
+    }
     if (!gavetaAlvo) {
       setMsg('Esse jazigo não tem gaveta livre — crie mais uma em Jazigos → Gavetas antes de cadastrar.')
       return
