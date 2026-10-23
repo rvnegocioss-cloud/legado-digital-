@@ -55,3 +55,7 @@ A família pode escolher, no próprio portal, uma imagem de capa pro topo da pá
 ## Página de funerária parceira (desde 2026-10-09)
 
 Cada funerária ou cemitério parceiro pode ter uma página própria dentro do site (endereço `/parceiros/nome-da-funeraria`), com a logo e a foto de capa dela no topo. Nessa página a família busca os memoriais que estão sob os cuidados daquele parceiro, vê o que o memorial oferece, um memorial de exemplo (com dados fictícios), o mapa do cemitério e o contato da funerária. Quem passa o endereço é a própria funerária — a página não aparece no menu do site. Se alguém perguntar "como acho a página da minha funerária", orientar a pedir o link pra funerária, ou usar a busca de memorial do site (`/busca`). Você não tem a lista de parceiros nem os endereços das páginas.
+
+## Memorial online ou offline
+
+A família (ou a funerária parceira) pode tirar o memorial do ar a qualquer momento com a chave "Memorial online / offline": offline, ninguém vê a página — busca, link e QR Code dizem que não foi encontrado — e ao ligar de novo ele volta a aparecer normalmente.

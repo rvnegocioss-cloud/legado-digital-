@@ -28,6 +28,7 @@ import { TimelineEditor, type TimelineEvento } from '@/components/admin/Timeline
 import { CampoFicha } from '@/components/admin/CampoFicha'
 import { SecaoFicha } from '@/components/admin/SecaoFicha'
 import { PrivacidadeMemorial } from '@/components/admin/PrivacidadeMemorial'
+import { ChaveMemorialOnline } from '@/components/admin/ChaveMemorialOnline'
 import { StatusFicha } from '@/components/admin/StatusFicha'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PALETAS_MEMORIAL } from '@/lib/temasMemorial'
@@ -129,6 +130,7 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
   })
   const [vinculos, setVinculos] = useState<string[]>([])
   const [figuraPublica, setFiguraPublica] = useState(false)
+  const [memorialOnline, setMemorialOnline] = useState<boolean | null>(null)
   const [cemiterios, setCemiterios] = useState<Cemiterio[]>([])
   const [jazigoEscolhido, setJazigoEscolhido] = useState<JazigoEscolhido | null>(null)
   const [cemiterioSelecionadoId, setCemiterioSelecionadoId] = useState('')
@@ -299,9 +301,10 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
 
     const { data: seguranca } = await supabase
       .from('homenagens_seguranca')
-      .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada')
+      .select('senha_acesso_hash, senha_familia_hash, mensagem_placa_confirmada, modo_gate')
       .eq('homenagem_id', m.id)
       .maybeSingle()
+    setMemorialOnline(seguranca?.modo_gate !== 'oculto')
     setTemSenha(!!seguranca?.senha_acesso_hash)
     setTemSenhaFamilia(!!seguranca?.senha_familia_hash)
     setMensagemPlacaConfirmada(!!seguranca?.mensagem_placa_confirmada)
@@ -1204,6 +1207,17 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
 
       <div className={aba === 'familia' ? '' : 'hidden'}>
           <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-6 max-w-2xl">
+            {memorial && memorialOnline !== null && (
+              <ChaveMemorialOnline
+                key={memorial.id}
+                memorialId={memorial.id}
+                estadoInicialOnline={memorialOnline}
+                getAuthHeaders={async () => {
+                  const { data: { session } } = await supabase.auth.getSession()
+                  return { Authorization: `Bearer ${session?.access_token}` }
+                }}
+              />
+            )}
             <SecaoFicha titulo="Acesso da família" icon={Mail} primeira>
               <form onSubmit={cadastrarEmailFamilia} className="space-y-3">
                 <CampoFicha label="CPF do responsável (opcional, preenche o nome)">

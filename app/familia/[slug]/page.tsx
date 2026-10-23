@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { TimelineEditor, type TimelineEvento } from '@/components/admin/TimelineEditor'
 import { VinculosEditor } from '@/components/admin/VinculosEditor'
 import { PrivacidadeFamilia } from '@/components/familia/PrivacidadeFamilia'
+import { ChaveMemorialOnline } from '@/components/admin/ChaveMemorialOnline'
 import JazigoDaFamilia from '@/components/familia/JazigoDaFamilia'
 import FotoLapideFamilia from '@/components/familia/FotoLapideFamilia'
 import ArvoreDaFamilia from '@/components/familia/ArvoreDaFamilia'
@@ -770,6 +771,15 @@ export default function FamiliaEdicaoPage() {
             Ver página →
           </a>
         </div>
+        {memorialId && (
+          <div className="mt-2">
+            <ChaveMemorialOnline
+              key={`${memorialId}-${modoGate}`}
+              memorialId={memorialId}
+              estadoInicialOnline={modoGate !== 'oculto'}
+            />
+          </div>
+        )}
 
         {/* Abas: um tema por vez, ocupando a tela inteira. Resolve a página
             sem fim -- nada mais fica empilhado embaixo (2026-09-16). */}

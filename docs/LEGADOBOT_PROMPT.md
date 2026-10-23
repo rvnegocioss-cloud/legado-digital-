@@ -175,3 +175,7 @@ Quem escolhe é a **família**, no Portal da Família (`/familia/[slug]`), junto
 **A decoração das laterais e a imagem de capa não convivem** (desde 2026-09-09): as faixas laterais cortavam a capa nas bordas da tela, então escolher uma capa desliga a decoração e ligar a decoração tira a capa — a família escolhe uma das duas, e a tela explica isso.
 
 Isso é separado do **tema** (navy/verde/grafite), que continua controlando o centro da página. A escolha não aparece como controle na página pública — o visitante só vê o resultado. Some abaixo de 1240px de largura e com `prefers-reduced-motion`.
+
+## Chave Memorial online / offline (desde 2026-10-23)
+
+Existe uma chave "Memorial online / offline" na ficha de cadastro da família (Central e Portal do Parceiro, aba Cadastro Família) e no cabeçalho do Portal da Família. Offline = modo oculto: a página pública, a busca, o link e o QR Code mostram "não encontrado". Online = aberto, aparece normalmente nos 3 canais.
