@@ -601,3 +601,17 @@ html {
   color: var(--ld-fg, #F5F2EB); font-family: var(--ld-font-corpo); font-size: 12.5px; cursor: pointer;
 }
 .btn-tela-cheia:hover { border-color: var(--ld-gold, #C9A46A); color: var(--ld-gold-lite, #dfc08a); }
+
+/* Portal da Família no celular: fonte 16px (sem zoom do iOS), alvos de 44px, abas numa linha */
+@media (max-width:767px){
+ .portal-familia{overflow-x:clip}
+ .portal-familia input:not([type=checkbox]):not([type=radio]):not([type=file]),
+ .portal-familia select,.portal-familia textarea{font-size:16px!important}
+ .portal-familia button,.portal-familia a,.portal-familia select,
+ .portal-familia input:not([type=checkbox]):not([type=radio]){min-height:44px}
+ .portal-familia input[type=checkbox],.portal-familia input[type=radio]{width:22px;height:22px}
+ .portal-familia label:has(>input[type=checkbox]){min-height:44px;display:flex;align-items:center}
+ .portal-familia nav{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none}
+ .portal-familia nav>*{flex-shrink:0;white-space:nowrap}
+ .portal-familia input[type=file]::file-selector-button{min-height:44px;font-size:15px}
+}

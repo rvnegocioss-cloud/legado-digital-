@@ -371,6 +371,8 @@ Se o SMTP falhar (ex: DKIM não propagado ainda), a API retorna a senha na respo
 
 **A família edita o jazigo** (mudou 2026-09-15/16, antes era só visualização): dá nome ao jazigo e escreve quem está enterrado nas gavetas que ainda não têm memorial. **Criar/remover gaveta e mexer em gaveta que já tem memorial continuam só do parceiro/staff** — gaveta com memorial pode ser de outra família (regra 22). A trava está no servidor (`/api/familia-jazigo` POST): só o jazigo do próprio memorial (lido de `homenagens.lapide_id`, nunca de id mandado no corpo), só gavetas daquele jazigo, só gaveta sem `homenagem_id`.
 
+**Celular (2026-10-23, plano `docs/PLANO_PORTAL_FAMILIA_CELULAR.md`, etapa 1 de 5):** regra CSS escopada `.portal-familia` em `globals.css` (só `max-width:767px`) — campos com fonte 16px (sem zoom do iOS), botões/campos/links com 44px de altura, checkbox 22px, abas numa linha rolável. Desktop e Central intactos. Etapas 2-5 pendentes.
+
 **Assinaturas não renderiza mais o livro** — é só a lista de quem assinou com "remover" do lado (`DELETE /api/memorial-condolencia`). O livro desenhado continua na página pública do memorial.
 
 **Modo ajuda** (`components/familia/ModoAjuda.tsx`) — botão no cabeçalho que liga as dicas de uma vez; ligado, cada campo ganha um "?" dourado que mostra um card explicando pra que serve (hover no desktop, toque no celular). Desligado (padrão), a tela fica idêntica, sem ícone nenhum. A escolha fica lembrada no navegador (`localStorage`, chave `legado-modo-ajuda`).

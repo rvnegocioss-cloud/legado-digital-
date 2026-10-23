@@ -683,7 +683,7 @@ export default function FamiliaEdicaoPage() {
 
   return (
     <ModoAjudaProvider>
-    <div className="min-h-screen bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="portal-familia min-h-screen bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-4">
