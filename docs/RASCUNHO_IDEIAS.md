@@ -168,3 +168,17 @@ O Rafael achou interessante e pediu pra não esquecer: a página do parceiro (`/
 - **Não decidido:** se é cobrado à parte, quem configura o DNS do parceiro, e se a apresentação guiada também responde nesse domínio.
 - **Hoje:** aparece como "sob consulta" na aba "No seu site" da Minha página do parceiro, e como lembrete na aba Página Pública da ficha do parceiro na Central. Nada construído.
 - **O que já funciona sem isso:** botão/link no site do parceiro. Embutir em moldura (iframe) não funciona por causa dos cabeçalhos de segurança, e não é recomendado.
+
+## Mapa: espaço do parceiro na Central + túmulo informado em texto — a fazer (2026-10-09)
+
+Ditado pelo Rafael, parado porque ele entrou numa entrevista. Retomar daqui.
+
+- **Mapa do parceiro:** só os memoriais dele (no ar), com lista e busca; fechar também o acesso por baixo (policies de `quadras`/`filas`/`lapides` e a RPC `obter_geojson_cemiterio`).
+- **Mapa da Central:** no menu lateral do mapa, um espaço "Parceiros" com um retrátil por parceiro ("Parceiro tal — N memoriais") listando os memoriais dele naquele cemitério; clicar no parceiro destaca os dele no mapa; pino de cor diferente conforme quem cadastrou (verde = Central cadastrou/conferiu; outra cor = cadastrado pelo parceiro), automático.
+- **Como o parceiro indica o túmulo (ideia aprovada, "fantástica", detalhe a ver depois com a funerária):** o parceiro informa o túmulo em **texto livre**, como vem no documento da prefeitura (quadra, sepultura), e a Central confere e marca no mapa. A prefeitura informa quadra e sepultura por telefone. O parceiro deixa de escolher numa lista com o nosso mapeamento.
+
+## Mapa público: explicar o 3D para o visitante (2026-10-26) — PENDENTE, Rafael não está satisfeito
+- Fatos (conferidos no código do MapLibre, não testados em celular): bússola aceita segurar e arrastar (mouse esquerdo ou um dedo) = inclina (vertical) e gira (horizontal); toque rápido reseta. Mouse: botão direito arrastando também inclina. Celular: dois dedos juntos na vertical inclina.
+- Protótipos (nada publicado): opendesign/mockups/bussola-3d/prototipo.html (+ e − pequenos onde estão, bússola 44px no canto inferior direito com rótulo "Segure e arraste: 3D" — Rafael achou a 1ª versão enorme; a 2ª ainda não aprovada) e opendesign/mockups/tutorial-mapa/prototipo.html (botão "Como navegar" fora do mapa, na barra de baixo; janela com animações; Rafael achou que a bússola pode substituir).
+- Código do tutorial do agente NÃO aprovado e NÃO publicado, ainda no working tree sem commit: components/public/TutorialMapa.tsx e alterações em components/public/MapaPublicoCemiterio.tsx (backup .bak-pre-tutorial-mapa-2026-10-26). Não commitar; desfazer só com ordem do Rafael.
+- Rafael quer uma explicação melhor de como usar o 3D; decidir com ele a próxima versão.
