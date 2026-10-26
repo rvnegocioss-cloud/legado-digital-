@@ -10,7 +10,7 @@ import { CORES } from '@/lib/publicTheme'
 import { normalizarOrtomosaico } from '@/lib/ortomosaico'
 import { estiloComOrtomosaico } from '@/lib/estiloSatelite'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
-import CardPino, { type MemorialDoCard } from '@/components/public/CardPino'
+import CardPino,{ type MemorialDoCard } from '@/components/public/CardPino'
 
 registrarProtocoloPmtiles()
 
@@ -89,6 +89,11 @@ export default function MapaPublicoCemiterio({
     timerFechar.current = setTimeout(() => setHover(null), 400)
   }, [cancelarFechar])
   const [busca, setBusca] = useState('')
+  // Aparelho de toque? Só depois de montar no cliente (evita erro de hidratação).
+  const [toque, setToque] = useState(false)
+  useEffect(() => {
+    setToque(window.matchMedia('(pointer: coarse)').matches)
+  }, [])
   const [expandido, setExpandido] = useState(false)
   // A camada de pinos espera a imagem da cruz existir no mapa -- ver
   // aoCarregarMapa. Sem isso, o mapa abria sem nenhuma cruz marcada.
@@ -363,7 +368,7 @@ export default function MapaPublicoCemiterio({
         </div>
       )}
 
-      <div style={{ position: 'relative', flex: expandido ? 1 : undefined, minHeight: 0 }}>
+      <div className="mapa-publico-3d" style={{ position: 'relative', flex: expandido ? 1 : undefined, minHeight: 0 }}>
         <Map
           ref={mapRef}
           onLoad={aoCarregarMapa}
@@ -381,7 +386,8 @@ export default function MapaPublicoCemiterio({
              ao toque; a cor vem do CSS (.maplibregl-ctrl-attrib em globals). */
           attributionControl={{ compact: true }}
         >
-          <NavigationControl visualizePitch showZoom position="top-right" />
+          <NavigationControl showZoom showCompass={false} position="top-right" />
+          <NavigationControl showZoom={false} showCompass visualizePitch position="bottom-right" />
 
         {temMemoriais && iconePronto && (
           <Source id="memoriais" type="geojson" data={memoriais}>
@@ -415,6 +421,10 @@ export default function MapaPublicoCemiterio({
           </Popup>
         )}
         </Map>
+
+        <span className="rotulo-bussola-3d" aria-hidden="true">
+          {toque ? 'Toque aqui: 3D' : 'Clique aqui: 3D'}
+        </span>
 
         {/* Em tela cheia o rodapé do mapa some, então o botão de fechar fica no
             canto de BAIXO. Antes ficava no canto de cima à esquerda e tapava a
@@ -453,6 +463,11 @@ export default function MapaPublicoCemiterio({
               <span>Arraste para andar pelo cemitério</span>
               <span>Use + e − para aproximar</span>
             </div>
+            <p style={{ fontSize: 11.5, color: '#C9A46A', margin: '0 0 6px' }}>
+              {toque
+                ? 'Para ver em 3D: toque na bússola (canto inferior direito) e arraste o dedo'
+                : 'Para ver em 3D: clique na bússola (canto inferior direito), segure o botão e arraste'}
+            </p>
             <button
               type="button"
               onClick={() => setExpandido(true)}
