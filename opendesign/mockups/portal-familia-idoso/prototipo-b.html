@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal da Família simples</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B1D2A;--card:#12293a;--card2:#163247;--line:rgba(201,164,106,.28);--gold:#C9A46A;--gold2:#dfc08a;--fg:#F5F2EB;--mut:#9fb0bd;--ok:#4ade80;--warn:#f59e0b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#050e15;font-family:Inter,system-ui,sans-serif;color:var(--fg);display:flex;justify-content:center;padding:24px 12px}
+.wrap{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.note{max-width:300px;font-size:14px;color:var(--mut);line-height:1.5}
+.note b{color:var(--gold2)}.note li{margin-bottom:6px}
+.phone{width:390px;height:780px;border-radius:34px;border:8px solid #000;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 20px 60px #000a}
+.screen{position:absolute;inset:0;overflow-y:auto;padding:18px 16px 110px;display:none}
+.screen.on{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--mut);min-height:44px}
+.top a,.back{color:var(--gold2);text-decoration:none;font-size:17px;font-weight:600;background:none;border:0;padding:10px 0;font-family:inherit;cursor:pointer}
+.eyebrow{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:6px}
+h1{font-size:27px;line-height:1.2;margin:4px 0 4px;font-weight:700}
+.sub{font-size:18px;color:var(--mut);margin:0 0 14px;line-height:1.4}
+.status{border:2px solid var(--warn);background:rgba(245,158,11,.1);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center;margin:10px 0 16px}
+.status.on{border-color:var(--ok);background:rgba(74,222,128,.08)}
+.status b{font-size:18px;display:block}.status span.s{font-size:15px;color:var(--mut)}
+.sw{width:64px;height:36px;border-radius:18px;background:#555;position:relative;flex:0 0 64px;border:0;cursor:pointer}
+.sw::after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#fff;transition:.2s}
+.status.on .sw{background:var(--ok)}.status.on .sw::after{left:32px}
+.cards{display:grid;gap:12px}
+.card{display:flex;gap:14px;align-items:center;background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:16px;min-height:92px;text-align:left;color:inherit;font-family:inherit;cursor:pointer;width:100%}
+.card:active{background:var(--card2)}
+.ic{flex:0 0 56px;height:56px;border-radius:16px;background:rgba(201,164,106,.14);display:flex;align-items:center;justify-content:center}
+.ic svg{width:30px;height:30px;stroke:var(--gold2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.card b{font-size:20px;display:block;line-height:1.2}
+.card small{font-size:15px;color:var(--mut);display:block;margin-top:3px}
+.tag{font-size:14px;font-weight:600;margin-top:5px;display:inline-block;padding:2px 10px;border-radius:20px}
+.tag.f{background:rgba(245,158,11,.15);color:#fbbf24}.tag.o{background:rgba(74,222,128,.14);color:var(--ok)}
+.more{margin-top:14px;width:100%;min-height:56px;border:1.5px dashed var(--line);border-radius:16px;background:none;color:var(--mut);font-size:17px;font-family:inherit;cursor:pointer}
+label{display:block;font-size:17px;color:var(--mut);margin:16px 0 6px}
+.in{width:100%;min-height:56px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);font-size:19px;padding:12px 14px;font-family:inherit}
+textarea.in{min-height:150px;resize:none}
+.hint{font-size:15px;color:var(--mut);margin-top:6px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:60px;border-radius:16px;font-size:20px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid var(--line);background:var(--card);color:var(--fg);margin-top:12px}
+.btn.gold{background:var(--gold);color:#1a1205;border-color:var(--gold)}
+.btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6}
+.bar{position:absolute;left:0;right:0;bottom:0;padding:10px 16px 16px;background:linear-gradient(transparent,var(--bg) 22%);z-index:3}
+.saved{font-size:14px;color:var(--ok);text-align:center;margin-bottom:6px;min-height:18px}
+.help{position:absolute;right:14px;bottom:92px;z-index:4;background:#25D366;color:#06210f;border:0;border-radius:30px;padding:12px 16px;font-size:16px;font-weight:700;font-family:inherit;box-shadow:0 6px 18px #0008;cursor:pointer}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.th{aspect-ratio:1;border-radius:14px;background:linear-gradient(135deg,#27465c,#1a3446);position:relative;border:1.5px solid var(--line)}
+.th i{position:absolute;top:-8px;right:-8px;width:34px;height:34px;border-radius:50%;background:#000c;color:#fff;font-style:normal;display:flex;align-items:center;justify-content:center;font-size:18px;border:1.5px solid var(--line)}
+.th.up::after{content:"Enviando 45%";position:absolute;inset:auto 6px 6px 6px;font-size:12px;background:#000a;border-radius:6px;text-align:center;padding:2px}
+.prev{border:1.5px solid var(--line);border-radius:18px;background:var(--card);padding:18px;text-align:center;margin-top:10px}
+.ring{width:96px;height:96px;border-radius:50%;margin:0 auto 10px;background:conic-gradient(var(--gold),var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center}
+.ring div{width:86px;height:86px;border-radius:50%;background:#27465c;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700}
+.badge{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#000;color:#fff;font-size:11px;padding:2px 10px;border-radius:0 0 10px 10px;z-index:9}
+</style></head><body>
+<div class="wrap">
+<div class="note"><b>Protótipo clicável (não é o sistema de verdade).</b><ul>
+<li>Toque nos 4 cartões e no interruptor para ver cada tela.</li>
+<li>Este é o jeito proposto de o Portal da Família ficar <b>no celular</b>; no computador continua como hoje.</li>
+<li>Botão verde "Preciso de ajuda" fica sempre visível e abre o WhatsApp.</li>
+<li>Botão "Salvar e voltar" sempre à vista no rodapé de cada tarefa.</li>
+<li>Os dados mostrados são do memorial de exemplo.</li></ul></div>
+
+<div class="phone"><div class="badge">simulação</div>
+
+<!-- INICIO -->
+<div class="screen on" id="home">
+ <div class="top"><span>Portal da Família</span><a href="#">Sair</a></div>
+ <div class="eyebrow">Memorial de</div>
+ <h1>Odelmo Leão Carneiro Sobrinho</h1>
+ <p class="sub">O que você quer fazer hoje?</p>
+ <div class="status" id="st"><div style="flex:1"><b id="stt">Página OFFLINE</b><span class="s" id="sts">Ninguém consegue ver ainda. Ligue quando estiver pronta.</span></div><button class="sw" id="sw" aria-label="Ligar ou desligar a página" onclick="tog()"></button></div>
+ <div class="cards">
+  <button class="card" onclick="go('hist')"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></div><div><b>Contar a história</b><small>Nome, datas e uma lembrança</small><span class="tag f">Falta a lembrança</span></div></button>
+  <button class="card" onclick="go('fotos')"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 16l-5-5-8 8"/></svg></div><div><b>Enviar fotos e vídeos</b><small>Tire agora ou escolha da galeria</small><span class="tag o">2 de 4 fotos</span></div></button>
+  <button class="card" onclick="go('ver')"><div class="ic"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><div><b>Ver como a página está</b><small>Veja do jeito que os outros verão</small></div></button>
+  <button class="card" onclick="go('priv')"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></div><div><b>Quem pode ver a página</b><small>Senha e proteção</small></div></button>
+ </div>
+ <button class="more" onclick="go('mais')">Mais opções (jazigo, árvore, assinaturas)</button>
+ <div class="sub" style="font-size:14px;margin-top:14px;text-align:center">Tudo que você escreve é salvo sozinho.</div>
+</div>
+
+<!-- HISTORIA -->
+<div class="screen" id="hist">
+ <div class="top"><button class="back" onclick="go('home')">← Voltar</button></div>
+ <h1>Contar a história</h1>
+ <label>Nome completo</label><input class="in" value="Odelmo Leão Carneiro Sobrinho">
+ <label>Nasceu em</label><input class="in" inputmode="numeric" value="26/05/1946">
+ <label>Faleceu em</label><input class="in" inputmode="numeric" value="27/07/2026">
+ <label>Uma lembrança dele</label><textarea class="in" placeholder="Escreva ou toque no microfone do teclado e fale"></textarea>
+ <div class="hint">Dica: no teclado do celular há um microfone. Toque nele e conte; o celular escreve para você.</div>
+ <div class="bar"><div class="saved">Salvo ✓</div><button class="btn gold" onclick="go('home')">Salvar e voltar</button></div>
+</div>
+
+<!-- FOTOS -->
+<div class="screen" id="fotos">
+ <div class="top"><button class="back" onclick="go('home')">← Voltar</button></div>
+ <h1>Fotos e vídeos</h1>
+ <p class="sub">Você pode enviar até 4 fotos.</p>
+ <button class="btn gold"><svg viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg>Tirar uma foto agora</button>
+ <button class="btn"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Escolher da galeria</button>
+ <div class="thumbs"><div class="th"><i>×</i></div><div class="th"><i>×</i></div><div class="th up"></div></div>
+ <div class="hint">Toque no × para tirar uma foto. A foto só vai para a página depois de enviada.</div>
+ <button class="btn" style="margin-top:20px">Enviar um vídeo</button>
+ <div class="bar"><div class="saved">Salvo ✓</div><button class="btn gold" onclick="go('home')">Salvar e voltar</button></div>
+</div>
+
+<!-- VER -->
+<div class="screen" id="ver">
+ <div class="top"><button class="back" onclick="go('home')">← Voltar</button></div>
+ <h1>Como a página está</h1>
+ <div class="prev"><div class="ring"><div>OL</div></div><b style="font-size:22px">Odelmo Leão Carneiro Sobrinho</b><div class="sub" style="margin:4px 0 0">26/05/1946 — 27/07/2026</div><div class="sub" style="margin:2px 0 0;font-size:16px">"Quatro vezes prefeito de Uberlândia"</div></div>
+ <p class="sub" style="margin-top:14px">Hoje a página está <b style="color:#fbbf24">offline</b>: só você vê esta prévia.</p>
+ <div class="bar"><button class="btn gold" onclick="go('home')">Voltar ao início</button></div>
+</div>
+
+<!-- PRIVACIDADE -->
+<div class="screen" id="priv">
+ <div class="top"><button class="back" onclick="go('home')">← Voltar</button></div>
+ <h1>Quem pode ver a página</h1>
+ <p class="sub">Escolha como a página fica para as outras pessoas.</p>
+ <div class="status" id="st2"><div style="flex:1"><b>Página OFFLINE</b><span class="s">Ninguém vê.</span></div><button class="sw" onclick="tog()" aria-label="Ligar ou desligar"></button></div>
+ <label>Senha para entrar (opcional)</label><input class="in" placeholder="Deixe em branco para todos verem">
+ <button class="btn">Gerar uma senha fácil</button>
+ <div class="bar"><div class="saved">Salvo ✓</div><button class="btn gold" onclick="go('home')">Salvar e voltar</button></div>
+</div>
+
+<!-- MAIS -->
+<div class="screen" id="mais">
+ <div class="top"><button class="back" onclick="go('home')">← Voltar</button></div>
+ <h1>Mais opções</h1>
+ <div class="cards"><button class="card"><div><b>Jazigo</b><small>Nome do jazigo e quem está nele</small></div></button><button class="card"><div><b>Árvore da família</b></div></button><button class="card"><div><b>Assinaturas do livro de visitas</b></div></button></div>
+</div>
+
+<button class="help" onclick="alert('Abriria o WhatsApp do atendente, já com o nome do memorial.')">Preciso de ajuda</button>
+</div>
+</div>
+<script>
+function go(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on')});document.getElementById(id).classList.add('on')}
+var on=false;
+function tog(){on=!on;[['st','stt','sts'],['st2']].forEach(function(a){var e=document.getElementById(a[0]);e.classList.toggle('on',on);var b=e.querySelector('b'),s=e.querySelector('.s');b.textContent=on?'Página ONLINE':'Página OFFLINE';s.textContent=on?'Todos que tiverem o link ou o QR podem ver.':'Ninguém consegue ver ainda. Ligue quando estiver pronta.'})}
+</script>
+</body></html>

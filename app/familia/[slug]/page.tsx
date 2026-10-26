@@ -20,6 +20,8 @@ import { useTravaEdicao, rotuloPapel } from '@/lib/useTravaEdicao'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
 import { ModoAjudaProvider, BotaoModoAjuda, Dica } from '@/components/familia/ModoAjuda'
 import type { ModoGate } from '@/lib/modosPrivacidade'
+import { WHATSAPP_AJUDA } from '@/lib/ajudaWhatsApp'
+import { PenLine, ImageIcon, Eye, Lock, ChevronRight } from 'lucide-react'
 
 interface Memorial {
   id: string
@@ -210,6 +212,20 @@ export default function FamiliaEdicaoPage() {
   // Abas no topo: cada tema abre sozinho na tela inteira, em vez de tudo
   // empilhado numa página sem fim (decisão do Rafael, 2026-09-16).
   const [aba, setAba] = useState<'memoriais' | 'fotos' | 'jazigo' | 'arvore' | 'privacidade' | 'assinaturas'>('memoriais')
+  // Modo simples (so celular, <768px): tela inicial com cartoes no lugar das abas.
+  const [inicio, setInicio] = useState(true)
+  const [subtela, setSubtela] = useState<null | 'ver' | 'mais'>(null)
+  const [onlineSel, setOnlineSel] = useState<boolean | null>(null)
+
+  function abrirAba(id: typeof aba) {
+    setAba(id)
+    setSubtela(null)
+    setInicio(false)
+  }
+  async function salvarEVoltar() {
+    const ok = await salvar(undefined, false)
+    if (ok) setInicio(true)
+  }
 
   useEffect(() => {
     if (params.slug) carregar(params.slug)
@@ -465,13 +481,13 @@ export default function FamiliaEdicaoPage() {
 
   async function salvar(e?: React.FormEvent, silencioso = false, baseOverride?: Record<string, unknown>) {
     e?.preventDefault()
-    if (salvandoRef.current) return
+    if (salvandoRef.current) return false
     const nascIso = brParaIso(form.data_nascimento)
     const falecIso = brParaIso(form.data_falecimento)
     if (nascIso === null || falecIso === null) {
       // data incompleta nao grava (nem no auto-save)
       if (!silencioso) setErro('Data incompleta')
-      return
+      return false
     }
     salvandoRef.current = true
     if (!silencioso) setSalvando(true)
@@ -527,7 +543,7 @@ export default function FamiliaEdicaoPage() {
 
       setSalvando(false)
       salvandoRef.current = false
-      return
+      return false
     }
 
     if (json.updatedAt) setUpdatedAtCarregado(json.updatedAt)
@@ -558,6 +574,7 @@ export default function FamiliaEdicaoPage() {
     setSalvo(true)
     setErro('')
     setConflito(null)
+    return true
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -719,6 +736,193 @@ export default function FamiliaEdicaoPage() {
     <ModoAjudaProvider>
     <div className="portal-familia min-h-screen bg-zinc-950 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
+        {/* ---------- Modo simples (so celular): tela inicial com cartoes ---------- */}
+        {inicio && (
+          <div className="md:hidden pf-simples">
+            <div className="flex items-center justify-between min-h-[44px] text-[15px] text-zinc-400">
+              <span>Portal da Família</span>
+              <Link href="/familia/login" aria-label="Sair do Portal da Família" className="text-[17px] font-semibold" style={{ color: '#dfc08a' }}>
+                Sair
+              </Link>
+            </div>
+
+            {subtela === null && (
+              <>
+                <p className="text-[13px] uppercase tracking-widest mt-1.5" style={{ color: '#C9A46A' }}>Memorial de</p>
+                <h1 className="text-[27px] leading-tight font-bold text-white mt-1">
+                  {form.nome_completo || 'memorial'}
+                </h1>
+                <p className="text-[18px] text-zinc-400 mt-1 mb-2">O que você quer fazer hoje?</p>
+
+                {memorialId && (
+                  <ChaveMemorialOnline
+                    key={`simples-${memorialId}-${modoGate}`}
+                    memorialId={memorialId}
+                    estadoInicialOnline={modoGate !== 'oculto'}
+                    destaque
+                    onMudar={setOnlineSel}
+                  />
+                )}
+
+                <div className="grid gap-3 mt-3">
+                  {([
+                    {
+                      id: 'hist',
+                      titulo: 'Contar a história',
+                      apoio: 'Nome, datas e uma lembrança',
+                      icone: <PenLine size={30} strokeWidth={1.5} aria-hidden="true" />,
+                      tag: !(form.biografia || '').trim() ? { t: 'Falta a lembrança', ok: false } : null,
+                      acao: () => abrirAba('memoriais'),
+                    },
+                    {
+                      id: 'fotos',
+                      titulo: 'Enviar fotos e vídeos',
+                      apoio: 'Tire agora ou escolha da galeria',
+                      icone: <ImageIcon size={30} strokeWidth={1.5} aria-hidden="true" />,
+                      tag: { t: `${galeria.length} de ${LIMITE_FOTOS} fotos`, ok: galeria.length > 0 },
+                      acao: () => abrirAba('fotos'),
+                    },
+                    {
+                      id: 'ver',
+                      titulo: 'Ver como a página está',
+                      apoio: 'Veja do jeito que os outros verão',
+                      icone: <Eye size={30} strokeWidth={1.5} aria-hidden="true" />,
+                      tag: null,
+                      acao: () => setSubtela('ver'),
+                    },
+                    {
+                      id: 'priv',
+                      titulo: 'Quem pode ver a página',
+                      apoio: 'Senha e proteção',
+                      icone: <Lock size={30} strokeWidth={1.5} aria-hidden="true" />,
+                      tag: null,
+                      acao: () => abrirAba('privacidade'),
+                    },
+                  ]).map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={c.acao}
+                      aria-label={`${c.titulo}. ${c.apoio}`}
+                      className="pf-cartao"
+                    >
+                      <span className="pf-cartao-ic">{c.icone}</span>
+                      <span className="text-left">
+                        <b className="block text-[20px] leading-tight text-white">{c.titulo}</b>
+                        <small className="block text-[15px] text-zinc-400 mt-0.5">{c.apoio}</small>
+                        {c.tag && (
+                          <span
+                            className={`inline-block mt-1 text-[14px] font-semibold px-2.5 py-0.5 rounded-full ${
+                              c.tag.ok ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
+                            }`}
+                          >
+                            {c.tag.t}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSubtela('mais')}
+                  aria-label="Mais opções: jazigo, árvore, assinaturas"
+                  className="pf-mais"
+                >
+                  Mais opções (jazigo, árvore, assinaturas)
+                </button>
+                <p className="text-[14px] text-zinc-400 text-center mt-4">Tudo que você escreve é salvo sozinho.</p>
+              </>
+            )}
+
+            {subtela === 'ver' && (
+              <>
+                <button type="button" onClick={() => setSubtela(null)} aria-label="Voltar para o início" className="pf-voltar">
+                  ← Voltar
+                </button>
+                <h1 className="text-[27px] font-bold text-white mt-1">Como a página está</h1>
+                <div className="mt-3 rounded-2xl border bg-zinc-900 p-5 text-center" style={{ borderColor: 'rgba(201,164,106,.28)' }}>
+                  <div
+                    className="mx-auto mb-2.5 w-24 h-24 rounded-full flex items-center justify-center"
+                    style={{ background: 'conic-gradient(#C9A46A,#dfc08a,#C9A46A)' }}
+                  >
+                    <div className="w-[86px] h-[86px] rounded-full bg-zinc-800 flex items-center justify-center text-[30px] font-bold text-white">
+                      {(form.nome_completo || '?')
+                        .split(/\s+/)
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((p) => p.charAt(0).toUpperCase())
+                        .join('')}
+                    </div>
+                  </div>
+                  <b className="block text-[22px] text-white">{form.nome_completo || 'Sem nome ainda'}</b>
+                  {(form.data_nascimento || form.data_falecimento) && (
+                    <p className="text-[18px] text-zinc-400 mt-1">
+                      {form.data_nascimento || '--'} — {form.data_falecimento || '--'}
+                    </p>
+                  )}
+                  {form.frase_preferida && (
+                    <p className="text-[16px] text-zinc-400 mt-1">&quot;{form.frase_preferida}&quot;</p>
+                  )}
+                </div>
+                <p className="text-[18px] text-zinc-400 mt-4">
+                  {(onlineSel ?? modoGate !== 'oculto') ? (
+                    <>Hoje a página está <b className="text-emerald-400">online</b>: quem tiver o link ou o QR pode ver.</>
+                  ) : (
+                    <>Hoje a página está <b className="text-amber-400">offline</b>: só você vê esta prévia.</>
+                  )}
+                </p>
+                {(onlineSel ?? modoGate !== 'oculto') && (
+                  <a
+                    href={`/homenagem/${params.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Abrir a página pública em uma nova aba"
+                    className="pf-botao pf-botao-ouro mt-3"
+                  >
+                    Abrir a página
+                  </a>
+                )}
+                <button type="button" onClick={() => setSubtela(null)} aria-label="Voltar ao início" className="pf-botao mt-3">
+                  Voltar ao início
+                </button>
+              </>
+            )}
+
+            {subtela === 'mais' && (
+              <>
+                <button type="button" onClick={() => setSubtela(null)} aria-label="Voltar para o início" className="pf-voltar">
+                  ← Voltar
+                </button>
+                <h1 className="text-[27px] font-bold text-white mt-1 mb-3">Mais opções</h1>
+                <div className="grid gap-3">
+                  {([
+                    ['jazigo', 'Jazigo', 'Nome do jazigo e quem está nele'],
+                    ['arvore', 'Árvore da família', ''],
+                    ['assinaturas', 'Assinaturas do livro de visitas', ''],
+                  ] as const).map(([id, titulo, apoio]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => abrirAba(id)}
+                      aria-label={titulo}
+                      className="pf-cartao"
+                    >
+                      <span className="text-left flex-1">
+                        <b className="block text-[20px] leading-tight text-white">{titulo}</b>
+                        {apoio && <small className="block text-[15px] text-zinc-400 mt-0.5">{apoio}</small>}
+                      </span>
+                      <ChevronRight size={30} strokeWidth={1.5} aria-hidden="true" className="text-zinc-400 shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="max-md:hidden">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-4">
             <Link href="/" aria-label="Ir para a página inicial">
@@ -780,10 +984,22 @@ export default function FamiliaEdicaoPage() {
             />
           </div>
         )}
+        </div>
+
+        {/* Conteudo das abas. No celular so aparece fora da tela inicial (modo simples). */}
+        <div className={`pf-abas${inicio ? ' max-md:hidden' : ''}`}>
+        <button
+          type="button"
+          onClick={() => setInicio(true)}
+          aria-label="Voltar para o início"
+          className="pf-voltar md:hidden"
+        >
+          ← Voltar
+        </button>
 
         {/* Abas: um tema por vez, ocupando a tela inteira. Resolve a página
             sem fim -- nada mais fica empilhado embaixo (2026-09-16). */}
-        <nav className="flex items-center gap-1 flex-wrap border-b border-zinc-800 mb-6 -mx-1">
+        <nav className="max-md:hidden flex items-center gap-1 flex-wrap border-b border-zinc-800 mb-6 -mx-1">
           {([
             ['memoriais', 'Memoriais'],
             ['fotos', 'Fotos e vídeos'],
@@ -1369,6 +1585,44 @@ export default function FamiliaEdicaoPage() {
                 )}
             </div>
         </div>
+
+        {/* Rodape fixo do modo simples (so celular, so dentro de uma tarefa) */}
+        {!inicio && (
+          <div className="pf-barra md:hidden">
+            <p className="text-center text-[15px] mb-1.5" role="status" aria-live="polite" style={{ color: erro ? '#f87171' : '#4ade80' }}>
+              {salvando
+                ? 'Salvando...'
+                : erro
+                  ? 'Não foi possível salvar'
+                  : salvoEm
+                    ? 'Salvo ✓'
+                    : 'Salvo sozinho enquanto você escreve'}
+            </p>
+            <button
+              type="button"
+              onClick={salvarEVoltar}
+              disabled={salvando}
+              aria-label="Salvar e voltar ao início"
+              className="pf-botao pf-botao-ouro"
+            >
+              Salvar e voltar
+            </button>
+          </div>
+        )}
+        </div>
+
+        {WHATSAPP_AJUDA && (
+          <a
+            href={`https://wa.me/${WHATSAPP_AJUDA}?text=${encodeURIComponent(`Preciso de ajuda com o memorial de ${form.nome_completo || ''}`.trim())}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Preciso de ajuda: falar pelo WhatsApp"
+            className="pf-ajuda md:hidden"
+            style={{ bottom: inicio ? 'calc(16px + env(safe-area-inset-bottom))' : 'calc(110px + env(safe-area-inset-bottom))' }}
+          >
+            Preciso de ajuda
+          </a>
+        )}
 
         <footer className="mt-10 pt-6 border-t border-zinc-800 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-zinc-500">
           <span>© {new Date().getFullYear()} Legado Digital</span>

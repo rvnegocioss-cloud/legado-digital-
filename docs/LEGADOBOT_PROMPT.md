@@ -179,3 +179,7 @@ Isso é separado do **tema** (navy/verde/grafite), que continua controlando o ce
 ## Chave Memorial online / offline (desde 2026-10-23)
 
 Existe uma chave "Memorial online / offline" na ficha de cadastro da família (Central e Portal do Parceiro, aba Cadastro Família) e no cabeçalho do Portal da Família. Offline = modo oculto: a página pública, a busca, o link e o QR Code mostram "não encontrado". Online = aberto, aparece normalmente nos 3 canais.
+
+
+## Portal da Família no celular (2026-10-26)
+No celular o Portal da Família abre numa tela simples com 4 cartões grandes: Contar a história, Enviar fotos e vídeos, Ver como a página está e Quem pode ver a página; jazigo, árvore e assinaturas ficam em "Mais opções". Cada tela tem o botão "Salvar e voltar" fixo no rodapé. No computador continua como antes.

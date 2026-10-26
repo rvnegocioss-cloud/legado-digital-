@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal da Família simples</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f1ea;color:#111;font-family:'Patrick Hand',cursive;font-size:17px}
+header{padding:18px 20px;border-bottom:2px solid #111}
+h1{font-family:Caveat,cursive;font-size:34px;margin:0}
+header p{margin:4px 0 0;max-width:900px}
+.bar{padding:10px 20px;border-bottom:1px dashed #111;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.bar label{cursor:pointer}
+.canvas{display:flex;gap:34px;overflow-x:auto;padding:22px 20px 40px;align-items:flex-start}
+.opt{flex:0 0 auto}
+.opt h2{font-family:Caveat,cursive;font-size:28px;margin:0 0 2px}
+.opt .why{width:760px;max-width:80vw;margin:0 0 10px;font-size:16px}
+.row{display:flex;gap:14px}
+.phone{width:240px;min-height:440px;border:3px solid #111;border-radius:22px;background:#fff;padding:12px 12px 14px;position:relative;display:flex;flex-direction:column;gap:8px}
+.phone .t{font-size:13px;text-align:center;border-bottom:1px dashed #999;padding-bottom:4px;color:#555}
+.box{border:2px solid #111;border-radius:8px;padding:8px 10px}
+.big{border:3px solid #111;border-radius:12px;padding:14px 10px;text-align:center;font-size:20px}
+.fill{background:#111;color:#fff}
+.hl{background:#ffe48a}
+.mut{border-style:dashed;color:#666}
+.note{color:#a00;font-family:Caveat,cursive;font-size:17px;line-height:1.1}
+.lbl{font-size:14px;color:#444;margin-bottom:2px}
+.ph{height:60px;background:repeating-linear-gradient(45deg,#eee,#eee 6px,#ddd 6px,#ddd 12px);border:2px solid #111;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.prog{display:flex;gap:4px}.prog i{flex:1;height:8px;border:2px solid #111;border-radius:4px}.prog i.on{background:#111}
+.chk{display:flex;gap:8px;align-items:center;border:2px solid #111;border-radius:10px;padding:10px}
+.dot{width:22px;height:22px;border:2px solid #111;border-radius:50%;flex:0 0 22px;text-align:center;line-height:18px;font-size:15px}
+.dot.ok{background:#111;color:#fff}
+.common{margin:0 20px 40px;border:2px solid #111;padding:12px 16px;max-width:900px;background:#fff}
+body.xl{font-size:21px}body.xl .big{font-size:25px}
+</style></head><body>
+<header><h1>Portal da Família — versão simples para quem tem pouca prática</h1>
+<p>Rascunho de ideias (não é o design final). 4 jeitos diferentes de pensar o mesmo problema: <b>família idosa, no celular, preenchendo dados e enviando fotos</b>. Todas usam os mesmos dados de hoje, só mudam o caminho.</p></header>
+<div class="bar"><label><input type="checkbox" id="xl"> letra extra grande (teste)</label><span>Deslize para o lado para ver as 4 opções →</span></div>
+<div class="canvas">
+
+<div class="opt"><h2>A · Passo a passo (uma pergunta por tela)</h2>
+<p class="why">Como um formulário de banco no celular: só UMA coisa por tela, botão grande "Continuar". Ninguém precisa escolher aba nem decidir o que fazer primeiro. Salva sozinho a cada passo; dá para parar e voltar depois.</p>
+<div class="row">
+<div class="phone"><div class="t">Passo 1 de 6</div><div class="prog"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="lbl">Qual o nome completo de quem está sendo homenageado?</div><div class="box">Odelmo Leão...</div>
+<div class="note">↑ campo único, letra grande, teclado abre sozinho</div><div style="flex:1"></div><div class="big fill">Continuar</div><div class="box mut" style="text-align:center">Voltar</div></div>
+<div class="phone"><div class="t">Passo 2 de 6</div><div class="prog"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+<div class="lbl">Quando nasceu?</div><div class="box">__ / __ / ____</div><div class="note">teclado só de números, barras automáticas</div><div class="lbl">Quando faleceu?</div><div class="box">__ / __ / ____</div><div style="flex:1"></div><div class="big fill">Continuar</div></div>
+<div class="phone"><div class="t">Passo 4 de 6 · Fotos</div><div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+<div class="lbl">Vamos escolher a foto principal</div><div class="big hl">Tirar uma foto agora</div><div class="big">Escolher da galeria</div><div class="ph">foto escolhida aparece aqui antes de enviar</div><div class="note">pode pular: "Fazer depois"</div></div>
+</div></div>
+
+<div class="opt"><h2>B · Cartões grandes com 4 tarefas</h2>
+<p class="why">Tela inicial com poucos cartões, cada um é uma tarefa em linguagem do dia a dia. As abas de hoje (Árvore, Assinaturas, Jazigo) saem da frente e ficam em "Mais opções". Quem sabe o que quer vai direto; quem não sabe lê os 4 cartões.</p>
+<div class="row">
+<div class="phone"><div class="t">Início</div><div class="lbl">Olá! O que você quer fazer?</div>
+<div class="big">Contar a história dele(a)</div><div class="big">Enviar fotos e vídeos</div><div class="big">Ver como a página está</div><div class="big">Quem pode ver a página</div>
+<div class="box mut" style="text-align:center">Mais opções (jazigo, árvore, assinaturas)</div></div>
+<div class="phone"><div class="t">Contar a história</div><div class="lbl">Nome</div><div class="box">Odelmo Leão Carneiro Sobrinho</div><div class="lbl">Nasceu em</div><div class="box">26/05/1946</div><div class="lbl">Faleceu em</div><div class="box">27/07/2026</div><div class="lbl">Escreva uma lembrança</div><div class="box" style="height:70px">(microfone: falar em vez de digitar)</div><div class="note">o microfone do teclado já ajuda; o botão só lembra disso</div><div class="big fill">Salvar</div></div>
+</div></div>
+
+<div class="opt"><h2>C · Lista "o que falta" com visto</h2>
+<p class="why">Parece uma lista de tarefas: cada item tem bolinha (feito / falta). Toca no item, faz só aquilo, volta para a lista. Dá sensação de progresso e mostra exatamente o que falta — bom para quando o parceiro ou a Central deixou o cadastro pela metade.</p>
+<div class="row">
+<div class="phone"><div class="t">Sua página: 3 de 6 prontos</div><div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+<div class="chk"><div class="dot ok">v</div>Nome e datas</div><div class="chk"><div class="dot ok">v</div>Foto principal</div><div class="chk"><div class="dot ok">v</div>Frase</div>
+<div class="chk hl"><div class="dot"></div>Contar a história →</div><div class="chk"><div class="dot"></div>Mais fotos</div><div class="chk"><div class="dot"></div>Linha do tempo</div>
+<div class="note">o primeiro que falta fica destacado</div></div>
+<div class="phone"><div class="t">Mais fotos</div><div class="lbl">Até 4 fotos (2 enviadas)</div><div class="row" style="gap:6px"><div class="ph" style="flex:1;height:70px">foto</div><div class="ph" style="flex:1;height:70px">foto</div></div><div class="big hl">+ Adicionar foto</div><div class="note">cada foto com X grande para remover</div><div style="flex:1"></div><div class="big fill">Pronto, voltar à lista</div></div>
+</div></div>
+
+<div class="opt"><h2>D · Fotos e voz primeiro, texto depois</h2>
+<p class="why">Idoso costuma ter foto na galeria e dificuldade de digitar. Aqui o primeiro gesto é enviar foto (botão enorme) e <b>contar a história falando</b> (o celular transcreve e a pessoa só confere). O formulário de campos fica por último e já vem preenchido com o que a Central cadastrou.</p>
+<div class="row">
+<div class="phone"><div class="t">Comece pelas fotos</div><div class="big hl">Enviar fotos</div><div class="note">abre a galeria; várias de uma vez; miniatura e barra de envio ("2 de 4")</div><div class="big">Contar a história falando</div><div class="note">grava, escreve na tela, a pessoa corrige com o dedo</div><div class="box mut" style="text-align:center">Preencher os dados escritos</div></div>
+<div class="phone"><div class="t">Contando a história</div><div class="big fill">Gravando... toque para parar</div><div class="box" style="height:120px">"Meu pai nasceu em Uberaba e veio para Uberlândia..." (texto vai aparecendo)</div><div class="big hl">Está certo, salvar</div><div class="box mut" style="text-align:center">Corrigir o texto</div></div>
+</div></div>
+
+</div>
+<div class="common"><b>O que vale para QUALQUER uma das 4 opções (sugestão):</b>
+<ul><li>Botão fixo "Precisa de ajuda?" no rodapé: abre o WhatsApp do atendente (funerária ou Legado) já com o nome do memorial.</li>
+<li>Letra a partir de 18px, botões de 56px, uma ação principal por tela, textos curtos.</li>
+<li>Salvar automático (já existe); mostrar "Salvo" bem visível.</li>
+<li>Abas de hoje (Jazigo, Árvore, Assinaturas, Privacidade) saem do caminho principal — continuam existindo em "Mais opções".</li>
+<li>Foto: sempre mostrar a miniatura antes de enviar e a porcentagem do envio; botões em português ("Tirar foto" / "Escolher da galeria").</li></ul>
+<div class="note" style="font-size:20px">Dica minha: A + D juntos (passo a passo, com fotos e voz) é o que mais ajuda idoso; C ajuda mais quando o cadastro já veio pela metade.</div></div>
+<script>document.getElementById('xl').onchange=function(e){document.body.classList.toggle('xl',e.target.checked)}</script>
+</body></html>

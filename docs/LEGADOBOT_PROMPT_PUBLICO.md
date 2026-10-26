@@ -59,3 +59,7 @@ Cada funerária ou cemitério parceiro pode ter uma página própria dentro do s
 ## Memorial online ou offline
 
 A família (ou a funerária parceira) pode tirar o memorial do ar a qualquer momento com a chave "Memorial online / offline": offline, ninguém vê a página — busca, link e QR Code dizem que não foi encontrado — e ao ligar de novo ele volta a aparecer normalmente.
+
+
+## Portal da Família no celular (2026-10-26)
+No celular o Portal da Família abre numa tela simples com 4 cartões grandes: Contar a história, Enviar fotos e vídeos, Ver como a página está e Quem pode ver a página; jazigo, árvore e assinaturas ficam em "Mais opções". Cada tela tem o botão "Salvar e voltar" fixo no rodapé. No computador continua como antes.
