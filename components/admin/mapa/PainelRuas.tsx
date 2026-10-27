@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Flag, Plus } from 'lucide-react'
 import { BarraDesenho } from './BarraDesenho'
 import { comprimentoPolilinha } from '@/lib/geo'
 import type { DiagnosticoRede, ResultadoRota } from '@/lib/rotaCemiterio'
@@ -13,6 +13,7 @@ interface Rua {
   eixo: { type: 'LineString'; coordinates: [number, number][] } | null
   geometria_revisada: boolean
   comprimento_m: number | null
+  tipo: 'principal' | 'secundaria'
 }
 
 interface DesenhoApi {
@@ -37,6 +38,7 @@ export default function PainelRuas({
   rotaTeste,
   onNovaRua,
   onRenomear,
+  onAlternarTipo,
   onTravar,
   onDestravar,
   onEditar,
@@ -56,6 +58,7 @@ export default function PainelRuas({
   rotaTeste: ResultadoRota | null
   onNovaRua: () => void
   onRenomear: (ruaId: string, nome: string) => void
+  onAlternarTipo: (rua: Rua) => void
   onTravar: (rua: Rua) => void
   onDestravar: (rua: Rua) => void
   onEditar: (rua: Rua) => void
@@ -69,6 +72,13 @@ export default function PainelRuas({
   // menu pra fora da tela. Diagnostico e "Testar rota" ficam SEMPRE visiveis
   // (sao o que se olha o tempo todo); so a lista item-a-item recolhe.
   const [listaAberta, setListaAberta] = useState(false)
+  const ordenadas = ruas.slice().sort((a, b) => a.numero - b.numero)
+  const principais = ordenadas.filter((r) => r.tipo !== 'secundaria')
+  const secundarias = ordenadas.filter((r) => r.tipo === 'secundaria')
+  const grupos = [
+    { chave: 'principal', titulo: `${principais.length} ${principais.length === 1 ? 'rua principal' : 'ruas principais'}`, cor: '#8a1c1c', itens: principais },
+    { chave: 'secundaria', titulo: `${secundarias.length} ${secundarias.length === 1 ? 'rua dos túmulos' : 'ruas dos túmulos'}`, cor: '#2b7a3d', itens: secundarias },
+  ]
 
   return (
     <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-4">
@@ -159,11 +169,15 @@ export default function PainelRuas({
         {/* Rua em edicao abre a lista sozinha -- senao o botao "Sair da
             edicao" ficaria escondido e o modo travaria sem saida visivel. */}
         {(listaAberta || ruaEmEdicao) && (
+        <div className="space-y-3">
+        {grupos.map((g) => (
+        <div key={g.chave}>
+        <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: g.cor }}>
+          <Flag size={12} strokeWidth={1.5} style={{ color: g.cor }} fill={g.cor} />
+          {g.titulo}
+        </p>
         <ul className="space-y-1">
-          {ruas
-            .slice()
-            .sort((a, b) => a.numero - b.numero)
-            .map((r) => (
+          {g.itens.map((r) => (
               <li key={r.id} className="rounded border border-[var(--tema-zinc-800)] px-2 py-1.5">
                 {renomeandoId === r.id ? (
                   <div className="flex items-center gap-1.5">
@@ -192,7 +206,7 @@ export default function PainelRuas({
                 ) : (
                   <div className="flex items-center justify-between gap-2 flex-wrap text-xs text-[var(--tema-zinc-300)]">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-[2px] inline-block shrink-0" style={{ background: '#a855f7' }} />
+                      <span className="w-2.5 h-2.5 rounded-[2px] inline-block shrink-0" style={{ background: g.cor }} />
                       Rua {r.numero} {r.nome && `— ${r.nome}`} {r.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
                       {r.comprimento_m != null && <span className="text-[var(--tema-zinc-500)]">({r.comprimento_m.toFixed(0)} m)</span>}
                       {diagnostico?.idsDesconectadas.includes(r.id) && <span style={{ color: '#f59e0b' }}>⚠ desconectada</span>}
@@ -208,6 +222,15 @@ export default function PainelRuas({
                           className="text-[var(--tema-zinc-400)] hover:text-white"
                         >
                           ✎ Renomear
+                        </button>
+                        <button
+                          type="button"
+                          disabled={salvando || r.geometria_revisada}
+                          onClick={() => onAlternarTipo(r)}
+                          title={r.geometria_revisada ? 'Rua travada: destrave pra mudar o tipo' : undefined}
+                          className="text-[var(--tema-zinc-400)] hover:text-white disabled:opacity-40"
+                        >
+                          {r.tipo === 'secundaria' ? 'Tornar principal' : 'Tornar rua dos túmulos'}
                         </button>
                         {ruaEmEdicao?.id === r.id ? (
                           <button type="button" onClick={onSairEdicao} className="text-blue-400 hover:text-blue-200">
@@ -237,6 +260,9 @@ export default function PainelRuas({
               </li>
             ))}
         </ul>
+        </div>
+        ))}
+        </div>
         )}
         </>
       )}

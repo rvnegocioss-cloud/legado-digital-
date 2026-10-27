@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ruas: curva e tipo</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#222;--bg:#fafaf7;--acc:#d9480f}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--bg);color:var(--ink);font-family:'Patrick Hand',cursive;font-size:17px}
+h1{font-family:Caveat;font-size:34px;margin:0 0 4px}
+.sub{margin:0 0 14px;color:#555}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{font:inherit;border:2px solid var(--ink);background:#fff;padding:6px 12px;border-radius:10px;cursor:pointer}
+.tabs button.on{background:var(--ink);color:#fff}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.opt{border:2px solid var(--ink);border-radius:12px;background:#fff;padding:10px}
+.opt h2{font-family:Caveat;font-size:26px;margin:0 0 6px}
+.note{font-size:15px;color:#444;margin:6px 0 0}
+.leg{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0;font-size:16px}
+.leg i{display:inline-block;vertical-align:middle;margin-right:6px}
+.princ{width:34px;height:7px;background:#8a1c1c;border-radius:4px}
+.sec{width:34px;height:0;border-top:3px dashed #2b7a3d}
+svg{width:100%;height:auto;display:block}
+.hide{display:none}
+.tweak{margin:8px 0 14px}
+label{margin-right:14px}
+</style></head><body>
+<h1>Ruas: curvar + tipo (principal / secundária)</h1>
+<p class="sub">Esboços de ideia, não é o desenho final. Cores sugeridas: <b>principal</b> = linha grossa vinho (asfalto, passa carro) · <b>secundária</b> = linha fina verde pontilhada (entre túmulos, a pé). Vértice continua quadrado roxo; a <b>alça de curva</b> é losango branco com borda preta (nada de laranja/ciano).</p>
+<div class="leg"><span><i class="princ"></i>Principal (carro)</span><span><i class="sec"></i>Secundária (a pé)</span><span>■ roxo = ponto da rua</span><span>◇ branco = alça da curva</span></div>
+<div class="tweak"><label><input type="checkbox" id="tLeg" checked> mostrar legenda no mapa</label><label><input type="checkbox" id="tCurva" checked> mostrar a curva de exemplo</label></div>
+<div class="tabs" id="tabs"></div>
+<div class="grid" id="grid">
+
+<!-- A -->
+<div class="opt" data-k="A"><h2>A · Painel lateral "Ruas"</h2>
+<svg viewBox="0 0 360 220" fill="none" stroke="#222" stroke-width="2">
+<rect x="2" y="2" width="356" height="216" rx="8"/>
+<rect x="8" y="8" width="108" height="204" rx="6"/>
+<text x="16" y="28" font-family="Caveat" font-size="18" fill="#222" stroke="none">Ruas (painel à esquerda)</text>
+<text x="16" y="52" font-size="13" fill="#222" stroke="none">Tipo ao desenhar:</text>
+<rect x="16" y="58" width="92" height="22" rx="5"/><text x="22" y="74" font-size="13" fill="#8a1c1c" stroke="none">● Principal</text>
+<rect x="16" y="84" width="92" height="22" rx="5" stroke-dasharray="4"/><text x="22" y="100" font-size="13" fill="#2b7a3d" stroke="none">○ Secundária</text>
+<text x="16" y="128" font-size="13" fill="#222" stroke="none">Trecho:</text>
+<rect x="16" y="134" width="44" height="22" rx="5"/><text x="22" y="150" font-size="13" fill="#222" stroke="none">Reta</text>
+<rect x="64" y="134" width="44" height="22" rx="5" fill="#eee"/><text x="68" y="150" font-size="13" fill="#222" stroke="none">Curva</text>
+<rect x="16" y="168" width="92" height="22" rx="5"/><text x="22" y="184" font-size="13" fill="#222" stroke="none">Concluir rua</text>
+<path d="M130 190 L180 150 L240 150" stroke="#2b7a3d" stroke-dasharray="6 5" stroke-width="3"/>
+<path d="M180 150 Q 230 70 300 60" stroke="#8a1c1c" stroke-width="7"/>
+<rect x="175" y="145" width="10" height="10" fill="#7e3ff2" stroke="#222"/>
+<rect x="295" y="55" width="10" height="10" fill="#7e3ff2" stroke="#222"/>
+<path d="M237 99 l6 6 -6 6 -6 -6z" fill="#fff" stroke="#222"/>
+<text x="248" y="98" font-size="12" fill="#222" stroke="none">alça</text>
+</svg>
+<p class="note">Escolhe tipo e "reta/curva" no painel, depois clica no mapa. Trocar o tipo de uma rua já feita: clicar nela e usar os mesmos botões do painel. Igual ao padrão atual (painel à esquerda).</p></div>
+
+<!-- B -->
+<div class="opt" data-k="B"><h2>B · Barra de ferramentas sobre o mapa</h2>
+<svg viewBox="0 0 360 220" fill="none" stroke="#222" stroke-width="2">
+<rect x="2" y="2" width="356" height="216" rx="8"/>
+<rect x="70" y="10" width="220" height="30" rx="15" fill="#fff"/>
+<text x="82" y="30" font-size="13" fill="#222" stroke="none">Reta · Curva · Arco | 🟥 Princ. 🟩 Sec.</text>
+<path d="M30 190 L110 150 L170 150" stroke="#2b7a3d" stroke-dasharray="6 5" stroke-width="3"/>
+<path d="M60 70 C 140 40 200 130 330 100" stroke="#8a1c1c" stroke-width="7"/>
+<rect x="55" y="65" width="10" height="10" fill="#7e3ff2"/>
+<path d="M190 83 l6 6 -6 6 -6 -6z" fill="#fff"/>
+<path d="M170 150 A 40 40 0 0 1 250 150" stroke="#2b7a3d" stroke-dasharray="6 5" stroke-width="3"/>
+<text x="150" y="205" font-size="12" fill="#222" stroke="none">arco por 3 pontos</text>
+</svg>
+<p class="note">Um clique escolhe a ferramenta e o tipo; tudo fica à vista em cima do mapa. "Arco" é para alameda redonda, "Curva" para curva livre. Contra: cobre parte da imagem.</p></div>
+
+<!-- C -->
+<div class="opt" data-k="C"><h2>C · Clicar na rua e escolher (menu)</h2>
+<svg viewBox="0 0 360 220" fill="none" stroke="#222" stroke-width="2">
+<rect x="2" y="2" width="356" height="216" rx="8"/>
+<path d="M20 170 L170 120 L340 120" stroke="#8a1c1c" stroke-width="7"/>
+<path d="M170 120 L260 40" stroke="#2b7a3d" stroke-dasharray="6 5" stroke-width="3"/>
+<rect x="165" y="115" width="10" height="10" fill="#7e3ff2"/>
+<rect x="200" y="125" width="130" height="86" rx="8" fill="#fff"/>
+<text x="210" y="146" font-size="13" fill="#222" stroke="none">Este trecho:</text>
+<text x="210" y="164" font-size="13" fill="#222" stroke="none">• Curvar</text>
+<text x="210" y="180" font-size="13" fill="#222" stroke="none">• Tipo: Principal ▸</text>
+<text x="210" y="196" font-size="13" fill="#222" stroke="none">• Apagar trecho</text>
+</svg>
+<p class="note">Desenha sempre reta, simples. Clicando num trecho aparece um menu: Curvar (a alça surge só aí) e Tipo. Poucos botões na tela, mas o tipo só se escolhe depois de desenhar.</p></div>
+
+<!-- D -->
+<div class="opt" data-k="D"><h2>D · Alça sempre no meio (sem seletor de curva)</h2>
+<svg viewBox="0 0 360 220" fill="none" stroke="#222" stroke-width="2">
+<rect x="2" y="2" width="356" height="216" rx="8"/>
+<rect x="8" y="8" width="150" height="40" rx="6"/>
+<text x="16" y="24" font-size="13" fill="#222" stroke="none">Nova rua é:</text>
+<rect x="16" y="28" width="62" height="16" rx="4" fill="#f3d7d7"/><text x="20" y="40" font-size="11" fill="#222" stroke="none">Principal</text>
+<rect x="84" y="28" width="66" height="16" rx="4"/><text x="88" y="40" font-size="11" fill="#222" stroke="none">Secundária</text>
+<path d="M30 190 L130 190" stroke="#8a1c1c" stroke-width="7"/>
+<path d="M130 190 Q 180 110 260 150" stroke="#8a1c1c" stroke-width="7"/>
+<path d="M90 190 l6 6 -6 6 -6 -6z" fill="#fff"/>
+<path d="M195 148 l6 6 -6 6 -6 -6z" fill="#fff"/>
+<text x="150" y="212" font-size="11" fill="#222" stroke="none">◇ no meio de todo trecho — arrastou, virou curva; devolve ao centro, volta reta</text>
+</svg>
+<p class="note">Sem botão de reta/curva: todo trecho tem a alça no meio. Arrastar curva, soltar no centro desfaz. Tipo escolhido num par de botões grandes antes de desenhar. Mais rápido, mas muitos losangos se a rua tiver muitos trechos.</p></div>
+
+</div>
+<script>
+const opts=[...document.querySelectorAll('.opt')];const tabs=document.getElementById('tabs');
+const b=document.createElement('button');b.textContent='Todas';b.className='on';b.onclick=()=>show('*',b);tabs.append(b);
+opts.forEach(o=>{const k=o.dataset.k,x=document.createElement('button');x.textContent='Só '+k;x.onclick=()=>show(k,x);tabs.append(x)});
+function show(k,btn){[...tabs.children].forEach(c=>c.classList.remove('on'));btn.classList.add('on');opts.forEach(o=>o.classList.toggle('hide',k!=='*'&&o.dataset.k!==k))}
+document.getElementById('tLeg').onchange=e=>document.querySelector('.leg').classList.toggle('hide',!e.target.checked);
+document.getElementById('tCurva').onchange=e=>document.querySelectorAll('svg path[stroke-width="7"]').forEach(p=>p.style.opacity=e.target.checked?1:.15);
+</script></body></html>

@@ -184,3 +184,5 @@ Existe uma chave "Memorial online / offline" na ficha de cadastro da família (C
 
 ## Portal da Família no celular (2026-10-26)
 No celular o Portal da Família abre numa tela simples com 4 cartões grandes: Contar a história, Enviar fotos e vídeos, Ver como a página está e Quem pode ver a página; jazigo, árvore e assinaturas ficam em "Mais opções". Cada tela tem o botão "Salvar e voltar" fixo no rodapé. No computador continua como antes.
+
+- **Tipo da rua no mapa do cemitério (Central, aba Ruas):** cada rua tem uma bandeira em cada ponta; clicar alterna entre rua principal (asfalto, passa carro; linha grossa vinho) e rua dos túmulos (entre túmulos, a pé; linha fina verde pontilhada). O painel lista "N ruas principais" e "N ruas dos túmulos". Rua nova nasce principal. Rua travada não troca.

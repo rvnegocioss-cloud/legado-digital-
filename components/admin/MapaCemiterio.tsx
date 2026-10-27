@@ -146,7 +146,11 @@ interface Rua {
   eixo: { type: 'LineString'; coordinates: [number, number][] } | null
   geometria_revisada: boolean
   comprimento_m: number | null
+  tipo: 'principal' | 'secundaria'
 }
+
+const COR_RUA_PRINCIPAL = '#8a1c1c'
+const COR_RUA_SECUNDARIA = '#2b7a3d'
 
 // Abas da coluna de edição (à esquerda do mapa). Ruas · Quadras · Fileiras ·
 // Túmulos · Jazigo seguem o caminho do mapeamento; as outras são ferramentas.
@@ -429,6 +433,17 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         geometria_revisada: f.properties.geometria_revisada,
       }))
     )
+    // Tipo da rua vem de select proprio (a RPC nao devolve). Se a coluna
+    // ainda nao existe, o erro e ignorado e toda rua vira 'principal'.
+    const tiposRua: Record<string, 'principal' | 'secundaria'> = {}
+    {
+      const { data: tiposData, error: tiposErr } = await supabase.from('ruas_cemiterio').select('id, tipo').eq('cemiterio_id', cemiterioId)
+      if (!tiposErr) {
+        for (const t of (tiposData || []) as { id: string; tipo: string | null }[]) {
+          tiposRua[t.id] = t.tipo === 'secundaria' ? 'secundaria' : 'principal'
+        }
+      }
+    }
     setRuas(
       (geoData?.ruas?.features || []).map((r) => ({
         id: r.properties.id,
@@ -437,6 +452,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         eixo: r.geometry,
         geometria_revisada: r.properties.geometria_revisada,
         comprimento_m: r.properties.comprimento_m,
+        tipo: tiposRua[r.properties.id] || 'principal',
       }))
     )
     setCarregando(false)
@@ -750,7 +766,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         .map((r) => ({
           type: 'Feature' as const,
           geometry: r.eixo!,
-          properties: { id: r.id, numero: r.numero, label: r.nome || `Rua ${r.numero}` },
+          properties: { id: r.id, numero: r.numero, label: r.nome || `Rua ${r.numero}`, tipo: r.tipo },
         })),
     }),
     [ruas]
@@ -2073,6 +2089,20 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
+  async function alternarTipoRua(rua: Rua) {
+    if (rua.geometria_revisada) {
+      setMsg(`Rua ${rua.numero} está travada: destrave pra mudar o tipo.`)
+      return
+    }
+    const novo = rua.tipo === 'principal' ? 'secundaria' : 'principal'
+    setRuas((atual) => atual.map((r) => (r.id === rua.id ? { ...r, tipo: novo } : r)))
+    const { error } = await supabase.from('ruas_cemiterio').update({ tipo: novo }).eq('id', rua.id)
+    if (error) {
+      setRuas((atual) => atual.map((r) => (r.id === rua.id ? { ...r, tipo: rua.tipo } : r)))
+      setMsg(error.message)
+    }
+  }
+
   async function renomearRua(ruaId: string, nome: string) {
     setSalvando(true)
     const { error } = await supabase.from('ruas_cemiterio').update({ nome: nome.trim() || null }).eq('id', ruaId)
@@ -2269,7 +2299,23 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               <Source id="ruas" type="geojson" data={ruasGeojson}>
                 {/* casing escuro embaixo: legibilidade sobre qualquer ortomosaico */}
                 <Layer id="ruas-casing" type="line" paint={{ 'line-color': '#0B1D2A', 'line-width': 8, 'line-opacity': 0.55 }} layout={{ 'line-cap': 'round', 'line-join': 'round' }} />
-                <Layer id="ruas-linha" type="line" paint={{ 'line-color': '#a855f7', 'line-width': 4, 'line-opacity': 0.9 }} layout={{ 'line-cap': 'round', 'line-join': 'round' }} />
+                <Layer
+                  id="ruas-linha"
+                  type="line"
+                  paint={{
+                    'line-color': ['case', ['==', ['get', 'tipo'], 'secundaria'], COR_RUA_SECUNDARIA, COR_RUA_PRINCIPAL],
+                    'line-width': ['case', ['==', ['get', 'tipo'], 'secundaria'], 2.5, 5],
+                    'line-opacity': 0.95,
+                  }}
+                  layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                />
+                <Layer
+                  id="ruas-linha-pontilhada"
+                  type="line"
+                  filter={['==', ['get', 'tipo'], 'secundaria']}
+                  paint={{ 'line-color': '#0B1D2A', 'line-width': 1.5, 'line-dasharray': [2, 2], 'line-opacity': 0.9 }}
+                  layout={{ 'line-join': 'round' }}
+                />
                 <Layer
                   id="ruas-label"
                   type="symbol"
@@ -2525,6 +2571,31 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                       />
                     </Marker>
                   ))}
+
+              {ruas
+                .filter((r) => r.eixo && r.eixo.coordinates.length >= 2)
+                .flatMap((r) => {
+                  const cs = r.eixo!.coordinates
+                  const cor = r.tipo === 'secundaria' ? COR_RUA_SECUNDARIA : COR_RUA_PRINCIPAL
+                  return [0, cs.length - 1].map((i) => (
+                    <Marker key={`bandeira-rua-${r.id}-${i}`} longitude={cs[i][0]} latitude={cs[i][1]} anchor="bottom">
+                      <button
+                        type="button"
+                        disabled={!editavel}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          alternarTipoRua(r)
+                        }}
+                        title={`Rua ${r.numero}: ${r.tipo === 'secundaria' ? 'rua dos túmulos' : 'rua principal'}${
+                          editavel ? ' -- clique pra trocar o tipo' : ''
+                        }`}
+                        style={{ background: 'none', border: 0, padding: 0, cursor: editavel && !r.geometria_revisada ? 'pointer' : 'default' }}
+                      >
+                        <Flag size={20} strokeWidth={1.5} fill={cor} style={{ color: '#fff' }} />
+                      </button>
+                    </Marker>
+                  ))
+                })}
 
               {ruaEmEdicao?.eixo?.coordinates.map(([lng, lat], index) => (
                 <Marker
@@ -3767,6 +3838,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               desenho.iniciar('linha', onConcluirRua)
             }}
             onRenomear={renomearRua}
+            onAlternarTipo={alternarTipoRua}
             onTravar={travarRua}
             onDestravar={destravarRua}
             onEditar={setRuaEmEdicao}
@@ -3914,8 +3986,16 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 Contorno dourado = quadra · linha azul tracejada = fileira
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-0.5 inline-block" style={{ background: '#a855f7' }} />
-                Linha roxa = rua (caminho interno, por onde a rota anda) · quadrado roxo = vértice de rua · quadrado laranja = ponta de fileira
+                <span className="w-4 h-1 inline-block" style={{ background: COR_RUA_PRINCIPAL }} />
+                Linha grossa vinho = rua principal (asfalto, passa carro)
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-0.5 inline-block" style={{ background: COR_RUA_SECUNDARIA }} />
+                Linha fina verde pontilhada = rua dos túmulos (entre as sepulturas, a pé)
+              </div>
+              <div className="flex items-center gap-2">
+                <Flag size={12} strokeWidth={1.5} style={{ color: COR_RUA_PRINCIPAL }} />
+                Bandeira em cada ponta da rua: clique pra trocar entre principal e rua dos túmulos · quadrado roxo = vértice de rua · quadrado laranja = ponta de fileira
               </div>
             </div>
           </div>
