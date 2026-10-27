@@ -646,14 +646,14 @@ html {
  .portal-familia .pf-botao:focus-visible,.portal-familia .pf-ajuda:focus-visible{outline:3px solid #dfc08a;outline-offset:2px}
 }
 
-/* Mapa público: controles no canto inferior direito, no padrão Legado (azul escuro + dourado) */
+/* Mapa público: controles no canto inferior direito, no padrão do botão dourado do site */
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
-  margin: 0 10px 26px 0; border: 1px solid #C9A46A; background: #0B1D2A; border-radius: 8px;
+  margin: 0 10px 26px 0; border: 0; background: var(--ld-gold, #C9A46A); border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, .5);
 }
-.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button { background: transparent; border-color: rgba(201, 164, 106, .35); }
-.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button:hover { background: #12304a; }
-.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1) brightness(1.1); }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button { background: transparent; border-color: rgba(26, 20, 8, .25); }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button:hover { background: var(--ld-gold-lite, #dfc08a); }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: none; }
 /* + e − ficam do lado esquerdo da bússola, na mesma altura */
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group:has(.maplibregl-ctrl-zoom-in) {
   position: absolute; right: 88px; bottom: 70px; margin: 0;
@@ -666,7 +666,7 @@ html {
 }
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass::after {
   content: 'Clique aqui: 3D'; position: absolute; left: 0; right: 0; bottom: 3px; padding: 0 3px;
-  font-size: 10px; line-height: 12px; font-weight: 700; text-align: center; color: #C9A46A; pointer-events: none;
+  font-size: 10px; line-height: 12px; font-weight: 700; text-align: center; color: #1a1408; pointer-events: none;
 }
 @media (hover: none) {
   .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass::after { content: 'Toque aqui: 3D'; }
