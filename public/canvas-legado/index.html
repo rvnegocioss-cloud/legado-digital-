@@ -15,7 +15,7 @@ html,body{margin:0;height:100%;background:#050d14;color:#e8eef3;font-family:Inte
 .painel .fixo{flex:none;border-top:1px solid #1f3140;padding:10px 0 12px;background:#0a1620}
 .painel .fixo .acoes{flex-direction:row;margin-top:0}
 .painel .fixo .acoes .btn{flex:1;padding:10px 6px}
-.abas{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 6px}
+.abas{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:0 0 6px}
 .abas button{flex:1 1 0;min-width:0;border:1px solid #2c4152;background:#0f1d29;color:#b7c4cf;padding:7px 2px;border-radius:6px;cursor:pointer;font:600 12px Inter,sans-serif}
 .abas button[aria-selected=true]{border-color:#C9A46A;color:#1a1208;background:#C9A46A}
 [data-aba]{display:none}[data-aba].on{display:block}
@@ -141,6 +141,7 @@ input:focus,textarea:focus{outline:2px solid #C9A46A;outline-offset:0}
 .orow .btn.peq{margin-top:0;margin-left:4px;padding:3px 7px;font-size:11.5px}
 #obj-ctl{margin:8px 0;padding:8px;border:1px solid #2c4152;border-radius:8px;background:#0c1924}
 #obj-ctl .seg button{padding:5px 8px;font-size:12px}
+.tplgal{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.tplgal .mcard{padding:6px}.tplgal img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;border-radius:5px;display:block}.tplgal .tn{font-weight:600;font-size:13px}.tplgal .ts{font-size:10px;color:#93a4b3}
 .molgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .mcard{display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid #3a4b59;background:#0f1d29;color:#e8eef3;border-radius:8px;padding:7px 4px;cursor:pointer;font:inherit;font-size:11.5px;line-height:1.2}
 .mcard[aria-pressed=true]{border-color:#C9A46A;color:#dfc08a;background:#16293a}
@@ -207,6 +208,7 @@ details.fino summary{cursor:pointer;color:#C9A46A;font:600 12px Inter,sans-serif
 .peca.arrasta .fbar{visibility:hidden}
 @media (pointer:coarse){.fbar button{min-height:calc(44px*var(--hk,2));min-width:calc(44px*var(--hk,2));font-size:calc(15px*var(--hk,2))}}
 </style>
+<script src="mini.js"></script>
 </head>
 <body>
 <div class="app">
@@ -220,12 +222,14 @@ details.fino summary{cursor:pointer;color:#C9A46A;font:600 12px Inter,sans-serif
     <div class="seg" id="s-tipo"></div>
     <h2>2. Formato</h2>
     <div class="seg" id="s-formato"></div>
-    <h2>3. Modelo</h2>
-    <div class="molgrid" id="s-tpl"></div>
-    <div class="aviso">O modelo é só o ponto de partida: enfeites, textos e foto podem ser movidos para qualquer lugar da peça (clique e arraste na peça).</div>
     <div class="seg" style="margin-top:8px"><button class="btn peq" id="b-reset2" type="button">Voltar ao modelo</button><button class="btn peq" id="b-tirar" type="button">Tirar todos os enfeites</button><button class="btn peq" id="b-undo" type="button">Desfazer</button></div>
     <h2>Enfeites na peça agora</h2>
     <div id="obj-lista2"></div>
+    </section>
+    <section data-aba="tpl">
+    <h2>Escolha um template</h2>
+    <div class="tplgal" id="s-tpl"></div>
+    <div class="aviso">O template é só o ponto de partida: enfeites, textos e foto podem ser movidos para qualquer lugar da peça (clique e arraste na peça). Trocar de template mantém o que você digitou.</div>
     </section>
     <section data-aba="cor">
     <h2>Paletas</h2>
@@ -336,16 +340,16 @@ const PALETAS = {
 };
 /* modelos: lista de [máscara, x, y, tamanho, espelhado]; posições em fração da peça (valem em todos os formatos) */
 const TPLS = {
- classico:{n:'Clássico',pair:['rosa_vetor_03',-.7,-.05,.13],mold:'none',borda:'padrao'},
- arco:{n:'Arco com lírios',pair:['lirio_12',-.8,-.1,.17],mold:'C',borda:'arcos'},
- vitral:{n:'Vitral / Igreja',pair:['cruz_vetor_20',-.82,0,.15],mold:'B',borda:'chanfro'},
- oracao:{n:'Oração',pair:['maos',-.82,.05,.16],mold:'none',borda:'filete'},
- anjo:{n:'Anjo',pair:['anjo_barroco_01',-.8,-.1,.2],mold:'none',borda:'cantos'},
- vela:{n:'Vela',pair:['vela_04',-.82,.08,.16],mold:'D',borda:'losangos'},
- minimal:{n:'Minimalista',pair:null,col:[],lado:[],mold:'none',borda:'filete'},
- jardim:{n:'Floral suave',col:[['buque',.20,.20,.2,0],['buque',.80,.20,.2,1]],lado:[['buque',.07,.16,.13,0],['buque',.93,.84,.13,1]],mold:'none',borda:'padrao',ico:'buque'},
- barroco:{n:'Barroco',col:[['barroco',.20,.20,.2,0],['barroco',.80,.20,.2,1]],lado:[['barroco',.07,.16,.13,0],['barroco',.93,.84,.13,1]],mold:'none',borda:'padrao',ico:'barroco'},
- folhas:{n:'Folhas',col:[['folhas',.17,.10,.14,0],['folhas',.83,.10,.14,1]],lado:[['folhas',.07,.15,.12,0],['folhas',.93,.85,.12,1]],mold:'none',borda:'padrao',ico:'folhas'}
+ classico:{ord:2,sub:'Clássico',n:'Clássico',pair:['rosa_vetor_03',-.7,-.05,.13],mold:'none',borda:'padrao'},
+ arco:{ord:3,sub:'Arco com lírios',n:'Arco com lírios',pair:['lirio_12',-.8,-.1,.17],mold:'C',borda:'arcos'},
+ vitral:{ord:4,sub:'Vitral / Igreja',n:'Vitral / Igreja',pair:['cruz_vetor_20',-.82,0,.15],mold:'B',borda:'chanfro'},
+ oracao:{ord:5,sub:'Oração',n:'Oração',pair:['maos',-.82,.05,.16],mold:'none',borda:'filete'},
+ anjo:{ord:6,sub:'Anjo',n:'Anjo',pair:['anjo_barroco_01',-.8,-.1,.2],mold:'none',borda:'cantos'},
+ vela:{ord:7,sub:'Vela',n:'Vela',pair:['vela_04',-.82,.08,.16],mold:'D',borda:'losangos'},
+ minimal:{ord:8,sub:'Minimalista',n:'Minimalista',pair:null,col:[],lado:[],mold:'none',borda:'filete'},
+ jardim:{ord:9,sub:'Floral suave',n:'Floral suave',col:[['buque',.20,.20,.2,0],['buque',.80,.20,.2,1]],lado:[['buque',.07,.16,.13,0],['buque',.93,.84,.13,1]],mold:'none',borda:'padrao',ico:'buque'},
+ barroco:{ord:10,sub:'Barroco',n:'Barroco',col:[['barroco',.20,.20,.2,0],['barroco',.80,.20,.2,1]],lado:[['barroco',.07,.16,.13,0],['barroco',.93,.84,.13,1]],mold:'none',borda:'padrao',ico:'barroco'},
+ folhas:{ord:11,sub:'Folhas',n:'Folhas',col:[['folhas',.17,.10,.14,0],['folhas',.83,.10,.14,1]],lado:[['folhas',.07,.15,.12,0],['folhas',.93,.85,.12,1]],mold:'none',borda:'padrao',ico:'folhas'}
 };
 const FORM = {
  '9x16':{n:'Vertical 9:16 (stories)',h:1920,ex:[1080,1920],lado:false},
@@ -370,7 +374,7 @@ const CORFONTE = {
  max:{n:'Máximo contraste',L:[[255,255,255],[255,255,255]],D:[[0,0,0],[0,0,0]]}
 };
 const BORDAS_NOMES = {padrao:'Padrão',A:'Clássica filigrana',B:'Folhas e ouro',C:'Fleur-de-lis'};
-const ABAS = [['peca','Peça'],['dados','Dados'],['foto','Foto'],['cor','Cor'],['texto','Texto'],['enfeites','Enfeites'],['borda','Borda']];
+const ABAS = [['peca','Peça'],['tpl','Templates'],['dados','Dados'],['foto','Foto'],['cor','Cor'],['texto','Texto'],['enfeites','Enfeites'],['borda','Borda']];
 const FRASE_C = 'Com profundo pesar, comunicamos o falecimento de nosso ente querido e convidamos familiares e amigos para a despedida.';
 const FUN0 = 'Funerária Vale da Paz', TEL0 = '(34) 3000-0000';
 /* cada peça tem o próprio conjunto de campos; só "falecido" é comum */
@@ -480,10 +484,10 @@ function bordaMini(id){
 /* ---------- peça ---------- */
 let SOLID=false;
 const HIST=[];
-function snapEstado(){ return JSON.stringify({objs:S.objs,blocks:S.blocks,hide:S.hide||{},mold:S.mold,borda:S.borda}); }
+function snapEstado(){ return JSON.stringify({objs:S.objs,blocks:S.blocks,hide:S.hide||{},mold:S.mold,borda:S.borda,tpl:S.tpl}); }
 function snap(str){ HIST.push(str||snapEstado()); if(HIST.length>80) HIST.shift(); }
 function desfaz(){ if(!HIST.length){ const m=$('msg'); m.className='aviso'; m.textContent='Nada para desfazer.'; return; }
-  const o=JSON.parse(HIST.pop()); S.objs=o.objs; S.blocks=o.blocks; S.hide=o.hide||{}; S.mold=o.mold; S.borda=o.borda; SEL=null; SELB=null; S.tocou=true; painel(); render();
+  const o=JSON.parse(HIST.pop()); S.objs=o.objs; S.blocks=o.blocks; S.hide=o.hide||{}; S.mold=o.mold; S.borda=o.borda; if(o.tpl&&TPLS[o.tpl]) S.tpl=o.tpl; SEL=null; SELB=null; S.tocou=true; painel(); render();
   const m=$('msg'); m.className='aviso'; m.textContent='Desfeito.'; }
 S.hide={};
 const BLOCOS=[['titulo','Título'],['moldura','Quadro da foto'],['nome','Nome'],['datas','Datas'],['texto','Oração ou mensagem'],['bloco','Local, data e hora'],['prev','Previsão do tempo'],['fun','Funerária']];
@@ -674,9 +678,9 @@ function painel(){
   seg('s-tipo',Object.entries(TIPOS),()=>S.tipo,k=>{S.tipo=k;});
   seg('s-formato',Object.entries(FORM).map(([k,v])=>[k,v.n]),()=>S.fmt,k=>{S.fmt=k; if(!S.tocou) aplicaTpl(S.tpl);});
   { const TG=$('s-tpl'); TG.innerHTML='';
-    Object.entries(TPLS).forEach(([k,v])=>{ const b=document.createElement('button'); b.type='button'; b.className='mcard'; b.setAttribute('aria-pressed',k===S.tpl);
-      const mk=v.pair?v.pair[0]:v.ico; b.innerHTML='<span class="tplmini">'+(v.mold&&v.mold!=='none'?'<i class="mth mf-'+v.mold+'" style="position:absolute;inset:6px 14px;width:auto;height:auto"></i>':'<i class="tfoto"></i>')+(mk?'<i class="th m-'+mk+'" style="position:absolute;left:3px;top:6px;width:20px;height:20px"></i><i class="th m-'+mk+'" style="position:absolute;right:3px;top:6px;width:20px;height:20px;transform:scaleX(-1)"></i>':'')+'</span><span>'+v.n+'</span>';
-      b.onclick=()=>{ aplicaTpl(k); painel(); render(); }; TG.appendChild(b); }); }
+    Object.entries(TPLS).sort((a,b)=>a[1].ord-b[1].ord).forEach(([k,v])=>{ const b=document.createElement('button'); b.type='button'; b.className='mcard'; b.setAttribute('aria-pressed',k===S.tpl);
+      b.innerHTML='<img alt="" src="'+((window.TPLMINI&&window.TPLMINI[k])||'')+'"><span class="tn">Template '+v.ord+'</span><span class="ts">'+v.sub+'</span>';
+      b.onclick=()=>{ if(k===S.tpl) return; const o=S.tocou; snap(); aplicaTpl(k); painel(); render(); }; TG.appendChild(b); }); }
   seg('s-fonte',Object.entries(FONTES).map(([k,v])=>[k,v.n]),()=>S.fonte,k=>{S.fonte=k;});
   seg('s-corfonte',Object.entries(CORFONTE).map(([k,v])=>[k,v.n]),()=>S.corfonte,k=>{S.corfonte=k;});
   { const BG=$('s-borda'); BG.innerHTML=''; const tall=FORM[S.fmt].h>=1350;
@@ -1023,7 +1027,7 @@ function montaBases(){
   const fo=q.get('formato'); if(fo==='banner'){S.tipo='missa';S.fmt='9x16';} if(fo==='santinho'){S.tipo='santinho';S.fmt='4x5';}
   if(TIPOS[q.get('tipo')]) S.tipo=q.get('tipo');
   if(FORM[q.get('fmt')]) S.fmt=q.get('fmt');
-  if(TPLS[q.get('tpl')]) aplicaTpl(q.get('tpl')); else aplicaTpl(S.tpl);
+  const qt=q.get('tpl')||q.get('modelo'); if(TPLS[qt]) aplicaTpl(qt); else aplicaTpl(S.tpl);
   if(PALETAS[q.get('paleta')]){ S.paleta=q.get('paleta'); LOCKPAL=true; }
   if(q.get('cor')){const [ct,tt]=q.get('cor').split(',').map(Number);CT=ct;TT=tt;const c0=corDe(CT);_cl={H:c0.H,S:c0.S,L:.05+TT*.87};ALVO={..._cl};PALETAS.custom=paletaLivre(_cl.H,_cl.S,_cl.L);S.paleta='custom';alvoDasFaixas();}
   if(q.get('el')){ q.get('el').split(',').forEach((id,i)=>{ if(CAT.some(c=>c[0]===id)){ addObj(id,.2,.2+i*.14,.18,0); addObj(id,.8,.2+i*.14,.18,1); } }); }
