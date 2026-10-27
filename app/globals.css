@@ -651,7 +651,7 @@ html {
 /* O botão é maior e o texto fica DENTRO do quadrado, abaixo da bússola */
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass { width: 80px; height: 78px; }
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass .maplibregl-ctrl-icon {
-  background-size: 34px 34px; background-position: center 5px; height: 100%;
+  background-size: 42px 42px; background-position: center 4px; width: 100%; height: 100%;
 }
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass { position: relative; }
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass::after {
