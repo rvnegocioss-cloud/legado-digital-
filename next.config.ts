@@ -54,7 +54,10 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/canvas-legado/:path*',
-        headers: [{ key: 'Content-Security-Policy', value: CSP_CANVAS }],
+        headers: [
+          { key: 'Content-Security-Policy', value: CSP_CANVAS },
+          { key: 'Permissions-Policy', value: 'microphone=(self), camera=(), geolocation=(self)' },
+        ],
       },
     ]
   },

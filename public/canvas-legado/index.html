@@ -243,6 +243,14 @@ details.fino summary{cursor:pointer;color:#C9A46A;font:600 12px Inter,sans-serif
     <div class="aviso" id="av-contraste"></div>
     </section>
     <section data-aba="dados">
+    <div id="leg-box" style="border:1px solid #c9a24b;border-radius:10px;padding:10px;margin-bottom:12px">
+      <h2 style="margin:0 0 6px">Falar ou colar para o Legado</h2>
+      <div class="aviso">Fale ou cole o texto (ex.: mensagem de WhatsApp). O Legado preenche só a peça atual. Ao usar o microfone, o áudio passa pelo Google.</div>
+      <textarea id="leg-txt" rows="4" aria-label="Texto para o Legado entender" style="width:100%"></textarea>
+      <div class="seg" style="margin-top:6px"><button type="button" class="btn" id="leg-mic">Microfone</button><button type="button" class="btn prim" id="leg-ok">Entender</button></div>
+      <div id="leg-st" class="aviso" role="status"></div>
+      <div id="leg-prev" style="display:none"></div>
+    </div>
     <div data-sec="falecido"><h2>Falecido (vale para todas as peças)</h2>
     <label class="c" for="d-falecido-nome">Nome do falecido(a)</label><input type="text" data-t="falecido" data-k="nome" id="d-falecido-nome"><div class="linha"><div><label class="c" for="d-falecido-nasc">Data de nascimento</label><input type="text" data-t="falecido" data-k="nasc" id="d-falecido-nasc"></div><div><label class="c" for="d-falecido-fal">Data de falecimento</label><input type="text" data-t="falecido" data-k="fal" id="d-falecido-fal"></div></div>
     <div class="aviso">A foto fica na aba Foto.</div></div>
@@ -1027,6 +1035,42 @@ function montaBases(){
     if(q.get('pdf')) setTimeout(()=>baixarPDF(q.get('pdf'),true),600); };
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(ini);
   render();
+})();
+</script>
+<script src="extrator.js"></script>
+<script>
+(function(){
+  const ROT={nome:'Nome do falecido(a)',nasc:'Data de nascimento',fal:'Data de falecimento',vel_local:'Local do velório',vel_dia:'Data do velório',vel_hora:'Hora do velório',cem:'Cemitério',sep_dia:'Data do sepultamento',sep_hora:'Hora do sepultamento',fun:'Funerária',tel:'Telefone',igreja:'Igreja',cidade:'Cidade',dia:'Data da missa',hora:'Hora da missa'};
+  const GRP=k=>({nome:'falecido',nasc:'falecido',fal:'falecido'}[k]||S.tipo);
+  const st=(t,e)=>{ const m=$('leg-st'); m.textContent=t; m.className='aviso'+(e?' err':''); };
+  let ACH={};
+  function previa(){
+    const box=$('leg-prev'); box.style.display=''; box.innerHTML='';
+    const r=window.LegadoExtrator.extrair($('leg-txt').value,S.tipo,new Date().toISOString().slice(0,10)); ACH={};
+    const h=document.createElement('div'); h.className='aviso'; h.textContent='Prévia para a peça "'+TIPOS[S.tipo]+'". Amarelo = confira. Nada é gravado antes de Confirmar.'; box.appendChild(h);
+    Object.keys(ROT).filter(k=>S.tipo==='santinho'?/^(nome|nasc|fal|fun|tel)$/.test(k):true).forEach(k=>{
+      if(!(k in r) && !(k in S.dados[GRP(k)])) return;
+      const d=document.createElement('div'); d.className='lgr'; const ok=r[k]; d.setAttribute('data-k',k);
+      d.innerHTML='<label>'+ROT[k]+'</label><input type="text" placeholder="não entendi">'; const i=d.querySelector('input');
+      if(ok){ i.value=ok.valor; ACH[k]=ok.valor; if(ok.confianca!=='alta') { i.style.background='#fff3c4'; i.style.color='#222'; } }
+      i.oninput=()=>{ ACH[k]=i.value; }; box.appendChild(d); });
+    const a=document.createElement('div'); a.className='seg';
+    const c=document.createElement('button'); c.type='button'; c.className='btn prim'; c.id='leg-conf'; c.textContent='Confirmar e preencher';
+    c.onclick=()=>{ let n=0; Object.keys(ACH).forEach(k=>{ const v=(ACH[k]||'').trim(); const g=S.dados[GRP(k)]; if(v&&g&&(k in g)){ g[k]=v; n++; } }); box.style.display='none'; painel(); render(); st(n+' campo(s) preenchido(s) na peça "'+TIPOS[S.tipo]+'".'); };
+    const x=document.createElement('button'); x.type='button'; x.className='btn'; x.textContent='Corrigir'; x.onclick=()=>{ box.style.display='none'; $('leg-txt').focus(); };
+    a.appendChild(c); a.appendChild(x); box.appendChild(a); st('Confira a prévia abaixo.');
+  }
+  $('leg-ok').onclick=()=>{ if(!$('leg-txt').value.trim()){ st('Escreva, cole ou fale um texto primeiro.',true); return; } previa(); };
+  const SRx=window.SpeechRecognition||window.webkitSpeechRecognition; let rec=null;
+  $('leg-mic').onclick=()=>{
+    if(!SRx){ st('Este navegador não permite ditar por voz. Use o Google Chrome ou cole o texto.',true); return; }
+    if(rec){ try{rec.stop();}catch(_){} return; }
+    rec=new SRx(); rec.lang='pt-BR'; rec.interimResults=true; rec.continuous=false; st('Ouvindo... fale agora. Clique de novo para parar.');
+    rec.onresult=ev=>{ let t=''; for(let i=0;i<ev.results.length;i++) t+=ev.results[i][0].transcript; $('leg-txt').value=t; };
+    rec.onerror=ev=>st(({'not-allowed':'O microfone não foi liberado. Clique no cadeado do endereço e permita o microfone.','service-not-allowed':'O microfone não foi liberado neste navegador.','no-speech':'Não ouvi nada. Tente de novo.','audio-capture':'Não encontrei um microfone.','network':'Sem internet para o reconhecimento de voz.'})[ev.error]||'Não deu para ouvir.',true);
+    rec.onend=()=>{ rec=null; if($('leg-txt').value.trim()) st('Texto ouvido. Clique em Entender.'); };
+    try{ rec.start(); }catch(e){ st('Não consegui ligar o microfone.',true); rec=null; }
+  };
 })();
 </script>
 </body>
