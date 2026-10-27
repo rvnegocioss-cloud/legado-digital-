@@ -386,7 +386,7 @@ export default function MapaPublicoCemiterio({
              ao toque; a cor vem do CSS (.maplibregl-ctrl-attrib em globals). */
           attributionControl={{ compact: true }}
         >
-          <NavigationControl showZoom showCompass={false} position="top-right" />
+          <NavigationControl showZoom showCompass={false} position="bottom-right" />
           <NavigationControl showZoom={false} showCompass visualizePitch position="bottom-right" />
 
         {temMemoriais && iconePronto && (

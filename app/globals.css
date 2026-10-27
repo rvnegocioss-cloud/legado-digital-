@@ -646,17 +646,27 @@ html {
  .portal-familia .pf-botao:focus-visible,.portal-familia .pf-ajuda:focus-visible{outline:3px solid #dfc08a;outline-offset:2px}
 }
 
-/* Mapa público: bússola grande no canto inferior direito (vira a vista 3D) */
-.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group { margin: 0 10px 26px 0; border: 1px solid #C9A46A; }
-/* O botão é maior e o texto fica DENTRO do quadrado, abaixo da bússola */
-.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass { width: 80px; height: 78px; }
-.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass .maplibregl-ctrl-icon {
-  background-size: 42px 42px; background-position: center 4px; width: 100%; height: 100%;
+/* Mapa público: controles no canto inferior direito, no padrão Legado (azul escuro + dourado) */
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
+  margin: 0 10px 26px 0; border: 1px solid #C9A46A; background: #0B1D2A; border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .5);
 }
-.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass { position: relative; }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button { background: transparent; border-color: rgba(201, 164, 106, .35); }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button:hover { background: #12304a; }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1) brightness(1.1); }
+/* + e − ficam do lado esquerdo da bússola, na mesma altura */
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group:has(.maplibregl-ctrl-zoom-in) {
+  position: absolute; right: 88px; bottom: 70px; margin: 0;
+}
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group:has(.maplibregl-ctrl-zoom-in) button { width: 34px; height: 34px; }
+/* A bússola é o botão do 3D: o texto fica DENTRO do quadrado, abaixo do desenho */
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass { width: 68px; height: 68px; position: relative; }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass .maplibregl-ctrl-icon {
+  background-size: 34px 34px; background-position: center 4px; width: 100%; height: 100%;
+}
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass::after {
-  content: 'Clique aqui: 3D'; position: absolute; left: 0; right: 0; bottom: 4px; padding: 0 4px;
-  font-size: 11px; line-height: 13px; font-weight: 700; text-align: center; color: #0B1D2A; pointer-events: none;
+  content: 'Clique aqui: 3D'; position: absolute; left: 0; right: 0; bottom: 3px; padding: 0 3px;
+  font-size: 10px; line-height: 12px; font-weight: 700; text-align: center; color: #C9A46A; pointer-events: none;
 }
 @media (hover: none) {
   .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass::after { content: 'Toque aqui: 3D'; }
