@@ -79,6 +79,8 @@ input:focus,textarea:focus{outline:2px solid #C9A46A;outline-offset:0}
 .nome{font-family:var(--f-nome);font-weight:var(--w-nome);font-style:var(--s-nome);font-size:150px;line-height:1;margin-top:44px;white-space:nowrap;padding:0 10px 14px}
 .datas{display:flex;align-items:center;gap:34px;margin-top:20px;font:600 46px/1 var(--f-tit);letter-spacing:.08em}
 .datas svg{height:62px;width:auto}
+.prev{margin-top:26px;font:500 27px/1.35 var(--f-corpo);color:var(--soft);opacity:.92;text-align:center;max-width:900px}
+.peca.lado .prev{font-size:23px;margin-top:14px}
 .texto{margin-top:60px;text-wrap:balance;font-family:var(--f-corpo);font-weight:var(--wc,400);font-size:calc(35px*var(--kc));line-height:1.55;letter-spacing:var(--ls);color:var(--soft);max-width:690px}
 .quando{margin-top:56px;font:600 44px/1.3 var(--f-tit);white-space:nowrap}
 .igreja{margin-top:46px;display:flex;align-items:center;gap:24px;font-family:var(--f-corpo);font-weight:var(--wc,400);font-size:calc(36px*var(--kc));line-height:1.35;letter-spacing:.08em;text-align:left;color:var(--soft)}
@@ -484,7 +486,7 @@ function desfaz(){ if(!HIST.length){ const m=$('msg'); m.className='aviso'; m.te
   const o=JSON.parse(HIST.pop()); S.objs=o.objs; S.blocks=o.blocks; S.hide=o.hide||{}; S.mold=o.mold; S.borda=o.borda; SEL=null; SELB=null; S.tocou=true; painel(); render();
   const m=$('msg'); m.className='aviso'; m.textContent='Desfeito.'; }
 S.hide={};
-const BLOCOS=[['titulo','Título'],['moldura','Quadro da foto'],['nome','Nome'],['datas','Datas'],['texto','Oração ou mensagem'],['bloco','Local, data e hora'],['fun','Funerária']];
+const BLOCOS=[['titulo','Título'],['moldura','Quadro da foto'],['nome','Nome'],['datas','Datas'],['texto','Oração ou mensagem'],['bloco','Local, data e hora'],['prev','Previsão do tempo'],['fun','Funerária']];
 S.blocks=null;
 const MW=410, MH=496;
 const esc2=esc;
@@ -580,14 +582,17 @@ function render(){
   const datasH='<div class="datas"'+D('datas')+'><span>'+esc(fa.nasc)+'</span><svg viewBox="0 0 20 30"><path d="M8.5 0h3v8.5H20v3h-8.5V30h-3V11.5H0v-3h8.5z" fill="url(#ouroG)"/></svg><span>'+esc(fa.fal)+'</span></div>';
   const textoH='<div class="texto"'+D('texto')+'>'+esc(dt.frase||'')+'</div>';
   const blocoH=bloco?'<div class="blocoloc"'+D('bloco')+'>'+bloco+'</div>':'';
+  const prevTxt=(dt.prev_on!==false&&dt.prev_txt)?String(dt.prev_txt).trim():'';
+  const prevH=prevTxt?'<div class="prev"'+D('prev')+'>'+esc(prevTxt)+'</div>':'';
+  if(FZ&&prevH&&!FZ.prev){ const ref=FZ.bloco||FZ.datas||FZ.nome; if(ref) FZ.prev={x:ref.x,y:Math.min(.97,ref.y+.05),s:ref.s,r:0,w:0}; }
   const funH='<div class="fun"'+D('fun')+'><div class="vp ouro">'+esc(ini)+'</div><div><b>'+esc(fun)+'</b>'+(tel?' <span>· '+esc(tel)+'</span>':'')+'</div></div>';
   let conteudo, rodapeIn='';
   if(!FZ){
-    const resto=nomeH+datasH+textoH+blocoH;
+    const resto=nomeH+datasH+textoH+blocoH+prevH;
     conteudo=lado?'<div class="conteudo">'+quadro+'<div class="col2">'+tit+resto+'</div></div>':'<div class="conteudo">'+tit+quadro+resto+'</div>';
     rodapeIn=funH;
   } else {
-    const inner={titulo:tit,moldura:quadro,nome:nomeH,datas:datasH,texto:textoH,bloco:blocoH,fun:funH};
+    const inner={titulo:tit,moldura:quadro,nome:nomeH,datas:datasH,texto:textoH,bloco:blocoH,prev:prevH,fun:funH};
     conteudo=BLOCOS.map(([id])=>{ const bl=FZ[id]; if(!bl||!inner[id]||S.hide[id]) return ''; const sel=(SELB===id);
       return '<div class="tb'+(sel?' sel':'')+'" data-b="'+id+'" style="left:'+(bl.x*1080).toFixed(1)+'px;top:'+(bl.y*H).toFixed(1)+'px;'+(bl.w?'width:'+bl.w+'px;':'')+'--bs:'+bl.s+';transform:translate(-50%,-50%) rotate('+bl.r+'deg) scale('+bl.s+')">'+inner[id]+'<b class="hx" title="Esconder (dá para mostrar de novo na aba Enfeites)">✕</b>'+(sel?'<b class="hd hd-rt"></b><b class="hd hd-rs"></b>':'')+'</div>'; }).join('');
   }
@@ -611,6 +616,7 @@ function render(){
   fit(pc,H,lado,sant);
   ajusta();
   if(S.pend) posiciona();
+  if(window.checaPrev) window.checaPrev();
 }
 function posiciona(){
   const t=S.pend; S.pend=null; const T=TPLS[t], F=FORM[S.fmt], H=F.h;
@@ -683,6 +689,7 @@ function painel(){
   /* dados: só a seção da peça atual (+ falecido) aparece; cada campo lê o estado da própria peça */
   document.querySelectorAll('[data-sec]').forEach(e=>{ e.style.display=(e.dataset.sec==='falecido'||e.dataset.sec===S.tipo)?'':'none'; });
   document.querySelectorAll('input[data-t],textarea[data-t]').forEach(i=>{ if(document.activeElement!==i) i.value=S.dados[i.dataset.t][i.dataset.k]||''; });
+  if(window.pintaPrev) window.pintaPrev();
   /* molduras da foto */
   const MG=$('s-mold'); MG.innerHTML='';
   Object.entries(MOLD_NOMES).forEach(([k,n])=>{
@@ -1071,6 +1078,79 @@ function montaBases(){
     rec.onend=()=>{ rec=null; if($('leg-txt').value.trim()) st('Texto ouvido. Clique em Entender.'); };
     try{ rec.start(); }catch(e){ st('Não consegui ligar o microfone.',true); rec=null; }
   };
+})();
+</script>
+<script>
+/* Previsão do tempo (Open-Meteo): cada peça tem o próprio estado em S.dados[tipo].prev_* ; nada é misturado entre peças */
+(function(){
+  const P=window.LegadoExtrator.previsao, TS=['convite','missa','santinho'], TOK={}, TIM={};
+  const p2=n=>(n<10?'0':'')+n;
+  const hoje=()=>{ const d=new Date(); return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); };
+  const comSep=s=>/\s[—–-]\s|\/|,/.test(s||'');
+  function cidadeDe(t,dt){
+    const o=(dt.prev_cidade||'').trim(); if(o) return P.limpaCidade(o);
+    if(t==='missa') return P.limpaCidade(dt.cidade);
+    if(t==='convite'){ const s=comSep(dt.cem)?dt.cem:(comSep(dt.vel_local)?dt.vel_local:''); return s?P.limpaCidade(s):''; }
+    return '';
+  }
+  function diaDe(t,dt){
+    if(t==='missa') return dt.dia||'';
+    if(t==='santinho') return dt.prev_dia||'';
+    return P.dataParaISO(dt.vel_dia,hoje())?dt.vel_dia:(dt.sep_dia||'');
+  }
+  const wrap=t=>document.querySelector('.prev-sec[data-pt="'+t+'"]');
+  TS.forEach(t=>{
+    const sec=document.querySelector('[data-sec="'+t+'"]'); if(!sec) return;
+    const w=document.createElement('div'); w.className='prev-sec'; w.dataset.pt=t;
+    w.innerHTML='<h2>Previsão do tempo</h2>'
+     +'<label class="c" style="display:flex;gap:8px;align-items:center"><input type="checkbox" class="pv-on" style="width:auto"> Mostrar previsão na peça</label>'
+     +'<label class="c">Cidade'+(t==='santinho'?'':' (deixe em branco para usar a da peça)')+'</label><input type="text" class="pv-cidade" placeholder="Ex.: Uberlândia ou Uberlândia - MG">'
+     +(t==='santinho'?'<label class="c">Data do evento</label><input type="text" class="pv-dia" placeholder="Ex.: 3/11 ou 3 de novembro">':'')
+     +'<label class="c">Texto da previsão (pode editar)</label><textarea class="pv-txt" rows="2"></textarea>'
+     +'<div class="seg" style="margin-top:6px"><button type="button" class="btn pv-atu">Atualizar</button><button type="button" class="btn pv-limpa">Limpar</button></div>'
+     +'<div class="aviso pv-st" role="status"></div>';
+    sec.appendChild(w);
+    const dt=()=>S.dados[t];
+    w.querySelector('.pv-on').onchange=e=>{ dt().prev_on=e.target.checked; render(); };
+    w.querySelector('.pv-cidade').oninput=e=>{ dt().prev_cidade=e.target.value; render(); };
+    const d=w.querySelector('.pv-dia'); if(d) d.oninput=e=>{ dt().prev_dia=e.target.value; render(); };
+    w.querySelector('.pv-txt').oninput=e=>{ dt().prev_txt=e.target.value; dt().prev_manual=true; render(); };
+    w.querySelector('.pv-limpa').onclick=()=>{ clearTimeout(TIM[t]); TOK[t]=(TOK[t]||0)+1; dt().prev_txt=''; dt().prev_manual=true; dt().prev_st='Previsão limpa. Clique em Atualizar para buscar de novo.'; render(); pinta(); };
+    w.querySelector('.pv-atu').onclick=()=>{ P.limpaCache(); dt().prev_manual=false; dt().prev_key=null; clearTimeout(TIM[t]); roda(t,0); };
+  });
+  function pinta(){
+    TS.forEach(t=>{ const w=wrap(t); if(!w) return; const dt=S.dados[t], at=document.activeElement;
+      const on=w.querySelector('.pv-on'); on.checked=dt.prev_on!==false;
+      const c=w.querySelector('.pv-cidade'); if(at!==c) c.value=dt.prev_cidade||'';
+      const d=w.querySelector('.pv-dia'); if(d&&at!==d) d.value=dt.prev_dia||'';
+      const x=w.querySelector('.pv-txt'); if(at!==x) x.value=dt.prev_txt||'';
+      w.querySelector('.pv-st').textContent=dt.prev_st||''; });
+  }
+  function roda(t,atraso){
+    const dt=S.dados[t], tok=(TOK[t]=(TOK[t]||0)+1), cid=cidadeDe(t,dt), dia=diaDe(t,dt), iso=P.dataParaISO(dia,hoje());
+    dt.prev_key=cid+'|'+(iso||dia);
+    if(!cid||!iso){ if(!dt.prev_manual) dt.prev_txt=''; dt.prev_st=(!cid||!dia)?'Informe a cidade e a data para a previsão aparecer.':'Indisponível: data não entendida.'; render(); pinta(); return; }
+    dt.prev_st='Buscando...'; pinta();
+    clearTimeout(TIM[t]);
+    TIM[t]=setTimeout(()=>{
+      P.buscaPrevisao(cid,iso,hoje()).then(r=>{
+        if(TOK[t]!==tok) return;
+        if(r.ok){ if(!dt.prev_manual) dt.prev_txt=r.texto; dt.prev_st='Previsão de '+iso.slice(8)+'/'+iso.slice(5,7); }
+        else { if(!dt.prev_manual) dt.prev_txt=''; dt.prev_st='Indisponível: '+({passada:'data passada.',longe:'a data está a mais de 16 dias.',cidade:'cidade não achada.',faltam:'faltam cidade ou data.'}[r.erro]||'sem internet ou dados indisponíveis.'); }
+        render(); pinta();
+      });
+    },atraso===0?0:600);
+  }
+  window.checaPrev=function(){
+    const t=S.tipo, dt=S.dados[t]; if(!dt||TS.indexOf(t)<0) return;
+    const key=cidadeDe(t,dt)+'|'+(P.dataParaISO(diaDe(t,dt),hoje())||diaDe(t,dt));
+    if(dt.prev_key===key) return;
+    dt.prev_manual=false; dt.prev_key=key; dt.prev_st='Buscando...';
+    clearTimeout(TIM[t]); TOK[t]=(TOK[t]||0)+1; const tok=TOK[t]; pinta();
+    TIM[t]=setTimeout(()=>{ if(TOK[t]!==tok) return; dt.prev_key=null; roda(t,0); },600);
+  };
+  window.pintaPrev=pinta;
+  pinta(); window.checaPrev();
 })();
 </script>
 </body>

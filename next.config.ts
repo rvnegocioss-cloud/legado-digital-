@@ -33,6 +33,7 @@ const CSP_CANVAS = CSP
   .replace("script-src 'self' 'unsafe-inline'", "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com")
   .replace("style-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com")
   .replace("font-src 'self' data:", "font-src 'self' data: https://fonts.gstatic.com")
+  .replace("connect-src 'self'", "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com")
 
 const nextConfig: NextConfig = {
   images: {

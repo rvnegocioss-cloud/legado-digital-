@@ -172,7 +172,80 @@
     if (permitidos) Object.keys(out).forEach(function (k) { if (permitidos.indexOf(k) < 0) delete out[k]; });
     return out;
   }
-  var api = { extrair: extrair };
+  /* ---------- Previsão do tempo (Open-Meteo, sem chave). Funções puras + busca com fetch injetável ---------- */
+  var DIAS_SEM = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  function isoDe(a, m, d) { var t = new Date(Date.UTC(a, m - 1, d)); if (t.getUTCMonth() !== m - 1 || t.getUTCDate() !== d) return null; return a + '-' + p2(m) + '-' + p2(d); }
+  /* texto livre ("Terça-feira, 3 de novembro", "12 de novembro de 2026", "3/11") -> "AAAA-MM-DD" ou null. Sem ano: ano de hoje, ou o próximo se já passou há mais de 30 dias. */
+  function dataParaISO(txt, hojeISO) {
+    var s = sem(String(txt || '')), a, m, d, r;
+    var hj = hojeISO.split('-').map(Number);
+    if ((r = s.match(/(\d{1,2})\s*\/\s*(\d{1,2})(?:\s*\/\s*(\d{2,4}))?/))) { d = +r[1]; m = +r[2]; a = r[3] ? +r[3] : 0; }
+    else if ((r = s.match(/(\d{1,2})\s*(?:de\s+)?([a-z]+)(?:\s+de\s+(\d{4}))?/)) && mesNum(r[2])) { d = +r[1]; m = mesNum(r[2]); a = r[3] ? +r[3] : 0; }
+    else return null;
+    if (a && a < 100) a += 2000;
+    if (a) return isoDe(a, m, d);
+    var iso = isoDe(hj[0], m, d); if (!iso) return null;
+    var dif = (Date.parse(iso) - Date.parse(hojeISO)) / 86400000;
+    return dif < -30 ? isoDe(hj[0] + 1, m, d) : iso;
+  }
+  /* "Uberlândia - MG" / "Cemitério São Pedro — Uberlândia" -> "Uberlândia" */
+  function limpaCidade(s) {
+    s = String(s || '').trim(); if (!s) return '';
+    var partes = s.split(/\s+[—–-]\s+|\s*\/\s*|\s*,\s*/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (partes.length > 1 && /^[A-Za-z]{2}$/.test(partes[partes.length - 1])) partes.pop();
+    return partes[partes.length - 1] || '';
+  }
+  function condicao(c) {
+    if (c === 0) return 'Céu limpo';
+    if (c === 1) return 'Predominantemente limpo';
+    if (c === 2) return 'Parcialmente nublado';
+    if (c === 3) return 'Nublado';
+    if (c === 45 || c === 48) return 'Névoa';
+    if (c >= 51 && c <= 57) return 'Garoa';
+    if (c === 61 || c === 80) return 'Chuva fraca';
+    if (c === 63 || c === 81) return 'Chuva';
+    if (c === 65 || c === 82 || c === 67) return 'Chuva forte';
+    if (c === 66) return 'Chuva fraca';
+    if (c >= 71 && c <= 77 || c === 85 || c === 86) return 'Frio com neve';
+    if (c === 95 || c === 96 || c === 99) return 'Trovoadas';
+    return '';
+  }
+  function montaLinha(iso, cod, tmin, tmax, prob) {
+    var c = condicao(cod); if (!c || tmin == null || tmax == null || isNaN(tmin) || isNaN(tmax)) return '';
+    var p = iso.split('-').map(Number), dow = new Date(Date.UTC(p[0], p[1] - 1, p[2], 12)).getUTCDay();
+    var dia = DIAS_SEM[dow]; dia = dia.charAt(0).toUpperCase() + dia.slice(1);
+    var t = 'Previsão para ' + dia + ', ' + p[2] + ' de ' + MESES[p[1] - 1] + ': ' + c + ', ' + Math.round(tmin) + '° a ' + Math.round(tmax) + '°';
+    if (prob != null && !isNaN(prob)) t += ', chuva ' + Math.round(prob) + '%';
+    return t;
+  }
+  var CACHE_PREV = {};
+  /* devolve {ok:true,texto} ou {ok:false,erro:'passada'|'longe'|'cidade'|'rede'|'dados'} */
+  function buscaPrevisao(cidade, iso, hojeISO, fetchFn) {
+    cidade = limpaCidade(cidade);
+    if (!cidade || !iso) return Promise.resolve({ ok: false, erro: 'faltam' });
+    var dif = (Date.parse(iso) - Date.parse(hojeISO)) / 86400000;
+    if (dif < 0) return Promise.resolve({ ok: false, erro: 'passada' });
+    if (dif > 15) return Promise.resolve({ ok: false, erro: 'longe' });
+    var key = sem(cidade) + '|' + iso; if (CACHE_PREV[key]) return Promise.resolve(CACHE_PREV[key]);
+    var f = fetchFn || (typeof fetch !== 'undefined' ? fetch.bind(root) : null); if (!f) return Promise.resolve({ ok: false, erro: 'rede' });
+    return f('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(cidade) + '&count=1&language=pt&country=BR')
+      .then(function (r) { return r.json(); })
+      .then(function (g) {
+        var l = g && g.results && g.results[0]; if (!l) return { ok: false, erro: 'cidade' };
+        return f('https://api.open-meteo.com/v1/forecast?latitude=' + l.latitude + '&longitude=' + l.longitude + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=America%2FSao_Paulo&forecast_days=16')
+          .then(function (r) { return r.json(); })
+          .then(function (w) {
+            var d = w && w.daily, i = d && d.time ? d.time.indexOf(iso) : -1; if (i < 0) return { ok: false, erro: 'dados' };
+            var t = montaLinha(iso, d.weather_code[i], d.temperature_2m_min[i], d.temperature_2m_max[i], d.precipitation_probability_max ? d.precipitation_probability_max[i] : null);
+            if (!t) return { ok: false, erro: 'dados' };
+            return (CACHE_PREV[key] = { ok: true, texto: t });
+          });
+      })
+      .catch(function () { return { ok: false, erro: 'rede' }; });
+  }
+  function limpaCachePrevisao() { CACHE_PREV = {}; }
+  var api = { extrair: extrair, previsao: { dataParaISO: dataParaISO, limpaCidade: limpaCidade, condicao: condicao, montaLinha: montaLinha, buscaPrevisao: buscaPrevisao, limpaCache: limpaCachePrevisao } };
   root.LegadoExtrator = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
