@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { supabase } from '@/lib/supabase'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
 import FormularioLead from '@/components/public/FormularioLead'
 
@@ -50,11 +49,13 @@ export default function FamiliaLoginPage() {
     let cancelado = false
     setBuscando(true)
     const timer = setTimeout(async () => {
-      const { data } = await supabase.rpc('buscar_homenagens_publicas', { termo: nome })
+      // Rota própria da família: acha o memorial mesmo estando offline.
+      const res = await fetch(`/api/familia-busca?termo=${encodeURIComponent(nome)}`)
+      const json = res.ok ? await res.json() : { resultados: [] }
       // Resposta de uma busca antiga não pode sobrescrever a lista atual --
       // quem digita rápido dispara várias, e elas não voltam em ordem.
       if (cancelado) return
-      setResultados((data || []) as Resultado[])
+      setResultados((json.resultados || []) as Resultado[])
       setBuscando(false)
     }, 300)
 
