@@ -653,8 +653,12 @@ html {
 .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass .maplibregl-ctrl-icon {
   background-size: 34px 34px; background-position: center 5px; height: 100%;
 }
-.mapa-publico-3d .rotulo-bussola-3d {
-  position: absolute; right: 11px; bottom: 28px; width: 80px; z-index: 2; pointer-events: none;
-  font-size: 11px; line-height: 13px; font-weight: 700; text-align: center;
-  color: #0B1D2A; white-space: normal;
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass { position: relative; }
+.mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass::after {
+  content: 'Clique aqui: 3D'; position: absolute; left: 0; right: 0; bottom: 4px; padding: 0 4px;
+  font-size: 11px; line-height: 13px; font-weight: 700; text-align: center; color: #0B1D2A; pointer-events: none;
 }
+@media (hover: none) {
+  .mapa-publico-3d .maplibregl-ctrl-bottom-right .maplibregl-ctrl-compass::after { content: 'Toque aqui: 3D'; }
+}
+.mapa-publico-3d .rotulo-bussola-3d { display: none; }
