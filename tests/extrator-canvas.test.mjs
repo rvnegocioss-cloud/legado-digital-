@@ -43,3 +43,27 @@ test('critério: acerto >= 70% e no máximo 2 errados preenchidos', () => {
   assert.ok(cert / tot >= 0.7, 'acerto ' + cert + '/' + tot);
   assert.ok(errados <= 2, 'errados ' + errados);
 });
+
+// ---- Template 1 Retrato: endereço e versículo (extrairExtra, só adição) ----
+const { extrairExtra } = createRequire(import.meta.url)('../public/canvas-legado/extrator.js');
+test('retrato: acha rua, bairro e cidade/UF da missa', () => {
+  const r = extrairExtra('Missa de sétimo dia no Santuário Nossa Senhora Aparecida, Praça Nossa Senhora Aparecida, nº 100, bairro Nossa Senhora Aparecida, Uberlândia/MG, terça às 19h', 'missa');
+  assert.equal(r.end_rua?.valor, 'Praça Nossa Senhora Aparecida, nº 100');
+  assert.equal(r.end_bairro?.valor, 'Nossa Senhora Aparecida');
+  assert.equal(r.end_cidade_uf?.valor, 'Uberlândia/MG');
+});
+test('retrato: avenida com número e cidade com hífen no convite', () => {
+  const r = extrairExtra('Velório na capela, Av. João Naves de Ávila, 2121, bairro Santa Mônica, Uberlândia - MG', 'convite');
+  assert.equal(r.end_rua?.valor, 'Av. João Naves de Ávila, 2121');
+  assert.equal(r.end_bairro?.valor, 'Santa Mônica');
+  assert.equal(r.end_cidade_uf?.valor, 'Uberlândia/MG');
+});
+test('retrato: versículo entre aspas com referência bíblica', () => {
+  const r = extrairExtra('Missa terça. “Eu sou a ressurreição e a vida. Quem acredita em mim, ainda que tenha morrido, viverá.” João 11,25 A família agradece.', 'missa');
+  assert.equal(r.versiculo?.valor, '“Eu sou a ressurreição e a vida. Quem acredita em mim, ainda que tenha morrido, viverá.” — João 11,25');
+  assert.equal(r.versiculo?.confianca, 'alta');
+});
+test('retrato: nada inventado sem endereço/versículo e nada no santinho', () => {
+  assert.deepEqual(extrairExtra('Missa de sétimo dia na terça às 19h na igreja matriz de Uberlândia', 'missa'), {});
+  assert.deepEqual(extrairExtra('Rua das Flores, 10, bairro Centro, Uberlândia/MG “Deus é amor e fidelidade sempre.” Salmo 23,1', 'santinho'), {});
+});

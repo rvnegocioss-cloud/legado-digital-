@@ -246,6 +246,28 @@
   }
   function limpaCachePrevisao() { CACHE_PREV = {}; }
   var api = { extrair: extrair, previsao: { dataParaISO: dataParaISO, limpaCidade: limpaCidade, condicao: condicao, montaLinha: montaLinha, buscaPrevisao: buscaPrevisao, limpaCache: limpaCachePrevisao } };
+  // ---- Template 1 Retrato (so adicao): endereco e versiculo. Fica fora de extrair() de proposito. ----
+  var UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ');
+  function extrairExtra(texto, tipo) {
+    var out = {};
+    if (tipo !== 'missa' && tipo !== 'convite') return out;
+    var T = String(texto || '').replace(/\s+/g, ' ').trim();
+    var put = function (k, v, c) { v = String(v || '').trim().replace(/[,;.\s]+$/, ''); if (v) out[k] = { valor: v, confianca: c || 'alta' }; };
+    var mr = T.match(/\b(?:Rua|Avenida|Av\.|Travessa|Tv\.|Pra[çc]a|Alameda|Rodovia)\s+[A-Za-zÀ-ÿ][^,;.\n]*?(?:,\s*(?:n[ºo°.]*\s*)?|\s+n[ºo°.]*\s*|\s+)\d{1,5}[A-Za-z]?\b/);
+    if (mr) put('end_rua', mr[0]);
+    var mb = T.match(/\b[Bb]airro\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'’ ]*?)(?=\s*(?:[,;.\/-]|\s+(?:em|na|no|às|as|dia|hoje|amanh)\b|$))/);
+    if (mb) put('end_bairro', mb[1]);
+    var re = /\b((?:[A-ZÀ-Ý][a-zà-ÿ]+\s+(?:d[aeo]s?\s+)?)?[A-ZÀ-Ý][a-zà-ÿ]+)\s*[\/\-–]\s*([A-Z]{2})\b/g, mc;
+    while ((mc = re.exec(T))) {
+      if (UFS.indexOf(mc[2]) < 0) continue;
+      var cid = mc[1]; if (out.end_bairro && cid.indexOf(out.end_bairro.valor) === 0) cid = cid.slice(out.end_bairro.valor.length).trim();
+      if (cid) { put('end_cidade_uf', cid + '/' + mc[2]); break; }
+    }
+    var mv = T.match(/[“"]([^”"]{15,300})[”"]\s*[-–—,(]?\s*((?:[1-3]\s?)?[A-ZÀ-Ý][a-zà-ÿ]{1,12}\.?\s+\d{1,3}\s*[,.:]\s*\d{1,3}(?:\s*[-–]\s*\d{1,3})?)?/);
+    if (mv) put('versiculo', '“' + mv[1].trim() + '”' + (mv[2] ? ' — ' + mv[2].trim() : ''), mv[2] ? 'alta' : 'media');
+    return out;
+  }
+  api.extrairExtra = extrairExtra;
   root.LegadoExtrator = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
