@@ -1,0 +1,128 @@
+[
+ {
+  "id": "vitral",
+  "nome": "Vitral dourado",
+  "grupo": "Igreja e fé",
+  "arquivo": "fundo_01_vitral.webp",
+  "mini": "fundo_01_vitral_mini.webp",
+  "tom": "escuro",
+  "veu": 0.7
+ },
+ {
+  "id": "cruz_colina",
+  "nome": "Cruz na colina",
+  "grupo": "Igreja e fé",
+  "arquivo": "fundo_02_cruz_colina.webp",
+  "mini": "fundo_02_cruz_colina_mini.webp",
+  "tom": "escuro",
+  "veu": 0.7
+ },
+ {
+  "id": "pomba",
+  "nome": "Pomba e luz",
+  "grupo": "Igreja e fé",
+  "arquivo": "fundo_03_pomba.webp",
+  "mini": "fundo_03_pomba_mini.webp",
+  "tom": "escuro",
+  "veu": 0.5
+ },
+ {
+  "id": "nsa_flores",
+  "nome": "Nossa Senhora com flores",
+  "grupo": "Igreja e fé",
+  "arquivo": "fundo_04_nsa_flores.webp",
+  "mini": "fundo_04_nsa_flores_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "nsa_hortensias",
+  "nome": "Nossa Senhora com hortênsias",
+  "grupo": "Igreja e fé",
+  "arquivo": "fundo_05_nsa_hortensias.webp",
+  "mini": "fundo_05_nsa_hortensias_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "ceu_rosado",
+  "nome": "Céu rosado",
+  "grupo": "Céu e luz",
+  "arquivo": "fundo_06_ceu_rosado.webp",
+  "mini": "fundo_06_ceu_rosado_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "ceu_dourado",
+  "nome": "Céu dourado",
+  "grupo": "Céu e luz",
+  "arquivo": "fundo_07_ceu_dourado.webp",
+  "mini": "fundo_07_ceu_dourado_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "ceu_raios",
+  "nome": "Raios de sol",
+  "grupo": "Céu e luz",
+  "arquivo": "fundo_08_ceu_raios.webp",
+  "mini": "fundo_08_ceu_raios_mini.webp",
+  "tom": "escuro",
+  "veu": 0.5
+ },
+ {
+  "id": "rosas_nevoa",
+  "nome": "Rosas em névoa",
+  "grupo": "Flores",
+  "arquivo": "fundo_09_rosas_nevoa.webp",
+  "mini": "fundo_09_rosas_nevoa_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "lirios",
+  "nome": "Lírios",
+  "grupo": "Flores",
+  "arquivo": "fundo_10_lirios.webp",
+  "mini": "fundo_10_lirios_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "rosas_brancas",
+  "nome": "Rosas brancas",
+  "grupo": "Flores",
+  "arquivo": "fundo_11_rosas_brancas.webp",
+  "mini": "fundo_11_rosas_brancas_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "aquarela_dourada",
+  "nome": "Aquarela dourada",
+  "grupo": "Texturas",
+  "arquivo": "fundo_12_aquarela_dourada.webp",
+  "mini": "fundo_12_aquarela_dourada_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "onix_claro",
+  "nome": "Ônix claro",
+  "grupo": "Texturas",
+  "arquivo": "fundo_13_onix_claro.webp",
+  "mini": "fundo_13_onix_claro_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ },
+ {
+  "id": "aquarela_rosada",
+  "nome": "Aquarela rosada",
+  "grupo": "Texturas",
+  "arquivo": "fundo_14_aquarela_rosada.webp",
+  "mini": "fundo_14_aquarela_rosada_mini.webp",
+  "tom": "claro",
+  "veu": 0.3
+ }
+]

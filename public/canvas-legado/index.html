@@ -277,6 +277,18 @@ details.fino summary{cursor:pointer;color:#C9A46A;font:600 12px Inter,sans-serif
     <div class="molgrid" id="s-mold"></div>
     <div class="aviso">A foto entra dentro da moldura; a cor segue a paleta. Sem foto, fica a cruz.</div>
     </section>
+    <section data-aba="fundo">
+    <h2>Fundo da peça</h2>
+    <div class="aviso">Escolha uma imagem para ficar atrás de tudo. O fundo vale só para esta peça. Sem fundo, a peça fica como sempre foi.</div>
+    <div id="fundo-gal"></div>
+    <div id="fundo-ctl">
+      <label class="c" for="fd-tr">Transparência do fundo: <b id="fd-tr-v"></b></label><input type="range" id="fd-tr" min="0" max="100" step="1">
+      <label class="c" for="fd-bl">Desfoque: <b id="fd-bl-v"></b></label><input type="range" id="fd-bl" min="0" max="12" step="1">
+      <label class="c" for="fd-veu">Véu na cor da paleta: <b id="fd-veu-v"></b></label><input type="range" id="fd-veu" min="0" max="80" step="1">
+      <div style="margin-top:8px"><button class="btn peq" id="fd-tirar" type="button">Tirar fundo</button></div>
+    </div>
+    <div class="aviso" id="fundo-nota" role="status" aria-live="polite"></div>
+    </section>
     <section data-aba="enfeites">
     <h2>Textos e foto da peça</h2>
     <div id="blk-lista"></div>
@@ -1407,6 +1419,70 @@ const CAMPOS=[['versiculo','Versículo (opcional)','ta'],['agradecimento','Frase
     const r=LegadoExtrator.extrairExtra($('leg-txt').value,S.tipo), box=$('leg-prev'), ref=box.querySelector('.seg');
     Object.keys(ROT2).forEach(k=>{ if(!r[k]) return; const d=document.createElement('div'); d.className='lgr'; d.innerHTML='<label>'+ROT2[k]+'</label><input type="text">'; const i=d.querySelector('input'); i.value=r[k].valor; ACH2[k]=r[k].valor; if(r[k].confianca!=='alta'){ i.style.background='#fff3c4'; i.style.color='#222'; } i.oninput=()=>{ ACH2[k]=i.value; }; box.insertBefore(d,ref); }); });
   document.addEventListener('click',e=>{ if(e.target&&e.target.id==='leg-conf'){ Object.keys(ACH2).forEach(k=>{ const v=(ACH2[k]||'').trim(); if(v&&S.dados[S.tipo]&&(k in S.dados[S.tipo])) S.dados[S.tipo][k]=v; }); ACH2={}; } },true); }
+/* ---- aba Fundo (E4): camada 0 atras de tudo. Sem fundo escolhido, o render fica exatamente como antes ---- */
+const FUNDOS=[["vitral","Vitral dourado","Igreja e fé","fundo_01_vitral.webp","fundo_01_vitral_mini.webp","escuro",0.7],["cruz_colina","Cruz na colina","Igreja e fé","fundo_02_cruz_colina.webp","fundo_02_cruz_colina_mini.webp","escuro",0.7],["pomba","Pomba e luz","Igreja e fé","fundo_03_pomba.webp","fundo_03_pomba_mini.webp","escuro",0.5],["nsa_flores","Nossa Senhora com flores","Igreja e fé","fundo_04_nsa_flores.webp","fundo_04_nsa_flores_mini.webp","claro",0.3],["nsa_hortensias","Nossa Senhora com hortênsias","Igreja e fé","fundo_05_nsa_hortensias.webp","fundo_05_nsa_hortensias_mini.webp","claro",0.3],["ceu_rosado","Céu rosado","Céu e luz","fundo_06_ceu_rosado.webp","fundo_06_ceu_rosado_mini.webp","claro",0.3],["ceu_dourado","Céu dourado","Céu e luz","fundo_07_ceu_dourado.webp","fundo_07_ceu_dourado_mini.webp","claro",0.3],["ceu_raios","Raios de sol","Céu e luz","fundo_08_ceu_raios.webp","fundo_08_ceu_raios_mini.webp","escuro",0.5],["rosas_nevoa","Rosas em névoa","Flores","fundo_09_rosas_nevoa.webp","fundo_09_rosas_nevoa_mini.webp","claro",0.3],["lirios","Lírios","Flores","fundo_10_lirios.webp","fundo_10_lirios_mini.webp","claro",0.3],["rosas_brancas","Rosas brancas","Flores","fundo_11_rosas_brancas.webp","fundo_11_rosas_brancas_mini.webp","claro",0.3],["aquarela_dourada","Aquarela dourada","Texturas","fundo_12_aquarela_dourada.webp","fundo_12_aquarela_dourada_mini.webp","claro",0.3],["onix_claro","Ônix claro","Texturas","fundo_13_onix_claro.webp","fundo_13_onix_claro_mini.webp","claro",0.3],["aquarela_rosada","Aquarela rosada","Texturas","fundo_14_aquarela_rosada.webp","fundo_14_aquarela_rosada_mini.webp","claro",0.3]].map(a=>({id:a[0],nome:a[1],grupo:a[2],arquivo:a[3],mini:a[4],tom:a[5],veu:a[6]}));
+S.fundo={}; /* por peca: undefined = nunca escolheu; {id:null} = sem fundo; {id,tr,bl,veu} */
+ABAS.splice(4,0,['fundo','Fundo']);
+{ const st=document.createElement('style'); st.textContent='.abas{grid-template-columns:repeat(5,1fr)}.abas button{font-size:11.5px}#fundo-gal h3{margin:12px 0 6px;font:600 12px Inter,sans-serif;color:#d9b777}.fd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.fd-grid .mcard{padding:4px}.fd-grid img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:4px;display:block;background:#16293a}.fd-grid .none{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:9/16;border-radius:4px;background:#16293a;font-size:22px}#fundo-ctl{margin-top:12px}#fundo-ctl input[type=range]{width:100%}#fundo-ctl b{color:#d9b777}'; document.head.appendChild(st); }
+const FI={}, FBAKE={}, FVEU={}; let FEL=null, FUNDO_OFF=false, FUNDO_EXPORT=false, FUNDO_FALHOU=false;
+const fundoDef=id=>FUNDOS.find(f=>f.id===id);
+function fundoAtual(){ const f=S.fundo[S.tipo]; return f&&f.id&&fundoDef(f.id)?f:null; }
+function fundoCria(id){ const d=fundoDef(id); return {id,tr:d.tom==='escuro'?25:35,bl:0,veu:Math.round(d.veu*100)}; }
+function fundoImg(id){ let i=FI[id]; if(!i){ i=FI[id]=new Image(); i.onload=()=>{ render(); }; i.onerror=()=>{ i.erro=true; render(); }; i.src='fundos/'+fundoDef(id).arquivo; } return (i.complete&&i.naturalWidth)?i:null; }
+function fundoCarrega(id){ return new Promise((ok,no)=>{ let i=fundoImg(id); if(i) return ok(i); if(FI[id].erro){ delete FI[id]; fundoImg(id); } i=FI[id]; const t=setTimeout(()=>no(new Error('tempo')),15000);
+  i.addEventListener('load',()=>{ clearTimeout(t); ok(i); }); i.addEventListener('error',()=>{ clearTimeout(t); no(new Error('fundo')); }); if(i.complete&&i.naturalWidth){ clearTimeout(t); ok(i); } }); }
+/* html2canvas nao faz filter:blur: o desfoque e assado num canvas fora da tela (com sobra nas bordas) e vira dataURL */
+function fundoBake(id,bl,W,H,png){ const key=[id,bl,W,H,png?1:0].join('|'); if(FBAKE[key]) return FBAKE[key]; if(Object.keys(FBAKE).length>6) Object.keys(FBAKE).forEach(k=>delete FBAKE[k]);
+  const im=FI[id], c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d'); const m=bl*2;
+  if(bl>0) x.filter='blur('+bl+'px)'; const dw=W+2*m, dh=H+2*m, k=Math.max(dw/im.width,dh/im.height), w=im.width*k, h=im.height*k; x.drawImage(im,(W-w)/2,(H-h)/2,w,h);
+  return FBAKE[key]={url:png?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.92)}; }
+/* veu efetivo: sobe sozinho (ate 85%) se o texto da paleta ficar abaixo de 4.5:1 sobre o fundo+veu */
+function fundoVeu(f,pc,H){ const cs=getComputedStyle(pc), bg=rgbDe(cs.getPropertyValue('--bg2')), tx=rgbDe(cs.getPropertyValue('--txt'));
+  const key=[f.id,f.tr,f.veu,bg.join(),tx.join(),H].join('|'); if(FVEU[key]) return FVEU[key];
+  const base=f.veu/100; let res={v:base,aj:false,ratio:null};
+  try{ const im=FI[f.id], w=108, h=Math.max(8,Math.round(H/10)), c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d');
+    x.fillStyle=rgbCss(bg); x.fillRect(0,0,w,h); x.globalAlpha=1-f.tr/100; const k=Math.max(w/im.width,h/im.height), iw=im.width*k, ih=im.height*k; x.drawImage(im,(w-iw)/2,(h-ih)/2,iw,ih);
+    const d=x.getImageData(0,0,w,h).data, px=[]; for(let yy=Math.floor(h*.03);yy<h*.97;yy++) for(let xx=Math.floor(w*.08);xx<w*.92;xx++){ const o=(yy*w+xx)*4; px.push(d[o],d[o+1],d[o+2]); }
+    const Lt=lumRel(tx), at=v=>{ let s=0; for(let i=0;i<px.length;i+=3) s+=lumRel([px[i]*(1-v)+bg[0]*v,px[i+1]*(1-v)+bg[1]*v,px[i+2]*(1-v)+bg[2]*v]); const Lm=s/(px.length/3); return (Math.max(Lt,Lm)+.05)/(Math.min(Lt,Lm)+.05); };
+    let v=base, r=at(v); while(r<4.5&&v<.85){ v=Math.min(.85,v+.03); r=at(v); } res={v,aj:v>base+.001,ratio:r}; }catch(e){ res.erro=String(e); }
+  return FVEU[key]=res; }
+function fundoCamada(){
+  const pc=$('peca'), nota=$('fundo-nota'), f=fundoAtual(); window.FUNDO_INFO=null; if(nota) nota.textContent='';
+  if(!f||FUNDO_OFF) return;
+  const im=fundoImg(f.id); if(!im){ if(nota) nota.textContent=FI[f.id]&&FI[f.id].erro?'Não foi possível carregar este fundo (sem conexão?). A peça fica sem fundo.':'Carregando fundo...'; return; }
+  const H=FORM[S.fmt].h, r=fundoVeu(f,pc,H), bg=rgbDe(getComputedStyle(pc).getPropertyValue('--bg2')), key=[f.id,f.tr,f.bl,r.v.toFixed(3),bg.join(),H,FUNDO_EXPORT?1:0].join('|');
+  if(!FEL||FEL.key!==key){ const src=(f.bl>0||FUNDO_EXPORT)?fundoBake(f.id,f.bl,1080,H,FUNDO_EXPORT).url:im.src, el=document.createElement('div'); el.className='fundo-camada'; el.setAttribute('aria-hidden','true'); el.style.cssText='position:absolute;left:0;top:0;width:1080px;height:'+H+'px;overflow:hidden;pointer-events:none';
+    el.innerHTML='<img class="fundo-img" alt="" src="'+src+'" style="position:absolute;left:0;top:0;width:1080px;height:'+H+'px;object-fit:cover;opacity:'+(1-f.tr/100).toFixed(3)+'"><div class="fundo-veu" style="position:absolute;left:0;top:0;width:1080px;height:'+H+'px;background:'+rgbCss(bg)+';opacity:'+r.v.toFixed(3)+'"></div>'; FEL={key,el}; }
+  pc.insertBefore(FEL.el,pc.firstChild);
+  window.FUNDO_INFO={ratio:r.ratio,veu:r.v,ajustado:r.aj};
+  if(nota&&r.aj) nota.textContent='Véu ajustado para o texto ficar legível ('+Math.round(r.v*100)+'%).';
+}
+{ const _r=render; render=function(){ _r(); fundoCamada(); }; }
+{ const _g=gerarCanvas; gerarCanvas=async function(m){ const f=fundoAtual(), msg=$('msg'); FUNDO_OFF=false; FUNDO_EXPORT=false; FUNDO_FALHOU=false;
+    if(f){ msg.className='aviso'; msg.textContent='Carregando fundo...';
+      try{ const im=await fundoCarrega(f.id); if(im.decode) await im.decode(); FUNDO_EXPORT=true; fundoBake(f.id,f.bl,1080,FORM[S.fmt].h,true); render(); const el=document.querySelector('.fundo-img'); if(el&&el.decode) await el.decode(); }
+      catch(e){ FUNDO_OFF=true; FUNDO_EXPORT=false; FUNDO_FALHOU=true; render(); } }
+    try{ return await _g(m); } finally{ FUNDO_EXPORT=false; FUNDO_OFF=false; render(); if(FUNDO_FALHOU){ setTimeout(()=>{ msg.className='aviso err'; msg.textContent='Não consegui carregar o fundo (sem conexão?). A imagem foi gerada sem fundo.'; },60); } } }; }
+/* estado do fundo entra no Desfazer */
+{ const _se=snapEstado; snapEstado=function(){ const o=JSON.parse(_se()); o.fundo=JSON.parse(JSON.stringify(S.fundo)); return JSON.stringify(o); };
+  const _d=desfaz; desfaz=function(){ const ult=HIST[HIST.length-1]; _d(); if(ult){ try{ const o=JSON.parse(ult); if(o.fundo){ S.fundo=o.fundo; painel(); render(); } }catch(e){} } };
+  $('b-undo').onclick=desfaz; $('b-undo2').onclick=desfaz; }
+/* Template 1 Retrato: fundo Ceu dourado ligado na primeira vez, numa peca sem fundo escolhido (continua editavel e removivel) */
+{ const _ta=tnAplica; tnAplica=function(id,old){ _ta(id,old); if(id==='retrato'&&S.fundo[S.tipo]===undefined) S.fundo[S.tipo]=fundoCria('ceu_dourado'); }; }
+/* painel */
+function fundoEscolhe(id){ snap(); S.fundo[S.tipo]=id?fundoCria(id):{id:null}; if(id) fundoImg(id); painel(); render(); }
+{ const G=$('fundo-gal'); const mk=(nome,inner,id)=>{ const b=document.createElement('button'); b.type='button'; b.className='mcard'; b.dataset.fd=id||''; b.innerHTML=inner+'<span>'+nome+'</span>'; b.onclick=()=>fundoEscolhe(id); return b; };
+  let g=document.createElement('div'); g.className='fd-grid'; g.appendChild(mk('Sem fundo','<span class="none">—</span>','')); G.appendChild(g);
+  ['Céu e luz','Igreja e fé','Flores','Texturas'].forEach(gr=>{ const h=document.createElement('h3'); h.textContent=gr; G.appendChild(h); g=document.createElement('div'); g.className='fd-grid';
+    FUNDOS.filter(f=>f.grupo===gr).forEach(f=>{ const b=mk(f.nome,'<img loading="lazy" alt="" src="fundos/'+f.mini+'">',f.id); g.appendChild(b); }); G.appendChild(g); });
+  const un={tr:'%',bl:' px',veu:'%'};
+  ['tr','bl','veu'].forEach(k=>{ const i=$('fd-'+k); let sn=false;
+    i.addEventListener('input',()=>{ const f=S.fundo[S.tipo]; if(!f||!f.id) return; if(!sn){ snap(); sn=true; } f[k]=+i.value; $('fd-'+k+'-v').textContent=i.value+un[k]; render(); });
+    i.addEventListener('change',()=>{ sn=false; }); });
+  $('fd-tirar').onclick=()=>{ if(!fundoAtual()) return; fundoEscolhe(''); };
+  const fundoPinta=()=>{ const f=fundoAtual(); G.querySelectorAll('button[data-fd]').forEach(b=>b.setAttribute('aria-pressed',f?b.dataset.fd===f.id:b.dataset.fd===''));
+    ['tr','bl','veu'].forEach(k=>{ const i=$('fd-'+k); i.disabled=!f; if(f&&document.activeElement!==i) i.value=f[k]; $('fd-'+k+'-v').textContent=f?f[k]+un[k]:'—'; }); $('fd-tirar').disabled=!f; };
+  const _p=painel; painel=function(){ _p(); fundoPinta(); }; }
 painel();
 })();
 </script>
