@@ -6,8 +6,8 @@ import { urlMidiaProtegida } from '@/lib/urlMidia'
 // não uma ilustração. Saiu de dentro de app/(site)/page.tsx em 2026-10-09,
 // quando a página do parceiro passou a usar o mesmo bloco.
 //
-// Sem `preferidos`, pega o primeiro cemitério público que já tem ortomosaico
-// de drone (hoje o São Pedro, Uberlândia). Com `preferidos` (slugs dos
+// Sem `preferidos`, pega o São Pedro (Uberlândia); se ele não tiver mapa, o
+// primeiro cemitério público com ortomosaico de drone. Com `preferidos` (slugs dos
 // cemitérios onde aquele parceiro atua), tenta um deles primeiro e só cai no
 // geral se nenhum tiver mapa aéreo. Se nada tiver, devolve null e o bloco
 // some em vez de mostrar um retângulo vazio.
@@ -67,9 +67,12 @@ export async function buscarCemiterioDestaque(preferidos: string[] = []): Promis
     }
   }
 
+  // Padrão da landing: São Pedro primeiro (tem memorial real). Outros só entram
+  // se ele não tiver mapa.
+  const prioridade = preferidos.length ? preferidos : ['cemiterio-sao-pedro']
   const ordenados = [
-    ...comMapa.filter((x) => preferidos.includes(x.slug)),
-    ...comMapa.filter((x) => !preferidos.includes(x.slug)),
+    ...comMapa.filter((x) => prioridade.includes(x.slug)),
+    ...comMapa.filter((x) => !prioridade.includes(x.slug)),
   ]
   for (const x of ordenados) {
     const achado = await carregar(x.cidade, x.slug, preferidos.includes(x.slug))
