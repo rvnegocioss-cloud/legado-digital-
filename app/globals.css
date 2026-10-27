@@ -655,3 +655,4 @@ html {
   font-size: 11px; line-height: 16px; padding: 0 6px; border-radius: 4px;
   background: rgba(11, 29, 42, 0.85); color: #e8eef3; white-space: nowrap;
 }
+.mapa-publico-3d .seta-bussola-3d { color: #C9A46A; font-weight: 700; font-size: 14px; }

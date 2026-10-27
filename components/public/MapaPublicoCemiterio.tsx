@@ -423,7 +423,7 @@ export default function MapaPublicoCemiterio({
         </Map>
 
         <span className="rotulo-bussola-3d" aria-hidden="true">
-          {toque ? 'Toque aqui: 3D' : 'Clique aqui: 3D'}
+          <span className="seta-bussola-3d">↑</span> {toque ? 'Toque aqui: 3D' : 'Clique aqui: 3D'}
         </span>
 
         {/* Em tela cheia o rodapé do mapa some, então o botão de fechar fica no
