@@ -27,6 +27,13 @@ const CSP = [
   "upgrade-insecure-requests",
 ].join('; ')
 
+// Canvas Legado (2026-10-28): editor estático em /canvas-legado/* carrega
+// html2canvas e jsPDF do cdnjs e fontes do Google. Afrouxa SÓ esse path.
+const CSP_CANVAS = CSP
+  .replace("script-src 'self' 'unsafe-inline'", "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com")
+  .replace("style-src 'self' 'unsafe-inline'", "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com")
+  .replace("font-src 'self' data:", "font-src 'self' data: https://fonts.gstatic.com")
+
 const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowSVG: true,
@@ -44,6 +51,10 @@ const nextConfig: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
         ],
+      },
+      {
+        source: '/canvas-legado/:path*',
+        headers: [{ key: 'Content-Security-Policy', value: CSP_CANVAS }],
       },
     ]
   },
