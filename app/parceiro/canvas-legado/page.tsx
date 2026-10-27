@@ -10,6 +10,7 @@ export default function CanvasLegado() {
       <iframe
         src="/canvas-legado/index.html"
         title="Canvas Legado"
+        allow="microphone"
         className="w-full border-0 rounded-lg bg-white"
         style={{ height: 'calc(100vh - 140px)', minHeight: 640 }}
       />

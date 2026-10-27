@@ -35,6 +35,10 @@ const CSP_CANVAS = CSP
   .replace("font-src 'self' data:", "font-src 'self' data: https://fonts.gstatic.com")
   .replace("connect-src 'self'", "connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com")
 
+// Página do portal que embute o Canvas por iframe same-origin: libera frame-src 'self'
+// (o CSP global só deixa o YouTube) e o microfone pro iframe. Só esse path.
+const CSP_PORTAL_CANVAS = CSP.replace("frame-src https://www.youtube.com", "frame-src 'self' https://www.youtube.com")
+
 const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowSVG: true,
@@ -51,6 +55,13 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
+        ],
+      },
+      {
+        source: '/parceiro/canvas-legado',
+        headers: [
+          { key: 'Content-Security-Policy', value: CSP_PORTAL_CANVAS },
+          { key: 'Permissions-Policy', value: 'microphone=(self), camera=(), geolocation=(self)' },
         ],
       },
       {
