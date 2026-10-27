@@ -30,6 +30,7 @@ export default function PainelRuas({
   editavel,
   salvando,
   desenhandoRua,
+  desenhandoCurva,
   desenho,
   ruaEmEdicao,
   diagnostico,
@@ -50,13 +51,14 @@ export default function PainelRuas({
   editavel: boolean
   salvando: boolean
   desenhandoRua: boolean
+  desenhandoCurva: boolean
   desenho: DesenhoApi
   ruaEmEdicao: Rua | null
   diagnostico: DiagnosticoRede | null
   temEntrada: boolean
   modoTestarRota: boolean
   rotaTeste: ResultadoRota | null
-  onNovaRua: () => void
+  onNovaRua: (modo: 'lapis' | 'pontos') => void
   onRenomear: (ruaId: string, nome: string) => void
   onAlternarTipo: (rua: Rua) => void
   onTravar: (rua: Rua) => void
@@ -72,6 +74,7 @@ export default function PainelRuas({
   // menu pra fora da tela. Diagnostico e "Testar rota" ficam SEMPRE visiveis
   // (sao o que se olha o tempo todo); so a lista item-a-item recolhe.
   const [listaAberta, setListaAberta] = useState(false)
+  const [menuNova, setMenuNova] = useState(false)
   const ordenadas = ruas.slice().sort((a, b) => a.numero - b.numero)
   const principais = ordenadas.filter((r) => r.tipo !== 'secundaria')
   const secundarias = ordenadas.filter((r) => r.tipo === 'secundaria')
@@ -85,9 +88,41 @@ export default function PainelRuas({
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-sm font-semibold text-white">Ruas (caminhos internos) · {ruas.length}</h2>
         {editavel && (
-          <button type="button" disabled={salvando || desenho.ativo} onClick={onNovaRua} className="text-xs flex items-center gap-1 hover:opacity-80 disabled:opacity-40" style={{ color: '#a855f7' }}>
-            <Plus size={12} strokeWidth={2} /> Nova rua
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              disabled={salvando || desenho.ativo || desenhandoCurva}
+              onClick={() => setMenuNova((v) => !v)}
+              className="text-xs font-semibold flex items-center gap-1 rounded px-2.5 py-1.5 hover:opacity-90 disabled:opacity-40"
+              style={{ background: '#c9a24b', color: '#111' }}
+            >
+              <Plus size={12} strokeWidth={1.5} /> Nova rua
+            </button>
+            {menuNova && (
+              <div className="absolute right-0 top-full mt-1 z-20 rounded-lg border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-900)] shadow-xl py-1 min-w-[210px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuNova(false)
+                    onNovaRua('lapis')
+                  }}
+                  className="block w-full text-left text-xs px-3 py-2 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
+                >
+                  Desenhar com lápis
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuNova(false)
+                    onNovaRua('pontos')
+                  }}
+                  className="block w-full text-left text-xs px-3 py-2 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
+                >
+                  Desenhar clicando pontos
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
       <p className="text-xs text-[var(--tema-zinc-500)] mb-3">

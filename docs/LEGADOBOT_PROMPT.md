@@ -193,3 +193,7 @@ Na aba Templates do Canvas Legado (Portal do Parceiro) o Template 1 "Retrato" (F
 
 ## Canvas Legado: aba Fundo (2026-10-27)
 Na aba Fundo (entre Foto e Cor) a pessoa escolhe uma imagem para ficar atras de tudo na peca atual (missa, convite e santinho tem fundos separados). Sao 14 fundos em 4 grupos: Ceu e luz, Igreja e fe, Flores e Texturas. Controles: Transparencia do fundo (0-100), Desfoque (0-12 px) e Veu na cor da paleta (0-80%). O veu sobe sozinho para o texto ficar legivel e o editor avisa. "Tirar fundo" remove; Ctrl+Z desfaz; "Voltar ao modelo" nao apaga o fundo. Sem fundo escolhido a peca fica como antes. O Template 1 Retrato ja vem com o fundo Ceu dourado, que pode ser trocado ou removido. A imagem baixada inclui o fundo.
+
+- **Desenhar e curvar ruas no mapa do cemitério (Central, aba Ruas):** botão "+ Nova rua" (lápis à mão livre ou clicando pontos; Enter, duplo clique ou "Concluir a rua" termina). Com a rua em edição, a bolinha branca no meio de cada trecho curva ao arrastar (duplo clique volta reta). Bandeira na ponta: Rua principal, Rua dos túmulos, Continuar com lápis, Continuar clicando pontos. Rua travada não edita.
+
+- **Portal do Parceiro aberto pela Central:** faixa amarela no topo com o botão "← Voltar pra Central" (volta pra página de onde a pessoa veio).

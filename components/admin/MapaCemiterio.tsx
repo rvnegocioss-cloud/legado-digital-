@@ -13,6 +13,9 @@ import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
 import { useDesenhoNoMapa } from './mapa/useDesenhoNoMapa'
 import { BarraDesenho } from './mapa/BarraDesenho'
 import PainelRuas from './mapa/PainelRuas'
+import BolinhaCurva from './mapa/BolinhaCurva'
+import { simplificarLinha } from '@/lib/simplificarLinha'
+import { ancorasIniciais, controleDoPuxador, montarEixo, pontoMedioTrecho } from '@/lib/curvaRua'
 import { centroide, comprimentoPolilinha, deMetrosLocal, distanciaMetros, projetarLocal } from '@/lib/geo'
 import { lerCoordenada, ROTULO_ORIGEM_COORDENADA, type CoordenadaLida } from '@/lib/parseCoordenada'
 import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, medirPassoEntreFileiras, validarEspacamento } from '@/lib/enderecoTumulo'
@@ -139,6 +142,14 @@ interface Fila {
   geometria_revisada: boolean
 }
 
+interface DesRua {
+  modo: 'lapis' | 'pontos'
+  ruaId: string | null
+  ponta: 'inicio' | 'fim'
+  base: [number, number][]
+  pts: [number, number][]
+}
+
 interface Rua {
   id: string
   numero: number
@@ -201,6 +212,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [filas, setFilas] = useState<Fila[]>([])
   const [ruas, setRuas] = useState<Rua[]>([])
   const [ruaEmEdicao, setRuaEmEdicao] = useState<Rua | null>(null)
+  // Desenho de rua (lapis / pontos) e curvas -- estado proprio, independente do hook de desenho das quadras/fileiras
+  const [desRua, setDesRua] = useState<DesRua | null>(null)
+  const desRuaRef = useRef<DesRua | null>(null)
+  const [cursorRua, setCursorRua] = useState<[number, number] | null>(null)
+  const ignorarCliqueAte = useRef(0)
+  const terminarRuaRef = useRef<() => void>(() => {})
+  const [menuPonta, setMenuPonta] = useState<{ ruaId: string; ponta: 'inicio' | 'fim'; x: number; y: number } | null>(null)
+  const [curvas, setCurvas] = useState<{ ruaId: string; ancoras: [number, number][]; ctrl: ([number, number] | null)[] } | null>(null)
+  const metaCurvas = useRef(new Map<string, { ancoras: [number, number][]; ctrl: ([number, number] | null)[]; n: number }>())
   const [modoTestarRota, setModoTestarRota] = useState(false)
   const [rotaTeste, setRotaTeste] = useState<ResultadoRota | null>(null)
   const [lapideSelecionada, setLapideSelecionada] = useState<Lapide | null>(null)
@@ -1007,6 +1027,11 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   }
 
   async function aoClicarMapa(e: MapLayerMouseEvent) {
+    if (desRuaRef.current) {
+      if (Date.now() >= ignorarCliqueAte.current && desRuaRef.current.modo === 'pontos') clicarPontoRua(e)
+      return
+    }
+    if (Date.now() < ignorarCliqueAte.current) return
     if (!editavel) {
       const feature = e.features?.[0]
       if (feature?.properties?.lapideId) {
@@ -2079,6 +2104,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       numero: proximoNumero,
       eixo: { type: 'LineString', coordinates: pontos },
       comprimento_m: comprimentoPolilinha(pontos),
+      tipo: 'principal',
     })
     if (error) {
       setMsg(error.message)
@@ -2090,11 +2116,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   }
 
   async function alternarTipoRua(rua: Rua) {
+    await definirTipoRua(rua, rua.tipo === 'principal' ? 'secundaria' : 'principal')
+  }
+
+  async function definirTipoRua(rua: Rua, novo: 'principal' | 'secundaria') {
     if (rua.geometria_revisada) {
       setMsg(`Rua ${rua.numero} está travada: destrave pra mudar o tipo.`)
       return
     }
-    const novo = rua.tipo === 'principal' ? 'secundaria' : 'principal'
+    if (rua.tipo === novo) return
     setRuas((atual) => atual.map((r) => (r.id === rua.id ? { ...r, tipo: novo } : r)))
     const { error } = await supabase.from('ruas_cemiterio').update({ tipo: novo }).eq('id', rua.id)
     if (error) {
@@ -2131,19 +2161,121 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
-  async function arrastarVerticeRua(ruaId: string, index: number, lat: number, lng: number) {
-    const rua = ruas.find((r) => r.id === ruaId)
-    if (!rua?.eixo || rua.geometria_revisada) return
-    const coords = rua.eixo.coordinates.map((p) => [...p]) as [number, number][]
-    coords[index] = [lng, lat]
+  // Aplica as ancoras + curvas da rua em edicao: remonta o eixo (curva densa), atualiza tela e, se pedido, grava.
+  async function aplicarCurvasRua(ruaId: string, ancoras: [number, number][], ctrl: ([number, number] | null)[], gravar: boolean) {
+    const coords = montarEixo(ancoras, ctrl)
     const novoEixo = { type: 'LineString' as const, coordinates: coords }
     const novoComprimento = comprimentoPolilinha(coords)
-
+    metaCurvas.current.set(ruaId, { ancoras, ctrl, n: coords.length })
+    setCurvas({ ruaId, ancoras, ctrl })
     setRuas((atual) => atual.map((r) => (r.id === ruaId ? { ...r, eixo: novoEixo, comprimento_m: novoComprimento } : r)))
     setRuaEmEdicao((atual) => (atual?.id === ruaId ? { ...atual, eixo: novoEixo, comprimento_m: novoComprimento } : atual))
-
+    if (!gravar) return
     const { error } = await supabase.from('ruas_cemiterio').update({ eixo: novoEixo, comprimento_m: novoComprimento }).eq('id', ruaId)
     if (error) setMsg(error.message)
+  }
+
+  async function arrastarVerticeRua(ruaId: string, index: number, lat: number, lng: number, gravar = true) {
+    const rua = ruas.find((r) => r.id === ruaId)
+    if (!rua?.eixo || rua.geometria_revisada || !curvas || curvas.ruaId !== ruaId) return
+    const ancoras = curvas.ancoras.map((p) => [...p]) as [number, number][]
+    ancoras[index] = [lng, lat]
+    await aplicarCurvasRua(ruaId, ancoras, curvas.ctrl, gravar)
+  }
+
+  async function curvarTrechoRua(ruaId: string, i: number, lat: number, lng: number, gravar: boolean) {
+    const rua = ruas.find((r) => r.id === ruaId)
+    if (!rua?.eixo || rua.geometria_revisada || !curvas || curvas.ruaId !== ruaId) return
+    const ctrl = curvas.ctrl.slice()
+    ctrl[i] = controleDoPuxador(curvas.ancoras[i], curvas.ancoras[i + 1], [lng, lat])
+    await aplicarCurvasRua(ruaId, curvas.ancoras, ctrl, gravar)
+  }
+
+  async function trechoVoltaReto(ruaId: string, i: number) {
+    const rua = ruas.find((r) => r.id === ruaId)
+    if (!rua?.eixo || rua.geometria_revisada || !curvas || curvas.ruaId !== ruaId) return
+    const ctrl = curvas.ctrl.slice()
+    ctrl[i] = null
+    await aplicarCurvasRua(ruaId, curvas.ancoras, ctrl, true)
+  }
+
+  // --- Desenho de rua nova / continuacao: lapis (arrasta) ou pontos (clica) ---
+  function setDes(v: DesRua | null) {
+    desRuaRef.current = v
+    setDesRua(v)
+  }
+
+  function iniciarDesenhoRua(modo: 'lapis' | 'pontos', ruaId: string | null, ponta: 'inicio' | 'fim') {
+    const rua = ruaId ? ruas.find((r) => r.id === ruaId) : null
+    if (rua?.geometria_revisada) {
+      setMsg(`Rua ${rua.numero} está travada: destrave pra continuar o desenho.`)
+      return
+    }
+    setModoMarcarEntrada(false)
+    setModoMarcar(false)
+    setQuadraAtivaParaFila(null)
+    setRuaEmEdicao(null)
+    setMenuPonta(null)
+    desenho.cancelar()
+    setCursorRua(null)
+    setDes({ modo, ruaId, ponta, base: rua?.eixo?.coordinates ?? [], pts: [] })
+  }
+
+  async function terminarDesenhoRua() {
+    const d = desRuaRef.current
+    if (!d) return
+    setDes(null)
+    setCursorRua(null)
+    if (d.ruaId ? d.pts.length < 1 : d.pts.length < 2) {
+      if (!d.ruaId) setMsg('Rua descartada: precisa de pelo menos 2 pontos.')
+      return
+    }
+    if (!d.ruaId) {
+      await onConcluirRua(d.pts)
+      return
+    }
+    const coords = d.ponta === 'fim' ? [...d.base, ...d.pts] : [...d.pts.slice().reverse(), ...d.base]
+    setSalvando(true)
+    const { error } = await supabase
+      .from('ruas_cemiterio')
+      .update({ eixo: { type: 'LineString', coordinates: coords }, comprimento_m: comprimentoPolilinha(coords) })
+      .eq('id', d.ruaId)
+    if (error) setMsg(error.message)
+    else {
+      metaCurvas.current.delete(d.ruaId)
+      setMsg('Rua atualizada.')
+      await carregar()
+    }
+    setSalvando(false)
+  }
+  terminarRuaRef.current = terminarDesenhoRua
+
+  function clicarPontoRua(e: MapLayerMouseEvent) {
+    const d = desRuaRef.current
+    if (!d) return
+    const map = mapRef.current?.getMap()
+    const ultimo = d.pts.length ? d.pts[d.pts.length - 1] : null
+    if (ultimo && map && d.pts.length >= 2) {
+      const pu = map.project(ultimo)
+      if (Math.hypot(pu.x - e.point.x, pu.y - e.point.y) < 10) {
+        void terminarDesenhoRua()
+        return
+      }
+    }
+    setDes({ ...d, pts: [...d.pts, [e.lngLat.lng, e.lngLat.lat]] })
+  }
+
+  function duploCliqueRua() {
+    const d = desRuaRef.current
+    if (!d || d.modo !== 'pontos') return
+    const map = mapRef.current?.getMap()
+    const n = d.pts.length
+    if (n >= 2 && map) {
+      const a = map.project(d.pts[n - 1])
+      const b = map.project(d.pts[n - 2])
+      if (Math.hypot(a.x - b.x, a.y - b.y) < 6) desRuaRef.current = { ...d, pts: d.pts.slice(0, -1) }
+    }
+    void terminarDesenhoRua()
   }
 
   async function apagarRua(rua: Rua) {
@@ -2160,6 +2292,97 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
+  // Lapis: segura e arrasta no mapa. O arrasto do mapa e desligado so durante o traco.
+  useEffect(() => {
+    if (desRua?.modo !== 'lapis') return
+    const map = mapRef.current?.getMap()
+    if (!map) return
+    const cont = map.getCanvasContainer()
+    const touchAntes = cont.style.touchAction
+    cont.style.touchAction = 'none'
+    let buf: [number, number][] | null = null
+    const ponto = (ev: PointerEvent): [number, number] => {
+      const r = cont.getBoundingClientRect()
+      const ll = map.unproject([ev.clientX - r.left, ev.clientY - r.top])
+      return [ll.lng, ll.lat]
+    }
+    const mover = (ev: PointerEvent) => {
+      const d = desRuaRef.current
+      if (!buf || !d) return
+      buf.push(ponto(ev))
+      setDes({ ...d, pts: buf.slice() })
+    }
+    const limpar = () => {
+      window.removeEventListener('pointermove', mover)
+      window.removeEventListener('pointerup', soltar)
+      window.removeEventListener('pointercancel', soltar)
+    }
+    function soltar() {
+      limpar()
+      map?.dragPan.enable()
+      const b = buf
+      buf = null
+      ignorarCliqueAte.current = Date.now() + 400
+      const d = desRuaRef.current
+      if (!b || !d) return
+      desRuaRef.current = { ...d, pts: b.length > 2 ? simplificarLinha(b, 0.6) : b }
+      terminarRuaRef.current()
+    }
+    const descer = (ev: PointerEvent) => {
+      if (ev.button !== 0 || buf) return
+      if ((ev.target as HTMLElement | null)?.closest('.maplibregl-marker, .maplibregl-ctrl')) return
+      map.dragPan.disable()
+      buf = [ponto(ev)]
+      window.addEventListener('pointermove', mover)
+      window.addEventListener('pointerup', soltar)
+      window.addEventListener('pointercancel', soltar)
+    }
+    cont.addEventListener('pointerdown', descer, true)
+    return () => {
+      cont.removeEventListener('pointerdown', descer, true)
+      limpar()
+      cont.style.touchAction = touchAntes
+      map.dragPan.enable()
+    }
+  }, [desRua?.modo])
+
+  // Enter / Esc terminam a rua; no modo pontos o zoom por duplo clique fica desligado.
+  useEffect(() => {
+    if (!desRua) return
+    const map = mapRef.current?.getMap()
+    const pontos = desRua.modo === 'pontos'
+    if (pontos) map?.doubleClickZoom.disable()
+    const tecla = (ev: KeyboardEvent) => {
+      const t = ev.target as HTMLElement | null
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return
+      if (ev.key === 'Escape' || ev.key === 'Enter') {
+        ev.preventDefault()
+        terminarRuaRef.current()
+      }
+    }
+    window.addEventListener('keydown', tecla)
+    return () => {
+      window.removeEventListener('keydown', tecla)
+      if (pontos) setTimeout(() => map?.doubleClickZoom.enable(), 500)
+    }
+  }, [desRua != null, desRua?.modo])
+
+  // Ancoras e curvas da rua em edicao (metadados da sessao, ou a polilinha tratada como trechos retos)
+  useEffect(() => {
+    if (!ruaEmEdicao?.eixo) {
+      setCurvas(null)
+      return
+    }
+    const coords = ruaEmEdicao.eixo.coordinates
+    const meta = metaCurvas.current.get(ruaEmEdicao.id)
+    if (meta && meta.n === coords.length) {
+      setCurvas({ ruaId: ruaEmEdicao.id, ancoras: meta.ancoras, ctrl: meta.ctrl })
+      return
+    }
+    const ancoras = ancorasIniciais(coords)
+    setCurvas({ ruaId: ruaEmEdicao.id, ancoras, ctrl: new Array(Math.max(0, ancoras.length - 1)).fill(null) })
+  }, [ruaEmEdicao?.id])
+
   if (carregando && !cemiterio) return <p className="text-[var(--tema-zinc-400)] text-sm">Carregando mapa...</p>
   if (!cemiterio) return <p className="text-[var(--tema-zinc-400)] text-sm">Cemitério não encontrado.</p>
 
@@ -2168,6 +2391,19 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   // (so fileira sempre passa por uma quadra antes de comecar a desenhar).
   const desenhandoFila = desenho.ativo && desenho.modo === 'linha' && quadraAtivaParaFila != null
   const desenhandoRua = desenho.ativo && desenho.modo === 'linha' && quadraAtivaParaFila == null
+
+  const previewRua = (() => {
+    if (!desRua) return FC_VAZIA
+    const novos = desRua.pts
+    let linha: [number, number][] = !desRua.ruaId ? novos : desRua.ponta === 'fim' ? [...desRua.base, ...novos] : [...novos.slice().reverse(), ...desRua.base]
+    if (desRua.modo === 'pontos' && cursorRua && linha.length > 0) {
+      linha = desRua.ruaId && desRua.ponta === 'inicio' ? [cursorRua, ...linha] : [...linha, cursorRua]
+    }
+    const features: GeoJSON.Feature[] = []
+    if (linha.length >= 2) features.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: linha }, properties: {} })
+    for (const p of novos) features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: p }, properties: {} })
+    return { type: 'FeatureCollection' as const, features }
+  })()
 
   const quadraSel = quadraSelId ? quadras.find((q) => q.id === quadraSelId) ?? null : null
   const filaSel = filaSelId ? filas.find((f) => f.id === filaSelId) ?? null : null
@@ -2251,7 +2487,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
 
       <div className="grid lg:grid-cols-12 gap-4 mt-4">
         <div className="lg:col-span-8 lg:order-2">
-          <div className="rounded-xl border border-[var(--tema-zinc-800)] overflow-hidden" style={{ height: 'calc(100vh - 140px)', minHeight: 560 }}>
+          <div className="relative rounded-xl border border-[var(--tema-zinc-800)] overflow-hidden" style={{ height: 'calc(100vh - 140px)', minHeight: 560 }}>
             <MapGL
               ref={mapRef}
               onLoad={aoCarregarMapa}
@@ -2268,12 +2504,16 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 width: '100%',
                 height: '100%',
                 cursor:
-                  modoMarcarEntrada || pontoRefParaMarcar || (modoMarcar && lapideParaMarcar) || desenho.ativo || modoAdicionarTumulo
+                  modoMarcarEntrada || pontoRefParaMarcar || (modoMarcar && lapideParaMarcar) || desenho.ativo || desRua || modoAdicionarTumulo
                     ? 'crosshair'
                     : undefined,
               }}
               interactiveLayerIds={['lapides-pinos']}
               onClick={aoClicarMapa}
+              onDblClick={duploCliqueRua}
+              onMouseMove={(e) => {
+                if (desRuaRef.current?.modo === 'pontos') setCursorRua([e.lngLat.lng, e.lngLat.lat])
+              }}
               onContextMenu={aoBotaoDireitoMapa}
             >
               <NavigationControl showZoom position="top-right" />
@@ -2338,6 +2578,22 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   />
                 </Source>
               )}
+
+              <Source id="rua-preview" type="geojson" data={previewRua}>
+                <Layer
+                  id="rua-preview-linha"
+                  type="line"
+                  filter={['==', ['geometry-type'], 'LineString']}
+                  paint={{ 'line-color': '#fbbf24', 'line-width': 3 }}
+                  layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                />
+                <Layer
+                  id="rua-preview-ponto"
+                  type="circle"
+                  filter={['==', ['geometry-type'], 'Point']}
+                  paint={{ 'circle-radius': 5, 'circle-color': '#fbbf24', 'circle-stroke-color': '#0B1D2A', 'circle-stroke-width': 1.5 }}
+                />
+              </Source>
 
               <Source id="desenho-preview" type="geojson" data={desenho.geojsonPreview ?? FC_VAZIA}>
                 <Layer
@@ -2584,10 +2840,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                         disabled={!editavel}
                         onClick={(e) => {
                           e.stopPropagation()
-                          alternarTipoRua(r)
+                          setMenuPonta({ ruaId: r.id, ponta: i === 0 ? 'inicio' : 'fim', x: e.clientX, y: e.clientY })
                         }}
                         title={`Rua ${r.numero}: ${r.tipo === 'secundaria' ? 'rua dos túmulos' : 'rua principal'}${
-                          editavel ? ' -- clique pra trocar o tipo' : ''
+                          editavel ? ' -- clique pra abrir o menu da ponta' : ''
                         }`}
                         style={{ background: 'none', border: 0, padding: 0, cursor: editavel && !r.geometria_revisada ? 'pointer' : 'default' }}
                       >
@@ -2597,14 +2853,33 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   ))
                 })}
 
-              {ruaEmEdicao?.eixo?.coordinates.map(([lng, lat], index) => (
+              {ruaEmEdicao && curvas && curvas.ruaId === ruaEmEdicao.id && !desRua &&
+                curvas.ancoras.slice(0, -1).map((a, i) => {
+                  const [lng, lat] = pontoMedioTrecho(a, curvas.ancoras[i + 1], curvas.ctrl[i] ?? null)
+                  return (
+                    <Marker
+                      key={`curva-rua-${i}`}
+                      longitude={lng}
+                      latitude={lat}
+                      anchor="center"
+                      draggable={!ruaEmEdicao.geometria_revisada}
+                      onDrag={(e) => curvarTrechoRua(ruaEmEdicao.id, i, e.lngLat.lat, e.lngLat.lng, false)}
+                      onDragEnd={(e) => curvarTrechoRua(ruaEmEdicao.id, i, e.lngLat.lat, e.lngLat.lng, true)}
+                    >
+                      <BolinhaCurva travada={ruaEmEdicao.geometria_revisada} onReta={() => trechoVoltaReto(ruaEmEdicao.id, i)} />
+                    </Marker>
+                  )
+                })}
+
+              {ruaEmEdicao && curvas && curvas.ruaId === ruaEmEdicao.id && curvas.ancoras.map(([lng, lat], index) => (
                 <Marker
                   key={`vertice-rua-${index}`}
                   longitude={lng}
                   latitude={lat}
                   anchor="center"
                   draggable={!ruaEmEdicao.geometria_revisada}
-                  onDragEnd={(e) => arrastarVerticeRua(ruaEmEdicao.id, index, e.lngLat.lat, e.lngLat.lng)}
+                  onDrag={(e) => arrastarVerticeRua(ruaEmEdicao.id, index, e.lngLat.lat, e.lngLat.lng, false)}
+                  onDragEnd={(e) => arrastarVerticeRua(ruaEmEdicao.id, index, e.lngLat.lat, e.lngLat.lng, true)}
                 >
                   <div
                     title="Vértice da rua -- arrasta pro meio do caminho real"
@@ -2782,6 +3057,58 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   Portal da Família e no mapa público, onde só o nome basta. */}
 
             </MapGL>
+
+            {desRua && (
+              <>
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 top-3 z-10 rounded-full border px-4 py-1.5 text-xs text-white pointer-events-none"
+                  style={{ background: 'rgba(0,0,0,0.78)', borderColor: '#c9a24b' }}
+                >
+                  {desRua.modo === 'lapis'
+                    ? 'Segure e arraste para desenhar a rua. Solte para gravar.'
+                    : 'Clique para pôr os pontos. Duplo clique ou Enter termina.'}
+                </div>
+                {desRua.modo === 'pontos' && (
+                  <button
+                    type="button"
+                    onClick={() => terminarRuaRef.current()}
+                    className="absolute left-1/2 -translate-x-1/2 bottom-6 z-10 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-lg"
+                    style={{ background: '#c9a24b', color: '#111' }}
+                  >
+                    Concluir a rua (Enter)
+                  </button>
+                )}
+              </>
+            )}
+
+            {menuPonta && (() => {
+              const ruaMenu = ruas.find((r) => r.id === menuPonta.ruaId)
+              if (!ruaMenu) return null
+              const itemCls = 'block w-full text-left text-xs px-3 py-2 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)] disabled:opacity-40'
+              return (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setMenuPonta(null)} onContextMenu={(e) => { e.preventDefault(); setMenuPonta(null) }} />
+                  <div
+                    className="fixed z-50 rounded-lg border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-900)] shadow-xl py-1 min-w-[210px]"
+                    style={{ left: menuPonta.x + 8, top: menuPonta.y + 8 }}
+                  >
+                    <button type="button" className={itemCls} onClick={() => { setMenuPonta(null); definirTipoRua(ruaMenu, 'principal') }}>
+                      Rua principal
+                    </button>
+                    <button type="button" className={itemCls} onClick={() => { setMenuPonta(null); definirTipoRua(ruaMenu, 'secundaria') }}>
+                      Rua dos túmulos
+                    </button>
+                    <div className="my-1 border-t border-[var(--tema-zinc-700)]" />
+                    <button type="button" className={itemCls} onClick={() => iniciarDesenhoRua('lapis', ruaMenu.id, menuPonta.ponta)}>
+                      Continuar com lápis
+                    </button>
+                    <button type="button" className={itemCls} onClick={() => iniciarDesenhoRua('pontos', ruaMenu.id, menuPonta.ponta)}>
+                      Continuar clicando pontos
+                    </button>
+                  </div>
+                </>
+              )
+            })()}
 
             {menuContexto && (
               <>
@@ -3830,13 +4157,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             temEntrada={cemiterio.entrada_latitude != null && cemiterio.entrada_longitude != null}
             modoTestarRota={modoTestarRota}
             rotaTeste={rotaTeste}
-            onNovaRua={() => {
-              setModoMarcarEntrada(false)
-              setModoMarcar(false)
-              setQuadraAtivaParaFila(null)
-              setRuaEmEdicao(null)
-              desenho.iniciar('linha', onConcluirRua)
-            }}
+            onNovaRua={(modo) => iniciarDesenhoRua(modo, null, 'fim')}
+            desenhandoCurva={desRua != null}
             onRenomear={renomearRua}
             onAlternarTipo={alternarTipoRua}
             onTravar={travarRua}

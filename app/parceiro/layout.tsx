@@ -130,9 +130,19 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
     return <TrocarSenhaObrigatoria onConcluido={() => setPrecisaTrocarSenha(false)} />
   }
 
+  // Staff vindo da Central: volta pra página de onde veio (dashboard, ficha do
+  // parceiro, lista); sem histórico (link aberto direto), cai no dashboard.
+  function voltarPraCentral() {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back()
+    } else {
+      router.push('/admin')
+    }
+  }
+
   async function handleLogout() {
     if (modoStaff) {
-      router.push(`/admin/parceiros/${parceiroIdParam}`)
+      voltarPraCentral()
       return
     }
     await signOut()
@@ -212,8 +222,16 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0">
         {modoStaff && (
-          <div className="bg-yellow-900/40 text-yellow-300 text-xs text-center py-1.5">
-            Visualizando como <strong>{nomeParceiro}</strong> — modo Central
+          <div className="bg-yellow-900/40 text-yellow-300 text-xs flex items-center justify-center gap-3 py-1.5 px-3 flex-wrap">
+            <button
+              onClick={voltarPraCentral}
+              className="rounded-md bg-yellow-300 text-yellow-950 font-semibold px-3 py-1 hover:bg-yellow-200 transition-colors"
+            >
+              ← Voltar pra Central
+            </button>
+            <span>
+              Visualizando como <strong>{nomeParceiro}</strong> — modo Central
+            </span>
           </div>
         )}
         <header className="h-16 border-b border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)]/50 backdrop-blur-sm flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 shrink-0">
