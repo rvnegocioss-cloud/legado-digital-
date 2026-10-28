@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { gerarSlugUnico } from '@/lib/gerarSlug'
 import MapGL, { Source, Layer, Marker, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Flag, MapPin, Crosshair, X, Plus, Landmark } from 'lucide-react'
+import { Flag, MapPin, Crosshair, X, Plus, Landmark, Lock, LockOpen } from 'lucide-react'
 import { supabase, obterUsuarioIdAtual } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
@@ -2761,6 +2761,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                             }}
                           >
                             Editar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={salvando}
+                            style={{ ...btn, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                            onClick={() => (r.geometria_revisada ? destravarRua(r) : travarRua(r))}
+                          >
+                            {r.geometria_revisada ? <LockOpen size={13} strokeWidth={1.5} /> : <Lock size={13} strokeWidth={1.5} />}
+                            {r.geometria_revisada ? 'Destravar' : 'Travar'}
                           </button>
                           <button
                             type="button"
