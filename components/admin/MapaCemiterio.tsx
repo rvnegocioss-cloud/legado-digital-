@@ -213,6 +213,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [filas, setFilas] = useState<Fila[]>([])
   const [ruas, setRuas] = useState<Rua[]>([])
   const [ruaEmEdicao, setRuaEmEdicao] = useState<Rua | null>(null)
+  const [cardRua, setCardRua] = useState<{ ruaId: string; lng: number; lat: number; confirmando: boolean } | null>(null)
   // Ocultar grupo de ruas: so na tela, nada vai pro banco.
   const [ruasOcultas, setRuasOcultas] = useState<{ principal: boolean; secundaria: boolean }>({ principal: false, secundaria: false })
   const chaveOcultas = `mapa-ruas-ocultas-${cemiterioId}`
@@ -1137,7 +1138,27 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       // Clique no pino abre a aba Jazigo (antes era um card só pra jazigo
       // com memorial; agora a aba cobre com e sem memorial).
       if (lapide) abrirJazigo(lapide)
+      return
     }
+
+    // Clique na linha de uma rua: abre o card com Editar / Apagar
+    const map = mapRef.current?.getMap()
+    if (map) {
+      const T = 8
+      const achadas = map.queryRenderedFeatures(
+        [
+          [e.point.x - T, e.point.y - T],
+          [e.point.x + T, e.point.y + T],
+        ],
+        { layers: ['ruas-casing', 'ruas-linha', 'ruas-linha-pontilhada'] }
+      )
+      const ruaId = achadas[0]?.properties?.id
+      if (ruaId && ruas.some((r) => r.id === ruaId)) {
+        setCardRua({ ruaId, lng: e.lngLat.lng, lat: e.lngLat.lat, confirmando: false })
+        return
+      }
+    }
+    setCardRua(null)
   }
 
   async function salvarEntrada(lat: number, lng: number) {
@@ -2438,6 +2459,16 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }
   }, [desRua?.modo])
 
+  // Esc fecha o card da rua
+  useEffect(() => {
+    if (!cardRua) return
+    const tecla = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') setCardRua(null)
+    }
+    window.addEventListener('keydown', tecla)
+    return () => window.removeEventListener('keydown', tecla)
+  }, [cardRua != null])
+
   // Enter / Esc terminam a rua; no modo pontos o zoom por duplo clique fica desligado.
   useEffect(() => {
     if (!desRua) return
@@ -2669,6 +2700,93 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   paint={{ 'text-color': '#e9d5ff', 'text-halo-color': '#0B1D2A', 'text-halo-width': 1.5 }}
                 />
               </Source>
+
+              {cardRua && editavel && !desRua && (() => {
+                const r = ruas.find((x) => x.id === cardRua.ruaId)
+                if (!r) return null
+                const nomeRua = r.nome?.trim() ? r.nome : `Rua ${r.numero}`
+                const metros = r.comprimento_m != null ? Math.round(r.comprimento_m) : null
+                const txtTipo = r.tipo === 'secundaria' ? 'Rua dos túmulos' : 'Rua principal'
+                const btn: React.CSSProperties = { fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a', cursor: 'pointer' }
+                return (
+                  <Popup
+                    longitude={cardRua.lng}
+                    latitude={cardRua.lat}
+                    anchor="top"
+                    offset={12}
+                    closeButton={false}
+                    onClose={() => setCardRua(null)}
+                  >
+                    <div style={{ minWidth: 170, color: '#0f172a' }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#0f172a' }}>{nomeRua}</p>
+                      <p style={{ fontSize: 11, color: '#475569', margin: '2px 0 8px' }}>
+                        {txtTipo}
+                        {metros != null ? ` · ${metros} m` : ''}
+                      </p>
+                      {cardRua.confirmando ? (
+                        <>
+                          <p style={{ fontSize: 12, color: '#b91c1c', margin: '0 0 6px' }}>
+                            Apagar {nomeRua}
+                            {metros != null ? ` (${metros} m)` : ''}? Não dá para desfazer.
+                          </p>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                              type="button"
+                              disabled={salvando}
+                              style={{ ...btn, background: '#dc2626', borderColor: '#dc2626', color: '#fff' }}
+                              onClick={async () => {
+                                await apagarRua(r)
+                                setCardRua(null)
+                              }}
+                            >
+                              Confirmar
+                            </button>
+                            <button type="button" style={btn} onClick={() => setCardRua({ ...cardRua, confirmando: false })}>
+                              Cancelar
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            type="button"
+                            style={btn}
+                            onClick={() => {
+                              if (ruaOculta(r)) {
+                                setMsg('Mostre este grupo para editar.')
+                                return
+                              }
+                              setRuaEmEdicao(r)
+                              setCardRua(null)
+                            }}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={salvando || r.geometria_revisada}
+                            title={r.geometria_revisada ? 'Destrave a rua para apagar' : undefined}
+                            style={{
+                              ...btn,
+                              color: '#fff',
+                              background: '#dc2626',
+                              borderColor: '#dc2626',
+                              opacity: r.geometria_revisada ? 0.45 : 1,
+                              cursor: r.geometria_revisada ? 'not-allowed' : 'pointer',
+                            }}
+                            onClick={() => setCardRua({ ...cardRua, confirmando: true })}
+                          >
+                            Apagar
+                          </button>
+                        </div>
+                      )}
+                      {r.geometria_revisada && !cardRua.confirmando && (
+                        <p style={{ fontSize: 11, color: '#475569', margin: '6px 0 0' }}>Destrave a rua para apagar</p>
+                      )}
+                    </div>
+                  </Popup>
+                )
+              })()}
 
               {rotaTeste && (
                 <Source

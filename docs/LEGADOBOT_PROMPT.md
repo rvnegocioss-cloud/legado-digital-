@@ -203,3 +203,5 @@ Na aba Fundo (entre Foto e Cor) a pessoa escolhe uma imagem para ficar atras de 
 - **Cor e ocultar ruas (Central, mapa do cemitério, aba Ruas):** sem cor escolhida, a rua usa o padrão do tipo (principal = vinho grosso; rua dos túmulos = verde pontilhado). No menu da bandeira da ponta há "Cor da rua" (8 amostras) e "Padrão do tipo". Cada grupo do painel tem um botão de olho "Ocultar/Mostrar" que esconde linha, bandeiras e bolinhas só na tela (não apaga nada; a rua continua valendo pro GPS e pras quadras). Rua oculta não edita até mostrar o grupo.
 
 - **Escolher o tipo antes de criar a rua (Central, mapa do cemitério, aba Ruas):** acima do botão "+ Nova rua" há o seletor "Criar como:" (Principal ou Rua dos túmulos). A escolha fica lembrada e vale pra rua criada com lápis ou clicando pontos.
+
+- **Clicar na linha da rua (Central, mapa do cemitério):** abre um card com nome, tipo, tamanho em metros e os botões "Editar" e "Apagar". Apagar pede confirmação ("Apagar Rua N (X m)? Não dá para desfazer."); rua travada não apaga, é preciso destravar antes. Só no modo edição.
