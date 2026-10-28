@@ -197,3 +197,5 @@ Na aba Fundo (entre Foto e Cor) a pessoa escolhe uma imagem para ficar atras de 
 - **Desenhar e curvar ruas no mapa do cemitério (Central, aba Ruas):** botão "+ Nova rua" (lápis à mão livre ou clicando pontos; Enter, duplo clique ou "Concluir a rua" termina). Com a rua em edição, a bolinha branca no meio de cada trecho curva ao arrastar (duplo clique volta reta). Bandeira na ponta: Rua principal, Rua dos túmulos, Continuar com lápis, Continuar clicando pontos. Rua travada não edita.
 
 - **Portal do Parceiro aberto pela Central:** faixa amarela no topo com o botão "← Voltar pra Central" (volta pra página de onde a pessoa veio).
+
+- **Cor e travar ruas no mapa do cemitério (Central, aba Ruas):** cada rua tem cor própria (mesma paleta das fileiras); o tipo aparece no traço (grossa = principal, pontilhada = rua dos túmulos). Cada grupo ("N ruas principais", "N ruas dos túmulos") tem botões "Travar" e "Destravar" que agem só nas ruas daquele grupo, com confirmação mostrando quantas serão afetadas, e o contador "N travadas / M".

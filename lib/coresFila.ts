@@ -11,3 +11,17 @@ export const PALETA_FILAS = [
 export function corDaFila(numero: number) {
   return PALETA_FILAS[(numero - 1) % PALETA_FILAS.length]
 }
+
+// Cor de cada rua: mesma paleta das fileiras, escolhida pela posição da rua
+// na lista ordenada por número (ordem de criação). Estável enquanto não
+// apagar rua; usado no mapa e no painel de ruas.
+export function coresDasRuas(ruas: { id: string; numero: number }[]): Record<string, string> {
+  const mapa: Record<string, string> = {}
+  ruas
+    .slice()
+    .sort((a, b) => a.numero - b.numero)
+    .forEach((r, i) => {
+      mapa[r.id] = corDaFila(i + 1)
+    })
+  return mapa
+}

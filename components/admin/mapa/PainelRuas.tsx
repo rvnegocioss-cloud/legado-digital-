@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Flag, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Flag, Lock, LockOpen, Plus } from 'lucide-react'
 import { BarraDesenho } from './BarraDesenho'
 import { comprimentoPolilinha } from '@/lib/geo'
+import { coresDasRuas } from '@/lib/coresFila'
 import type { DiagnosticoRede, ResultadoRota } from '@/lib/rotaCemiterio'
 
 interface Rua {
@@ -42,6 +43,7 @@ export default function PainelRuas({
   onAlternarTipo,
   onTravar,
   onDestravar,
+  onTravarGrupo,
   onEditar,
   onSairEdicao,
   onApagar,
@@ -63,6 +65,7 @@ export default function PainelRuas({
   onAlternarTipo: (rua: Rua) => void
   onTravar: (rua: Rua) => void
   onDestravar: (rua: Rua) => void
+  onTravarGrupo: (travar: boolean, tipo: 'principal' | 'secundaria') => void
   onEditar: (rua: Rua) => void
   onSairEdicao: () => void
   onApagar: (rua: Rua) => void
@@ -75,6 +78,7 @@ export default function PainelRuas({
   // (sao o que se olha o tempo todo); so a lista item-a-item recolhe.
   const [listaAberta, setListaAberta] = useState(false)
   const [menuNova, setMenuNova] = useState(false)
+  const corPorId = coresDasRuas(ruas)
   const ordenadas = ruas.slice().sort((a, b) => a.numero - b.numero)
   const principais = ordenadas.filter((r) => r.tipo !== 'secundaria')
   const secundarias = ordenadas.filter((r) => r.tipo === 'secundaria')
@@ -125,6 +129,9 @@ export default function PainelRuas({
           </div>
         )}
       </div>
+      <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
+        Cor = identifica a rua; linha grossa = principal; pontilhada = rua dos túmulos.
+      </p>
       <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
         Desenha por onde a pessoa anda de verdade (asfalto/calçada) -- a rota da página pública segue essas ruas em vez de cortar reto por cima das
         quadras.
@@ -207,10 +214,35 @@ export default function PainelRuas({
         <div className="space-y-3">
         {grupos.map((g) => (
         <div key={g.chave}>
-        <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: g.cor }}>
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+        <p className="text-xs font-semibold flex items-center gap-1.5" style={{ color: g.cor }}>
           <Flag size={12} strokeWidth={1.5} style={{ color: g.cor }} fill={g.cor} />
           {g.titulo}
+          <span className="font-normal text-[var(--tema-zinc-400)]">
+            · {g.itens.filter((r) => r.geometria_revisada).length} travadas / {g.itens.length}
+          </span>
         </p>
+        {editavel && (
+          <span className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={salvando}
+              onClick={() => onTravarGrupo(true, g.chave as 'principal' | 'secundaria')}
+              className="text-xs flex items-center gap-1 rounded px-2 py-1 border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
+            >
+              <Lock size={12} strokeWidth={1.5} /> {g.chave === 'principal' ? 'Travar principais' : 'Travar ruas dos túmulos'}
+            </button>
+            <button
+              type="button"
+              disabled={salvando}
+              onClick={() => onTravarGrupo(false, g.chave as 'principal' | 'secundaria')}
+              className="text-xs flex items-center gap-1 rounded px-2 py-1 border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
+            >
+              <LockOpen size={12} strokeWidth={1.5} /> {g.chave === 'principal' ? 'Destravar principais' : 'Destravar ruas dos túmulos'}
+            </button>
+          </span>
+        )}
+        </div>
         <ul className="space-y-1">
           {g.itens.map((r) => (
               <li key={r.id} className="rounded border border-[var(--tema-zinc-800)] px-2 py-1.5">
@@ -241,7 +273,7 @@ export default function PainelRuas({
                 ) : (
                   <div className="flex items-center justify-between gap-2 flex-wrap text-xs text-[var(--tema-zinc-300)]">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-[2px] inline-block shrink-0" style={{ background: g.cor }} />
+                      <span className="w-3 h-3 rounded-full inline-block shrink-0 border border-white/60" style={{ background: corPorId[r.id] }} />
                       Rua {r.numero} {r.nome && `— ${r.nome}`} {r.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
                       {r.comprimento_m != null && <span className="text-[var(--tema-zinc-500)]">({r.comprimento_m.toFixed(0)} m)</span>}
                       {diagnostico?.idsDesconectadas.includes(r.id) && <span style={{ color: '#f59e0b' }}>⚠ desconectada</span>}
