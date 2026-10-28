@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { gerarSlugUnico } from '@/lib/gerarSlug'
 import MapGL, { Source, Layer, Marker, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Flag, MapPin, Crosshair, X, Plus, Landmark, Lock, LockOpen, Copy } from 'lucide-react'
+import { Flag, MapPin, Crosshair, X, Plus, Landmark, Lock, LockOpen, Copy, Move } from 'lucide-react'
 import { supabase, obterUsuarioIdAtual } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
@@ -213,6 +213,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [filas, setFilas] = useState<Fila[]>([])
   const [ruas, setRuas] = useState<Rua[]>([])
   const [ruaEmEdicao, setRuaEmEdicao] = useState<Rua | null>(null)
+  const [ruaMover, setRuaMover] = useState<string | null>(null)
   const [cardRua, setCardRua] = useState<{ ruaId: string; lng: number; lat: number; confirmando: boolean } | null>(null)
   // Ocultar grupo de ruas: so na tela, nada vai pro banco.
   const [ruasOcultas, setRuasOcultas] = useState<{ principal: boolean; secundaria: boolean }>({ principal: false, secundaria: false })
@@ -2189,16 +2190,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }
     setSalvando(true)
     setMsg('')
-    // Desloca ~6 m para a direita de quem percorre o 1o trecho (metros reais por latitude).
-    const lat0 = coords[0][1]
-    const mLng = 111320 * Math.cos((lat0 * Math.PI) / 180)
-    const mLat = 110574
-    const dx = (coords[1][0] - coords[0][0]) * mLng
-    const dy = (coords[1][1] - coords[0][1]) * mLat
-    const len = Math.hypot(dx, dy) || 1
-    const dLng = ((dy / len) * 6) / mLng
-    const dLat = ((-dx / len) * 6) / mLat
-    const novos = coords.map((p) => [p[0] + dLng, p[1] + dLat] as [number, number])
+    // A copia nasce no mesmo lugar; depois entra em modo mover.
+    const novos = coords.map((p) => [p[0], p[1]] as [number, number])
     // Proximo numero livre acima do da original (e sem nome "Rua N" ja usado).
     const usados = new Set(ruas.map((r) => r.numero))
     const nomesUsados = new Set(ruas.map((r) => (r.nome?.trim() ? r.nome.trim() : `Rua ${r.numero}`)))
@@ -2227,8 +2220,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       await carregar()
       setCardRua(null)
       if (criada?.id) {
-        const nova: Rua = { id: criada.id, numero: n, nome: null, eixo: { type: 'LineString', coordinates: novos }, geometria_revisada: false, comprimento_m: rua.comprimento_m, tipo: rua.tipo, cor: rua.cor ?? null }
-        setRuaEmEdicao(nova)
+        setRuaMover(criada.id)
+        setMsg(`Rua ${rua.numero} duplicada como Rua ${n}. Arraste a cópia para o lugar certo.`)
       }
     }
     setSalvando(false)
@@ -2512,6 +2505,108 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }
   }, [desRua?.modo])
 
+  // Modo mover rua: segura a linha e arrasta a rua inteira. Grava ao soltar; continua ate Pronto/Enter/Esc.
+  const ruasRefMover = useRef(ruas)
+  ruasRefMover.current = ruas
+  useEffect(() => {
+    if (!ruaMover) return
+    const map = mapRef.current?.getMap()
+    if (!map) return
+    const cont = map.getCanvasContainer()
+    const touchAntes = cont.style.touchAction
+    cont.style.touchAction = 'none'
+    const idRua = ruaMover
+    let arr: { lng0: number; lat0: number; base: number[][] } | null = null
+    let ultimo: [number, number][] | null = null
+    const ll = (ev: PointerEvent) => {
+      const r = cont.getBoundingClientRect()
+      return map.unproject([ev.clientX - r.left, ev.clientY - r.top])
+    }
+    const pertoDaLinha = (ev: PointerEvent, coords: number[][]) => {
+      const r = cont.getBoundingClientRect()
+      const px = ev.clientX - r.left
+      const py = ev.clientY - r.top
+      const pts = coords.map((c) => map.project([c[0], c[1]]))
+      for (let i = 0; i < pts.length - 1; i++) {
+        const ax = pts[i].x, ay = pts[i].y, bx = pts[i + 1].x, by = pts[i + 1].y
+        const dx = bx - ax, dy = by - ay
+        const l2 = dx * dx + dy * dy
+        const t = l2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / l2))
+        if (Math.hypot(px - (ax + t * dx), py - (ay + t * dy)) <= 20) return true
+      }
+      return false
+    }
+    const mover = (ev: PointerEvent) => {
+      if (!arr) return
+      const p = ll(ev)
+      const dLng = p.lng - arr.lng0
+      const dLat = p.lat - arr.lat0
+      const novos = arr.base.map((c) => [c[0] + dLng, c[1] + dLat] as [number, number])
+      ultimo = novos
+      const eixo = { type: 'LineString' as const, coordinates: novos }
+      setRuas((atual) => atual.map((r) => (r.id === idRua ? { ...r, eixo } : r)))
+    }
+    const limpar = () => {
+      window.removeEventListener('pointermove', mover)
+      window.removeEventListener('pointerup', soltar)
+      window.removeEventListener('pointercancel', soltar)
+    }
+    function soltar() {
+      limpar()
+      map?.dragPan.enable()
+      arr = null
+      ignorarCliqueAte.current = Date.now() + 400
+      const novos = ultimo
+      ultimo = null
+      if (!novos) return
+      metaCurvas.current.delete(idRua)
+      const comp = comprimentoPolilinha(novos)
+      setRuas((atual) => atual.map((r) => (r.id === idRua ? { ...r, comprimento_m: comp } : r)))
+      supabase
+        .from('ruas_cemiterio')
+        .update({ eixo: { type: 'LineString', coordinates: novos }, comprimento_m: comp })
+        .eq('id', idRua)
+        .then(({ error }) => {
+          if (error) setMsg(error.message)
+        })
+    }
+    const descer = (ev: PointerEvent) => {
+      if (ev.button !== 0 || arr) return
+      if ((ev.target as HTMLElement | null)?.closest('.maplibregl-marker, .maplibregl-ctrl')) return
+      const rua = ruasRefMover.current.find((r) => r.id === idRua)
+      const coords = rua?.eixo?.coordinates
+      if (!rua || !coords || coords.length < 2 || !pertoDaLinha(ev, coords)) return
+      if (rua.geometria_revisada) {
+        setMsg('Rua travada. Destrave para mover.')
+        return
+      }
+      const p = ll(ev)
+      map.dragPan.disable()
+      arr = { lng0: p.lng, lat0: p.lat, base: coords.map((c) => [c[0], c[1]]) }
+      ultimo = null
+      window.addEventListener('pointermove', mover)
+      window.addEventListener('pointerup', soltar)
+      window.addEventListener('pointercancel', soltar)
+    }
+    const tecla = (ev: KeyboardEvent) => {
+      const t = ev.target as HTMLElement | null
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return
+      if (ev.key === 'Escape' || ev.key === 'Enter') {
+        ev.preventDefault()
+        setRuaMover(null)
+      }
+    }
+    cont.addEventListener('pointerdown', descer, true)
+    window.addEventListener('keydown', tecla)
+    return () => {
+      cont.removeEventListener('pointerdown', descer, true)
+      window.removeEventListener('keydown', tecla)
+      limpar()
+      cont.style.touchAction = touchAntes
+      map.dragPan.enable()
+    }
+  }, [ruaMover])
+
   // Esc fecha o card da rua
   useEffect(() => {
     if (!cardRua) return
@@ -2717,7 +2812,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 <Layer
                   id="ruas-selecionada"
                   type="line"
-                  filter={['==', ['get', 'id'], ruaEmEdicao?.id ?? '']}
+                  filter={['==', ['get', 'id'], ruaMover ?? ruaEmEdicao?.id ?? '']}
                   paint={{ 'line-color': '#ffffff', 'line-width': 14, 'line-opacity': 0.85 }}
                   layout={{ 'line-cap': 'round', 'line-join': 'round' }}
                 />
@@ -2754,13 +2849,13 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 />
               </Source>
 
-              {cardRua && editavel && !desRua && (() => {
+              {cardRua && editavel && !desRua && !ruaMover && (() => {
                 const r = ruas.find((x) => x.id === cardRua.ruaId)
                 if (!r) return null
                 const nomeRua = r.nome?.trim() ? r.nome : `Rua ${r.numero}`
                 const metros = r.comprimento_m != null ? Math.round(r.comprimento_m) : null
                 const txtTipo = r.tipo === 'secundaria' ? 'Rua dos túmulos' : 'Rua principal'
-                const btn: React.CSSProperties = { fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a', cursor: 'pointer' }
+                const btn: React.CSSProperties = { fontSize: 12, padding: '5px 10px', whiteSpace: 'nowrap', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: 4, borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a', cursor: 'pointer' }
                 return (
                   <Popup
                     longitude={cardRua.lng}
@@ -2770,7 +2865,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     closeButton={false}
                     onClose={() => setCardRua(null)}
                   >
-                    <div style={{ minWidth: 170, color: '#0f172a' }}>
+                    <div style={{ minWidth: 230, color: '#0f172a' }}>
                       <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#0f172a' }}>{nomeRua}</p>
                       <p style={{ fontSize: 11, color: '#475569', margin: '2px 0 8px' }}>
                         {txtTipo}
@@ -2800,7 +2895,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           </div>
                         </>
                       ) : (
-                        <div style={{ display: 'flex', gap: 6 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                           <button
                             type="button"
                             style={btn}
@@ -2823,6 +2918,23 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                           >
                             <Copy size={13} strokeWidth={1.5} />
                             Duplicar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={salvando || r.geometria_revisada}
+                            title={r.geometria_revisada ? 'Destrave a rua para mover' : undefined}
+                            style={{ ...btn, opacity: r.geometria_revisada ? 0.45 : 1, cursor: r.geometria_revisada ? 'not-allowed' : 'pointer' }}
+                            onClick={() => {
+                              if (ruaOculta(r)) {
+                                setMsg('Mostre este grupo para mover.')
+                                return
+                              }
+                              setRuaMover(r.id)
+                              setCardRua(null)
+                            }}
+                          >
+                            <Move size={13} strokeWidth={1.5} />
+                            Mover
                           </button>
                           <button
                             type="button"
@@ -2852,7 +2964,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                         </div>
                       )}
                       {r.geometria_revisada && !cardRua.confirmando && (
-                        <p style={{ fontSize: 11, color: '#475569', margin: '6px 0 0' }}>Destrave a rua para apagar</p>
+                        <p style={{ fontSize: 11, color: '#475569', margin: '6px 0 0' }}>Destrave a rua para mover ou apagar</p>
                       )}
                     </div>
                   </Popup>
@@ -3352,6 +3464,25 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   Portal da Família e no mapa público, onde só o nome basta. */}
 
             </MapGL>
+
+            {ruaMover && (
+              <>
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 top-3 z-10 rounded-full border px-4 py-1.5 text-xs text-white pointer-events-none"
+                  style={{ background: 'rgba(0,0,0,0.78)', borderColor: '#c9a24b' }}
+                >
+                  Arraste a linha para o lugar certo. Solte para gravar. Enter termina.
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRuaMover(null)}
+                  className="absolute left-1/2 -translate-x-1/2 bottom-6 z-10 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-lg"
+                  style={{ background: '#c9a24b', color: '#111' }}
+                >
+                  Pronto
+                </button>
+              </>
+            )}
 
             {desRua && (
               <>
