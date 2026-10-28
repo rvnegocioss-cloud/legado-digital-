@@ -3,7 +3,7 @@ import { simplificarLinha } from '@/lib/simplificarLinha'
 
 export type Pt = [number, number]
 
-const PASSO_M = 1.5
+const PASSO_M = 3
 
 /** Controle da Bézier quadrática pra que a curva passe EXATAMENTE por h no meio (t = 0,5). */
 export function controleDoPuxador(a: Pt, b: Pt, h: Pt): Pt {
@@ -16,7 +16,7 @@ export function pontoMedioTrecho(a: Pt, b: Pt, c: Pt | null): Pt {
   return [0.25 * a[0] + 0.5 * c[0] + 0.25 * b[0], 0.25 * a[1] + 0.5 * c[1] + 0.25 * b[1]]
 }
 
-/** Bézier quadrática a->b com controle c, densificada (~1 ponto a cada 1,5 m). Inclui a e b. */
+/** Bézier quadrática a->b com controle c, densificada (~1 ponto a cada 3 m). Inclui a e b. */
 export function bezierDensa(a: Pt, c: Pt, b: Pt): Pt[] {
   const grosso: Pt[] = []
   for (let i = 0; i <= 8; i++) grosso.push(pontoBezier(a, c, b, i / 8))

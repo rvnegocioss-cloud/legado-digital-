@@ -263,6 +263,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const terminarRuaRef = useRef<() => void>(() => {})
   const [menuPonta, setMenuPonta] = useState<{ ruaId: string; ponta: 'inicio' | 'fim'; x: number; y: number } | null>(null)
   const [curvas, setCurvas] = useState<{ ruaId: string; ancoras: [number, number][]; ctrl: ([number, number] | null)[] } | null>(null)
+  const pendenteCurva = useRef<{ ruaId: string; ancoras: [number, number][]; ctrl: ([number, number] | null)[] } | null>(null)
+  const rafCurva = useRef<number | null>(null)
+  const cursorPendente = useRef<[number, number] | null>(null)
+  const rafCursor = useRef<number | null>(null)
   const metaCurvas = useRef(new Map<string, { ancoras: [number, number][]; ctrl: ([number, number] | null)[]; n: number }>())
   const [modoTestarRota, setModoTestarRota] = useState(false)
   const [rotaTeste, setRotaTeste] = useState<ResultadoRota | null>(null)
@@ -838,6 +842,9 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     }),
     [ruas, ruasOcultas]
   )
+
+  const ruasGeojsonRef = useRef(ruasGeojson)
+  ruasGeojsonRef.current = ruasGeojson
 
   const ruasParaRota = useMemo<RuaMapeada[]>(
     () => ruas.filter((r) => r.eixo).map((r) => ({ id: r.id, numero: r.numero, nome: r.nome, coordenadas: r.eixo!.coordinates })),
@@ -2263,7 +2270,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(true)
     const { error } = await supabase.from('ruas_cemiterio').update({ nome: nome.trim() || null }).eq('id', ruaId)
     if (error) setMsg(error.message)
-    else await carregar()
+    else setRuas((atual) => atual.map((r) => (r.id === ruaId ? { ...r, nome: nome.trim() || null } : r)))
     setSalvando(false)
   }
 
@@ -2274,7 +2281,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     else {
       setMsg(`Rua ${rua.numero} travada.`)
       if (ruaEmEdicao?.id === rua.id) setRuaEmEdicao(null)
-      await carregar()
+      setRuas((atual) => atual.map((r) => (r.id === rua.id ? { ...r, geometria_revisada: true } : r)))
     }
     setSalvando(false)
   }
@@ -2283,7 +2290,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(true)
     const { error } = await supabase.from('ruas_cemiterio').update({ geometria_revisada: false }).eq('id', rua.id)
     if (error) setMsg(error.message)
-    else await carregar()
+    else setRuas((atual) => atual.map((r) => (r.id === rua.id ? { ...r, geometria_revisada: false } : r)))
     setSalvando(false)
   }
 
@@ -2306,13 +2313,35 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     else {
       setMsg(`${afetadas} ${nomeGrupo} ${travar ? 'travadas' : 'destravadas'}.`)
       if (travar) setRuaEmEdicao(null)
-      await carregar()
+      setRuas((atual) => atual.map((r) => ((r.tipo === 'secundaria' ? 'secundaria' : 'principal') === tipo ? { ...r, geometria_revisada: travar } : r)))
     }
     setSalvando(false)
   }
 
   // Aplica as ancoras + curvas da rua em edicao: remonta o eixo (curva densa), atualiza tela e, se pedido, grava.
   async function aplicarCurvasRua(ruaId: string, ancoras: [number, number][], ctrl: ([number, number] | null)[], gravar: boolean) {
+    // Durante o arrasto (gravar=false) so 1 atualizacao por frame; ao soltar aplica na hora.
+    if (!gravar) {
+      pendenteCurva.current = { ruaId, ancoras, ctrl }
+      if (rafCurva.current == null) {
+        rafCurva.current = requestAnimationFrame(() => {
+          rafCurva.current = null
+          const p = pendenteCurva.current
+          pendenteCurva.current = null
+          if (p) void aplicarCurvasRuaAgora(p.ruaId, p.ancoras, p.ctrl, false)
+        })
+      }
+      return
+    }
+    if (rafCurva.current != null) {
+      cancelAnimationFrame(rafCurva.current)
+      rafCurva.current = null
+    }
+    pendenteCurva.current = null
+    await aplicarCurvasRuaAgora(ruaId, ancoras, ctrl, true)
+  }
+
+  async function aplicarCurvasRuaAgora(ruaId: string, ancoras: [number, number][], ctrl: ([number, number] | null)[], gravar: boolean) {
     const coords = montarEixo(ancoras, ctrl)
     const novoEixo = { type: 'LineString' as const, coordinates: coords }
     const novoComprimento = comprimentoPolilinha(coords)
@@ -2403,7 +2432,9 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     else {
       metaCurvas.current.delete(d.ruaId)
       setMsg('Rua atualizada.')
-      await carregar()
+      const eixoNovo = { type: 'LineString' as const, coordinates: coords as [number, number][] }
+      const compNovo = comprimentoPolilinha(coords)
+      setRuas((atual) => atual.map((r) => (r.id === d.ruaId ? { ...r, eixo: eixoNovo, comprimento_m: compNovo } : r)))
     }
     setSalvando(false)
   }
@@ -2446,7 +2477,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     } else {
       setMsg(`Rua ${rua.numero} apagada.`)
       if (ruaEmEdicao?.id === rua.id) setRuaEmEdicao(null)
-      await carregar()
+      setRuas((atual) => atual.filter((r) => r.id !== rua.id))
     }
     setSalvando(false)
   }
@@ -2518,6 +2549,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     const idRua = ruaMover
     let arr: { lng0: number; lat0: number; base: number[][] } | null = null
     let ultimo: [number, number][] | null = null
+    let rafMover: number | null = null
     const ll = (ev: PointerEvent) => {
       const r = cont.getBoundingClientRect()
       return map.unproject([ev.clientX - r.left, ev.clientY - r.top])
@@ -2543,10 +2575,26 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       const dLat = p.lat - arr.lat0
       const novos = arr.base.map((c) => [c[0] + dLng, c[1] + dLat] as [number, number])
       ultimo = novos
-      const eixo = { type: 'LineString' as const, coordinates: novos }
-      setRuas((atual) => atual.map((r) => (r.id === idRua ? { ...r, eixo } : r)))
+      // Durante o arrasto atualiza so a source das ruas (1x por frame), sem re-render React.
+      if (rafMover == null) {
+        rafMover = requestAnimationFrame(() => {
+          rafMover = null
+          const src = map.getSource('ruas') as unknown as { setData: (d: GeoJSON.FeatureCollection) => void } | undefined
+          const u = ultimo
+          if (!src || !u) return
+          const atual = ruasGeojsonRef.current
+          src.setData({
+            ...atual,
+            features: atual.features.map((f) => (f.properties.id === idRua ? { ...f, geometry: { type: 'LineString' as const, coordinates: u } } : f)),
+          } as GeoJSON.FeatureCollection)
+        })
+      }
     }
     const limpar = () => {
+      if (rafMover != null) {
+        cancelAnimationFrame(rafMover)
+        rafMover = null
+      }
       window.removeEventListener('pointermove', mover)
       window.removeEventListener('pointerup', soltar)
       window.removeEventListener('pointercancel', soltar)
@@ -2561,7 +2609,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       if (!novos) return
       metaCurvas.current.delete(idRua)
       const comp = comprimentoPolilinha(novos)
-      setRuas((atual) => atual.map((r) => (r.id === idRua ? { ...r, comprimento_m: comp } : r)))
+      const eixoFinal = { type: 'LineString' as const, coordinates: novos }
+      setRuas((atual) => atual.map((r) => (r.id === idRua ? { ...r, eixo: eixoFinal, comprimento_m: comp } : r)))
       supabase
         .from('ruas_cemiterio')
         .update({ eixo: { type: 'LineString', coordinates: novos }, comprimento_m: comp })
@@ -2783,7 +2832,14 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
               onClick={aoClicarMapa}
               onDblClick={duploCliqueRua}
               onMouseMove={(e) => {
-                if (desRuaRef.current?.modo === 'pontos') setCursorRua([e.lngLat.lng, e.lngLat.lat])
+                if (desRuaRef.current?.modo !== 'pontos') return
+                cursorPendente.current = [e.lngLat.lng, e.lngLat.lat]
+                if (rafCursor.current == null) {
+                  rafCursor.current = requestAnimationFrame(() => {
+                    rafCursor.current = null
+                    if (cursorPendente.current) setCursorRua(cursorPendente.current)
+                  })
+                }
               }}
               onContextMenu={aoBotaoDireitoMapa}
             >
