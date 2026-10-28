@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { gerarSlugUnico } from '@/lib/gerarSlug'
 import MapGL, { Source, Layer, Marker, Popup, NavigationControl, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Flag, MapPin, Crosshair, X, Plus, Landmark, Lock, LockOpen } from 'lucide-react'
+import { Flag, MapPin, Crosshair, X, Plus, Landmark, Lock, LockOpen, Copy } from 'lucide-react'
 import { supabase, obterUsuarioIdAtual } from '@/lib/auth'
 import { normalizarOrtomosaico, sourceOrtomosaico } from '@/lib/ortomosaico'
 import { registrarProtocoloPmtiles } from '@/lib/registrarProtocoloPmtiles'
@@ -2181,6 +2181,59 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     setSalvando(false)
   }
 
+  async function duplicarRua(rua: Rua) {
+    const coords = rua.eixo?.coordinates
+    if (!coords || coords.length < 2) {
+      setMsg('Esta rua não tem traçado para duplicar.')
+      return
+    }
+    setSalvando(true)
+    setMsg('')
+    // Desloca ~6 m para a direita de quem percorre o 1o trecho (metros reais por latitude).
+    const lat0 = coords[0][1]
+    const mLng = 111320 * Math.cos((lat0 * Math.PI) / 180)
+    const mLat = 110574
+    const dx = (coords[1][0] - coords[0][0]) * mLng
+    const dy = (coords[1][1] - coords[0][1]) * mLat
+    const len = Math.hypot(dx, dy) || 1
+    const dLng = ((dy / len) * 6) / mLng
+    const dLat = ((-dx / len) * 6) / mLat
+    const novos = coords.map((p) => [p[0] + dLng, p[1] + dLat] as [number, number])
+    // Proximo numero livre acima do da original (e sem nome "Rua N" ja usado).
+    const usados = new Set(ruas.map((r) => r.numero))
+    const nomesUsados = new Set(ruas.map((r) => (r.nome?.trim() ? r.nome.trim() : `Rua ${r.numero}`)))
+    let n = rua.numero + 1
+    while (usados.has(n) || nomesUsados.has(`Rua ${n}`)) n++
+    const { data: orig } = await supabase.from('ruas_cemiterio').select('situacao').eq('id', rua.id).maybeSingle()
+    const { data: criada, error } = await supabase
+      .from('ruas_cemiterio')
+      .insert({
+        cemiterio_id: cemiterioId,
+        numero: n,
+        eixo: { type: 'LineString', coordinates: novos },
+        comprimento_m: rua.comprimento_m,
+        tipo: rua.tipo,
+        cor: rua.cor ?? null,
+        situacao: (orig as { situacao?: string } | null)?.situacao ?? 'ativa',
+        geometria_revisada: false,
+      })
+      .select('id')
+      .single()
+    if (error) {
+      setMsg(error.message)
+    } else {
+      if (ruaOculta(rua)) alternarOcultoRuas(rua.tipo === 'secundaria' ? 'secundaria' : 'principal')
+      setMsg(`Rua ${rua.numero} duplicada como Rua ${n}`)
+      await carregar()
+      setCardRua(null)
+      if (criada?.id) {
+        const nova: Rua = { id: criada.id, numero: n, nome: null, eixo: { type: 'LineString', coordinates: novos }, geometria_revisada: false, comprimento_m: rua.comprimento_m, tipo: rua.tipo, cor: rua.cor ?? null }
+        setRuaEmEdicao(nova)
+      }
+    }
+    setSalvando(false)
+  }
+
   async function alternarTipoRua(rua: Rua) {
     await definirTipoRua(rua, rua.tipo === 'principal' ? 'secundaria' : 'principal')
   }
@@ -2761,6 +2814,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                             }}
                           >
                             Editar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={salvando}
+                            style={{ ...btn, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                            onClick={() => duplicarRua(r)}
+                          >
+                            <Copy size={13} strokeWidth={1.5} />
+                            Duplicar
                           </button>
                           <button
                             type="button"

@@ -204,4 +204,4 @@ Na aba Fundo (entre Foto e Cor) a pessoa escolhe uma imagem para ficar atras de 
 
 - **Escolher o tipo antes de criar a rua (Central, mapa do cemitério, aba Ruas):** acima do botão "+ Nova rua" há o seletor "Criar como:" (Principal ou Rua dos túmulos). A escolha fica lembrada e vale pra rua criada com lápis ou clicando pontos.
 
-- **Clicar na linha da rua (Central, mapa do cemitério):** abre um card com nome, tipo, tamanho em metros e os botões "Editar", "Travar" (vira "Destravar" quando travada) e "Apagar". Apagar pede confirmação ("Apagar Rua N (X m)? Não dá para desfazer."); rua travada não apaga, é preciso destravar antes. Só no modo edição.
+- **Clicar na linha da rua (Central, mapa do cemitério):** abre um card com nome, tipo, tamanho em metros e os botões "Editar", "Duplicar" (cópia com o número seguinte, deslocada uns 6 m pro lado, nasce destravada), "Travar" (vira "Destravar" quando travada) e "Apagar". Apagar pede confirmação ("Apagar Rua N (X m)? Não dá para desfazer."); rua travada não apaga, é preciso destravar antes. Só no modo edição.
