@@ -39,6 +39,8 @@ export default function PainelRuas({
   modoTestarRota,
   rotaTeste,
   onNovaRua,
+  tipoNovaRua,
+  onTipoNovaRua,
   onRenomear,
   onAlternarTipo,
   onTravar,
@@ -63,6 +65,8 @@ export default function PainelRuas({
   modoTestarRota: boolean
   rotaTeste: ResultadoRota | null
   onNovaRua: (modo: 'lapis' | 'pontos') => void
+  tipoNovaRua: 'principal' | 'secundaria'
+  onTipoNovaRua: (t: 'principal' | 'secundaria') => void
   onRenomear: (ruaId: string, nome: string) => void
   onAlternarTipo: (rua: Rua) => void
   onTravar: (rua: Rua) => void
@@ -95,7 +99,38 @@ export default function PainelRuas({
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-sm font-semibold text-white">Ruas (caminhos internos) · {ruas.length}</h2>
         {editavel && (
-          <div className="relative">
+          <div className="relative flex flex-col items-end gap-1.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[var(--tema-zinc-400)]">Criar como:</span>
+              <div className="flex rounded border border-[var(--tema-zinc-700)] overflow-hidden">
+                {([
+                  { v: 'principal', t: 'Principal', cor: '#8a1c1c', pont: false },
+                  { v: 'secundaria', t: 'Rua dos túmulos', cor: '#2b7a3d', pont: true },
+                ] as const).map((o) => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    aria-pressed={tipoNovaRua === o.v}
+                    onClick={() => onTipoNovaRua(o.v)}
+                    className={`text-[11px] px-2 py-1 flex items-center gap-1.5 ${
+                      tipoNovaRua === o.v
+                        ? 'bg-[var(--tema-zinc-700)] text-white font-semibold'
+                        : 'text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]'
+                    }`}
+                  >
+                    <span
+                      aria-hidden
+                      style={{
+                        display: 'inline-block',
+                        width: 16,
+                        borderTop: `${o.pont ? 2 : 4}px ${o.pont ? 'dotted' : 'solid'} ${o.cor}`,
+                      }}
+                    />
+                    {o.t}
+                  </button>
+                ))}
+              </div>
+            </div>
             <button
               type="button"
               disabled={salvando || desenho.ativo || desenhandoCurva}

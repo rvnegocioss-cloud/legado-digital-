@@ -233,6 +233,25 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     } catch {}
     if (novo[tipo] && ruaEmEdicao && (ruaEmEdicao.tipo === 'secundaria' ? 'secundaria' : 'principal') === tipo) setRuaEmEdicao(null)
   }
+  // Tipo escolhido pro "+ Nova rua" (lembrado no navegador).
+  const [tipoNovaRua, setTipoNovaRuaState] = useState<'principal' | 'secundaria'>('principal')
+  const tipoNovaRuaRef = useRef<'principal' | 'secundaria'>('principal')
+  useEffect(() => {
+    try {
+      const v = window.localStorage.getItem('mapa-tipo-nova-rua')
+      if (v === 'principal' || v === 'secundaria') {
+        tipoNovaRuaRef.current = v
+        setTipoNovaRuaState(v)
+      }
+    } catch {}
+  }, [])
+  function setTipoNovaRua(t: 'principal' | 'secundaria') {
+    tipoNovaRuaRef.current = t
+    setTipoNovaRuaState(t)
+    try {
+      window.localStorage.setItem('mapa-tipo-nova-rua', t)
+    } catch {}
+  }
   const ruaOculta = (r: Rua) => ruasOcultas[r.tipo === 'secundaria' ? 'secundaria' : 'principal']
   // Desenho de rua (lapis / pontos) e curvas -- estado proprio, independente do hook de desenho das quadras/fileiras
   const [desRua, setDesRua] = useState<DesRua | null>(null)
@@ -2130,7 +2149,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       numero: proximoNumero,
       eixo: { type: 'LineString', coordinates: pontos },
       comprimento_m: comprimentoPolilinha(pontos),
-      tipo: 'principal',
+      tipo: tipoNovaRuaRef.current,
     })
     if (error) {
       setMsg(error.message)
@@ -2275,9 +2294,14 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
       setMsg(`Rua ${rua.numero} está travada: destrave pra continuar o desenho.`)
       return
     }
-    if (!ruaId && ruasOcultas.principal) {
-      alternarOcultoRuas('principal')
-      setMsg('Mostrei as ruas principais para você ver a rua nova.')
+    const tipoNovo = tipoNovaRuaRef.current
+    if (!ruaId && ruasOcultas[tipoNovo]) {
+      alternarOcultoRuas(tipoNovo)
+      setMsg(
+        tipoNovo === 'principal'
+          ? 'Mostrei as ruas principais para você ver a rua nova.'
+          : 'Mostrei as ruas dos túmulos para você ver a rua nova.'
+      )
     }
     setModoMarcarEntrada(false)
     setModoMarcar(false)
@@ -4260,6 +4284,8 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             modoTestarRota={modoTestarRota}
             rotaTeste={rotaTeste}
             onNovaRua={(modo) => iniciarDesenhoRua(modo, null, 'fim')}
+            tipoNovaRua={tipoNovaRua}
+            onTipoNovaRua={setTipoNovaRua}
             desenhandoCurva={desRua != null}
             onRenomear={renomearRua}
             onAlternarTipo={alternarTipoRua}
