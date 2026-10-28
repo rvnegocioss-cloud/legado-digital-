@@ -116,7 +116,7 @@ export default function ArvoreDaFamilia({ slug }: { slug: string }) {
   return (
     <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-6">
       <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-1">
-        Árvore da família
+        Árvore genealógica da família
       </h2>
       <p className="text-xs text-zinc-500 mb-4">
         Quem cadastrar aqui aparece na árvore da página do memorial. O parentesco é sempre em

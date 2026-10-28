@@ -899,7 +899,7 @@ export default function FamiliaEdicaoPage() {
                 <div className="grid gap-3">
                   {([
                     ['jazigo', 'Jazigo', 'Nome do jazigo e quem está nele'],
-                    ['arvore', 'Árvore da família', ''],
+                    ['arvore', 'Árvore genealógica da família', ''],
                     ['assinaturas', 'Assinaturas do livro de visitas', ''],
                   ] as const).map(([id, titulo, apoio]) => (
                     <button
@@ -1004,7 +1004,7 @@ export default function FamiliaEdicaoPage() {
             ['memoriais', 'Memoriais'],
             ['fotos', 'Fotos e vídeos'],
             ['jazigo', 'Jazigo'],
-            ['arvore', 'Árvore'],
+            ['arvore', 'Árvore genealógica da família'],
             ['privacidade', 'Privacidade'],
             ['assinaturas', 'Assinaturas'],
           ] as const).map(([id, rotulo]) => (
