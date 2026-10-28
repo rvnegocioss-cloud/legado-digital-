@@ -19,7 +19,7 @@ import { ancorasIniciais, controleDoPuxador, montarEixo, pontoMedioTrecho } from
 import { centroide, comprimentoPolilinha, deMetrosLocal, distanciaMetros, projetarLocal } from '@/lib/geo'
 import { lerCoordenada, ROTULO_ORIGEM_COORDENADA, type CoordenadaLida } from '@/lib/parseCoordenada'
 import { acharSobreposicoes, gerarPontosLoteAncorado, medirContinuacao, medirPassoEntreFileiras, validarEspacamento } from '@/lib/enderecoTumulo'
-import { corDaFila, coresDasRuas } from '@/lib/coresFila'
+import { corDaFila, CORES_RUA } from '@/lib/coresFila'
 import { calcularRota, diagnosticarRede, type ResultadoRota, type RuaMapeada } from '@/lib/rotaCemiterio'
 import { urlMidiaProtegida } from '@/lib/urlMidia'
 
@@ -158,8 +158,11 @@ interface Rua {
   geometria_revisada: boolean
   comprimento_m: number | null
   tipo: 'principal' | 'secundaria'
+  cor?: string | null
 }
 
+const COR_RUA_PRINCIPAL = '#8a1c1c'
+const COR_RUA_SECUNDARIA = '#2b7a3d'
 
 // Abas da coluna de edição (à esquerda do mapa). Ruas · Quadras · Fileiras ·
 // Túmulos · Jazigo seguem o caminho do mapeamento; as outras são ferramentas.
@@ -210,6 +213,27 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
   const [filas, setFilas] = useState<Fila[]>([])
   const [ruas, setRuas] = useState<Rua[]>([])
   const [ruaEmEdicao, setRuaEmEdicao] = useState<Rua | null>(null)
+  // Ocultar grupo de ruas: so na tela, nada vai pro banco.
+  const [ruasOcultas, setRuasOcultas] = useState<{ principal: boolean; secundaria: boolean }>({ principal: false, secundaria: false })
+  const chaveOcultas = `mapa-ruas-ocultas-${cemiterioId}`
+  useEffect(() => {
+    try {
+      const v = window.localStorage.getItem(chaveOcultas)
+      if (v) {
+        const o = JSON.parse(v)
+        setRuasOcultas({ principal: !!o.principal, secundaria: !!o.secundaria })
+      }
+    } catch {}
+  }, [chaveOcultas])
+  function alternarOcultoRuas(tipo: 'principal' | 'secundaria') {
+    const novo = { ...ruasOcultas, [tipo]: !ruasOcultas[tipo] }
+    setRuasOcultas(novo)
+    try {
+      window.localStorage.setItem(chaveOcultas, JSON.stringify(novo))
+    } catch {}
+    if (novo[tipo] && ruaEmEdicao && (ruaEmEdicao.tipo === 'secundaria' ? 'secundaria' : 'principal') === tipo) setRuaEmEdicao(null)
+  }
+  const ruaOculta = (r: Rua) => ruasOcultas[r.tipo === 'secundaria' ? 'secundaria' : 'principal']
   // Desenho de rua (lapis / pontos) e curvas -- estado proprio, independente do hook de desenho das quadras/fileiras
   const [desRua, setDesRua] = useState<DesRua | null>(null)
   const desRuaRef = useRef<DesRua | null>(null)
@@ -454,11 +478,13 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     // Tipo da rua vem de select proprio (a RPC nao devolve). Se a coluna
     // ainda nao existe, o erro e ignorado e toda rua vira 'principal'.
     const tiposRua: Record<string, 'principal' | 'secundaria'> = {}
+    const coresRua: Record<string, string | null> = {}
     {
-      const { data: tiposData, error: tiposErr } = await supabase.from('ruas_cemiterio').select('id, tipo').eq('cemiterio_id', cemiterioId)
+      const { data: tiposData, error: tiposErr } = await supabase.from('ruas_cemiterio').select('id, tipo, cor').eq('cemiterio_id', cemiterioId)
       if (!tiposErr) {
-        for (const t of (tiposData || []) as { id: string; tipo: string | null }[]) {
+        for (const t of (tiposData || []) as { id: string; tipo: string | null; cor?: string | null }[]) {
           tiposRua[t.id] = t.tipo === 'secundaria' ? 'secundaria' : 'principal'
+          coresRua[t.id] = t.cor ?? null
         }
       }
     }
@@ -471,6 +497,7 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
         geometria_revisada: r.properties.geometria_revisada,
         comprimento_m: r.properties.comprimento_m,
         tipo: tiposRua[r.properties.id] || 'principal',
+        cor: coresRua[r.properties.id] ?? null,
       }))
     )
     setCarregando(false)
@@ -776,20 +803,19 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     [filas]
   )
 
-  const corRuaPorId = useMemo(() => coresDasRuas(ruas), [ruas])
-
   const ruasGeojson = useMemo(
     () => ({
       type: 'FeatureCollection' as const,
       features: ruas
         .filter((r) => r.eixo)
+        .filter((r) => !ruasOcultas[r.tipo === 'secundaria' ? 'secundaria' : 'principal'])
         .map((r) => ({
           type: 'Feature' as const,
           geometry: r.eixo!,
-          properties: { id: r.id, numero: r.numero, label: r.nome || `Rua ${r.numero}`, tipo: r.tipo, cor: corRuaPorId[r.id] },
+          properties: { id: r.id, numero: r.numero, label: r.nome || `Rua ${r.numero}`, tipo: r.tipo, ...(r.cor ? { cor: r.cor } : {}) },
         })),
     }),
-    [ruas, corRuaPorId]
+    [ruas, ruasOcultas]
   )
 
   const ruasParaRota = useMemo<RuaMapeada[]>(
@@ -2119,6 +2145,20 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     await definirTipoRua(rua, rua.tipo === 'principal' ? 'secundaria' : 'principal')
   }
 
+  async function definirCorRua(rua: Rua, cor: string | null) {
+    if (rua.geometria_revisada) {
+      setMsg(`Rua ${rua.numero} está travada: destrave pra mudar a cor.`)
+      return
+    }
+    if ((rua.cor ?? null) === cor) return
+    setRuas((atual) => atual.map((r) => (r.id === rua.id ? { ...r, cor } : r)))
+    const { error } = await supabase.from('ruas_cemiterio').update({ cor }).eq('id', rua.id)
+    if (error) {
+      setRuas((atual) => atual.map((r) => (r.id === rua.id ? { ...r, cor: rua.cor ?? null } : r)))
+      setMsg(error.message)
+    }
+  }
+
   async function definirTipoRua(rua: Rua, novo: 'principal' | 'secundaria') {
     if (rua.geometria_revisada) {
       setMsg(`Rua ${rua.numero} está travada: destrave pra mudar o tipo.`)
@@ -2234,6 +2274,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
     if (rua?.geometria_revisada) {
       setMsg(`Rua ${rua.numero} está travada: destrave pra continuar o desenho.`)
       return
+    }
+    if (!ruaId && ruasOcultas.principal) {
+      alternarOcultoRuas('principal')
+      setMsg('Mostrei as ruas principais para você ver a rua nova.')
     }
     setModoMarcarEntrada(false)
     setModoMarcar(false)
@@ -2584,14 +2628,14 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   id="ruas-linha"
                   type="line"
                   filter={['!=', ['get', 'tipo'], 'secundaria']}
-                  paint={{ 'line-color': ['get', 'cor'], 'line-width': 6, 'line-opacity': 1 }}
+                  paint={{ 'line-color': ['coalesce', ['get', 'cor'], COR_RUA_PRINCIPAL], 'line-width': 6, 'line-opacity': 1 }}
                   layout={{ 'line-cap': 'round', 'line-join': 'round' }}
                 />
                 <Layer
                   id="ruas-linha-pontilhada"
                   type="line"
                   filter={['==', ['get', 'tipo'], 'secundaria']}
-                  paint={{ 'line-color': ['get', 'cor'], 'line-width': 3, 'line-dasharray': [2, 1.5], 'line-opacity': 1 }}
+                  paint={{ 'line-color': ['coalesce', ['get', 'cor'], COR_RUA_SECUNDARIA], 'line-width': 2.5, 'line-dasharray': [2, 1.5], 'line-opacity': 1 }}
                   layout={{ 'line-join': 'round' }}
                 />
                 <Layer
@@ -2867,10 +2911,10 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                   ))}
 
               {ruas
-                .filter((r) => r.eixo && r.eixo.coordinates.length >= 2)
+                .filter((r) => r.eixo && r.eixo.coordinates.length >= 2 && !ruaOculta(r))
                 .flatMap((r) => {
                   const cs = r.eixo!.coordinates
-                  const cor = corRuaPorId[r.id] || '#ffffff'
+                  const cor = r.cor || (r.tipo === 'secundaria' ? COR_RUA_SECUNDARIA : COR_RUA_PRINCIPAL)
                   return [0, cs.length - 1].map((i) => (
                     <Marker key={`bandeira-rua-${r.id}-${i}`} longitude={cs[i][0]} latitude={cs[i][1]} anchor="bottom">
                       <button
@@ -3136,6 +3180,26 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                     <button type="button" className={itemCls} onClick={() => { setMenuPonta(null); definirTipoRua(ruaMenu, 'secundaria') }}>
                       Rua dos túmulos
                     </button>
+                    <div className="my-1 border-t border-[var(--tema-zinc-700)]" />
+                    <div className="px-3 py-2">
+                      <p className="text-xs text-[var(--tema-zinc-400)] mb-1.5">Cor da rua</p>
+                      <div className="flex flex-wrap gap-1.5 mb-1.5">
+                        {CORES_RUA.map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            title={c}
+                            aria-label={`Cor ${c}`}
+                            onClick={() => { setMenuPonta(null); definirCorRua(ruaMenu, c) }}
+                            className="w-5 h-5 rounded-full border"
+                            style={{ background: c, borderColor: ruaMenu.cor === c ? '#fff' : 'rgba(255,255,255,0.35)', boxShadow: ruaMenu.cor === c ? '0 0 0 2px #c9a24b' : undefined }}
+                          />
+                        ))}
+                      </div>
+                      <button type="button" className="text-xs text-[var(--tema-zinc-300)] hover:text-white underline" onClick={() => { setMenuPonta(null); definirCorRua(ruaMenu, null) }}>
+                        Padrão do tipo
+                      </button>
+                    </div>
                     <div className="my-1 border-t border-[var(--tema-zinc-700)]" />
                     <button type="button" className={itemCls} onClick={() => iniciarDesenhoRua('lapis', ruaMenu.id, menuPonta.ponta)}>
                       Continuar com lápis
@@ -4202,7 +4266,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
             onTravar={travarRua}
             onDestravar={destravarRua}
             onTravarGrupo={travarRuasDoGrupo}
-            onEditar={setRuaEmEdicao}
+            ocultos={ruasOcultas}
+            onAlternarOculto={alternarOcultoRuas}
+            onEditar={(r) => {
+              if (ruaOculta(r)) {
+                setMsg('Mostre este grupo para editar.')
+                return
+              }
+              setRuaEmEdicao(r)
+            }}
             onSairEdicao={() => setRuaEmEdicao(null)}
             onApagar={apagarRua}
             onToggleTestarRota={() => {
@@ -4347,11 +4419,15 @@ export function MapaCemiterio({ cemiterioId, modo = 'edicao' }: { cemiterioId: s
                 Contorno dourado = quadra · linha azul tracejada = fileira
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-4 h-1 inline-block rounded-full" style={{ background: 'linear-gradient(90deg,#f87171,#60a5fa,#4ade80)' }} />
-                Ruas: cor = identifica a rua; linha grossa = principal; pontilhada = rua dos túmulos
+                <span className="w-4 h-1 inline-block" style={{ background: COR_RUA_PRINCIPAL }} />
+                Linha grossa vinho = rua principal (asfalto, passa carro)
               </div>
               <div className="flex items-center gap-2">
-                <Flag size={12} strokeWidth={1.5} style={{ color: '#C9A46A' }} />
+                <span className="w-4 h-0.5 inline-block" style={{ background: COR_RUA_SECUNDARIA }} />
+                Linha fina verde pontilhada = rua dos túmulos (entre as sepulturas, a pé) · cor escolhida por você sobrescreve
+              </div>
+              <div className="flex items-center gap-2">
+                <Flag size={12} strokeWidth={1.5} style={{ color: COR_RUA_PRINCIPAL }} />
                 Bandeira em cada ponta da rua: clique pra trocar entre principal e rua dos túmulos · quadrado roxo = vértice de rua · quadrado laranja = ponta de fileira
               </div>
             </div>

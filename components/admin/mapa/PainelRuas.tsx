@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Flag, Lock, LockOpen, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Eye, EyeOff, Flag, Lock, LockOpen, Plus } from 'lucide-react'
 import { BarraDesenho } from './BarraDesenho'
 import { comprimentoPolilinha } from '@/lib/geo'
-import { coresDasRuas } from '@/lib/coresFila'
 import type { DiagnosticoRede, ResultadoRota } from '@/lib/rotaCemiterio'
 
 interface Rua {
@@ -15,6 +14,7 @@ interface Rua {
   geometria_revisada: boolean
   comprimento_m: number | null
   tipo: 'principal' | 'secundaria'
+  cor?: string | null
 }
 
 interface DesenhoApi {
@@ -44,6 +44,8 @@ export default function PainelRuas({
   onTravar,
   onDestravar,
   onTravarGrupo,
+  ocultos,
+  onAlternarOculto,
   onEditar,
   onSairEdicao,
   onApagar,
@@ -66,6 +68,8 @@ export default function PainelRuas({
   onTravar: (rua: Rua) => void
   onDestravar: (rua: Rua) => void
   onTravarGrupo: (travar: boolean, tipo: 'principal' | 'secundaria') => void
+  ocultos: { principal: boolean; secundaria: boolean }
+  onAlternarOculto: (tipo: 'principal' | 'secundaria') => void
   onEditar: (rua: Rua) => void
   onSairEdicao: () => void
   onApagar: (rua: Rua) => void
@@ -78,7 +82,6 @@ export default function PainelRuas({
   // (sao o que se olha o tempo todo); so a lista item-a-item recolhe.
   const [listaAberta, setListaAberta] = useState(false)
   const [menuNova, setMenuNova] = useState(false)
-  const corPorId = coresDasRuas(ruas)
   const ordenadas = ruas.slice().sort((a, b) => a.numero - b.numero)
   const principais = ordenadas.filter((r) => r.tipo !== 'secundaria')
   const secundarias = ordenadas.filter((r) => r.tipo === 'secundaria')
@@ -130,7 +133,7 @@ export default function PainelRuas({
         )}
       </div>
       <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
-        Cor = identifica a rua; linha grossa = principal; pontilhada = rua dos túmulos.
+        Principal = vinho grosso; rua dos túmulos = verde pontilhado; a cor escolhida por você sobrescreve (menu da bandeira da ponta).
       </p>
       <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
         Desenha por onde a pessoa anda de verdade (asfalto/calçada) -- a rota da página pública segue essas ruas em vez de cortar reto por cima das
@@ -222,8 +225,18 @@ export default function PainelRuas({
             · {g.itens.filter((r) => r.geometria_revisada).length} travadas / {g.itens.length}
           </span>
         </p>
+        <span className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => onAlternarOculto(g.chave as 'principal' | 'secundaria')}
+          title="Só esconde na tela; não apaga nada"
+          className="text-xs flex items-center gap-1 rounded px-2 py-1 border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]"
+        >
+          {ocultos[g.chave as 'principal' | 'secundaria'] ? <Eye size={12} strokeWidth={1.5} /> : <EyeOff size={12} strokeWidth={1.5} />}{' '}
+          {ocultos[g.chave as 'principal' | 'secundaria'] ? 'Mostrar' : 'Ocultar'}
+        </button>
         {editavel && (
-          <span className="flex items-center gap-2">
+          <>
             <button
               type="button"
               disabled={salvando}
@@ -240,12 +253,13 @@ export default function PainelRuas({
             >
               <LockOpen size={12} strokeWidth={1.5} /> {g.chave === 'principal' ? 'Destravar principais' : 'Destravar ruas dos túmulos'}
             </button>
-          </span>
+          </>
         )}
+        </span>
         </div>
         <ul className="space-y-1">
           {g.itens.map((r) => (
-              <li key={r.id} className="rounded border border-[var(--tema-zinc-800)] px-2 py-1.5">
+              <li key={r.id} className={`rounded border border-[var(--tema-zinc-800)] px-2 py-1.5 ${ocultos[g.chave as 'principal' | 'secundaria'] ? 'opacity-50' : ''}`}>
                 {renomeandoId === r.id ? (
                   <div className="flex items-center gap-1.5">
                     <input
@@ -273,9 +287,10 @@ export default function PainelRuas({
                 ) : (
                   <div className="flex items-center justify-between gap-2 flex-wrap text-xs text-[var(--tema-zinc-300)]">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 rounded-full inline-block shrink-0 border border-white/60" style={{ background: corPorId[r.id] }} />
+                      <span className="w-3 h-3 rounded-full inline-block shrink-0 border border-white/60" style={{ background: r.cor || g.cor }} />
                       Rua {r.numero} {r.nome && `— ${r.nome}`} {r.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
                       {r.comprimento_m != null && <span className="text-[var(--tema-zinc-500)]">({r.comprimento_m.toFixed(0)} m)</span>}
+                      {ocultos[g.chave as 'principal' | 'secundaria'] && <span className="text-[var(--tema-zinc-500)]">oculto</span>}
                       {diagnostico?.idsDesconectadas.includes(r.id) && <span style={{ color: '#f59e0b' }}>⚠ desconectada</span>}
                     </span>
                     {editavel && (
