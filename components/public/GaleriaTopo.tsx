@@ -23,13 +23,13 @@ export default function GaleriaTopo({
   ehYoutube: boolean
 }) {
   const [aberto, setAberto] = useState(false)
-  // Formato do quadro = formato da mídia (largura/altura), limitado entre 3/4
-  // (em pé) e 16/9 (deitado): foto em pé não fica pequena no quadro deitado e
+  // Formato do quadro = formato da mídia (largura/altura), limitado entre 1/1
+  // (quadrado; foto em pé fica inteira com faixa preta dos lados) e 16/9 (deitado): foto em pé não fica pequena no quadro deitado e
   // a pessoa nunca é cortada.
   const [prop, setProp] = useState<number | null>(null)
   const ajustarProp = (w: number, h: number) => {
     if (!w || !h) return
-    setProp(Math.min(16 / 9, Math.max(3 / 4, w / h)))
+    setProp(Math.min(16 / 9, Math.max(1, w / h)))
   }
   useEffect(() => {
     if (!fotos[0] || (videoCapa && aberto)) return

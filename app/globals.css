@@ -416,6 +416,7 @@ html {
 
 .retrato-moldura {
   position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden;
+  max-height: min(560px, 72vh); /* limite: quadro alto demais empurra o cartão do nome */
   margin-bottom: 16px; padding: 10px; border: 0; cursor: pointer; display: block;
   background: linear-gradient(150deg, #f6e7c0 0%, #c9a46a 36%, #8a6a2f 70%, #e2cd96 100%);
   border-radius: 4px;
