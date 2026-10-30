@@ -23,6 +23,20 @@ export default function GaleriaTopo({
   ehYoutube: boolean
 }) {
   const [aberto, setAberto] = useState(false)
+  // Formato do quadro = formato da mídia (largura/altura), limitado entre 3/4
+  // (em pé) e 16/9 (deitado): foto em pé não fica pequena no quadro deitado e
+  // a pessoa nunca é cortada.
+  const [prop, setProp] = useState<number | null>(null)
+  const ajustarProp = (w: number, h: number) => {
+    if (!w || !h) return
+    setProp(Math.min(16 / 9, Math.max(3 / 4, w / h)))
+  }
+  useEffect(() => {
+    if (!fotos[0] || (videoCapa && aberto)) return
+    const img = new window.Image()
+    img.onload = () => ajustarProp(img.naturalWidth, img.naturalHeight)
+    img.src = fotos[0]
+  }, [fotos, videoCapa, aberto])
   // Índice do item aberto em tela cheia. Antes as miniaturas eram atalho pra
   // seção lá de baixo -- agora abrem aqui mesmo, no topo.
   const [visor, setVisor] = useState<number | null>(null)
@@ -56,7 +70,7 @@ export default function GaleriaTopo({
       </div>
 
       {videoCapa ? (
-        <div className="retrato-moldura">
+        <div className="retrato-moldura" style={prop ? { aspectRatio: String(prop) } : undefined}>
           {aberto ? (
             ehYoutube ? (
               <iframe
@@ -67,7 +81,7 @@ export default function GaleriaTopo({
                 style={{ width: '100%', height: '100%', border: 0 }}
               />
             ) : (
-              <video src={videoCapa} controls autoPlay style={{ width: '100%', height: '100%', background: '#000' }} />
+              <video src={videoCapa} controls autoPlay onLoadedMetadata={(e) => ajustarProp(e.currentTarget.videoWidth, e.currentTarget.videoHeight)} style={{ width: '100%', height: '100%', background: '#000' }} />
             )
           ) : (
             <button
@@ -87,7 +101,7 @@ export default function GaleriaTopo({
         </div>
       ) : (
         fotos[0] && (
-          <button type="button" onClick={() => setVisor(0)} className="retrato-moldura">
+          <button type="button" onClick={() => setVisor(0)} className="retrato-moldura" style={prop ? { aspectRatio: String(prop) } : undefined}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={fotos[0]} alt="" />
           </button>

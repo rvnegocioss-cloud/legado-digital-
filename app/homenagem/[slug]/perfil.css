@@ -424,7 +424,7 @@
 .perfil-miniatura img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; background: #000;
   transition: transform 250ms ease, filter 250ms ease;
 }
 .perfil-miniatura:hover img {
@@ -699,8 +699,8 @@
   color:var(--perfil-dourado);margin-bottom:10px;
 }
 .arv-mini{
-  width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center 38%;
-  border-radius:8px;display:block;background:#f5ecd8;
+  width:100%;aspect-ratio:4/3;object-fit:contain;
+  border-radius:8px;display:block;background:#000;
 }
 .arv-abrir{display:block;margin-top:10px;font-size:11.5px;color:var(--perfil-texto-fraco)}
 .arv-card:hover .arv-abrir{color:var(--perfil-dourado-claro)}

@@ -260,7 +260,7 @@ const estiloTopo = {
     alignItems: "center",
     justifyContent: "center",
   },
-  foto: { width: "100%", height: "100%", objectFit: "cover" },
+  foto: { width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 20%" },
   monograma: { fontSize: "clamp(40px, 6vw, 56px)", color: v(VAR_DOURADO, CORES.dourado), fontFamily: "Georgia, serif" },
   eyebrowLinha: { marginTop: 28, display: "flex", alignItems: "center", gap: 10 },
   hairlineCurta: { width: 24, height: 1, background: CORES.douradoBorda },

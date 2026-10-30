@@ -67,7 +67,7 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
             aspectRatio: '1',
             width: '100%',
             height: '100%',
-            objectFit: 'cover' as const,
+            objectFit: 'contain' as const,
             borderRadius: 6,
             border: `1px solid ${CORES.douradoBorda}`,
             cursor: 'zoom-in' as const,
@@ -83,7 +83,7 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
               >
                 {/* preload metadata: carrega só o primeiro quadro como capa,
                     nunca o vídeo inteiro só pra montar o mosaico */}
-                <video src={url} preload="metadata" muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <video src={url} preload="metadata" muted playsInline style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 <span
                   style={{
                     position: 'absolute',

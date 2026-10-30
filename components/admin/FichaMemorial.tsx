@@ -1101,7 +1101,7 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
                         {galeria.map((url) => (
                           <div key={url} className="relative group aspect-square">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={urlMidiaProtegida(url) || url} alt="" className="w-full h-full object-cover rounded" />
+                            <img src={urlMidiaProtegida(url) || url} alt="" className="w-full h-full object-contain bg-black rounded" />
                             <button
                               type="button"
                               onClick={() => removerFoto(url)}
@@ -1147,7 +1147,7 @@ function FichaMemorialInner({ modo }: { modo: ModoFicha }) {
                       <div className="grid grid-cols-2 @lg:grid-cols-4 gap-2 mb-2">
                         {videosGaleria.map((url) => (
                           <div key={url} className="relative group">
-                            <video src={urlMidiaProtegida(url) || url} controls className="w-full h-20 object-cover rounded bg-black" />
+                            <video src={urlMidiaProtegida(url) || url} controls className="w-full h-20 object-contain rounded bg-black" />
                             <button
                               type="button"
                               onClick={() => removerVideoGaleria(url)}

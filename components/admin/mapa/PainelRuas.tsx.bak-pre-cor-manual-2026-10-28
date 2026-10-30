@@ -1,0 +1,338 @@
+'use client'
+
+import { useState } from 'react'
+import { ChevronDown, ChevronRight, Flag, Lock, LockOpen, Plus } from 'lucide-react'
+import { BarraDesenho } from './BarraDesenho'
+import { comprimentoPolilinha } from '@/lib/geo'
+import { coresDasRuas } from '@/lib/coresFila'
+import type { DiagnosticoRede, ResultadoRota } from '@/lib/rotaCemiterio'
+
+interface Rua {
+  id: string
+  numero: number
+  nome: string | null
+  eixo: { type: 'LineString'; coordinates: [number, number][] } | null
+  geometria_revisada: boolean
+  comprimento_m: number | null
+  tipo: 'principal' | 'secundaria'
+}
+
+interface DesenhoApi {
+  ativo: boolean
+  pontos: [number, number][]
+  iniciar: (modo: 'linha', onConcluir: (pontos: [number, number][]) => void) => void
+  concluir: () => void
+  desfazerUltimoPonto: () => void
+  cancelar: () => void
+}
+
+export default function PainelRuas({
+  ruas,
+  editavel,
+  salvando,
+  desenhandoRua,
+  desenhandoCurva,
+  desenho,
+  ruaEmEdicao,
+  diagnostico,
+  temEntrada,
+  modoTestarRota,
+  rotaTeste,
+  onNovaRua,
+  onRenomear,
+  onAlternarTipo,
+  onTravar,
+  onDestravar,
+  onTravarGrupo,
+  onEditar,
+  onSairEdicao,
+  onApagar,
+  onToggleTestarRota,
+}: {
+  ruas: Rua[]
+  editavel: boolean
+  salvando: boolean
+  desenhandoRua: boolean
+  desenhandoCurva: boolean
+  desenho: DesenhoApi
+  ruaEmEdicao: Rua | null
+  diagnostico: DiagnosticoRede | null
+  temEntrada: boolean
+  modoTestarRota: boolean
+  rotaTeste: ResultadoRota | null
+  onNovaRua: (modo: 'lapis' | 'pontos') => void
+  onRenomear: (ruaId: string, nome: string) => void
+  onAlternarTipo: (rua: Rua) => void
+  onTravar: (rua: Rua) => void
+  onDestravar: (rua: Rua) => void
+  onTravarGrupo: (travar: boolean, tipo: 'principal' | 'secundaria') => void
+  onEditar: (rua: Rua) => void
+  onSairEdicao: () => void
+  onApagar: (rua: Rua) => void
+  onToggleTestarRota: () => void
+}) {
+  const [renomeandoId, setRenomeandoId] = useState<string | null>(null)
+  const [nomeInput, setNomeInput] = useState('')
+  // Lista retratil -- com muita rua desenhada o painel empurrava o resto do
+  // menu pra fora da tela. Diagnostico e "Testar rota" ficam SEMPRE visiveis
+  // (sao o que se olha o tempo todo); so a lista item-a-item recolhe.
+  const [listaAberta, setListaAberta] = useState(false)
+  const [menuNova, setMenuNova] = useState(false)
+  const corPorId = coresDasRuas(ruas)
+  const ordenadas = ruas.slice().sort((a, b) => a.numero - b.numero)
+  const principais = ordenadas.filter((r) => r.tipo !== 'secundaria')
+  const secundarias = ordenadas.filter((r) => r.tipo === 'secundaria')
+  const grupos = [
+    { chave: 'principal', titulo: `${principais.length} ${principais.length === 1 ? 'rua principal' : 'ruas principais'}`, cor: '#8a1c1c', itens: principais },
+    { chave: 'secundaria', titulo: `${secundarias.length} ${secundarias.length === 1 ? 'rua dos túmulos' : 'ruas dos túmulos'}`, cor: '#2b7a3d', itens: secundarias },
+  ]
+
+  return (
+    <div className="rounded-xl bg-[var(--tema-zinc-900)] border border-[var(--tema-zinc-800)] p-4 mb-4">
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-sm font-semibold text-white">Ruas (caminhos internos) · {ruas.length}</h2>
+        {editavel && (
+          <div className="relative">
+            <button
+              type="button"
+              disabled={salvando || desenho.ativo || desenhandoCurva}
+              onClick={() => setMenuNova((v) => !v)}
+              className="text-xs font-semibold flex items-center gap-1 rounded px-2.5 py-1.5 hover:opacity-90 disabled:opacity-40"
+              style={{ background: '#c9a24b', color: '#111' }}
+            >
+              <Plus size={12} strokeWidth={1.5} /> Nova rua
+            </button>
+            {menuNova && (
+              <div className="absolute right-0 top-full mt-1 z-20 rounded-lg border border-[var(--tema-zinc-700)] bg-[var(--tema-zinc-900)] shadow-xl py-1 min-w-[210px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuNova(false)
+                    onNovaRua('lapis')
+                  }}
+                  className="block w-full text-left text-xs px-3 py-2 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
+                >
+                  Desenhar com lápis
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuNova(false)
+                    onNovaRua('pontos')
+                  }}
+                  className="block w-full text-left text-xs px-3 py-2 text-[var(--tema-zinc-200)] hover:bg-[var(--tema-zinc-800)]"
+                >
+                  Desenhar clicando pontos
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <p className="text-xs text-[var(--tema-zinc-500)] mb-1">
+        Cor = identifica a rua; linha grossa = principal; pontilhada = rua dos túmulos.
+      </p>
+      <p className="text-xs text-[var(--tema-zinc-500)] mb-3">
+        Desenha por onde a pessoa anda de verdade (asfalto/calçada) -- a rota da página pública segue essas ruas em vez de cortar reto por cima das
+        quadras.
+      </p>
+
+      {desenhandoRua && (
+        <BarraDesenho
+          texto={`Clica ao longo do caminho (${desenho.pontos.length} ponto${desenho.pontos.length === 1 ? '' : 's'})${
+            desenho.pontos.length >= 2 ? ` — ${comprimentoPolilinha(desenho.pontos).toFixed(1)} m` : ''
+          }`}
+          podeConcluir={desenho.pontos.length >= 2}
+          onConcluir={desenho.concluir}
+          onDesfazer={desenho.desfazerUltimoPonto}
+          onCancelar={desenho.cancelar}
+        />
+      )}
+
+      {!temEntrada ? (
+        <p className="text-xs text-[var(--tema-zinc-500)] mb-3">Marque a entrada do cemitério (card mais abaixo) pra eu conferir se as ruas se conectam com a portaria.</p>
+      ) : ruas.length > 0 && diagnostico ? (
+        diagnostico.idsDesconectadas.length > 0 ? (
+          <p className="text-xs mb-3" style={{ color: '#f59e0b' }}>
+            ⚠ {diagnostico.idsDesconectadas.length} rua(s) sem ligação com a portaria -- a rota vai ignorar ela(s). Arrasta um vértice pra encostar
+            em outra rua.
+          </p>
+        ) : (
+          <p className="text-xs text-emerald-400 mb-3">✓ Rede conectada -- {diagnostico.comprimentoTotalM.toFixed(0)} m de rua mapeada.</p>
+        )
+      ) : null}
+
+      {ruas.length > 0 && (
+        <button
+          type="button"
+          disabled={!temEntrada}
+          onClick={onToggleTestarRota}
+          className={`w-full text-xs px-3 py-1.5 rounded mb-2 disabled:opacity-40 ${
+            modoTestarRota ? 'bg-purple-700 text-branco-fixo' : 'border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)]'
+          }`}
+        >
+          {modoTestarRota ? 'Clica num túmulo pra testar a rota (clica de novo pra sair)' : 'Testar rota até um túmulo'}
+        </button>
+      )}
+      {modoTestarRota && rotaTeste && (
+        <p className="text-xs mb-3" style={{ color: rotaTeste.usouRede ? '#a855f7' : '#f87171' }}>
+          {rotaTeste.usouRede
+            ? `${rotaTeste.distanciaM.toFixed(0)} m pela rua (linha reta: ${rotaTeste.distanciaRetaM.toFixed(0)} m)`
+            : `Linha reta (${rotaTeste.distanciaRetaM.toFixed(0)} m) -- ${
+                rotaTeste.motivo === 'entrada_longe'
+                  ? 'a portaria está longe demais de qualquer rua mapeada.'
+                  : rotaTeste.motivo === 'tumulo_longe'
+                    ? 'esse túmulo está longe demais de qualquer rua mapeada.'
+                    : rotaTeste.motivo === 'sem_caminho'
+                      ? 'não achei caminho conectado até esse túmulo.'
+                      : 'nenhuma rua mapeada ainda.'
+              }`}
+        </p>
+      )}
+
+      {ruas.length === 0 ? (
+        <p className="text-[var(--tema-zinc-500)] text-xs">Nenhuma rua desenhada ainda.</p>
+      ) : (
+        <>
+        <button
+          type="button"
+          disabled={!!ruaEmEdicao}
+          onClick={() => setListaAberta((v) => !v)}
+          className="w-full flex items-center gap-1 text-xs text-[var(--tema-zinc-400)] hover:text-white mb-1 disabled:opacity-60"
+        >
+          {listaAberta || ruaEmEdicao ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          {ruaEmEdicao
+            ? `Editando a Rua ${ruaEmEdicao.numero} no mapa`
+            : listaAberta
+              ? 'Esconder lista de ruas'
+              : `Editar / renomear ruas (${ruas.length})`}
+        </button>
+
+        {/* Rua em edicao abre a lista sozinha -- senao o botao "Sair da
+            edicao" ficaria escondido e o modo travaria sem saida visivel. */}
+        {(listaAberta || ruaEmEdicao) && (
+        <div className="space-y-3">
+        {grupos.map((g) => (
+        <div key={g.chave}>
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+        <p className="text-xs font-semibold flex items-center gap-1.5" style={{ color: g.cor }}>
+          <Flag size={12} strokeWidth={1.5} style={{ color: g.cor }} fill={g.cor} />
+          {g.titulo}
+          <span className="font-normal text-[var(--tema-zinc-400)]">
+            · {g.itens.filter((r) => r.geometria_revisada).length} travadas / {g.itens.length}
+          </span>
+        </p>
+        {editavel && (
+          <span className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={salvando}
+              onClick={() => onTravarGrupo(true, g.chave as 'principal' | 'secundaria')}
+              className="text-xs flex items-center gap-1 rounded px-2 py-1 border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
+            >
+              <Lock size={12} strokeWidth={1.5} /> {g.chave === 'principal' ? 'Travar principais' : 'Travar ruas dos túmulos'}
+            </button>
+            <button
+              type="button"
+              disabled={salvando}
+              onClick={() => onTravarGrupo(false, g.chave as 'principal' | 'secundaria')}
+              className="text-xs flex items-center gap-1 rounded px-2 py-1 border border-[var(--tema-zinc-700)] text-[var(--tema-zinc-300)] hover:bg-[var(--tema-zinc-800)] disabled:opacity-40"
+            >
+              <LockOpen size={12} strokeWidth={1.5} /> {g.chave === 'principal' ? 'Destravar principais' : 'Destravar ruas dos túmulos'}
+            </button>
+          </span>
+        )}
+        </div>
+        <ul className="space-y-1">
+          {g.itens.map((r) => (
+              <li key={r.id} className="rounded border border-[var(--tema-zinc-800)] px-2 py-1.5">
+                {renomeandoId === r.id ? (
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      autoFocus
+                      value={nomeInput}
+                      onChange={(e) => setNomeInput(e.target.value)}
+                      placeholder="Nome da rua (ex: Alameda Central)"
+                      className="text-xs bg-[var(--tema-zinc-800)] border border-[var(--tema-zinc-700)] rounded px-2 py-1 text-white flex-1 min-w-[140px]"
+                    />
+                    <button
+                      type="button"
+                      disabled={salvando}
+                      onClick={() => {
+                        onRenomear(r.id, nomeInput)
+                        setRenomeandoId(null)
+                      }}
+                      className="text-xs text-emerald-400 hover:text-emerald-200"
+                    >
+                      Salvar
+                    </button>
+                    <button type="button" onClick={() => setRenomeandoId(null)} className="text-xs text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]">
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-2 flex-wrap text-xs text-[var(--tema-zinc-300)]">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full inline-block shrink-0 border border-white/60" style={{ background: corPorId[r.id] }} />
+                      Rua {r.numero} {r.nome && `— ${r.nome}`} {r.geometria_revisada && <span className="text-emerald-400">🔒</span>}{' '}
+                      {r.comprimento_m != null && <span className="text-[var(--tema-zinc-500)]">({r.comprimento_m.toFixed(0)} m)</span>}
+                      {diagnostico?.idsDesconectadas.includes(r.id) && <span style={{ color: '#f59e0b' }}>⚠ desconectada</span>}
+                    </span>
+                    {editavel && (
+                      <span className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRenomeandoId(r.id)
+                            setNomeInput(r.nome || '')
+                          }}
+                          className="text-[var(--tema-zinc-400)] hover:text-white"
+                        >
+                          ✎ Renomear
+                        </button>
+                        <button
+                          type="button"
+                          disabled={salvando || r.geometria_revisada}
+                          onClick={() => onAlternarTipo(r)}
+                          title={r.geometria_revisada ? 'Rua travada: destrave pra mudar o tipo' : undefined}
+                          className="text-[var(--tema-zinc-400)] hover:text-white disabled:opacity-40"
+                        >
+                          {r.tipo === 'secundaria' ? 'Tornar principal' : 'Tornar rua dos túmulos'}
+                        </button>
+                        {ruaEmEdicao?.id === r.id ? (
+                          <button type="button" onClick={onSairEdicao} className="text-blue-400 hover:text-blue-200">
+                            Sair da edição
+                          </button>
+                        ) : (
+                          <button type="button" disabled={salvando || desenho.ativo} onClick={() => onEditar(r)} className="text-blue-400 hover:text-blue-200 disabled:opacity-40">
+                            Editar no mapa
+                          </button>
+                        )}
+                        {r.geometria_revisada ? (
+                          <button type="button" disabled={salvando} onClick={() => onDestravar(r)} className="text-emerald-400 hover:text-emerald-200">
+                            Destravar
+                          </button>
+                        ) : (
+                          <button type="button" disabled={salvando} onClick={() => onTravar(r)} className="text-[var(--tema-zinc-400)] hover:text-[var(--tema-zinc-200)]">
+                            🔒 Travar
+                          </button>
+                        )}
+                        <button type="button" disabled={salvando} onClick={() => onApagar(r)} className="text-red-400 hover:text-red-200">
+                          Apagar
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+        </ul>
+        </div>
+        ))}
+        </div>
+        )}
+        </>
+      )}
+    </div>
+  )
+}

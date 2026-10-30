@@ -128,7 +128,7 @@ export function MuralMemorias({ memorialId, memoriasIniciais }: { memorialId: st
                   src={urlMidiaProtegida(m.foto_url) || m.foto_url}
                   alt=""
                   loading="lazy"
-                  style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: 6, marginBottom: 10 }}
+                  style={{ width: '100%', aspectRatio: '16/9', objectFit: 'contain', background: '#000', borderRadius: 6, marginBottom: 10 }}
                 />
               )}
               <p style={{ fontSize: 14, lineHeight: 1.7, color: CORES.textoCorpo, margin: 0 }}>{m.texto}</p>

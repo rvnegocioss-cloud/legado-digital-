@@ -1333,7 +1333,7 @@ export default function FamiliaEdicaoPage() {
               <div className="grid grid-cols-2 gap-2 mb-2">
                 {videosGaleria.map((url) => (
                   <div key={url} className="relative group">
-                    <video src={urlMidiaProtegida(url) || url} controls className="w-full h-24 object-cover rounded bg-black" />
+                    <video src={urlMidiaProtegida(url) || url} controls className="w-full h-24 object-contain rounded bg-black" />
                     <button
                       type="button"
                       onClick={() => removerVideoGaleria(url)}
@@ -1504,7 +1504,7 @@ export default function FamiliaEdicaoPage() {
                 {galeria.map((url) => (
                   <div key={url} className="relative group">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={urlMidiaProtegida(url) || url} alt="" className="w-full h-16 object-cover rounded" />
+                    <img src={urlMidiaProtegida(url) || url} alt="" className="w-full h-16 object-contain bg-black rounded" />
                     <button
                       type="button"
                       onClick={() => removerFoto(url)}
