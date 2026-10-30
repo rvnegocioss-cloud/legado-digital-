@@ -437,6 +437,9 @@ html {
   width: 100%; height: 100%; display: block; border: 0; background: #000;
   object-fit: cover; border-radius: 2px;
 }
+/* Vídeo aparece INTEIRO (barras pretas nas sobras): com cover, vídeo de celular
+   em pé era cortado no formato 16/10 e perdia cabeça e pés da pessoa. */
+.retrato-moldura > video { object-fit: contain; }
 .retrato-play { cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .retrato-play > span {
   width: 46px; height: 46px; border-radius: 50%; background: rgba(201,164,106,.94);
