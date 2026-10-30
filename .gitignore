@@ -64,3 +64,6 @@ google-credentials*.json
 
 # worker do maplibre-gl, copiado de node_modules a cada build
 /public/maplibre/
+
+# backups locais de edicao
+*.bak-*
