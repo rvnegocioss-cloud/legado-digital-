@@ -435,7 +435,7 @@ html {
 .retrato-moldura > img,
 .retrato-moldura > button {
   width: 100%; height: 100%; display: block; border: 0; background: #000;
-  object-fit: cover; border-radius: 2px;
+  object-fit: contain; border-radius: 2px;
 }
 /* Vídeo aparece INTEIRO (barras pretas nas sobras): com cover, vídeo de celular
    em pé era cortado no formato 16/10 e perdia cabeça e pés da pessoa. */
@@ -459,7 +459,7 @@ html {
 }
 .retrato-mini:hover { transform: translateY(-3px); box-shadow: 0 7px 18px rgba(0,0,0,.45); }
 .retrato-mini img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
+  width: 100%; height: 100%; object-fit: contain; display: block; background: #000; background: #000;
   border-radius: 1px; border: 1.5px solid #f7f1e0;
 }
 .retrato-mini.mais {

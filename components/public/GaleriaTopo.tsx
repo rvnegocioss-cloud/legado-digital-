@@ -77,7 +77,7 @@ export default function GaleriaTopo({
               className="retrato-play"
               style={{
                 background: fotos[0]
-                  ? `center/cover no-repeat url(${fotos[0]})`
+                  ? `#000 center/contain no-repeat url(${fotos[0]})`
                   : 'linear-gradient(135deg,#1b3040,#20384a)',
               }}
             >
