@@ -222,6 +222,7 @@ html {
 }
 @media (min-width: 768px) {
   .mem-hero {
+    align-items: flex-start !important; /* card do nome e galeria começam na mesma linha */
     flex-direction: row !important;
     text-align: left !important;
     gap: 32px;
@@ -415,9 +416,14 @@ html {
 .retrato-cabeca button:hover { color: #dfc08a; }
 
 .retrato-moldura {
-  position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden;
-  max-height: min(560px, 72vh); /* limite: quadro alto demais empurra o cartão do nome */
-  margin-bottom: 16px; padding: 10px; border: 0; cursor: pointer; display: block;
+  /* Quadro = formato da mídia (--prop, definido pelo componente), com altura
+     máxima fixa: se a mídia é alta, o quadro fica ESTREITO e centralizado (nada
+     de faixa preta nem corte, nada passa dos limites da coluna). */
+  --max-h: min(460px, 70vh);
+  position: relative; aspect-ratio: var(--prop, 1.6); overflow: hidden;
+  width: min(100%, calc((var(--max-h) - 20px) * var(--prop, 1.6) + 20px));
+  max-height: var(--max-h);
+  margin: 0 auto 16px; padding: 10px; border: 0; cursor: pointer; display: block;
   background: linear-gradient(150deg, #f6e7c0 0%, #c9a46a 36%, #8a6a2f 70%, #e2cd96 100%);
   border-radius: 4px;
   box-shadow:

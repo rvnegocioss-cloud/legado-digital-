@@ -23,13 +23,13 @@ export default function GaleriaTopo({
   ehYoutube: boolean
 }) {
   const [aberto, setAberto] = useState(false)
-  // Formato do quadro = formato da mídia (largura/altura), limitado entre 1/1
-  // (quadrado; foto em pé fica inteira com faixa preta dos lados) e 16/9 (deitado): foto em pé não fica pequena no quadro deitado e
-  // a pessoa nunca é cortada.
+  // Formato do quadro = formato da mídia (largura/altura), entre 9/16 (em pé) e
+  // 16/9 (deitado). A altura máxima é do CSS (.retrato-moldura): mídia alta deixa
+  // o quadro estreito em vez de passar do limite -- a pessoa nunca é cortada.
   const [prop, setProp] = useState<number | null>(null)
   const ajustarProp = (w: number, h: number) => {
     if (!w || !h) return
-    setProp(Math.min(16 / 9, Math.max(1, w / h)))
+    setProp(Math.min(16 / 9, Math.max(9 / 16, w / h)))
   }
   useEffect(() => {
     if (!fotos[0] || (videoCapa && aberto)) return
@@ -70,7 +70,7 @@ export default function GaleriaTopo({
       </div>
 
       {videoCapa ? (
-        <div className="retrato-moldura" style={prop ? { aspectRatio: String(prop) } : undefined}>
+        <div className="retrato-moldura" style={prop ? ({ ['--prop' as string]: String(prop) }) : undefined}>
           {aberto ? (
             ehYoutube ? (
               <iframe
@@ -101,7 +101,7 @@ export default function GaleriaTopo({
         </div>
       ) : (
         fotos[0] && (
-          <button type="button" onClick={() => setVisor(0)} className="retrato-moldura" style={prop ? { aspectRatio: String(prop) } : undefined}>
+          <button type="button" onClick={() => setVisor(0)} className="retrato-moldura" style={prop ? ({ ['--prop' as string]: String(prop) }) : undefined}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={fotos[0]} alt="" />
           </button>
