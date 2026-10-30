@@ -26,17 +26,32 @@ export default function GaleriaTopo({
   // Formato do quadro = formato da mídia (largura/altura), entre 9/16 (em pé) e
   // 16/9 (deitado). A altura máxima é do CSS (.retrato-moldura): mídia alta deixa
   // o quadro estreito em vez de passar do limite -- a pessoa nunca é cortada.
-  const [prop, setProp] = useState<number | null>(null)
+  const [prop, setProp] = useState<number | null>(() =>
+    videoCapa ? (videoCapa.includes('/shorts/') ? 9 / 16 : 16 / 9) : null
+  )
   const ajustarProp = (w: number, h: number) => {
     if (!w || !h) return
     setProp(Math.min(16 / 9, Math.max(9 / 16, w / h)))
   }
+  // Com vídeo de capa o quadro segue o VÍDEO (nunca a foto): inicial 16/9
+  // (9/16 em Shorts) e, em arquivo mp4, corrigido pela medida real do vídeo.
   useEffect(() => {
-    if (!fotos[0] || (videoCapa && aberto)) return
+    if (videoCapa) {
+      if (!ehYoutube && ehVideoUrl(videoCapa)) {
+        const v = document.createElement('video')
+        v.preload = 'metadata'
+        v.muted = true
+        v.onloadedmetadata = () => ajustarProp(v.videoWidth, v.videoHeight)
+        v.src = videoCapa
+        return () => { v.onloadedmetadata = null; v.removeAttribute('src'); v.load() }
+      }
+      return
+    }
+    if (!fotos[0]) return
     const img = new window.Image()
     img.onload = () => ajustarProp(img.naturalWidth, img.naturalHeight)
     img.src = fotos[0]
-  }, [fotos, videoCapa, aberto])
+  }, [fotos, videoCapa, ehYoutube])
   // Índice do item aberto em tela cheia. Antes as miniaturas eram atalho pra
   // seção lá de baixo -- agora abrem aqui mesmo, no topo.
   const [visor, setVisor] = useState<number | null>(null)
@@ -69,6 +84,7 @@ export default function GaleriaTopo({
         <button type="button" onClick={() => setVisor(0)}>ver tudo ({total})</button>
       </div>
 
+      <div className="retrato-area">
       {videoCapa ? (
         <div className="retrato-moldura" style={prop ? ({ ['--prop' as string]: String(prop) }) : undefined}>
           {aberto ? (
@@ -107,13 +123,16 @@ export default function GaleriaTopo({
           </button>
         )
       )}
+      </div>
 
       {miniaturas.length > 0 && (
-        <div className="retrato-tira" style={{ gridTemplateColumns: `repeat(${miniaturas.length}, 1fr)`, ["--mini-prop" as string]: miniaturas.length < 3 ? "16 / 10" : "1" }}>
+        <div className="retrato-tira" style={{ gridTemplateColumns: `repeat(${miniaturas.length}, 1fr)`, ["--mini-prop" as string]: miniaturas.length < 3 ? 1.6 : 1 }}>
           {miniaturas.map((url) => (
             <button key={url} type="button" onClick={() => setVisor(fotos.indexOf(url))} className="retrato-mini">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" />
+              <img src={url} alt="" aria-hidden className="fundo-desfoque" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt="" className="frente" />
             </button>
           ))}
         </div>

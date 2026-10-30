@@ -115,17 +115,31 @@ export function GaleriaFotos({ fotos, videos = [] }: { fotos: string[]; videos?:
           }
 
           return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <div
               key={i}
-              src={url}
-              alt={`Foto ${i + 1}`}
-              loading="lazy"
-              decoding="async"
               onClick={() => setAberta(i)}
               className="mem-galeria-item"
-              style={estilo}
-            />
+              style={{ ...estilo, position: 'relative', overflow: 'hidden', background: '#000' }}
+            >
+              {/* fundo desfocado da própria foto: foto em pé não fica com faixa preta */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt=""
+                aria-hidden
+                loading="lazy"
+                decoding="async"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(12px) brightness(.6)', transform: 'scale(1.2)' }}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`Foto ${i + 1}`}
+                loading="lazy"
+                decoding="async"
+                style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+              />
+            </div>
           )
         })}
       </div>
