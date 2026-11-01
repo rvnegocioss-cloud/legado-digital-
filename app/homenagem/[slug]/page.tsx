@@ -705,8 +705,8 @@ export default async function PerfilMemorialPage({
       {/* Faixa 3: sub-navegação da própria página -- a faixa sticky de
           sempre, só com os rótulos do wireframe (Uma vida / Fotos) e as
           ações de participação reunidas do mesmo lado. */}
-      <nav className="mem-container mem-nav-topo" style={estiloTopo.nav}>
-        <div style={estiloTopo.navLinks}>
+      <nav className="mem-container mem-nav-topo mem-subnav" style={estiloTopo.nav}>
+        <div className="mem-subnav-links" style={estiloTopo.navLinks}>
           <a href="#biografia" style={estiloTopo.navLink}>Sobre</a>
           <a href="#timeline" style={estiloTopo.navLink}>Uma vida</a>
           <a href="#galeria" style={estiloTopo.navLink}>Fotos</a>
@@ -714,7 +714,20 @@ export default async function PerfilMemorialPage({
           <a href="#livro" style={estiloTopo.navLink}>Homenagens</a>
           <a href="#localizacao" style={estiloTopo.navLink}>Localização</a>
         </div>
-        <div style={estiloTopo.navAcoes}>
+        {/* Só no celular: os 6 atalhos viram uma lista que abre (sem JS), pra
+            a barra fixa ocupar uma linha só em vez de 3-4. */}
+        <details className="mem-irpara">
+          <summary>Ir para</summary>
+          <div className="mem-irpara-lista">
+            <a href="#biografia">Sobre</a>
+            <a href="#timeline">Uma vida</a>
+            <a href="#galeria">Fotos</a>
+            <a href="#familia">Família</a>
+            <a href="#livro">Homenagens</a>
+            <a href="#localizacao">Localização</a>
+          </div>
+        </details>
+        <div className="mem-subnav-acoes" style={estiloTopo.navAcoes}>
           <a href="#livro" style={estiloTopo.navBotaoDourado}>Assinar livro</a>
           <BotaoCompartilhar nome={m.nome_completo} />
         </div>

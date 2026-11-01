@@ -552,6 +552,47 @@ html {
   clip-path: inset(0 -100vmax);
 }
 
+/* Barra fixa do memorial no CELULAR: uma linha só (~56px). Os 6 atalhos viram
+   a lista "Ir para" (details, sem JS) e os dois botões ficam do lado. Antes os
+   atalhos quebravam em 2 linhas e os botões em outra: ~160px fixos de 844px.
+   No computador nada muda. Aqui o fundo em largura cheia (box-shadow/clip-path)
+   sai: no celular a barra já ocupa a tela toda, e o clip cortaria a lista. */
+.mem-irpara { display: none; }
+@media (max-width: 760px) {
+  .mem-subnav {
+    box-shadow: none;
+    clip-path: none;
+    padding: 6px 14px !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    justify-content: space-between !important;
+  }
+  .mem-subnav .mem-subnav-links { display: none !important; }
+  .mem-subnav .mem-subnav-acoes { flex-wrap: nowrap !important; gap: 8px !important; }
+  .mem-irpara { display: block; position: relative; flex: 0 0 auto; }
+  .mem-irpara summary {
+    list-style: none; cursor: pointer; min-height: 44px; display: flex;
+    align-items: center; padding: 0 14px; font-size: 13px; letter-spacing: .3px;
+    color: var(--mem-dourado-claro, #dfc08a);
+    border: 1px solid rgba(201, 164, 106, .35); border-radius: 4px;
+  }
+  .mem-irpara summary::-webkit-details-marker { display: none; }
+  .mem-irpara summary::after { content: "▾"; margin-left: 8px; font-size: 11px; }
+  .mem-irpara[open] summary::after { content: "▴"; }
+  .mem-irpara-lista {
+    position: absolute; top: calc(100% + 6px); left: 0; min-width: 220px; z-index: 30;
+    background: var(--mem-fundo-topo, #0f2436); padding: 6px;
+    border: 1px solid rgba(201, 164, 106, .35); border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .55);
+  }
+  .mem-irpara-lista a {
+    display: flex; align-items: center; min-height: 44px; padding: 0 12px;
+    font-size: 14px; color: #d9d4c7; text-decoration: none;
+    border-bottom: 1px solid rgba(201, 164, 106, .12);
+  }
+  .mem-irpara-lista a:last-child { border-bottom: 0; }
+}
+
 /* ---- Card do pino no mapa PÚBLICO do cemitério (components/public/CardPino.tsx) ----
    2026-09-23. Segue o padrão do card de jazigo da Central (.card-jazigo):
    pequeno, foto da lápide baixa no topo, lista VERTICAL, foto de cada pessoa
