@@ -165,6 +165,9 @@ function ParceiroLayoutInner({ children }: { children: React.ReactNode }) {
   // ("E-" / "mails", "Voltar pra Central" em 3 linhas), e no celular sumia.
   return (
     <div className="min-h-screen bg-[var(--tema-zinc-950)] text-white flex">
+      {/* O editor do Canvas Legado pesa uns 3 MB: baixa em segundo plano com o
+          portal aberto pra já estar pronto quando clicar no item do menu. */}
+      <link rel="prefetch" href="/canvas-legado/index.html" as="document" />
       <aside className={`hidden md:flex md:flex-col shrink-0 border-r border-[var(--tema-zinc-800)] bg-[var(--tema-zinc-900)]/60 transition-all duration-200 ${sidebarAberta ? 'w-60' : 'w-16'}`}>
         <div className="flex items-center h-20 px-3 border-b border-[var(--tema-zinc-800)] shrink-0 justify-between">
           <Link href={`/parceiro${suffix}`} className={`flex items-center overflow-hidden ${sidebarAberta ? '' : 'w-0'}`}>
