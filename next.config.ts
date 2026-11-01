@@ -37,7 +37,7 @@ const CSP_CANVAS = CSP
 
 // Página do portal que embute o Canvas por iframe same-origin: libera frame-src 'self'
 // (o CSP global só deixa o YouTube) e o microfone pro iframe. Só esse path.
-const CSP_PORTAL_CANVAS = CSP.replace("frame-src https://www.youtube.com", "frame-src 'self' https://www.youtube.com")
+const CSP_PORTAL_CANVAS = CSP_CANVAS.replace("frame-src https://www.youtube.com", "frame-src 'self' https://www.youtube.com")
 
 const nextConfig: NextConfig = {
   images: {
