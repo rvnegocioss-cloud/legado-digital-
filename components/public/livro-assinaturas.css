@@ -62,7 +62,7 @@
      onde uma fita de livro realmente fica, e e a faixa onde nao ha texto em
      pagina nenhuma. Centralizada, ela cortava o texto da paginacao logo abaixo
      do livro. */
-  left: calc(50% + 26px);
+  left: calc(50% - 10px);
   width: 20px;
   /* Sobra curta: o suficiente pra ler como fita, sem alcancar os controles. */
   height: calc(100% + 30px);
