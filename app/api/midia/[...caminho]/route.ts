@@ -104,12 +104,19 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ caminho: st
     )
 
     if (!ehEquipeAqui && !ehFamiliaAqui) {
+      // Foto de parente da árvore também é mídia do memorial (coluna própria).
+      const { data: parentes } = await supabaseAdmin
+        .from('parentescos')
+        .select('foto_url')
+        .eq('homenagem_id', memorial.id)
+
       const referenciadas = new Set(
         [
           memorial.foto_url,
           memorial.video_url,
           ...(memorial.galeria_fotos ?? []),
           ...(memorial.videos_galeria ?? []),
+          ...(parentes ?? []).map((p) => p.foto_url),
         ]
           .filter((u): u is string => typeof u === 'string' && u.length > 0)
           .map((u) => {
