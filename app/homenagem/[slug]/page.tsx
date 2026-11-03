@@ -20,6 +20,7 @@ import GaleriaTopo from "@/components/public/GaleriaTopo";
 import ArvoreFamilia, { type ArvoreDados } from "@/components/public/ArvoreFamilia";
 import { ROTULO as ROTULO_PARENTESCO } from "@/lib/rotuloParentesco";
 import TextoVerMais from "@/components/public/TextoVerMais";
+import AcendeMarcos from "@/components/public/AcendeMarcos";
 import { SeletorTema } from "@/components/public/SeletorTema";
 import { resolverBanner } from "@/lib/bannersMemorial";
 import FotoRetratoTelaCheia from "@/components/public/FotoRetratoTelaCheia";
@@ -877,6 +878,7 @@ export default async function PerfilMemorialPage({
                   </li>
                 ))}
               </ol>
+              <AcendeMarcos />
             </section>
           )}
 

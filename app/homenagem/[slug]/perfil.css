@@ -179,6 +179,20 @@
   background: linear-gradient(180deg, var(--perfil-borda-forte), var(--perfil-borda), transparent);
 }
 
+/* Fio dourado que cresce até a última bolinha acesa (AcendeMarcos). */
+.perfil-linha-tempo::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  width: 1px;
+  height: var(--fio-aceso, 0px);
+  background: linear-gradient(180deg, var(--perfil-dourado-claro), var(--perfil-dourado));
+  box-shadow: 0 0 6px rgba(212, 175, 106, 0.55);
+  transition: height 0.5s ease-out;
+  pointer-events: none;
+}
+
 .perfil-marco {
   position: relative;
   padding-bottom: 26px;
@@ -197,6 +211,22 @@
   border-radius: 50%;
   background: var(--perfil-fundo-base);
   border: 1px solid var(--perfil-dourado);
+  z-index: 1;
+  transition: background 0.5s ease, box-shadow 0.6s ease, transform 0.5s ease;
+}
+
+/* Bolinha acesa: miolo dourado com brilho suave ao redor. */
+.perfil-marco-no.acesa {
+  background: radial-gradient(circle at 35% 35%, var(--perfil-dourado-claro), var(--perfil-dourado) 70%);
+  box-shadow: 0 0 0 3px rgba(212, 175, 106, 0.16), 0 0 12px 2px rgba(212, 175, 106, 0.55);
+  transform: scale(1.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .perfil-marco-no,
+  .perfil-linha-tempo::after {
+    transition: none;
+  }
 }
 
 .perfil-marco-ano {
