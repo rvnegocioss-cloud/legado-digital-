@@ -36,13 +36,7 @@ export interface ArvoreDados {
 // é a mais antiga -- é como a árvore do fundo foi desenhada.
 const Y = { netos: 16, filhos: 27, ref: 46, pais: 62, avos: 78 }
 
-export const ROTULO: Record<string, string> = {
-  pai: 'Pai', mae: 'Mãe', conjuge: 'Cônjuge',
-  filho: 'Filho', filha: 'Filha', irmao: 'Irmão', irma: 'Irmã',
-  avo_paterno: 'Avô paterno', avo_paterna: 'Avó paterna',
-  avo_materno: 'Avô materno', avo_materna: 'Avó materna',
-  neto: 'Neto', neta: 'Neta',
-}
+import { ROTULO } from '@/lib/rotuloParentesco'
 
 function anos(de: number | null, ate: number | null) {
   if (de && ate) return `${de} — ${ate}`

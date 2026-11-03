@@ -669,10 +669,13 @@
    resto da linha. Nenhuma das duas partes depende da quantidade da
    outra, então não existe célula vazia possível. */
 .perfil-familia-faixa{
-  display:flex;gap:16px;margin-top:16px;align-items:flex-start;flex-wrap:wrap;
+  display:flex;gap:16px;margin-top:16px;align-items:stretch;flex-wrap:wrap;
 }
+/* Cartão da árvore acompanha a altura da lista de nomes ao lado (mesma altura
+   em qualquer quantidade de parentes). */
 .perfil-familia-faixa .arv-card{
   width:150px;max-width:150px;flex-shrink:0;padding:10px;
+  align-self:stretch;display:flex;flex-direction:column;justify-content:center;
 }
 .perfil-familia-faixa .arv-rotu{font-size:9px;letter-spacing:1.2px;margin-bottom:6px}
 .perfil-familia-faixa .arv-abrir{font-size:10px;margin-top:6px}
