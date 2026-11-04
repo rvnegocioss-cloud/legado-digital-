@@ -12,6 +12,8 @@ import React from "react"
 
 import { Badge } from "@/components/financeiro/ui/Badge"
 import { Tooltip } from "@/components/financeiro/ui/Tooltip"
+import { useEstado } from "@/lib/financeiro/estado"
+import { fonteEfetiva } from "@/lib/financeiro/fonte"
 import type { Fonte } from "@/lib/financeiro/tipos"
 
 const cfg: Record<
@@ -50,7 +52,9 @@ const cfg: Record<
   },
 }
 
-export function EtiquetaFonte({ fonte }: { fonte: Fonte }) {
+export function EtiquetaFonte({ fonte: pedida, real }: { fonte: Fonte; real?: boolean }) {
+  const { dados } = useEstado()
+  const fonte = fonteEfetiva(pedida, real ?? dados.real)
   const c = cfg[fonte]
   const Icone = c.icone
   return (

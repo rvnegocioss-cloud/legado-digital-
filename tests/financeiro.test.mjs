@@ -67,3 +67,21 @@ test('padroes: soma dos custos e dos meses', () => {
   perto(custosIniciais.reduce((t, c) => t + c.valor, 0), 496.5)
   assert.equal(memoriaisPorMes.reduce((t, m) => t + m.total, 0), 13)
 })
+
+import { fonteEfetiva } from '../lib/financeiro/fonte.ts'
+import { readFileSync } from 'node:fs'
+test('etiqueta REAL so quando os dados vieram da API; senao EXEMPLO', () => {
+  assert.equal(fonteEfetiva('REAL', true), 'REAL')
+  assert.equal(fonteEfetiva('REAL', false), 'EXEMPLO')
+  for (const f of ['INFORMADO', 'CALCULADO', 'EXEMPLO', 'SIMULAÇÃO']) {
+    assert.equal(fonteEfetiva(f, true), f)
+    assert.equal(fonteEfetiva(f, false), f)
+  }
+})
+test('estado: dados.real so e true com dadosApi; EtiquetaFonte usa fonteEfetiva', () => {
+  const e = readFileSync(new URL('../lib/financeiro/estado.tsx', import.meta.url), 'utf8')
+  assert.ok(/real: false,\s*\n\s*dataConsulta: DATA_SNAPSHOT/.test(e))
+  assert.ok(/real: true,/.test(e) && /dadosApi \? dadosDaApi/.test(e))
+  const t = readFileSync(new URL('../components/financeiro/EtiquetaFonte.tsx', import.meta.url), 'utf8')
+  assert.ok(t.includes('fonteEfetiva(pedida'))
+})

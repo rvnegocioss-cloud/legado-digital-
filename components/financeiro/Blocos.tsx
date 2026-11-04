@@ -17,6 +17,7 @@ export function CartaoFonte({
   children,
   className,
   kpi,
+  real,
 }: {
   id: string
   titulo: React.ReactNode
@@ -25,6 +26,8 @@ export function CartaoFonte({
   className?: string
   /** cartão estreito de número: etiqueta em cima, título embaixo */
   kpi?: boolean
+  /** força a origem dos dados (portal do parceiro); padrão = veio da API da Central */
+  real?: boolean
 }) {
   return (
     <Card data-cartao={id} className={cx("flex h-full flex-col p-5", className)}>
@@ -33,9 +36,9 @@ export function CartaoFonte({
           kpi ? "flex flex-col items-start gap-2" : "flex items-start justify-between gap-3",
         )}
       >
-        {kpi ? <EtiquetaFonte fonte={fonte} /> : null}
+        {kpi ? <EtiquetaFonte fonte={fonte} real={real} /> : null}
         <h2 className={cx("text-base font-semibold text-[var(--tinta)]", kpi && "min-h-[3rem]")}>{titulo}</h2>
-        {kpi ? null : <EtiquetaFonte fonte={fonte} />}
+        {kpi ? null : <EtiquetaFonte fonte={fonte} real={real} />}
       </header>
       {children}
     </Card>

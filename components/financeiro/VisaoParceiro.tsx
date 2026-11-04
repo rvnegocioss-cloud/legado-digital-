@@ -67,12 +67,12 @@ export function VisaoParceiro({
       </Frase>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <CartaoFonte kpi id="pa-cadastrou" fonte="REAL" titulo="Memoriais deste mês">
+        <CartaoFonte kpi real={estado === "ok"} id="pa-cadastrou" fonte="REAL" titulo="Memoriais deste mês">
           <p className="mt-auto pt-3 text-lg font-medium text-[var(--tinta)]">
             Você cadastrou <Destaque>{inteiro(noMes)}</Destaque> memoriais este mês.
           </p>
         </CartaoFonte>
-        <CartaoFonte kpi id="pa-total" fonte="REAL" titulo="Memoriais cadastrados">
+        <CartaoFonte kpi real={estado === "ok"} id="pa-total" fonte="REAL" titulo="Memoriais cadastrados">
           <p className="mt-auto pt-3 text-lg font-medium text-[var(--tinta)]">
             Ao todo são <Destaque>{inteiro(memoriais.length)}</Destaque> memoriais seus.
           </p>
@@ -89,7 +89,7 @@ export function VisaoParceiro({
         </CartaoFonte>
       </div>
 
-      <CartaoFonte id="pa-lista" fonte="REAL" titulo="Seus memoriais">
+      <CartaoFonte real={estado === "ok"} id="pa-lista" fonte="REAL" titulo="Seus memoriais">
         {memoriais.length === 0 ? (
           <Frase>Você ainda não tem memoriais cadastrados.</Frase>
         ) : (
