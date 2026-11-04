@@ -1,0 +1,104 @@
+/* Legado Financeiro: TODO o CSS desta área fica escopado em `.ld-financeiro`.
+   Este arquivo é importado só por app/admin/financeiro/layout.tsx (e pelo portal do parceiro
+   em app/parceiro/financeiro/layout.tsx, que usa a mesma classe). Nada aqui vaza para o resto
+   da Central: só variáveis CSS e regras sob `.ld-financeiro`.
+   Tokens vêm de app/tokens.css (--ld-*). Tema padrão CLARO; escuro por [data-ftema="escuro"].
+
+   Como o Tailwind faz as cores: as classes gray-* e white usam variáveis --color-*, que aqui são
+   redefinidas só dentro de `.ld-financeiro` no tema escuro. As classes de dourado do protótipo
+   (blue-*) viraram bg-[var(--ldb-N)] nos componentes, então não mexem no zinc/blue do app. */
+
+.ld-financeiro {
+  /* papéis do painel no tema CLARO (padrão) */
+  --pagina: #f3f4f6;
+  --tinta: #0b1d2a;
+  --cor-linha: #0b1d2a;
+  --cor-ouro: #a8834a;
+  --cor-alerta: #be123c;
+  --cor-s1: #a8834a;
+  --cor-s2: #1d6fa5;
+  --cor-s3: #0b1d2a;
+  --cor-s4: #2f8a57;
+  --cor-s5: #7c4dc4;
+  --barra: #ead7af;
+  /* escala dourada (antigo blue-* do protótipo) */
+  --ldb-50: #fbf6ec;
+  --ldb-100: #f5ead3;
+  --ldb-200: #ead7af;
+  --ldb-300: #dfc48b;
+  --ldb-400: #d4b47a;
+  --ldb-500: #c9a46a;
+  --ldb-600: #a8823f;
+  --ldb-700: #8c6c3b;
+  --ldb-800: #6b5230;
+  --ldb-900: #4a3921;
+  --ldb-950: #2e2314;
+
+  position: relative;
+  border-radius: var(--ld-raio-card);
+  background: var(--pagina);
+  color: var(--tinta);
+  font-family: var(--font-sans), Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: var(--ld-t-corpo);
+  line-height: 1.5;
+  padding: clamp(12px, 2vw, 24px);
+  color-scheme: light;
+}
+
+.ld-financeiro[data-ftema="escuro"] {
+  color-scheme: dark;
+  --pagina: var(--ld-bg);
+  --tinta: var(--ld-fg);
+  --cor-linha: var(--ld-fg);
+  --cor-ouro: var(--ld-gold);
+  --cor-alerta: #fb7185;
+  --cor-s1: #c9a46a;
+  --cor-s2: #5fa8d3;
+  --cor-s3: #f5f2eb;
+  --cor-s4: #7fc29b;
+  --cor-s5: #b79cf0;
+  --barra: #6b5230;
+  --ldb-50: rgba(201, 164, 106, 0.12);
+  --ldb-600: var(--ld-gold-lite);
+  --ldb-700: var(--ld-gold-lite);
+
+  --color-white: var(--ld-panel);
+  --color-gray-50: var(--ld-bg-alt);
+  --color-gray-100: #1a3342;
+  --color-gray-200: var(--ld-border);
+  --color-gray-300: var(--ld-border-strong);
+  --color-gray-400: #97a3aa;
+  --color-gray-500: var(--ld-fg-mut);
+  --color-gray-600: #b6c0c6;
+  --color-gray-700: #cdd4d8;
+  --color-gray-800: #e4e1da;
+  --color-gray-900: var(--ld-fg);
+  --color-gray-950: #ffffff;
+}
+
+.ld-financeiro .ldf-conteudo {
+  max-width: var(--ld-largura);
+  margin: 0 auto;
+}
+
+/* títulos de tela: Playfair (escala do Legado); marca: Cinzel */
+.ld-financeiro .ldf-titulo {
+  font-family: var(--font-serif), "Playfair Display", Georgia, serif;
+  font-size: var(--ld-t-h1);
+  line-height: 1.15;
+}
+.ld-financeiro .ldf-marca {
+  font-family: var(--font-cinzel), Georgia, serif;
+  letter-spacing: 0.08em;
+}
+
+/* a caixa de explicação (Radix) sai fora do fluxo e precisa ficar acima dos gráficos */
+.ld-financeiro [data-radix-popper-content-wrapper] {
+  z-index: 60 !important;
+}
+
+/* gráficos: texto dos eixos nunca abaixo de 14px */
+.ld-financeiro .recharts-text,
+.ld-financeiro .recharts-cartesian-axis-tick-value {
+  font-size: 14px;
+}

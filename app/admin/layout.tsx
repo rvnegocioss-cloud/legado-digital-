@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart, Handshake, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Building2, MapPin, ScrollText, Users, Map, Search, Mail, Bell, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Home, Heart, Handshake, Sun, Moon, Wallet } from 'lucide-react'
 import { getAdminUser, signOut, supabase } from '@/lib/auth'
 import { rotuloTipoEmail } from '@/lib/emailLog'
 import { useTema } from '@/lib/useTema'
@@ -200,6 +200,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { href: '/admin', label: 'Dashboard', Icon: LayoutDashboard },
     { href: '/admin/parceiros', label: 'Parceiros', Icon: Building2 },
+    { href: '/admin/financeiro', label: 'Legado Financeiro', Icon: Wallet },
     { href: '/admin/cemiterios', label: 'Cemitérios', Icon: MapPin },
     { href: '/admin/memoriais', label: 'Memoriais', Icon: ScrollText },
     { href: '/admin/usuarios', label: 'Usuários', Icon: Users },
@@ -238,7 +239,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href={item.href}
               title={sidebarAberta ? undefined : item.label}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                pathname === item.href
+                (item.href === '/admin/financeiro' ? pathname.startsWith(item.href) : pathname === item.href)
                   ? 'bg-[var(--tema-zinc-800)] text-white'
                   : 'text-[var(--tema-zinc-400)] hover:text-white hover:bg-[var(--tema-zinc-800)]/50'
               }`}
