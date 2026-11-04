@@ -119,13 +119,25 @@ export default function MovimentoLanding() {
         window.addEventListener("load", atualizar);
         const imgs = Array.from(raiz.querySelectorAll("img")).filter((i) => !i.complete);
         imgs.forEach((i) => i.addEventListener("load", atualizar));
-        const ro = new ResizeObserver(atualizar);
+        // O Lenis mede a altura da página uma vez e usa isso como fim da
+        // rolagem; se a altura muda depois (imagens, mapa, FAQ abrindo), ele
+        // para antes do rodapé. Remede sempre que algo muda.
+        const remedir = () => lenis.resize();
+        ScrollTrigger.addEventListener("refresh", remedir);
+        const ro = new ResizeObserver(() => {
+          remedir();
+          atualizar();
+        });
         ro.observe(raiz);
+        ro.observe(document.body);
+        raiz.addEventListener("toggle", remedir, true);
         atualizar();
 
         return () => {
           clearTimeout(tmr);
           ro.disconnect();
+          ScrollTrigger.removeEventListener("refresh", remedir);
+          raiz.removeEventListener("toggle", remedir, true);
           window.removeEventListener("load", atualizar);
           imgs.forEach((i) => i.removeEventListener("load", atualizar));
           observador.disconnect();
