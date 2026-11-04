@@ -380,6 +380,10 @@ export default function MapaPublicoCemiterio({
           onMouseLeave={() => { if (!fixo) agendarFechar() }}
           onClick={aoClicarPino}
           cursor={hover ? 'pointer' : 'grab'}
+          /* Roda do mouse só dá zoom no mapa em tela cheia. Na página o mapa
+             engolia a roda e travava a rolagem ao chegar perto do rodapé
+             (o mapa fica logo acima dele); o zoom ali é pelos botões + e −. */
+          scrollZoom={expandido}
           /* O crédito do mapa é obrigatório (termos do Esri World Imagery), mas
              a caixa branca padrão do MapLibre brigava com o tema escuro e comia
              a largura do mapa no celular. `compact` encolhe pra um "i" que abre
