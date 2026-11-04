@@ -39,6 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${p.nome} — Memorial digital`,
     description: p.frase || `Memoriais digitais sob os cuidados de ${p.nome}.`,
+    alternates: { canonical: `/parceiros/${p.slug}` },
   };
 }
 

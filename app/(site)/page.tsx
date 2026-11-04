@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { supabaseServidor } from "@/lib/supabaseServidor";
@@ -23,6 +24,70 @@ import "./landing.css";
 // pra funerária.
 
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
+
+const SITE = "https://legadodigital.net";
+
+// Fonte única do FAQ: alimenta a seção da página e o JSON-LD (FAQPage), pra
+// o que o Google lê nunca divergir do que a pessoa vê.
+const FAQ = [
+  {
+    p: "A família precisa pagar algo?",
+    r: "Pela funerária ou cemitério parceiro, não: o memorial já vem incluído no serviço do parceiro. Direto pelo site, a família escolhe um plano — sem pagar nada no momento do pedido, a equipe entra em contato para a contratação.",
+  },
+  {
+    p: "O QR Code é único para cada falecido?",
+    r: "Sim. Cada memorial gera um QR Code exclusivo que leva diretamente à página de homenagem daquele ente querido.",
+  },
+  {
+    p: "Como funciona a privacidade com senha?",
+    r: "A família define no painel: aberta, com senha, com identificação, lista de e-mails autorizados ou totalmente oculta.",
+  },
+  {
+    p: "Meu cemitério não é parceiro. O que eu faço?",
+    r: "A família pode contratar direto pelo site mesmo assim — o memorial funciona igual, com o endereço do cemitério escrito na página. Quando aquele cemitério for mapeado, o memorial ganha o ponto no mapa e a rota até o túmulo, sem precisar refazer nada.",
+  },
+];
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE}/#organizacao`,
+      name: "Legado Digital",
+      url: SITE,
+      logo: `${SITE}/logo-legado-digital.png`,
+      email: "contato@legadodigital.net",
+      description:
+        "Plataforma brasileira de memoriais digitais com QR Code para lápides, oferecida por funerárias e cemitérios parceiros.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}/#site`,
+      url: SITE,
+      name: "Legado Digital",
+      inLanguage: "pt-BR",
+      publisher: { "@id": `${SITE}/#organizacao` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE}/busca`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.p,
+        acceptedAnswer: { "@type": "Answer", text: f.r },
+      })),
+    },
+  ],
+};
 
 // Memorial de exemplo mostrado ao lado da busca. Fixo num registro fictício de
 // teste, nunca no memorial real de uma família -- usar a homenagem de alguém
@@ -72,6 +137,10 @@ export default async function Home() {
 
   return (
     <div className="landing">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       <MovimentoLanding />
 
       {/* ---------- HERO: busca de memorial + prévia ---------- */}
@@ -365,47 +434,14 @@ export default async function Home() {
             Perguntas Frequentes
           </h2>
 
-          <details className="faq-item" open>
-            <summary>
-              A família precisa pagar algo? <span className="chev">▼</span>
-            </summary>
-            <p>
-              Pela funerária ou cemitério parceiro, não: o memorial já vem incluído no serviço do
-              parceiro. Direto pelo site, a família escolhe um plano — sem pagar nada no momento do
-              pedido, a equipe entra em contato para a contratação.
-            </p>
-          </details>
-
-          <details className="faq-item">
-            <summary>
-              O QR Code é único para cada falecido? <span className="chev">▼</span>
-            </summary>
-            <p>
-              Sim. Cada memorial gera um QR Code exclusivo que leva diretamente à página de homenagem
-              daquele ente querido.
-            </p>
-          </details>
-
-          <details className="faq-item">
-            <summary>
-              Como funciona a privacidade com senha? <span className="chev">▼</span>
-            </summary>
-            <p>
-              A família define no painel: aberta, com senha, com identificação, lista de e-mails
-              autorizados ou totalmente oculta.
-            </p>
-          </details>
-
-          <details className="faq-item">
-            <summary>
-              Meu cemitério não é parceiro. O que eu faço? <span className="chev">▼</span>
-            </summary>
-            <p>
-              A família pode contratar direto pelo site mesmo assim — o memorial funciona igual, com
-              o endereço do cemitério escrito na página. Quando aquele cemitério for mapeado, o
-              memorial ganha o ponto no mapa e a rota até o túmulo, sem precisar refazer nada.
-            </p>
-          </details>
+          {FAQ.map((f, i) => (
+            <details className="faq-item" key={f.p} open={i === 0}>
+              <summary>
+                {f.p} <span className="chev">▼</span>
+              </summary>
+              <p>{f.r}</p>
+            </details>
+          ))}
         </div>
       </section>
 

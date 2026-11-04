@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { tema } from "@/lib/publicTheme";
 import Migalhas from "@/components/public/Migalhas";
 import { BuscaMemorial } from "@/components/public/BuscaMemorial";
+
+export const metadata: Metadata = {
+  title: "Buscar um memorial — Legado Digital",
+  description:
+    "Encontre a página de homenagem de quem você procura pelo nome. Memoriais com acesso restrito pedem senha antes de abrir.",
+  alternates: { canonical: "/busca" },
+};
 
 export default function BuscaPage() {
   return (

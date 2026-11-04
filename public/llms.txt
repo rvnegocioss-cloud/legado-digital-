@@ -1,0 +1,22 @@
+# Legado Digital
+
+> Plataforma brasileira de memoriais digitais. Cada memorial é uma página de homenagem (história, fotos, vídeos, linha do tempo, livro de assinaturas) ligada a um QR Code instalado na lápide. A família decide quem pode ver. Funerárias e cemitérios parceiros oferecem o serviço; a família também pode contratar direto pelo site.
+
+## Para quem é
+- Famílias que querem preservar a história de quem partiu e deixar um lugar para visitar.
+- Funerárias, cemitérios, prefeituras e planos funerários que querem oferecer o memorial como benefício.
+
+## O que existe (páginas públicas)
+- [Início](https://legadodigital.net/): o que a família recebe, como funciona, perguntas frequentes.
+- [Buscar memorial](https://legadodigital.net/busca): busca por nome do homenageado. Memoriais com senha ou ocultos não aparecem.
+- [Política de Privacidade](https://legadodigital.net/politica-de-privacidade)
+- [Termos de Uso](https://legadodigital.net/termos-de-uso)
+
+## Pontos importantes
+- Privacidade por memorial: aberto, com senha, com identificação, lista de e-mails autorizados ou oculto.
+- Mapa e rota até o túmulo em cemitérios mapeados (imagem aérea de drone).
+- QR Code exclusivo por memorial.
+- Memoriais de famílias são privados por padrão e não devem ser indexados nem citados fora do que a própria página pública mostra.
+
+## Contato
+contato@legadodigital.net

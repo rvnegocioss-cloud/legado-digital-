@@ -9,6 +9,7 @@ import "../documento.css";
 
 export const metadata = {
   title: "Termos de Uso — Legado Digital",
+  alternates: { canonical: "/termos-de-uso" },
   description: "As regras de uso da plataforma de memoriais digitais do Legado Digital.",
 };
 

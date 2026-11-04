@@ -9,6 +9,7 @@ import "../documento.css";
 
 export const metadata = {
   title: "Política de Privacidade — Legado Digital",
+  alternates: { canonical: "/politica-de-privacidade" },
   description:
     "Como o Legado Digital trata os dados de famílias, homenageados, visitantes e parceiros.",
 };
