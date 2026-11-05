@@ -518,24 +518,24 @@ export default async function PerfilMemorialPage({
   let cidadeHref: string | null = null;
   let cidadeRotulo: string | null = null;
   if (localizacao?.cemiterio_nome) {
-    const { data: cem } = await supabase
+    // Três consultas simples em vez de um embed `lapides(cemiterios(...))`: o
+    // embed aninhado devolvia vazio em produção (o nome do cemitério na trilha
+    // aparecia sem link e sem o nível da cidade, 2026-11-05).
+    const { data: hom } = await supabase
       .from("homenagens")
-      .select("lapides(cemiterios(slug, cidade, estado, publico, ativo))")
+      .select("lapide_id")
       .eq("slug", slug)
       .maybeSingle();
-    const c = (
-      cem as {
-        lapides?: {
-          cemiterios?: {
-            slug: string | null;
-            cidade: string | null;
-            estado: string | null;
-            publico: boolean | null;
-            ativo: boolean | null;
-          };
-        };
-      } | null
-    )?.lapides?.cemiterios;
+    const { data: lap } = hom?.lapide_id
+      ? await supabase.from("lapides").select("cemiterio_id").eq("id", hom.lapide_id).maybeSingle()
+      : { data: null };
+    const { data: c } = lap?.cemiterio_id
+      ? await supabase
+          .from("cemiterios")
+          .select("slug, cidade, estado, publico, ativo")
+          .eq("id", lap.cemiterio_id)
+          .maybeSingle()
+      : { data: null };
     if (c?.slug && c.cidade && c.estado && c.publico && c.ativo) {
       const cidadeSlug = `${c.cidade
         .trim()
